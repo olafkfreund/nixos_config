@@ -17,7 +17,7 @@
 # cannot write to a Nix store symlink. Config changes go through this file.
 # Only config.toml is a symlink — herdr still owns the directory for its
 # sockets, logs, session.json and .plugins.lock.
-_:
+{ lib, ... }:
 {
   xdg.configFile."herdr/config.toml".text = ''
     onboarding = false
@@ -275,5 +275,21 @@ _:
   xdg.configFile."herdr/plugins/config/hhdebb.herdr-radar/config.toml".text = ''
     follow_appearance = false
     variant = "font"
+  '';
+
+  # Keep herdr's agent-state integrations current: its scripts report the pane
+  # state the sidebar needs, and a stale one silently stops doing so. Only
+  # outdated or missing ones are touched; a failure is logged and ignored.
+  home.activation.herdrIntegrations = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    PATH="$HOME/.nix-profile/bin:/etc/profiles/per-user/$USER/bin:$PATH"
+    if command -v herdr >/dev/null 2>&1; then
+      status=$(herdr integration status 2>/dev/null || true)
+      for target in claude codex antigravity-cli; do
+        if printf '%s\n' "$status" | grep -E "^$target: (outdated|not installed)" >/dev/null; then
+          run herdr integration install "$target" \
+            || echo "herdr integration install $target failed; continuing" >&2
+        fi
+      done
+    fi
   '';
 }

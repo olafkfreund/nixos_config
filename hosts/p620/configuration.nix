@@ -47,6 +47,7 @@ in
     ../../modules/services/audible-sync.nix # audible-sync: download + decrypt Audible library to .m4b
     ../../modules/services/nixarchy-runner.nix # Self-hosted CI for nixarchy's VM checks
     ../../modules/programs/agent-voice.nix
+    ../../modules/programs/claude-swarm-reaper.nix
   ];
   host.class = "workstation";
 
@@ -488,6 +489,10 @@ in
     apiHostBind = "100.69.100.115";
     apiPort = 6443;
   };
+
+  # Reap orphaned/idle swarm tmux servers; dryRun first (#2616).
+  features.claudeSwarmReaper.enable = true;
+  modules.programs.claude-code-managed.subagentMetadata.codex = true;
 
   features.agentVoice.enable = true;
 

@@ -585,6 +585,8 @@ let
   # are unaffected.
   subagentScript = pkgs.writeShellScript "claude-herdr-subagents.sh" ''
     action="''${1:-}"
+    # Second argument names the metadata source, so Codex and Claude counters never mix.
+    source="''${2:-claude-subagents}"
     cat >/dev/null 2>&1 || true   # drain hook stdin; the payload is not needed
 
     [ "''${HERDR_ENV:-}" = "1" ] || exit 0
@@ -594,7 +596,7 @@ let
     dir="''${XDG_RUNTIME_DIR:-/tmp}/claude-herdr-subagents"
     mkdir -p "$dir" 2>/dev/null || exit 0
     # Pane-scoped so two Claude panes never share a counter.
-    f="$dir/$(printf '%s' "$HERDR_PANE_ID" | tr -c 'A-Za-z0-9_' '_').count"
+    f="$dir/$(printf '%s-%s' "$source" "$HERDR_PANE_ID" | tr -c 'A-Za-z0-9_' '_').count"
 
     # flock: subagents are dispatched in parallel, so a plain read/modify/write
     # loses updates. Verified with 20 concurrent increments.
@@ -623,10 +625,10 @@ let
 
     if [ "$n" -gt 0 ]; then
       herdr pane report-metadata "$HERDR_PANE_ID" \
-        --source claude-subagents --token "agents=$n" >/dev/null 2>&1
+        --source "$source" --token "agents=$n" >/dev/null 2>&1
     else
       herdr pane report-metadata "$HERDR_PANE_ID" \
-        --source claude-subagents --clear-token agents >/dev/null 2>&1
+        --source "$source" --clear-token agents >/dev/null 2>&1
     fi
     exit 0
   '';
@@ -790,6 +792,15 @@ in
         Subagents run in-process with no PTY, so herdr cannot represent them as
         their own agent rows; this makes an otherwise invisible fan-out visible
         on the parent pane. No-ops outside a herdr pane.
+      '';
+    };
+
+    subagentMetadata.codex = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Also count Codex subagents (managed SubagentStart/SubagentStop hooks)
+        into the same herdr `agents` token, source `codex-subagents`.
       '';
     };
 
@@ -1001,7 +1012,31 @@ in
       type = "command"
       command = "/etc/codex/hooks/coder-guard"
       timeout = 10
+    '' + lib.optionalString cfg.subagentMetadata.codex ''
+
+      [[hooks.SubagentStart]]
+
+      [[hooks.SubagentStart.hooks]]
+      type = "command"
+      command = "/etc/codex/hooks/subagent-inc"
+      timeout = 5
+
+      [[hooks.SubagentStop]]
+
+      [[hooks.SubagentStop.hooks]]
+      type = "command"
+      command = "/etc/codex/hooks/subagent-dec"
+      timeout = 5
     '';
+
+    # Managed Codex commands must sit under managed_dir and are run without
+    # arguments, so each action gets its own wrapper.
+    environment.etc."codex/hooks/subagent-inc" = lib.mkIf cfg.subagentMetadata.codex {
+      source = pkgs.writeShellScript "codex-subagent-inc" "exec ${subagentScript} inc codex-subagents";
+    };
+    environment.etc."codex/hooks/subagent-dec" = lib.mkIf cfg.subagentMetadata.codex {
+      source = pkgs.writeShellScript "codex-subagent-dec" "exec ${subagentScript} dec codex-subagents";
+    };
 
     # agy reads ~/.gemini/config/hooks.json, which Syncthing carries between
     # hosts, so the command path must be absolute /etc, not a store path.

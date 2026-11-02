@@ -158,6 +158,9 @@
   # omarchyVoice with the real package.
   agent-say = pkgs.callPackage ./agent-say { omarchyVoice = null; };
 
+  # claude-swarm-reaper — reaps orphaned and idle Claude Code swarm tmux servers.
+  claude-swarm-reaper = pkgs.callPackage ./claude-swarm-reaper { };
+
   # Note: gnome-ext-* packages are NOT registered here. They're exposed
   # at top-level pkgs.* via overlays/custom-packages.nix so that home
   # configs can reference them with `with pkgs;` (matching the rudra /
