@@ -155,6 +155,10 @@
   # Consumed only by modules/services/agent-bus-mcp.nix.
   agent-bus-mcp = pkgs.callPackage ./agent-bus-mcp { };
 
+  # agent-say — spoken turn summaries; modules/programs/agent-voice.nix overrides
+  # omarchyVoice with the real package.
+  agent-say = pkgs.callPackage ./agent-say { omarchyVoice = null; };
+
   # Note: gnome-ext-* packages are NOT registered here. They're exposed
   # at top-level pkgs.* via overlays/custom-packages.nix so that home
   # configs can reference them with `with pkgs;` (matching the rudra /

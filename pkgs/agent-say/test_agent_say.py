@@ -316,3 +316,15 @@ def test_lock_busy_drops(dirs, monkeypatch):
         fcntl.flock(f, fcntl.LOCK_EX)
         assert a.say_gated(CFG, "x") is False
     assert spoken == []
+
+
+def test_hook_unit_argv_has_path_and_absolute_bin(dirs, monkeypatch):
+    monkeypatch.setenv("CLAUDE_CODE_ENTRYPOINT", "cli")
+    monkeypatch.setenv("PATH", "/x/bin")
+    monkeypatch.setenv("AGENT_SAY_BIN", "/store/bin/agent-say")
+    monkeypatch.setattr("sys.stdin", io.StringIO("{}"))
+    seen = []
+    monkeypatch.setattr(a.subprocess, "run", lambda cmd, **k: seen.append(cmd))
+    a.hook("claude")
+    assert "--setenv=PATH=/x/bin" in seen[0]
+    assert seen[0][-3:] == ["/store/bin/agent-say", "run", "claude"]
