@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2602
 spec: spec/2026-11-02-2602-omaoutlook-plugin.md
 ---
