@@ -273,7 +273,7 @@ without a rebuild: `agent-say off`.
 
 ## Phase 2 (2026-11-02): agy, razer, own sessions only
 
-Status: **draft**. It needs the user's approval; the phases above stay
+Status: **approved** (2026-11-02). The phases above stay
 approved and deployed. The user chose Claude Haiku as razer's summary source
 and "silence spawned agents" as the meaning of own sessions.
 
