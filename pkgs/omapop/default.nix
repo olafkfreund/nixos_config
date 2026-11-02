@@ -87,6 +87,10 @@ stdenvNoCC.mkDerivation {
       | (.barWidget.schema[] | select(.key == "directoryRefresh") | .defaultValue) = false' \
       manifest.json > manifest.json.new
     mv manifest.json.new manifest.json
+
+    # Omarchy's BarIconContent sizes the icon itself; anchors.fill inside its Loader collapses it to 0x0.
+    sed -i '/iconComponent: Component {/,/^ *}$/{/anchors.fill: parent/d}' BarWidget.qml
+    if grep -A3 'iconComponent: Component' BarWidget.qml | grep -q 'anchors.fill'; then exit 1; fi
   '';
 
   installPhase = ''
