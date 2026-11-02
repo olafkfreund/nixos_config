@@ -250,7 +250,10 @@ def say_gated(cfg, text):
 
 
 def offer_more(text):
-    """Notification with a 'Tell me more' button; True when it was clicked."""
+    """Notification with a 'Tell me more' action; True when it was clicked.
+
+    Named `default` because Omarchy hands notifications to the nixi companion,
+    and a click there only invokes the default action."""
     try:
         r = subprocess.run(
             [
@@ -258,7 +261,7 @@ def offer_more(text):
                 "-a",
                 "Agent voice",
                 "-A",
-                "more=Tell me more",
+                "default=Tell me more",
                 "--wait",
                 "-t",
                 "60000",
@@ -271,7 +274,7 @@ def offer_more(text):
         )
     except (OSError, subprocess.SubprocessError):
         return False
-    return r.stdout.strip() == "more"
+    return r.stdout.strip() == "default"
 
 
 # -- subcommands ------------------------------------------------------------------

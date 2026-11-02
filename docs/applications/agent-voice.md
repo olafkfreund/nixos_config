@@ -20,7 +20,8 @@ and is not wanted.
    the summary. If Ollama fails, `agent-say` stays silent. It never reads raw
    agent text aloud.
 3. After the silence gates pass, it speaks and shows a "Tell me more"
-   notification. Clicking it (or running `agent-say more`) speaks a longer
+   notification. Clicking the notification itself, pressing Super+Alt+I, or running
+   `agent-say more` speaks a longer
    version of about 45 seconds. The microphone is never used.
 
 Claude's hook is a managed Stop hook merged beside the existing ones. Codex's is
@@ -45,6 +46,7 @@ features.agentVoice.enable = true;
 | `summary.model` | `qwen3:14b` | Summary model |
 | `minTurnSeconds` | `60` | Shorter turns stay silent |
 | `startEnabled` | `true` | Speak by default |
+| `moreKey` | `SUPER + ALT + I` | Key that speaks the long version of the last turn; `""` disables |
 | `microphoneGate.enable` | `true` | Stay silent while a call is capturing the mic |
 | `microphoneGate.ignore` | Echo-Cancel Capture/Sink, `parecord` | Streams that do not count as a call |
 
