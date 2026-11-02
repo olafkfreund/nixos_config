@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2596
 spec: spec/2026-11-02-2596-agent-voice-summary.md
 ---
