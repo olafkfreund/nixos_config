@@ -132,6 +132,7 @@ def test_switch(dirs):
 
 
 def test_toggle(dirs, monkeypatch, capsys):
+    monkeypatch.setattr(a, "CONFIG", dirs / "none.json")
     fake_run(monkeypatch, {"notify-send": ""})
     a.main(["x", "toggle"])
     assert capsys.readouterr().out == "off\n"

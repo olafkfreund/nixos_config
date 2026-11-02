@@ -178,3 +178,9 @@ works as before. If the state was left muted, run `agent-say on`.
     (+15/-5 against main).
   - **Built output:** `agent-voice-binds.lua` from the p620 config contains
     both `o.bind` lines and points at the overridden `agent-say` package.
+- Review (fresh Opus): no critical or high findings.
+  - **Fixed:** `test_toggle` now points `a.CONFIG` at a missing file, so
+    a host config with `startEnabled: false` cannot flip its expectations.
+  - **Not fixed here:** `customPkgs.agent-say` built with
+    `omarchyVoice = null` fails at installPhase. This was already broken
+    before this change, so it is tracked separately.
