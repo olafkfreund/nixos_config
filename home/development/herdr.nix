@@ -17,8 +17,20 @@
 # cannot write to a Nix store symlink. Config changes go through this file.
 # Only config.toml is a symlink — herdr still owns the directory for its
 # sockets, logs, session.json and .plugins.lock.
-{ lib, ... }:
+{ lib, pkgs, ... }:
 {
+  home.packages = [ pkgs.customPkgs.herdr-claude-teams ];
+
+  programs.zsh.initContent = ''
+    claude() {
+      if [[ ''${HERDR_ENV:-} == 1 && -n ''${HERDR_SOCKET_PATH:-} ]]; then
+        command herdr-claude-teams "$@"
+      else
+        command claude "$@"
+      fi
+    }
+  '';
+
   xdg.configFile."herdr/config.toml".text = ''
     onboarding = false
 

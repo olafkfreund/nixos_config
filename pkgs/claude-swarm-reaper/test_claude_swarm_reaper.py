@@ -93,3 +93,46 @@ def test_hook_ignores_other_tmux(tmp_path, monkeypatch):
     monkeypatch.setenv("TMUX_PANE", "%3")
     assert m.main(["hook", "idle"]) == 0
     assert not (tmp_path / "claude-swarm-reaper").exists()
+
+
+def herdr(owned, agents, clocks):
+    return m.decide_herdr(owned, agents, clocks, NOW, WIN)
+
+
+def test_herdr_foreign_terminal_untouched():
+    closes, new = herdr([("/s", "t1")], {"/s": {"t9": "idle"}}, {"/s\tt9": 0})
+    assert closes == [] and new == {}
+
+
+def test_herdr_socket_mismatch_untouched():
+    closes, _ = herdr([("/s", "t1")], {"/other": {"t1": "idle"}}, {"/s\tt1": 0})
+    assert closes == []
+
+
+def test_herdr_unqueried_socket_keeps_clock():
+    closes, new = herdr([("/s", "t1")], {}, {"/s\tt1": 5.0})
+    assert closes == [] and new == {"/s\tt1": 5.0}
+
+
+def test_herdr_first_idle_starts_clock():
+    closes, new = herdr([("/s", "t1")], {"/s": {"t1": "idle"}}, {})
+    assert closes == [] and new == {"/s\tt1": NOW}
+
+
+def test_herdr_too_recent():
+    closes, new = herdr(
+        [("/s", "t1")], {"/s": {"t1": "done"}}, {"/s\tt1": NOW - WIN + 1}
+    )
+    assert closes == [] and "/s\tt1" in new
+
+
+def test_herdr_idle_long_enough_closes():
+    closes, new = herdr([("/s", "t1")], {"/s": {"t1": "idle"}}, {"/s\tt1": NOW - WIN})
+    assert closes == [("/s", "t1")] and new == {}
+
+
+def test_herdr_status_flip_resets_clock():
+    _, new = herdr([("/s", "t1")], {"/s": {"t1": "working"}}, {"/s\tt1": 0})
+    assert new == {}
+    closes, new = herdr([("/s", "t1")], {"/s": {}}, {"/s\tt1": 0})  # no longer listed
+    assert closes == [] and new == {}

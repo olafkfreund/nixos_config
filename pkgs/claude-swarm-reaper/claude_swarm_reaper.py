@@ -1,6 +1,7 @@
 """Reap Claude Code swarm tmux servers that outlived their lead or went idle.
 
-Only sockets named claude-swarm-<pid> in the user's tmux directory are touched.
+Only sockets named claude-swarm-<pid> in the user's tmux directory are touched,
+plus herdr panes listed in herdr-claude-teams' .owned files.
 `hook idle|active` (Claude Code hooks) records or clears a teammate's idle
 timestamp; `reap` (a timer) kills orphaned servers and long-idle teammate panes.
 The hook never writes stdout, never raises and always exits 0.
@@ -12,6 +13,7 @@ import json
 import os
 import re
 import shutil
+import socket
 import subprocess
 import sys
 import time
@@ -62,6 +64,136 @@ def decide(sockets, alive, panes, records, now, idle_seconds):
         if len(stale) == len(live):
             out.append(("kill-server", sock, None, "no panes left"))
     return out
+
+
+IDLE_STATES = ("idle", "done")
+
+
+class HerdrError(Exception):
+    pass
+
+
+def herdr_call(sock_path, method, params=None):
+    s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    s.settimeout(5)
+    try:
+        s.connect(sock_path)
+        req = {"id": "reaper", "method": method, "params": params or {}}
+        s.sendall((json.dumps(req) + "\n").encode())
+        buf = b""
+        while not buf.endswith(b"\n"):
+            chunk = s.recv(65536)
+            if not chunk:
+                break
+            buf += chunk
+    finally:
+        s.close()
+    resp = json.loads(buf.decode())
+    if resp.get("error"):
+        raise HerdrError(resp["error"].get("code", "error"))
+    return resp.get("result", {})
+
+
+def owned_root():
+    return record_root().parent / "herdr-claude-teams"
+
+
+def read_owned():
+    """Return [(file, socket, pane_id, terminal_id)] from every .owned file."""
+    rows = []
+    for f in sorted(owned_root().glob("*.owned")):
+        with contextlib.suppress(OSError):
+            for line in f.read_text().splitlines():
+                parts = line.split("\t")
+                if len(parts) == 3 and parts[2]:
+                    rows.append((f, *parts))
+    return rows
+
+
+def drop_owned(file, sock, term):
+    with contextlib.suppress(OSError):
+        keep = [
+            line
+            for line in file.read_text().splitlines()
+            if line.split("\t")[::2] != [sock, term]
+        ]
+        file.write_text("".join(line + "\n" for line in keep))
+
+
+def decide_herdr(owned, agents, clocks, now, idle_seconds):
+    """Return (closes, new_clocks); closes is [(socket, terminal_id)].
+
+    owned: [(socket, terminal_id)]; agents: {socket: {terminal_id: status}}, a
+    socket missing there could not be queried and keeps its clocks;
+    clocks: {"socket<TAB>terminal_id": first-seen-idle ts}.
+    """
+    closes, new = [], {}
+    for sock, term in owned:
+        key = f"{sock}\t{term}"
+        if sock not in agents:
+            if key in clocks:
+                new[key] = clocks[key]
+            continue
+        if agents[sock].get(term) not in IDLE_STATES:
+            continue
+        ts = clocks.get(key, now)
+        if now - ts >= idle_seconds:
+            closes.append((sock, term))
+        else:
+            new[key] = ts
+    return closes, new
+
+
+def reap_herdr(dry_run, idle_seconds):
+    rows = read_owned()
+    state = record_root() / "herdr-idle.json"
+    try:
+        clocks = {k: float(v) for k, v in json.loads(state.read_text()).items()}
+    except (OSError, ValueError, AttributeError):
+        clocks = {}
+    agents = {}
+    for sock in sorted({r[1] for r in rows}):
+        if not os.path.exists(sock):
+            for f, s, _pane, term in rows:
+                if s == sock and not dry_run:
+                    drop_owned(f, s, term)
+            continue
+        try:
+            listed = herdr_call(sock, "agent.list")["agents"]
+            agents[sock] = {a["terminal_id"]: a.get("agent_status") for a in listed}
+        except (OSError, ValueError, KeyError, HerdrError) as e:
+            log(f"herdr {sock}: agent.list failed ({e})")
+    closes, new = decide_herdr(
+        [(r[1], r[3]) for r in rows], agents, clocks, time.time(), idle_seconds
+    )
+    for sock, term in closes:
+        if dry_run:
+            log(f"would close herdr pane {term} on {sock} (idle past window)")
+            continue
+        try:
+            panes = herdr_call(sock, "pane.list")["panes"]
+            pane = next(
+                (p["pane_id"] for p in panes if p.get("terminal_id") == term), None
+            )
+            if pane:
+                herdr_call(sock, "pane.close", {"pane_id": pane})
+        except HerdrError as e:
+            if str(e) != "pane_not_found":
+                log(f"herdr close {term} failed ({e})")
+                new[f"{sock}\t{term}"] = clocks.get(f"{sock}\t{term}", time.time())
+                continue
+        except (OSError, ValueError, KeyError) as e:
+            log(f"herdr close {term} failed ({e})")
+            new[f"{sock}\t{term}"] = clocks.get(f"{sock}\t{term}", time.time())
+            continue
+        log(f"closed herdr pane {term} on {sock} (idle past window)")
+        for f, s, _pane, t in rows:
+            if (s, t) == (sock, term):
+                drop_owned(f, s, t)
+    if not dry_run:
+        with contextlib.suppress(OSError):
+            state.parent.mkdir(parents=True, exist_ok=True)
+            state.write_text(json.dumps(new))
 
 
 def hook(kind):
@@ -133,6 +265,7 @@ def reap(dry_run, idle_minutes):
             tmux(sdir / sock, "kill-server")
             (sdir / sock).unlink(missing_ok=True)
             shutil.rmtree(rroot / sock, ignore_errors=True)
+    reap_herdr(dry_run, idle_minutes * 60)
 
 
 def main(argv=None):

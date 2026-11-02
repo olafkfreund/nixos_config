@@ -17,10 +17,10 @@ index 9ce5f1c..01b40d4 100644
      _exec("claude", ["claude", *argv], new_env)
 diff --git a/herdr_claude_teams/ownership.py b/herdr_claude_teams/ownership.py
 new file mode 100644
-index 0000000..8209c08
+index 0000000..53b12ec
 --- /dev/null
 +++ b/herdr_claude_teams/ownership.py
-@@ -0,0 +1,66 @@
+@@ -0,0 +1,70 @@
 +"""Record which panes the shim created, so teardown only touches those.
 +
 +One file per leader pane: ``$XDG_RUNTIME_DIR/herdr-claude-teams/<leader>.owned``,
@@ -72,6 +72,8 @@ index 0000000..8209c08
 +
 +
 +def is_owned(terminal_id: str) -> bool:
++    if not terminal_id:
++        return False
 +    socket_path = os.environ.get("HERDR_SOCKET_PATH", "")
 +    for path in owned_dir().glob("*.owned"):
 +        for sock, _pane, term in _entries(path):
@@ -81,6 +83,8 @@ index 0000000..8209c08
 +
 +
 +def forget(terminal_id: str) -> None:
++    if not terminal_id:
++        return
 +    socket_path = os.environ.get("HERDR_SOCKET_PATH", "")
 +    for path in owned_dir().glob("*.owned"):
 +        rows = _entries(path)
@@ -263,10 +267,10 @@ index 0000000..d7f8291
 +    monkeypatch.delenv("HERDR_CLAUDE_TEAMS_SHIM_DIR", raising=False)
 diff --git a/tests/test_ownership.py b/tests/test_ownership.py
 new file mode 100644
-index 0000000..286d107
+index 0000000..6cb7615
 --- /dev/null
 +++ b/tests/test_ownership.py
-@@ -0,0 +1,112 @@
+@@ -0,0 +1,122 @@
 +"""Ownership: teardown touches only panes the shim created; respawn waits for cat."""
 +
 +from __future__ import annotations
@@ -379,6 +383,16 @@ index 0000000..286d107
 +            launcher.main([], _exec=_rec_exec)
 +        assert ei.value.env["PATH"].startswith("/store/shim:")
 +        assert not (tmp_path / ".cache").exists()
++
++
++def test_empty_terminal_id_never_owned(monkeypatch):
++    from herdr_claude_teams import ownership
++
++    monkeypatch.setenv("HERDR_SOCKET_PATH", "/s")
++    ownership.record({"pane_id": "w1:p2"})  # new-window root pane without a terminal_id
++    assert not ownership.is_owned("")
++    ownership.forget("")
++    assert ownership.owned_dir().joinpath("p_lead.owned").read_text().count("\n") == 1
 diff --git a/tests/test_verbs.py b/tests/test_verbs.py
 index 3a2fe21..f386929 100644
 --- a/tests/test_verbs.py

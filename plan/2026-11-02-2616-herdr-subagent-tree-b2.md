@@ -254,3 +254,14 @@ keeps its Phase A behaviour.
   - The fork's 3 `select-layout main-vertical` tests were removed, and its
     kill-session test now asserts a no-op.
   - `tests/conftest.py` and two fake-herdr handlers were added.
+- `HERDR_PANE_ID` is positional (`w1:p3`), and herdr renumbers positional ids
+  when panes close (checked live), so steps 3 and 4 stop keying on it:
+  - Step 3: a teammate is recognised by an ancestor process with an
+    `--agent-id` argv token (Claude passes it to every teammate). This covers
+    tmux and herdr teammates alike.
+  - Step 4: no hook changes. The reaper polls herdr `agent.list` for owned
+    `terminal_id`s, as the spec's "idle per herdr agent.list" put it. It
+    keeps first-seen-idle clocks in `herdr-idle.json` and closes an owned
+    pane via `pane.list` → `pane.close` once it has been idle or done for
+    `idleMinutes`.
+  - Step 1 fix: `is_owned` and `forget` never match an empty `terminal_id`.
