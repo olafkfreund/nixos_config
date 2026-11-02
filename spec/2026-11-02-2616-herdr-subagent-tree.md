@@ -156,3 +156,112 @@ discussion #723).
 - A Codex turn with a subagent shows `agents=1` on its herdr row.
 - `herdr integration status` reports claude and codex as current.
 - Phase B: the go/no-go checklist above, run and recorded in the plan.
+
+## Addendum B2 (2026-11-02): the tree, after a GO spike
+
+Status: **approved** (2026-11-02). Phase A stays approved and
+live.
+
+### Spike result: GO
+
+The spike ran in separate headless herdr sessions (`spike-teams`, `spike2`),
+which were deleted afterwards. The user's sessions were untouched.
+
+- **Upstream shim** (david-lutz `2c141f0`): Claude 2.1.316 selected the tmux
+  backend ("Selected: tmux (running inside tmux session)") and created two
+  panes. Then `respawn-pane` failed (unsupported), and Claude closed the
+  panes and fell back to in-process teammates. The cause came from Claude's
+  `--debug` log and the shim trace.
+- **Fork** [rameshbaskaran/herdr-claude-teams](https://github.com/rameshbaskaran/herdr-claude-teams)
+  (MIT, `984b08235`), which adds `respawn-pane -k`: all verbs exit 0. `@alpha`
+  and `@beta` ran as real herdr panes (`w1:p4`, `w1:p5`), detected by herdr
+  as `claude` agents. Both reported to the lead. On shutdown the lead sent
+  `kill-pane`, and both panes closed.
+
+All five go criteria passed.
+
+### Review of the fork
+
+The reviewer was Codex (`codex exec`, read-only), verified by the session.
+agy was not obtained earlier (headless denial). Three must-fixes, all
+confirmed against the code:
+
+1. `kill-pane`, `kill-window` and `kill-session` act on **any** pane, tab
+   or workspace in the session, which could include the user's own.
+2. `respawn-pane -k` sends Ctrl-C and then the command without waiting.
+   If `cat` is still running, it swallows the command and the teammate
+   never starts.
+3. `select-layout` (Claude calls it; it is in the spike trace) can move
+   unrelated panes in the same tab.
+
+### B2 design
+
+1. **Package the fork** as `pkgs/herdr-claude-teams`, pinned at
+   `984b08235`, with a local patch `ownership.patch`:
+   - **Ownership:** the shim records every pane it creates (by
+     `split-window` and `new-window`) in
+     `$XDG_RUNTIME_DIR/herdr-claude-teams/<lead pane>.owned`.
+     `kill-pane` only closes owned panes; anything else is a logged
+     no-op, exit 0. `kill-window` and `kill-session` become logged no-ops.
+   - **respawn race:** after the Ctrl-C, poll `pane.process_info` (≤ 2 s)
+     until the foreground process is the shell, then type the command.
+   - **select-layout:** a no-op.
+
+   The launcher's runtime-written shim is replaced by a store-built
+   `libexec/…/shim/tmux` (no write into `~/.cache`). Tests run in
+   `checkPhase`, including new ones for the three fixes.
+
+2. **Launch path:** in zsh, `claude` becomes a function that runs
+   `herdr-claude-teams` **only when `HERDR_ENV=1`**. Everywhere else it is
+   plain `claude`; the launcher itself also falls back. `teammateMode`
+   stays `"tmux"` (already the user's setting).
+
+3. **Tree.** Teammates are splits of the lead's tab. herdr-radar already
+   renders `$split_mark` for split panes and groups by tab, so the shim
+   adds one label: `pane.report_metadata` with token `teammate=<name>` on
+   each pane it creates. The Claude row template in `herdr.nix` renders
+   `$teammate`, so a child row reads `↳ alpha`. There is no second
+   `agent.view.set` owner, so no conflict with radar. If the live check
+   shows radar does **not** nest them, fall back to the herdr-agent-tree
+   approach (a projection), and that comes back to the user first.
+
+4. **Lingering.** Shutdown already closes the panes (the spike proved it).
+   For teammates left idle by a lead that never shuts them down, the Phase
+   A reaper is extended: a pane listed in a `.owned` file whose herdr agent
+   has been `idle` for `idleMinutes` (from herdr `agent.list`) gets
+   `pane.close`. Only owned panes are touched.
+
+### B2 alternatives rejected
+
+- **The upstream shim:** it lacks `respawn-pane`, so teammates fall back to
+  in-process.
+- **The fork unpatched:** Codex's must-fixes 1-3.
+- **Replacing radar with a tree projection now:** two view owners fight,
+  and radar's split nesting may already be enough. It is the fallback.
+- **Wrapping `claude` globally (PATH):** it would also affect claude
+  outside herdr and scripted runs. The zsh function only applies in herdr
+  panes.
+
+### B2 risks
+
+- **Claude changes its tmux call shapes again** (it did between 2.1.174
+  and 2.1.233). The shim fails closed: Claude falls back to in-process
+  teammates, which is today's behaviour. Detected by a smoke test after
+  Claude bumps.
+- **The respawn race persists despite polling:** the teammate does not
+  start, the lead reports it, and the next launch retries.
+- **The ownership file is lost** (tmpfs, after a restart): the panes are
+  then treated as foreign, so nothing is closed, which is the safe
+  direction.
+
+### B2 verification
+
+- `checkPhase` tests: the three fixes, plus the fork's own suite.
+- On p620, in the real herdr session:
+  1. Start `claude` in a pane and spawn two named teammates.
+  2. They appear as panes and in the sidebar nested under the lead, as
+     `↳ alpha` and `↳ beta`.
+  3. Shutdown closes both.
+  4. A `kill-pane` aimed at a foreign pane is refused (unit test, plus a
+     check of the trace).
+- razer: the same after it is switched.

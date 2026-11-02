@@ -163,12 +163,39 @@ def jsonl(path):
                     yield obj
 
 
+PROC = "/proc"
+
+
+def is_teammate(pid=None, proc=None):
+    """True when an ancestor (up to 6 levels) runs with an --agent-id argv token."""
+    proc = proc or PROC
+    pid = os.getppid() if pid is None else pid
+    for _ in range(6):
+        try:
+            with open(f"{proc}/{pid}/cmdline", "rb") as f:
+                if any(
+                    t == b"--agent-id" or t.startswith(b"--agent-id=")
+                    for t in f.read().split(b"\0")
+                ):
+                    return True
+            with open(f"{proc}/{pid}/stat") as f:
+                # comm may hold spaces and parens; ppid is the 2nd field after the last ")"
+                pid = int(f.read().rsplit(")", 1)[1].split()[1])
+        except (OSError, ValueError, IndexError):
+            return False
+        if pid <= 1:
+            return False
+    return False
+
+
 def interactive(agent, payload, env):
     """Gate 5: scripted and delegated runs stay silent."""
     if any(env.get(k) for k in DELEGATED):
         return False
     # Agent-spawned Claude sessions (coders, teams) run in a claude-swarm tmux.
     if "/claude-swarm-" in env.get("TMUX", ""):
+        return False
+    if is_teammate():
         return False
     if agent == "agy":
         # agy started by Claude (second opinion, handoff) carries CLAUDECODE.
