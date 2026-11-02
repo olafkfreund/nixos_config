@@ -170,3 +170,9 @@ works as before. If the state was left muted, run `agent-say on`.
   - **Real check:** the module uses
     `.override { omarchyVoice = hmVoice.package; }`, which
     `just test-host` builds in step 2. That build is the step's real check.
+- Step 2 (coder):
+  - **Shared condition:** the `moreKey || toggleKey` condition is computed
+    once, as `bindsWanted`, in a `let` around the `config` body, instead
+    of being inlined twice.
+  - **Built output:** `agent-voice-binds.lua` from the p620 config contains
+    both `o.bind` lines and points at the overridden `agent-say` package.
