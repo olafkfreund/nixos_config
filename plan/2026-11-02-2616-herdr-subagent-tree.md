@@ -152,6 +152,22 @@ follows only after Phase A is live.
    the orphan servers are gone, the user's tmux is untouched, and an idle
    coder agent disappears after 10 minutes.
 
+## Step 6 results (2026-11-02, p620 and razer)
+
+- Both hosts run main `a90ffe2f6`, with no failed units. The reaper timer
+  runs every 2 minutes.
+- The dry run on p620 found 19 swarm sockets and 15 actions, all
+  `would kill-server … (lead dead)`. There were no pane kills, and the 4
+  live-lead sockets were left alone.
+- `herdr integration status` reports claude v11, codex v10 and
+  antigravity-cli v4 current on both hosts.
+- **`TeammateIdle` proven:** a running teammate (`claude-swarm-46670`, pane
+  `%4`) finished a turn at 17:18:46. A record appeared in the same second,
+  so already-running teammates pick up the hook.
+- Limitation: panes with no turn since the deploy have no record and are
+  left until their lead exits, which is safe by design.
+- The user approved step 7 (dry run off) after this log.
+
 ## Tests
 
 ```bash

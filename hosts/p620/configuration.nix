@@ -491,7 +491,7 @@ in
   };
 
   # Reap orphaned/idle swarm tmux servers; dryRun first (#2616).
-  features.claudeSwarmReaper.enable = true;
+  features.claudeSwarmReaper = { enable = true; dryRun = false; };
   modules.programs.claude-code-managed.subagentMetadata.codex = true;
 
   features.agentVoice.enable = true;
