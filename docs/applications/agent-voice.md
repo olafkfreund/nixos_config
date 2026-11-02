@@ -64,6 +64,7 @@ features.agentVoice.enable = true;
 | `minTurnSeconds` | `60` | Shorter turns stay silent |
 | `startEnabled` | `true` | Speak by default |
 | `moreKey` | `SUPER + ALT + I` | Key that speaks the long version of the last turn; `""` disables |
+| `toggleKey` | `SUPER + SHIFT + ALT + V` | Key that toggles spoken summaries on/off; `""` disables |
 | `microphoneGate.enable` | `true` | Stay silent while a call is capturing the mic |
 | `microphoneGate.ignore` | Echo-Cancel Capture/Sink, `parecord` | Streams that do not count as a call |
 
@@ -74,7 +75,8 @@ assertion). Settings render to `/etc/agent-say/config.json`.
 
 Every gate fails closed and is checked again right before each sound.
 
-- **Runtime switch:** `agent-say off` mutes it until `agent-say on`.
+- **Runtime switch:** `agent-say off` mutes it until `agent-say on`; the
+  `toggleKey` flips it.
 - **Do not disturb:** if the Omarchy shell reports DND on, or its state is
   unreadable, it is silent.
 - **Snooze and quiet state:** a global notification snooze still running, or any
@@ -91,11 +93,31 @@ Every gate fails closed and is checked again right before each sound.
 **DND and snooze cannot be turned off by any option.** Meeting mode turns DND on
 during calls, so calls are covered too.
 
+## Turning it on and off
+
+SUPER + SHIFT + ALT + V toggles spoken summaries and shows a notification
+("Agent voice on" or "Agent voice off"). Press Super+K and search "voice" to
+find the key.
+
+The CLI does the same:
+
+```bash
+agent-say toggle   # flip and print the new state
+agent-say on
+agent-say off
+agent-say status
+```
+
+The switch survives reboots. `startEnabled = false` starts muted, and
+`enable = false` removes the hooks. To check that a new key is free, run
+`hyprctl binds -j`.
+
 ## Commands
 
 | Command | Effect |
 | --- | --- |
 | `agent-say on` / `off` | Unmute / mute at runtime |
+| `agent-say toggle` | Flip the runtime switch and show the new state |
 | `agent-say status` | Print `on` or `off` for the runtime switch (not the other gates) |
 | `agent-say more` | Speak the long version of the last turn |
 

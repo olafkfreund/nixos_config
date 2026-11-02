@@ -131,6 +131,17 @@ def test_switch(dirs):
     assert a.gate_switch({**CFG, "startEnabled": False}) == "switch"
 
 
+def test_toggle(dirs, monkeypatch, capsys):
+    monkeypatch.setattr(a, "CONFIG", dirs / "none.json")
+    fake_run(monkeypatch, {"notify-send": ""})
+    a.main(["x", "toggle"])
+    assert capsys.readouterr().out == "off\n"
+    assert (a.state_dir() / "off").exists()
+    a.main(["x", "toggle"])
+    assert capsys.readouterr().out == "on\n"
+    assert not (a.state_dir() / "off").exists()
+
+
 def test_delegated_and_entrypoint(dirs):
     assert a.interactive("claude", {}, {"CLAUDE_CODE_ENTRYPOINT": "cli"})
     assert not a.interactive("claude", {}, {"CLAUDE_CODE_ENTRYPOINT": "sdk-cli"})

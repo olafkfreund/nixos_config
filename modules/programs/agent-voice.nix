@@ -63,6 +63,12 @@ in
       description = "Hyprland key that speaks the long version of the last turn. Empty disables it.";
     };
 
+    toggleKey = mkOption {
+      type = types.str;
+      default = "SUPER + SHIFT + ALT + V";
+      description = "Hyprland key that toggles spoken summaries on/off. Empty disables it.";
+    };
+
     microphoneGate = {
       enable = mkOption { type = types.bool; default = true; description = "Stay silent while an application is capturing the microphone."; };
       ignore = mkOption {
@@ -96,14 +102,18 @@ in
 
     # A function so lib is Home Manager's (lib.hm.dag), not nixpkgs'.
     home-manager.users.olafkfreund = { lib, ... }: {
-      home.file.".config/hypr/agent-voice-binds.lua" = mkIf (cfg.moreKey != "") {
-        text = ''
-          o.bind("${cfg.moreKey}", "Agent voice: tell me more", "${cfg.package}/bin/agent-say more")
-        '';
+      home.file.".config/hypr/agent-voice-binds.lua" = mkIf (cfg.moreKey != "" || cfg.toggleKey != "") {
+        text =
+          optionalString (cfg.moreKey != "") ''
+            o.bind("${cfg.moreKey}", "Agent voice: tell me more", "${cfg.package}/bin/agent-say more")
+          ''
+          + optionalString (cfg.toggleKey != "") ''
+            o.bind("${cfg.toggleKey}", "Agent voice: toggle spoken summaries on/off", "${cfg.package}/bin/agent-say toggle")
+          '';
       };
 
       # Append-only so the user's edits to bindings.lua stay theirs.
-      home.activation.agentVoiceRequire = mkIf (cfg.moreKey != "") (lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      home.activation.agentVoiceRequire = mkIf (cfg.moreKey != "" || cfg.toggleKey != "") (lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         f="$HOME/.config/hypr/bindings.lua"
         if [ -f "$f" ] && ! grep -qF '"hypr.agent-voice-binds"' "$f"; then
           # The redirect lives inside run, so a dry run cannot append to the file.
