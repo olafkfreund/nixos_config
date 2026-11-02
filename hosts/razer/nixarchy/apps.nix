@@ -74,6 +74,7 @@
     # vim.enable = true;  #@ vim
     # vscode.enable = true;  #@ vscode  # unfree
     # zed.enable = true;  #@ zed
+    omawrite.enable = true;  #@ omawrite
 
     # ── Gaming ──────────────────────────────────────────────────────
     # heroic.enable = true;  #@ heroic

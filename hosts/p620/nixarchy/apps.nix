@@ -112,7 +112,7 @@
     # programs.nixarchy.apps.hey-cli.enable = true;  #@ hey-cli
     # programs.nixarchy.apps.omacalc.enable = true;  #@ omacalc
     # programs.nixarchy.apps.omacut.enable = true;  #@ omacut
-    # programs.nixarchy.apps.omawrite.enable = true;  #@ omawrite
+    programs.nixarchy.apps.omawrite.enable = true;  #@ omawrite
     # programs.nixarchy.apps.openclaw.enable = true;  #@ openclaw
     # programs.nixarchy.apps.opencode.enable = true;  #@ opencode
     # programs.nixarchy.apps.scrcpy.enable = true;  #@ scrcpy
