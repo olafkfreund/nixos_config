@@ -104,6 +104,18 @@ spec: spec/2026-11-02-2596-agent-voice-summary.md
 - The coder-guard env marker is `CODEX_CODER` (not `CODEX_IMPLEMENT`).
   Gate 5 env list: `AGY_CODER`, `CODEX_CODER`, `AGENT_SAY_QUIET`.
 
+## Deviations during implementation
+
+- **Step 5: p620 only, razer deferred.** razer runs no Ollama
+  (`services.ollama.enable = false`), and p620's Ollama is not reachable over
+  the tailnet: its firewall opens only 9300 on `tailscale0`. With the module
+  on, razer would build but stay silent forever, because the summary fails
+  closed. Opening 11434 on the tailnet is a security change outside this plan.
+  razer follows in its own change once the summary endpoint for it is
+  decided.
+- Step 4: `summary.ollamaUrl` defaults to `http://127.0.0.1:11434` (not
+  `localhost`), so it never resolves to `::1` when Ollama listens on IPv4 only.
+
 ## Steps
 
 1. **Probe the hook payloads (no repo edit).** Add a temporary Stop hook
