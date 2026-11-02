@@ -1,0 +1,311 @@
+diff -ruN a/herdr_claude_teams/verbs.py b/herdr_claude_teams/verbs.py
+--- a/herdr_claude_teams/verbs.py	2026-11-02 22:40:41.163746597 +0000
++++ b/herdr_claude_teams/verbs.py	2026-11-02 22:41:37.507459696 +0000
+@@ -204,42 +204,26 @@
+ # --- handlers --------------------------------------------------------
+ 
+ def _split_window(parsed) -> int:
+-    direction = "right" if parsed.has("-h") else "down"
+-    # tmux's trailing positional is a shell-command to run directly in the
+-    # new pane (e.g. jcode's `split-window -h -t <p> -c <cwd> <jcode-binary>
+-    # <args>`) — a call shape Claude Code's Agent Teams never uses (it splits
+-    # first, then launches via a separate respawn-pane/send-keys call).
+-    # Space-joined, not "".join like respawn-pane/send-keys below: those are
+-    # always called with the whole command pre-joined as ONE argv element by
+-    # their only observed caller; this is the first path that legitimately
+-    # receives a real multi-token argv (jcode's own "$@" expansion).
++    # Teammates open as background tabs after the lead's tab, not as splits.
+     command = " ".join(parsed.positional)
+-    # focus: Claude Code's Agent Teams never passes a trailing command and
+-    # relies on the coordinator staying focused (tested behavior below,
+-    # unchanged — it tracks teammate pane IDs itself, not tmux "current
+-    # pane" state, so this is purely cosmetic for that caller). Only when a
+-    # trailing command IS present (the jcode shape) does this follow real
+-    # tmux's default-focus-follows-split semantics (-d suppresses it) — the
+-    # jcode swarm hook relies on that: it calls bare `select-pane -T <title>`
+-    # with no -t right after split-window, expecting real tmux's "current
+-    # pane" to mean the pane just created.
+-    focus = (not parsed.has("-d")) if command else False
+-    params: dict = {"direction": direction, "focus": focus}
+-    target = parsed.value("-t")
++    target = parsed.value("-t") or os.environ.get("TMUX_PANE")
+     if target:
+-        params["target_pane_id"] = _require_target(target)
+-    ratio = _ratio(parsed)
+-    if ratio is not None:
+-        params["ratio"] = ratio
++        lead_id = _require_target(target)
++    else:
++        lead_id = os.environ.get("HERDR_PANE_ID")
++        if not lead_id:
++            raise HerdrError("pane_not_found", "split-window: no target pane")
++    lead = call("pane.get", {"pane_id": lead_id})["pane"]
++    params: dict = {"workspace_id": lead["workspace_id"], "focus": False}
+     cwd = parsed.value("-c")
+     if cwd:
+         params["cwd"] = cwd
+-    result = call("pane.split", params)
+-    pane = result["pane"]
++    result = call("tab.create", params)
++    pane = result["root_pane"]
+     ownership.record(pane)
+-    # herdr's pane.split has no equivalent "launch this" param, so deliver
+-    # the command as typed input followed by Enter — same mechanism
+-    # _respawn_pane already uses for "run this in an existing pane".
++    new_tab = (result.get("tab") or {}).get("tab_id") or pane.get("tab_id")
++    _place_after_lead(new_tab, lead["tab_id"], lead["workspace_id"])
++    # tab.create has no "launch this" param: type the command, as _respawn_pane does.
+     if command:
+         call("pane.send_text", {"pane_id": pane["pane_id"], "text": command + "\r"})
+     if parsed.has("-P"):
+@@ -250,6 +234,22 @@
+     return 0
+ 
+ 
++def _place_after_lead(new_tab_id: str | None, lead_tab_id: str, workspace_id: str) -> None:
++    """Move the new tab right after the lead's tab, behind teammates already there."""
++    try:
++        tabs = call("tab.list", {"workspace_id": workspace_id})["tabs"]
++        owned = {p["tab_id"] for p in call("pane.list", {})["panes"]
++                 if ownership.is_owned(p.get("terminal_id", ""))}
++        order = [t["tab_id"] for t in tabs if t["tab_id"] != new_tab_id]
++        # insert_index is assumed 0-based (list position); confirm live.
++        index = order.index(lead_tab_id) + 1
++        while index < len(order) and order[index] in owned:
++            index += 1
++        call("tab.move", {"tab_id": new_tab_id, "insert_index": index})
++    except Exception as exc:  # noqa: BLE001 - placement is cosmetic
++        trace.log("tab_move_failed", error=str(exc))
++
++
+ def _send_keys(parsed) -> int:
+     target = parsed.value("-t") or ""
+     pane_id = _require_target(target)
+diff -ruN a/tests/_fake_herdr.py b/tests/_fake_herdr.py
+--- a/tests/_fake_herdr.py	2026-11-02 22:40:41.163889627 +0000
++++ b/tests/_fake_herdr.py	2026-11-02 22:41:46.972271334 +0000
+@@ -23,6 +23,8 @@
+         self.requests: list[tuple[str, dict]] = []
+         self.workspace = ws
+         self.tab = f"{ws}:1"
++        self.tabs: list[dict] = [{"tab_id": self.tab, "workspace_id": ws}]
++        self._tab_counter = 1
+         self._term_counter = 0
+         self.panes: list[dict] = [
+             {
+@@ -67,8 +69,8 @@
+         return f"term_{self._term_counter}"
+ 
+     def _next_index(self, tab_id: str, ws: str) -> str:
+-        """Positional pane_id: the next 1-based index within the tab."""
+-        n = sum(1 for p in self.panes if p["tab_id"] == tab_id)
++        """Positional pane_id: the next 1-based index within the workspace."""
++        n = sum(1 for p in self.panes if p["workspace_id"] == ws)
+         return f"{ws}-{n + 1}"
+ 
+     def _renumber_tab(self, tab_id: str) -> None:
+@@ -79,8 +81,9 @@
+         """
+         remap: dict[str, str] = {}
+         index = 0
++        ws = next((t["workspace_id"] for t in self.tabs if t["tab_id"] == tab_id), None)
+         for p in self.panes:
+-            if p["tab_id"] != tab_id:
++            if p["workspace_id"] != ws:
+                 continue
+             index += 1
+             new_id = f"{p['workspace_id']}-{index}"
+@@ -201,7 +204,36 @@
+         return {"type": "ok"}
+ 
+     def _m_tab_list(self, params):
+-        return {"type": "tab_list", "tabs": [{"tab_id": self.tab, "workspace_id": self.workspace}]}
++        ws = params.get("workspace_id")
++        return {"type": "tab_list",
++                "tabs": [dict(t) for t in self.tabs if not ws or t["workspace_id"] == ws]}
++
++    def _m_tab_create(self, params):
++        ws = params.get("workspace_id", self.workspace)
++        self._tab_counter += 1
++        tab = {"tab_id": f"{ws}:{self._tab_counter}", "workspace_id": ws}
++        pane = {
++            "pane_id": self._next_index(tab["tab_id"], ws),
++            "terminal_id": self._next_term(),
++            "tab_id": tab["tab_id"],
++            "workspace_id": ws,
++            "focused": bool(params.get("focus", False)),
++        }
++        if pane["focused"]:
++            for p in self.panes:
++                p["focused"] = False
++        self.tabs.append(tab)
++        self.panes.append(pane)
++        return {"type": "tab_created", "tab": dict(tab), "root_pane": dict(pane)}
++
++    def _m_tab_move(self, params):
++        """insert_index is 0-based, into the order that remains after removing the tab."""
++        tab = next((t for t in self.tabs if t["tab_id"] == params["tab_id"]), None)
++        if tab is None:
++            raise _RpcError("tab_not_found", f"tab {params['tab_id']} not found")
++        self.tabs.remove(tab)
++        self.tabs.insert(params["insert_index"], tab)
++        return {"type": "ok"}
+ 
+     def _m_workspace_focus(self, params):
+         return {"type": "ok"}
+diff -ruN a/tests/test_regression.py b/tests/test_regression.py
+--- a/tests/test_regression.py	2026-11-02 22:40:41.158292728 +0000
++++ b/tests/test_regression.py	2026-11-02 22:42:18.470811094 +0000
+@@ -47,7 +47,7 @@
+         # 5. enumerate panes
+         code, out = run(["list-panes", "-t", window, "-F", "#{pane_id}"])
+         assert code == 0
+-        assert out.splitlines() == ["%term_1", new_pane]
++        assert out.splitlines() == ["%term_1"]  # the teammate has its own tab
+ 
+         # leader stays focused throughout
+         assert fake.state.pane("wL-1")["focused"] is True
+diff -ruN a/tests/test_trace.py b/tests/test_trace.py
+--- a/tests/test_trace.py	2026-11-02 22:40:41.158686913 +0000
++++ b/tests/test_trace.py	2026-11-02 22:42:18.470715524 +0000
+@@ -26,7 +26,7 @@
+     assert "rpc" in kinds
+     assert "exit" in kinds
+     rpc_methods = [e["method"] for e in events if e["event"] == "rpc"]
+-    assert rpc_methods == ["pane.list", "pane.split"]  # resolve target, then split
++    assert rpc_methods == ["pane.list", "pane.get", "tab.create", "tab.list", "pane.list", "tab.move"]
+     exit_ev = next(e for e in events if e["event"] == "exit")
+     assert exit_ev["code"] == 0
+ 
+diff -ruN a/tests/test_verbs.py b/tests/test_verbs.py
+--- a/tests/test_verbs.py	2026-11-02 22:40:41.164161570 +0000
++++ b/tests/test_verbs.py	2026-11-02 22:42:30.276823697 +0000
+@@ -15,70 +15,68 @@
+     return code, cap.out, cap.err
+ 
+ 
+-def split_params(fake):
+-    return [p for (m, p) in fake.state.requests if m == "pane.split"]
++def calls(fake, method):
++    return [p for (m, p) in fake.state.requests if m == method]
+ 
+ 
+-def test_split_window_horizontal_prints_new_pane_and_keeps_leader(monkeypatch, capsys):
++def tab_ids(fake):
++    return [t["tab_id"] for t in fake.state.tabs]
++
++
++def test_split_window_creates_background_tab_in_lead_workspace(monkeypatch, capsys):
+     with FakeHerdr(leader_pane="wL-1") as fake:
+         code, out, _ = run(fake, monkeypatch, capsys,
+                             ["split-window", "-t", "%term_1", "-h", "-l", "70%", "-P", "-F", "#{pane_id}"])
+         assert code == 0
+-        assert out.strip() == "%term_2"  # stable terminal id, not positional %wL-2
+-        p = split_params(fake)[0]
+-        # tmux -l 70% sizes the NEW pane at 70%; herdr's pane.split ratio
+-        # sizes the SOURCE pane, so the translated ratio is inverted (0.3).
+-        assert p["direction"] == "right" and p["target_pane_id"] == "wL-1" and p["ratio"] == 0.3
++        assert out.strip() == "%term_2"  # root pane, stable terminal id
++        assert calls(fake, "pane.split") == []
++        assert calls(fake, "tab.create") == [{"workspace_id": "wL", "focus": False}]
+         assert fake.state.pane("wL-1")["focused"] is True
++        assert fake.state.pane("wL-2")["tab_id"] == "wL:2"
+ 
+ 
+-def test_split_window_ratio_inversion_is_symmetric(monkeypatch, capsys):
++def test_split_window_passes_cwd_through(monkeypatch, capsys):
+     with FakeHerdr(leader_pane="wL-1") as fake:
+         run(fake, monkeypatch, capsys,
+-            ["split-window", "-t", "%term_1", "-h", "-p", "30", "-P", "-F", "#{pane_id}"])
+-        assert split_params(fake)[0]["ratio"] == 0.7
++            ["split-window", "-t", "%term_1", "-h", "-c", "/tmp/jcodetest"])
++        assert calls(fake, "tab.create")[0]["cwd"] == "/tmp/jcodetest"
+ 
+ 
+-def test_split_window_vertical_maps_to_down(monkeypatch, capsys):
++def test_split_window_without_target_uses_herdr_pane_id(monkeypatch, capsys):
+     with FakeHerdr(leader_pane="wL-1") as fake:
+-        run(fake, monkeypatch, capsys, ["split-window", "-t", "%term_1", "-v", "-P", "-F", "#{pane_id}"])
+-        assert split_params(fake)[0]["direction"] == "down"
++        monkeypatch.delenv("TMUX_PANE", raising=False)
++        fake.state.aliases["p_lead"] = "wL-1"
++        code, _, _ = run(fake, monkeypatch, capsys, ["split-window", "-h"])
++        assert code == 0
++        assert calls(fake, "tab.create")[0]["workspace_id"] == "wL"
+ 
+ 
+-def test_split_window_passes_cwd_through(monkeypatch, capsys):
++def test_split_window_moves_tab_right_after_lead_in_spawn_order(monkeypatch, capsys):
+     with FakeHerdr(leader_pane="wL-1") as fake:
+-        run(fake, monkeypatch, capsys,
+-            ["split-window", "-t", "%term_1", "-h", "-c", "/tmp/jcodetest"])
+-        assert split_params(fake)[0]["cwd"] == "/tmp/jcodetest"
++        fake.state.handle("tab.create", {"workspace_id": "wL"})  # user tab after the lead's
++        for _ in range(2):
++            run(fake, monkeypatch, capsys, ["split-window", "-t", "%term_1", "-h"])
++        moves = calls(fake, "tab.move")
++        assert [m["insert_index"] for m in moves] == [1, 2]
++        assert tab_ids(fake) == ["wL:1", "wL:3", "wL:4", "wL:2"]
+ 
+ 
+-def test_split_window_with_trailing_command_spawns_it_and_follows_focus(monkeypatch, capsys):
+-    # jcode's swarm hook shape: `split-window -h -t <p> -c <cwd> <bin> <args>`
+-    # — a command directly on split-window, no separate respawn-pane step.
++def test_split_window_failed_move_is_not_fatal_and_still_owned(monkeypatch, capsys):
++    with FakeHerdr(leader_pane="wL-1") as fake:
++        fake.state.fail("tab.move")
++        code, out, _ = run(fake, monkeypatch, capsys,
++                            ["split-window", "-t", "%term_1", "-h", "-P", "-F", "#{pane_id}"])
++        assert code == 0 and out.strip() == "%term_2"
++        code, _, _ = run(fake, monkeypatch, capsys, ["kill-pane", "-t", "%term_2"])
++        assert [p["pane_id"] for p in fake.state.panes] == ["wL-1"]  # owned, so it closed
++
++
++def test_split_window_with_trailing_command_types_it_and_keeps_leader_focused(monkeypatch, capsys):
+     with FakeHerdr(leader_pane="wL-1") as fake:
+         code, _, _ = run(fake, monkeypatch, capsys,
+                           ["split-window", "-t", "%term_1", "-h", "-c", "/tmp/x", "jcode", "-C", "/tmp/x"])
+         assert code == 0
+         assert fake.state.pane_text["wL-2"] == "jcode -C /tmp/x\r"
+-        # real tmux default (no -d): focus follows the new pane when a
+-        # command was launched into it — distinct from the no-command
+-        # Claude Code shape, which keeps the leader focused (tests above).
+-        assert fake.state.pane("wL-2")["focused"] is True
+-        assert fake.state.pane("wL-1")["focused"] is False
+-
+-
+-def test_split_window_with_command_and_dash_d_keeps_leader_focused(monkeypatch, capsys):
+-    with FakeHerdr(leader_pane="wL-1") as fake:
+-        run(fake, monkeypatch, capsys,
+-            ["split-window", "-d", "-t", "%term_1", "-h", "jcode"])
+-        assert fake.state.pane("wL-1")["focused"] is True
+-
+-
+-def test_split_window_no_command_keeps_old_focus_behavior(monkeypatch, capsys):
+-    # No trailing command (Claude Code's own shape) -> unchanged from before
+-    # this file's jcode-support changes: leader stays focused regardless.
+-    with FakeHerdr(leader_pane="wL-1") as fake:
+-        run(fake, monkeypatch, capsys, ["split-window", "-t", "%term_1", "-h"])
+         assert fake.state.pane("wL-1")["focused"] is True
+ 
+ 
+@@ -226,7 +224,9 @@
+         run(fake, monkeypatch, capsys, ["split-window", "-t", "%term_1", "-h", "-P", "-F", "#{pane_id}"])
+         code, out, _ = run(fake, monkeypatch, capsys, ["list-panes", "-t", "wL:1", "-F", "#{pane_id}"])
+         assert code == 0
+-        assert out.splitlines() == ["%term_1", "%term_2"]  # stable terminal ids
++        assert out.splitlines() == ["%term_1"]  # the teammate lives in its own tab
++        _, out, _ = run(fake, monkeypatch, capsys, ["list-panes", "-t", "wL:2", "-F", "#{pane_id}"])
++        assert out.splitlines() == ["%term_2"]  # stable terminal ids
+ 
+ 
+ def test_select_pane_title_with_explicit_target_renames(monkeypatch, capsys):
+@@ -242,6 +242,8 @@
+     # tmux's "current pane" meaning the pane just created.
+     with FakeHerdr(leader_pane="wL-1") as fake:
+         run(fake, monkeypatch, capsys, ["split-window", "-t", "%term_1", "-h", "jcode"])
++        fake.state.pane("wL-1")["focused"] = False  # split-window no longer moves focus
++        fake.state.pane("wL-2")["focused"] = True
+         code, _, _ = run(fake, monkeypatch, capsys, ["select-pane", "-T", "swarm-agent-1"])
+         assert code == 0
+         assert fake.state.pane("wL-2")["label"] == "swarm-agent-1"

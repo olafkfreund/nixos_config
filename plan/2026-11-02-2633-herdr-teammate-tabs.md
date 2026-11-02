@@ -193,3 +193,29 @@ A fresh Opus agent gets this plan and `git diff origin/main`.
 Revert the PR and redeploy. Without `teammate-tabs.patch`, teammates go
 back to splits in the lead's tab. Owned records stay compatible, so no
 cleanup is needed.
+
+## Deviations during implementation
+
+- **Step 1 (coder), patch method:** the coder guard blocks `git commit`
+  even in a scratch dir, so the patch was made with `diff -ruN` between an
+  ownership-patched tree and the edited copy, applied with `-p1`. The
+  source layout is flat (`herdr_claude_teams/`).
+- **Step 1, focus:** `tab.create` always uses `focus:false`, so tmux's
+  "trailing command follows focus" behaviour for the jcode shape is gone.
+  Claude Code does not use that shape.
+- **Step 1, tests:**
+  - **Replaced:** 5 old split tests that asserted `pane.split`.
+  - **Added:** 6 tab tests.
+  - **Updated:** two `list-panes` tests and the trace and regression
+    tests.
+  - **Fake herdr:** pane numbering is now per workspace, matching real
+    herdr (`w1:p2Q`, `w1:p2R`).
+  - **Result:** 167 passed.
+- **Step 1, `insert_index` checked live on p620** (a throwaway tab in the
+  agent's own workspace, closed after):
+  - It is 0-based and counts positions before the moved tab is removed.
+    From position 0, `insert_index` 2 landed at position 1.
+  - A just-created tab is always last, so "lead's position + 1 + owned
+    tabs after it" is correct as implemented.
+  - The `tab.create` response shape `{root_pane, tab: {tab_id}}` was seen
+    live.
