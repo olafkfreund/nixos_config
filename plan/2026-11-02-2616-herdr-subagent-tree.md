@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2616
 spec: spec/2026-11-02-2616-herdr-subagent-tree.md
 ---
