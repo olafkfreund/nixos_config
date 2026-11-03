@@ -296,7 +296,7 @@ Everything needed to implement is here. The spec and intent are background.
 
 | Command | Expected |
 |---|---|
-| the self-test, in `checkPhase` | 13 `ok` lines, exit 0 |
+| the self-test, in `checkPhase` | 18 `ok` lines, exit 0 |
 | `just check-syntax`, then `just test-host p620` and `razer` | pass |
 | live parallel review in herdr | two `↳` rows, outputs identical to a headless run |
 | Ctrl-C and `kill -9` during a live run | the recorded `cmd.pgid` has no members (`pgrep -g <pgid>` empty) within 7 s, and that tab is gone |
@@ -319,3 +319,22 @@ runs anything again.
   5 s, instead of a fixed 5 s, so the tab closes as soon as the run is gone.
 - Step 2 used `shellcheck-minimal` (the nixpkgs default's checker) and added
   `gawk` and `gnused` to `runtimeInputs`, which `herdr-run.sh` uses.
+- **PR review fixes (Codex, agy and Opus reviews of #2659), cases 14–18:**
+  - The runner, when signalled (its tab closed, Ctrl-C inside it), now stops
+    the command's group first and writes `lost`, which the helper reports as
+    a lost run (exit 1). Before, it wrote 127 while the command kept running,
+    and `agent-run`'s retry could start a second implementer.
+  - The runner keeps the group ID in memory, stops the group itself when it
+    is orphaned, then removes the private directory and closes the pane.
+  - Tab placement is one function called as `place_tab || :`, and every jq
+    parse of a herdr reply is guarded, so an error reply cannot kill the
+    helper before the run (it previously left a tab and ran nothing).
+  - The headless fallback `exec`s the command, so a signal to `herdr-run`
+    reaches it.
+  - The environment is copied with one `declare -p` per exported name.
+  - The wait loop ticks every second and needs two failed checks in a row
+    before declaring a run lost; it re-checks `status` first.
+  - SIGHUP is trapped like INT and TERM; the runner bakes in `herdr-run`'s
+    own PATH.
+  - Self-test: 13 → 18 cases. `runner-signalled`, `socket-error`,
+    `headless-term` and `term-resistant-child` fail on the previous code.

@@ -48,6 +48,7 @@ FAKE
 cat >"$tmp/socket-server" <<'SOCKET'
 #!/usr/bin/env bash
 IFS= read -r request || exit 1
+[[ ! -e $TEST_STATE/socket-error || $request != *pane.list* ]] || { printf '{"id":"1","error":{"code":"boom","message":"x"}}\n'; exit 0; }
 method=$(jq -r '.method' <<< "$request")
 case $method in
   tab.list)
@@ -130,7 +131,8 @@ for _ in {1..100}; do
   sleep 0.01
 done
 [[ -n $claim ]]
-bash -c "$(cat "$TEST_STATE/late-line")" >/dev/null 2>&1
+# the late runner finds the claim taken, or its directory already gone: either way it runs nothing
+bash -c "$(cat "$TEST_STATE/late-line")" >/dev/null 2>&1 || :
 code=0
 wait "$job" || code=$?
 assert_code 0
@@ -248,3 +250,71 @@ done
 [[ -e $TEST_STATE/closed ]]
 if kill -0 "$(cat "$TEST_STATE/command-pid")" 2>/dev/null; then exit 1; fi
 ok helper-killed
+
+# the runner is signalled (its tab closed): the command group stops, the helper reports a lost run
+reset_state
+"$tool" codex bash -c 'echo $$ > "$TEST_STATE/command-pid"; exec sleep 300' >"$tmp/out" 2>"$tmp/err" &
+helper=$!
+for _ in {1..300}; do
+  [[ -e $TEST_STATE/command-pid ]] && break
+  sleep 0.01
+done
+runner=$(find "$TMPDIR" -name runner.pid -path '*/tmp.*/*' -print -quit 2>/dev/null || :)
+kill -TERM "$(cat "$runner")"
+code=0
+wait "$helper" || code=$?
+assert_code 1
+grep -qF 'run lost' "$tmp/err"
+if kill -0 "$(cat "$TEST_STATE/command-pid")" 2>/dev/null; then exit 1; fi
+ok runner-signalled
+
+# a herdr socket error while placing the tab: the run still happens, once
+reset_state
+: >"$TEST_STATE/socket-error"
+printf '9\n' >>"$TEST_STATE/tabs" # a tab after the lead, so the pane lookup runs
+run_capture bash -c 'printf "x\n" >> "$TEST_STATE/runs"'
+assert_code 0
+count_runs 1
+ok socket-error
+
+# SIGTERM to herdr-run in the headless fallback reaches the command
+reset_state
+: >"$TEST_STATE/fail-tab-create"
+"$tool" codex bash -c 'echo $$ > "$TEST_STATE/command-pid"; exec sleep 300' >/dev/null 2>&1 &
+helper=$!
+for _ in {1..300}; do
+  [[ -e $TEST_STATE/command-pid ]] && break
+  sleep 0.01
+done
+kill -TERM "$helper"
+code=0
+wait "$helper" || code=$?
+assert_code 143
+if kill -0 "$(cat "$TEST_STATE/command-pid")" 2>/dev/null; then exit 1; fi
+ok headless-term
+
+# an exported value with newlines (and a line that looks like an excluded name) arrives intact
+reset_state
+export HERDR_RUN_TEST_MULTI=$'one\nBASH_LOOKALIKE="two\nthree'
+run_capture bash -c 'printf %s "$HERDR_RUN_TEST_MULTI"'
+unset HERDR_RUN_TEST_MULTI
+assert_code 0
+[[ $(cat "$tmp/out") == $'one\nBASH_LOOKALIKE="two\nthree' ]]
+ok multiline-env
+
+# kill -9 of the helper; the command dies on TERM but its child ignores it: the child is KILLed too
+reset_state
+"$tool" codex bash -c '(trap "" TERM; exec sleep 300) & echo $! > "$TEST_STATE/child-pid"; wait' >/dev/null 2>&1 &
+helper=$!
+for _ in {1..300}; do
+  [[ -e $TEST_STATE/child-pid ]] && break
+  sleep 0.01
+done
+kill -KILL "$helper"
+wait "$helper" 2>/dev/null || :
+for _ in {1..200}; do
+  kill -0 "$(cat "$TEST_STATE/child-pid")" 2>/dev/null || break
+  sleep 0.02
+done
+if kill -0 "$(cat "$TEST_STATE/child-pid")" 2>/dev/null; then exit 1; fi
+ok term-resistant-child
