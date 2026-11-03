@@ -85,8 +85,9 @@ Never edit `~/.config/nixos` (it is `/etc/nixos`).
    → verify: `just check-syntax` and
 
    ```bash
-   nix eval --raw '.#nixosConfigurations.p620.config.environment.etc."claude-code/managed-settings.json".text' \
-     | grep -o 'agent-team hook'
+   # the module sets .source, not .text (deviation found in step 1)
+   grep -o 'agent-team hook' "$(nix build --no-link --print-out-paths \
+     '.#nixosConfigurations.p620.config.environment.etc."claude-code/managed-settings.json".source')"
    ```
 
    Traps: comment only the why, one line (memory: minimal comments). The
