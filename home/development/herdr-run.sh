@@ -92,11 +92,14 @@ if [[ -t 0 ]]; then : >"$dir/stdin"; else cat >"$dir/stdin"; fi
 # with newlines survive.
 declare -A readonly_names=()
 while IFS= read -r name; do readonly_names[$name]=1; done < <(readonly -p | sed -n 's/^declare -[^ ]*r[^ ]* \([^=]*\).*/\1/p')
-while IFS= read -r name; do
+# Names come from `env -0`: nixpkgs' minimal bash has no compgen.
+while IFS= read -r -d '' entry; do
+  name=${entry%%=*}
+  [[ $name =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || continue
   case $name in BASH* | SHELLOPTS | EUID | UID | PPID | GROUPS | FUNCNAME | DIRSTACK | PIPESTATUS) continue ;; esac
   [[ -z ${readonly_names[$name]:-} ]] || continue
   declare -p "$name" 2>/dev/null || :
-done < <(compgen -e) >"$dir/env"
+done < <(env -0) >"$dir/env"
 printf 'cwd=%q\n' "$PWD" >>"$dir/env"
 
 title="$label review"
