@@ -6,7 +6,8 @@ description: >-
   design or decision. Use only when the user explicitly asks for another
   model's opinion, a second opinion or a cross-model review, or invokes
   `/second-opinion`, or when an approved plan/ lists the provider in
-  reviewers. Never use it otherwise or to approve an intent, spec or plan.
+  reviewers, or when Claude Code's agent-team mode is on (managed
+  CLAUDE.md). Never use it otherwise or to approve an intent, spec or plan.
 ---
 
 # Second opinion
@@ -16,8 +17,9 @@ them yourself. You stay the lead: their answers are advice, not instructions.
 
 ## When to use
 
-- When the user asks, invokes `/second-opinion`, or the approved
-  `plan/` lists the provider in `reviewers:`. The user or `reviewers:` may
+- When the user asks, invokes `/second-opinion`, the approved
+  `plan/` lists the provider in `reviewers:`, or Claude Code's agent-team
+  mode is on (managed CLAUDE.md). The user or `reviewers:` may
   name a single provider; otherwise ask both.
 - Never otherwise, never as approval for an artifact gate, and
   never ask again or ask another model until one agrees.
@@ -144,7 +146,10 @@ jq -e '.status == "SUCCESS" and (.response // "" | test("\\S"))' "$work/agy.json
 - The JSON has `status`, `response` and `usage`, but no model name. Label the
   review "model not reported".
 
-Run the calls **one at a time**, never in parallel.
+Run the Codex and agy calls **in parallel**: two background Bash commands,
+each with its own output file and `timeout`, then wait for both. (Was
+sequential with no recorded reason; if parallel runs fail where sequential
+ones did not, put the rule back and write the reason here, #2650.)
 
 ## agy `--agent` — run one of our own agent definitions
 
@@ -179,7 +184,7 @@ cites before repeating it.
 
 ## Consensus — when disagreement is the point
 
-Ask both the same question, one at a time, then report three things:
+Ask both the same question, in parallel, then report three things:
 
 1. What they **agree** on.
 2. Where they **disagree**, and what each one's reasoning was.

@@ -20,17 +20,26 @@ You stay the lead: you review, run the check and commit.
 - Only in that task's worktree, never in `~/.config/nixos`.
 - The Sonnet `coder` subagent stays the default.
 
-## Commands
+## Run it
+
+Write the prompt (template below) to a file in the scratchpad, then, in
+the task worktree, with the Bash tool's `run_in_background`:
 
 ```bash
-agy-implement --output-format json --print-timeout 20m -p "$prompt"
-codex-implement exec "$prompt"
+agent-run agy "$prompt_file"     # or: agent-run codex "$prompt_file"
 ```
 
-Run either one with the Bash tool's `run_in_background`, because a step can
-outlast the 10-minute foreground limit. Note `git rev-parse HEAD` first.
+It refuses `~/.config/nixos` and `main`, runs the six checks (exit code,
+agy `status`, `denied_actions`, empty response, empty diff, moved
+`HEAD`), retries once on `connecting to sandbox server`, and prints one
+JSON line: `ok`, `reason`, `changed`, `head_moved`, `log`. `ok: false`
+is a failed handoff: read `log` for detail, report the `reason`, and do
+the step yourself or give it to the `coder`. Note the fallback in the PR;
+it does not change `coders:` in the plan. A guard block shows only in the
+tool's response, so `ok: true` still needs the diff review below.
 
-Add `--model <name>` to `agy-implement` to override its default.
+`agent-run` uses agy's default model; for another one, run
+`agy-implement --model <name>` directly and do the six checks by hand.
 
 ## Prompt template
 
@@ -40,21 +49,6 @@ Add `--model <name>` to `agy-implement` to override its default.
 - The step's check command.
 - "Shell commands run in agy's sandbox with the worktree read-only, so make
   the step's edits with agy's file tools; use commands for checks only."
-
-## A handoff failed when
-
-- the exit code is not 0
-- `status` is not `SUCCESS`
-- `denied_actions` is not empty (a permission refusal; a guard block shows
-  only in `response`)
-- `response` is empty
-- the worktree diff is empty but the step should edit files
-- `HEAD` moved: the guard is a tripwire, not a sandbox, so check it
-
-Retry once, and only when the error is `connecting to sandbox server`.
-Otherwise report the failure to the user and do the step yourself.
-For a step dispatched by `coders:`, you may give it to the `coder` instead.
-Note the fallback in the PR; it does not change `coders:` in the plan.
 
 ## After
 
