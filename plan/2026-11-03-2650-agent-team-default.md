@@ -242,7 +242,9 @@ Never edit `~/.config/nixos` (it is `/etc/nixos`).
        its check, commit, note the worker; parallel only for steps the plan
        marks independent whose files are disjoint, each agy/codex step in
        `git worktree add ../<repo>-<issue>-s<n> HEAD`, diff applied back with
-       `git -C <wt> add -A && git -C <wt> diff --cached --binary | git apply` (deviation: plain `git diff` drops new files), worktree removed; on a failed apply,
+       `git -C <wt> add -A && git -C <wt> diff --cached --binary | git apply`
+       (deviation: plain `git diff` drops new files), worktree removed; on a
+       failed apply,
        rerun that step sequentially; at the end, fresh Opus review plus the
        plan's `reviewers:`; report which worker did each step. State: no
        Opus teammates; Claude never approves the plan.
@@ -318,4 +320,3 @@ Recorded per the managed policy; each landed with its code.
   unlisted steps follow the model-split default only, never agy or Codex
   (agy's draft had routed them by complexity, which defeated the opt-out).
 - Step 4: the "`agent-team: off`" line is a sub-bullet so it renders.
-
