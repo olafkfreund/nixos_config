@@ -3,72 +3,69 @@ status: draft
 issue: 2657
 spec: spec/2026-11-03-2657-herdr-headless-agent-rows.md
 coders:
-  1: codex   # herdr-run.sh is small, tricky logic: the claim race, traps, process groups
-  2: coder   # the self-test is straightforward shell against a fake herdr
-  3: coder   # one Nix file, packaging plus checkPhase
-  4: coder   # two one-line prefixes in agent-run.sh
-  5: agy     # mechanical prefix edits across two SKILL.md files
-  7: coder   # a docs section
+  1: codex   # herdr-run.sh and its self-test together: small, tricky logic (claim race, traps, process groups), and the fake must match the real calls
+  2: coder   # Nix packaging plus the agent-run.sh prefixes, one coupled change
+  3: agy     # mechanical prefix edits across two SKILL.md files
+  5: coder   # a docs section
 reviewers:
-  - codex    # it designed with us; checks the diff matches its findings
-  - agy      # independent read; was not obtained on the spec
+  - codex    # it shaped the design; checks the diff against its findings
+  - agy      # its plan review drove this revision
 ---
 
 # Plan: Codex and agy runs show in the herdr sidebar under their Claude lead
 
+Everything needed to implement is here. The spec and intent are background.
+
 ## Approved decisions (from the spec)
 
-- A new tool, `herdr-run <label> <command> [args...]` (`<label>` is `codex`
-  or `agy`). It is transparent to the caller: same stdin, stdout, stderr and
-  exit code. Callers only add the prefix.
-- Outside herdr (`HERDR_ENV` is not `1`, or `HERDR_SOCKET_PATH` or
-  `HERDR_TAB_ID` is unset): `exec "$@"` and nothing else.
-- Inside herdr:
-  - **Private directory** from `mktemp -d` (0700) holding:
-    - `stdin`: always created. It holds the caller's stdin read in full,
-      or is empty when stdin is a terminal.
-    - `env`: the caller's environment from `export -p`, plus the cwd.
-    - `run`: the runner, with the arguments quoted by `printf '%q'`.
-  - **Tab:** under `flock` on `$XDG_RUNTIME_DIR/herdr-run-<lead tab>.lock`,
-    run `herdr tab create --workspace "$HERDR_WORKSPACE_ID" --cwd "$PWD"
-    --label "↳ <label>" --no-focus`. Record `pane_id`, `tab_id` and
-    `terminal_id`, then place the tab with the socket's `tab.move`, sent
-    as one JSON line through `socat`. A failed move is ignored.
-  - **Start handshake:** send `herdr pane run <pane> "bash --noprofile
-    --norc <dir>/run"`, then wait 3 s for `<dir>/claim`. Resend up to 3
-    times. A late copy finds `claim` taken and exits.
-  - **Runner:**
-    1. `mkdir claim`. If it fails, exit without running anything.
-    2. Write `runner.pid` and set an `EXIT` trap that always writes
-       `status` (127 if the command never ran).
-    3. Set the title with OSC 0.
-    4. Restore the environment with `env -i` plus `env`, then `cd`.
-    5. Start the command with `setsid`, writing its group to `cmd.pgid`,
-       with `< stdin`, and `tee` stdout to `out` and stderr to `err`.
-    6. Write `PIPESTATUS[0]` to `status.tmp`, then `mv` it to `status`.
-
-    A watchdog checks the helper's PID every 2 s. If the helper is gone, it
-    sends TERM to the group, KILL 5 s later, and closes its own pane.
-  - **Helper:**
-    - If no copy has claimed after the third send, it claims itself and
-      runs the command headless with `< stdin`.
-    - Once a runner has claimed:
-      - `report-agent --source herdr-run --agent <label> --state working`.
-      - `split_mark=↳ <label>` sent at about 2, 6 and 15 s.
-      - Wait for `status`, checking every 5 s that the pane exists and
-        `runner.pid` is alive. If either is gone, KILL the group, replay
-        the partial output and exit 1. Never run the command again.
-    - At the end:
-      1. Replay `out` to stdout and `err` to stderr.
-      2. Report `idle`, wait 3 s, then `release-agent` and `pane close`.
-      3. Remove the directory and exit with the code from `status`.
-  - **Before every report, release and close:** `herdr pane get` must show
-    the recorded `terminal_id`. Otherwise do nothing.
-  - **Ctrl-C or SIGTERM to the helper:** TERM to `cmd.pgid`, KILL 5 s
-    later, close the pane, exit 130 or 143.
-  - **Any herdr failure before a claim:** claim, close the pane if one was
-    created, and run headless with `< stdin`.
-- Callers:
+- **The tool:** `herdr-run <label> <command> [args...]`, with `<label>`
+  `codex` or `agy`. The first thing it does is take the label and `shift`.
+  To the caller it is transparent: same stdin, stdout, stderr and exit code.
+  Callers only add the prefix.
+- **Outside herdr** (`HERDR_ENV` is not `1`, or `HERDR_SOCKET_PATH`,
+  `HERDR_TAB_ID` or `HERDR_WORKSPACE_ID` is unset): `exec "$@"` after the
+  shift, and nothing else.
+- **Inside herdr,** in order:
+  1. **Private directory:** `mktemp -d`, mode 0700. It holds:
+     - `stdin`: always created. It holds the caller's stdin read in full,
+       or is empty when stdin is a terminal (`[ -t 0 ]`).
+     - `env`: `export -p` with readonly variables and `BASH*`/`SHELLOPTS`
+       filtered out, plus the cwd.
+     - `run`: the runner, with the arguments quoted by `printf '%q'`.
+  2. **Tab:** under `flock` on `$XDG_RUNTIME_DIR/herdr-run-<lead tab>.lock`:
+     - `tab create`.
+     - Record `.result.root_pane.pane_id`, `.result.tab.tab_id` and
+       `.result.root_pane.terminal_id`.
+     - **Send `split_mark` at once, while still holding the lock,** so a
+       parallel run sees this tab as a child.
+     - Place the tab with socket `tab.move`. Release the lock.
+  3. **Handshake:** send `pane run`, then wait up to 3 s for `claim`, up
+     to 3 sends.
+     - A late copy finds `claim` taken and exits.
+     - If no copy has claimed, the helper tries `mkdir claim` itself. If
+       that succeeds, it closes its pane (identity-checked) and runs the
+       command headless with `< stdin`. If it fails, a runner won at the
+       last moment, and the helper carries on waiting.
+  4. **Runner:** no `set -e`, see step 1.
+  5. **Helper:**
+     - Sends `report-agent working`.
+     - Re-sends `split_mark` at about 2, 6 and 15 s, from a background job
+       that is killed on exit.
+     - Waits for `status`. Every 5 s it checks that the pane exists and
+       `runner.pid` is alive. If either is gone, it KILLs the group,
+       replays the partial output, prints `herdr-run: <label> run lost
+       (pane closed or runner died); not re-run` to stderr and exits 1.
+  6. **End:**
+     - Replay `out` to stdout and `err` to stderr.
+     - Report `idle`, wait 3 s, then `release-agent` and `pane close`.
+     - Remove the directory and exit with the code from `status`.
+- **Identity:** before every report, release and close, `pane get` must
+  still show the recorded `terminal_id`.
+- **Ctrl-C or SIGTERM to the helper:** TERM to the command's group, KILL
+  5 s later, close the pane, exit 130 or 143.
+- **Any herdr failure before a claim:** as the end of point 3, a headless
+  run with `< stdin`.
+- **Callers:**
   - `second-opinion`: the `codex review`, `codex exec`, `agy` and
     `agy --agent` blocks.
   - `agent-run.sh`: lines 44 and 49, with the retry loop outside the
@@ -76,125 +73,190 @@ reviewers:
   - `handoff`: the direct `agy-implement --model` example.
 - `herdr.nix` is unchanged.
 
-### Deviation from the spec (found while writing this plan)
+### Deviations from the spec (found while planning)
 
-The spec places the tab "after any consecutive tabs whose label starts with
-`↳`". That cannot work: the auto-title plugin rewrites tab labels (live
-`tab.list` on 2026-11-03 showed `2 · agy`, `1 · nixos › claude › …`).
-Instead, a tab counts as a child row when its root pane carries a
-`split_mark` token, which is what the sidebar actually draws from. This
-covers herdr-run tabs and herdr-claude-teams teammates alike. The `--label`
-stays: it is what the tab shows until auto-title replaces it.
+1. **Recognising child tabs.** The spec places a tab "after any
+   consecutive tabs whose label starts with `↳`". That cannot work: the
+   auto-title plugin rewrites labels (a live `tab.list` on 2026-11-03 showed
+   `2 · agy`). A tab counts as a child when its root pane carries a
+   `split_mark` token, which is what the sidebar draws. That covers
+   herdr-run tabs and herdr-claude-teams teammates alike. herdr-run sends
+   its own `split_mark` at creation, under the lock, so parallel runs see
+   each other.
+2. **herdr is not a runtime input.** The tool calls `"${HERDR_BIN_PATH:-herdr}"`.
+   herdr sets `HERDR_BIN_PATH` in every pane, to the running server's
+   binary, so p510 does not gain herdr in its closure. `procps` is added
+   for `pgrep`.
+3. **No `tee`.** The command writes straight to `out` and `err`, and the
+   pane shows them with `tail --pid`. That removes a race where a
+   process-substitution `tee` could still be flushing after `status`
+   appeared.
+4. **Title rule:** `<label> implement` when an argument is exactly
+   `codex-implement` or `agy-implement`, else `<label> review`. The
+   spec's "first word" would be `timeout`. A substring match would also
+   hit prompt text.
+
+## Interfaces the code must use (verified live on p620, 2026-11-03)
+
+| Call | Form | Reply fields used |
+|---|---|---|
+| create | `herdr tab create --workspace W --cwd D --label "↳ L" --no-focus` | `.result.root_pane.pane_id`, `.result.root_pane.terminal_id`, `.result.tab.tab_id` |
+| get | `herdr pane get P` | `.result.pane.terminal_id`, `.result.pane.tokens.split_mark` |
+| run | `herdr pane run P "<line>"` | exit code only |
+| state | `herdr pane report-agent P --source herdr-run --agent L --state working\|idle` | — |
+| mark | `herdr pane report-metadata P --source herdr-run --token "split_mark=↳ L"` | — |
+| release | `herdr pane release-agent P --source herdr-run --agent L` | — |
+| close | `herdr pane close P` | — |
+| socket | one line `{"id":"1","method":M,"params":{…}}` to `socat -t5 - UNIX-CONNECT:"$HERDR_SOCKET_PATH"` | — |
+| `tab.list` | params `{"workspace_id":W}` | `.result.tabs[].tab_id` |
+| `pane.list` | params `{"workspace_id":W}` | `.result.panes[] \| {pane_id, tab_id}` |
+| `tab.move` | params `{"tab_id":T,"insert_index":N}` (0-based, counted before removal) | — |
 
 ## Steps
 
-1. **`home/development/herdr-run.sh`** (new): the helper and runner from
-   the decisions above. The runner is written into the private directory
-   as a here-doc, with the quoted command and the private paths baked in.
-   - Read `HERDR_TAB_ID`, `HERDR_WORKSPACE_ID` and `HERDR_SOCKET_PATH` once
-     at the start. Call herdr as `"${HERDR_BIN_PATH:-herdr}"`: herdr sets
-     `HERDR_BIN_PATH` in every pane, to the binary of the running server. The socket call is `printf '%s\n' "$json" | socat -t5 -
-     UNIX-CONNECT:"$HERDR_SOCKET_PATH"`.
-   - **Insert position:** list the tabs with socket `tab.list`. Start right
-     after the lead's index, then skip each following tab whose root pane
-     has `.tokens.split_mark`, read with `herdr pane get` for that tab's
-     first pane from `pane.list`.
-   - The OSC title is `<label> implement` when the command contains
-     `-implement`, else `<label> review`.
+1. **`home/development/herdr-run.sh` and `home/development/herdr-run-test.sh`**
+   (new, one coder). The helper is as decided above.
+   - **The runner** is written into the private directory as a here-doc,
+     with the quoted command and the paths baked in. It does not use
+     `set -e`.
+     1. `mkdir claim || exit 0`.
+     2. Write `runner.pid` (via `.tmp` then `mv`).
+     3. Set an `EXIT` trap. It writes `status` as `127` (via `.tmp` then
+        `mv`) only if `status` does not exist yet, and it kills the
+        watchdog.
+     4. Start the watchdog in the background. Every 2 s it checks the
+        helper PID. If the helper is gone, it sends TERM to the group,
+        KILL 5 s later, and then runs `pane close` on itself, after the
+        identity check.
+     5. Print OSC 0.
+     6. Run:
 
-   → Verify by `shellcheck home/development/herdr-run.sh` and by step 2.
+        ```bash
+        env -i bash --noprofile --norc -c 'source env; cd "$cwd"; echo $$ > cmd.pgid.tmp && mv cmd.pgid.tmp cmd.pgid; exec "$@"' _ "${cmd[@]}"
+        ```
+
+        under `setsid -w`, with `< stdin > out 2> err`. Use a subshell
+        so `exec` does not replace the runner.
+     7. Show `out` and `err` in the pane with `tail --pid=<setsid pid> -f`.
+     8. On exit, write the code to `status.tmp`, then `mv` it to `status`.
+   - **Process groups:** every `kill` of the command's group reads
+     `cmd.pgid`, requires `[[ $pgid =~ ^[0-9]+$ ]] && (( pgid > 1 ))`, and
+     sends `kill -TERM -- "-$pgid"`. With no valid `cmd.pgid` yet, it kills
+     nothing and closes the pane.
+   - **Insert position:**
+     - Take `tab.list` and `pane.list`, and find the index of
+       `HERDR_TAB_ID`.
+     - Walk the following tabs. For each, `pane get` its first pane from
+       `pane.list` and keep walking while `.tokens.split_mark` is set.
+       Insert at the first tab without it.
+   - **Timing:** every wait in `herdr-run.sh` is multiplied by
+     `HERDR_RUN_TIME_SCALE`, default `1`. The self-test sets it to
+     `0.05`. It is the only test hook in the tool, and it is documented in
+     the tool's usage text.
+   - **The self-test** takes the built tool's path as `$1`. It creates
+     `XDG_RUNTIME_DIR` and a temp directory, and puts a fake `herdr`
+     there. Point at it with `HERDR_BIN_PATH`, never via `PATH`, because
+     `writeShellApplication` prepends its own `runtimeInputs` to `PATH`.
+     It sets `HERDR_ENV=1`, fake `HERDR_TAB_ID` and `HERDR_WORKSPACE_ID`,
+     and a `HERDR_SOCKET_PATH` served by a real `socat
+     UNIX-LISTEN:…,fork EXEC:<fake socket server>`. The test **unsets any
+     inherited `HERDR_*` first**, so running it inside a live herdr pane
+     can never reach the real server.
+     - The fake herdr keeps its state in files. It logs every call. It
+       answers `tab create` and `pane get` with the fields in the
+       interface table. It runs `pane run` lines with `bash -c "<line>" &`.
+       It can be told to fail a named subcommand, to drop the first `pane
+       run`, or to change a pane's `terminal_id`.
+   - **Cases**, each printing `ok <name>`:
+     1. Outside herdr: stdin, stdout, stderr and exit codes 0, 3 and 124
+        come through byte-identical.
+     2. The same four through the pane path.
+     3. `tab create` fails: the command runs exactly once (it counts its
+        runs in a file).
+     4. The runner never claims: the helper runs it once, and a late
+        runner runs nothing.
+     5. The pane vanishes mid-run: exit 1, the stderr message, the partial
+        output replayed, no second run.
+     6. The runner dies after its claim: the helper returns within 5 s
+        (scaled), with 1 or 127, and does not hang.
+     7. The first `pane run` is dropped: the resend runs it once.
+     8. stdin is a terminal: under `script -qc` (util-linux), the command
+        gets empty input and does not block.
+     9. A fallback after the stdin was saved gets the full prompt.
+     10. A changed `terminal_id` means no close or report was sent.
+     11. Ctrl-C (SIGINT to the helper) kills the command's group: a
+         `sleep 300` command is gone within the scaled 5 s.
+     12. Two parallel runs: the second tab is inserted after the first.
+
+   → Verify by `shellcheck home/development/herdr-run.sh home/development/herdr-run-test.sh`
+   and by running
+   `bash home/development/herdr-run-test.sh <wrapper>`, where `<wrapper>` is
+   a two-line script running `bash -euo pipefail home/development/herdr-run.sh "$@"`.
+   Every case prints `ok`. Step 2 runs the same test against the built tool.
    Traps:
-   - It runs under `writeShellApplication`, so `set -euo pipefail` is on.
-     Every herdr call that may fail must be inside `if` or end in `|| …`,
-     or `-e` kills the helper mid-run.
-   - Do not use `$(...)` to capture the command's output: it would drop the
-     trailing newline. Replay with `cat`.
-   - `mkdir` is the only atomic claim. Do not use `[ -e ]` then `touch`.
-2. **`home/development/herdr-run-test.sh`** (new): a self-test. It puts a
-   fake `herdr` and `socat` on `PATH`. The fake records its calls in a
-   log, can be told to fail a named subcommand, and runs `pane run`
-   commands with `bash -c … &`. One delay setting makes the first
-   `pane run` vanish.
-   - **Cases**, from spec Verification 2:
-     - outside herdr, byte-identical stdin, stdout, stderr and exit codes
-       0, 3 and 124
-     - the same four through the pane path
-     - `tab create` fails, so the command runs headless exactly once (it
-       counts its runs in a file)
-     - the runner never claims, so the helper runs it once and a late
-       runner runs nothing
-     - the pane vanishes mid-run: exit 1, partial output replayed, no
-       second run
-     - the runner dies after its claim: the helper returns within 7 s and
-       does not hang
-     - the first `pane run` is dropped, so the resend runs it once
-     - stdin is a terminal (`script -qc`, or skip it with a printed reason
-       if unavailable)
-     - a fallback after the stdin was saved gets the full prompt
-     - a changed `terminal_id` means no close or report was sent
+   - The helper runs under `writeShellApplication`'s `set -euo pipefail`.
+     Every herdr or socat call that may fail goes inside `if` or ends in
+     `|| …`.
+   - Replay output with `cat`, never via `$(...)`.
+   - `mkdir` is the only claim. No `[ -e ]` then `touch`.
+   - `kill -- -$pgid` only after the numeric check. An empty value would
+     become `kill -1`, which kills every process of the user.
+2. **`home/development/agent-run.nix` and `home/development/agent-run.sh`**
+   (one coder).
+   - In `agent-run.nix`, add a `let` binding `herdr-run =
+     pkgs.writeShellApplication { name = "herdr-run"; runtimeInputs = with
+     pkgs; [ jq socat coreutils util-linux procps ]; text = builtins.readFile
+     ./herdr-run.sh; checkPhase = …; }`.
+     - `checkPhase` replaces the default, so it must restate it:
+       `runHook preCheck`, `${pkgs.stdenv.shellDryRun} "$target"`,
+       `${lib.getExe pkgs.shellcheck} "$target"`, and then
+       `PATH=${lib.makeBinPath (with pkgs; [ bash coreutils util-linux procps jq socat gnugrep ])}:$PATH bash ${./herdr-run-test.sh} "$target"`
+       and `runHook postCheck`. Read the current nixpkgs `writeShellApplication`
+       to copy its default check exactly, rather than trusting this line.
+     - Add `herdr-run` to `home.packages` and to `agent-run`'s
+       `runtimeInputs`.
+   - In `agent-run.sh`, line 44 becomes `herdr-run agy agy-implement …` and
+     line 49 becomes `herdr-run codex codex-implement …`.
 
-   → Verify by `bash home/development/herdr-run-test.sh ./result/bin/herdr-run`
-   printing one `ok` per case and exiting 0.
-   Traps: in the sandbox, `XDG_RUNTIME_DIR` is unset, so the test sets it
-   to a temp dir. Keep each case under 20 s, so sleeps scale through
-   `HERDR_RUN_TEST_SPEED` (an environment variable read only by the test's
-   fake, never by `herdr-run`).
-3. **`home/development/agent-run.nix`**: add a second
-   `writeShellApplication`, `herdr-run`:
-   - `runtimeInputs = [ jq socat coreutils util-linux procps ]`. herdr is
-     deliberately not included: the tool only calls it inside herdr, through
-     `HERDR_BIN_PATH`, so p510 does not gain herdr in its closure.
-   - Extend `checkPhase` to run the default shellcheck, then
-     `bash ${./herdr-run-test.sh} "$target"`.
-
-   → Verify by `nix build .#nixosConfigurations.p620.config.home-manager.users.olafkfreund.home.path`
-   (or `just test-host p620`) with the check passing.
+   → Verify by `just test-host p620`. The check runs and passes, and
+   `git diff home/development/agent-run.sh` shows exactly two changed lines.
    Traps:
-   - Explicit imports only: `agent-run.nix` is already imported, so do not
-     add a new import.
-   - If the test cannot run in the sandbox, stop and report rather than
-     disabling it.
-4. **`home/development/agent-run.sh`**: line 44 becomes `herdr-run agy
-   agy-implement …` and line 49 becomes `herdr-run codex codex-implement
-   …`. Nothing else changes.
-   → Verify by `shellcheck`, and `git diff` showing exactly two changed
-   lines.
-   Traps: `agent-run`'s `runtimeInputs` must now include the `herdr-run`
-   package. Reference it as a let-binding shared in `agent-run.nix`, not
-   via PATH luck.
-5. **`home/development/claude-code-skills/second-opinion/SKILL.md`** and
-   **`…/handoff/SKILL.md`**:
-   - Prefix the `codex review`, `codex exec`, `agy` and `agy --agent`
-     commands with `herdr-run codex` or `herdr-run agy`. That is `timeout
-     … env -u …` becoming `herdr-run codex timeout … env -u …`.
+   - `agent-run.nix` is already imported (`home/development/default.nix:17`).
+     Do not add an import.
+   - If the self-test cannot run in the sandbox, stop and report. Do not
+     disable it.
+3. **`home/development/claude-code-skills/second-opinion/SKILL.md`** and
+   **`…/handoff/SKILL.md`**.
+   - Prefix the four command blocks (`codex review`, `codex exec`, `agy`,
+     `agy --agent`): `timeout … env -u …` becomes `herdr-run codex timeout
+     … env -u …`.
    - Prefix the direct `agy-implement --model` line in `handoff`.
-   - Add one sentence to each: *Inside herdr, each run shows as a `↳`
-     row under this session; outside herdr, `herdr-run` just runs the
-     command.*
+   - Add one sentence to each: *Inside herdr, each run shows as a `↳` row
+     under this session; outside herdr, `herdr-run` just runs the command.*
 
-   → Verify by `git diff` showing the guards (`-s read-only`, `-c
-   sandbox_mode="read-only"`, `--mode plan`, `env -u`,
-   `forced_login_method`) byte-identical, and `just check-syntax`.
-   Traps: the pre-push markdownlint lints whole files. Run it before
-   pushing.
-6. **Build** (mine): `just check-syntax`, `just test-host p620`, and
-   `just test-host razer` (razer builds on p620 via
-   `just deploy-via-p620 razer` only at deploy time).
-   → All three succeed.
-7. **`docs/applications/herdr.md`**: add a section, "Codex and agy rows",
-   covering what shows, `herdr-run`, and what happens outside herdr. Nav
-   is unchanged.
+   → Verify by `git diff` showing every guard (`-s read-only`,
+   `-c sandbox_mode="read-only"`, `--mode plan`, `env -u`,
+   `forced_login_method`) byte-identical, and `npx markdownlint-cli2` on
+   both files.
+   Traps: the pre-push markdownlint lints whole files.
+4. **Build** (mine): `just check-syntax`, `just test-host p620` and
+   `just test-host razer` all succeed.
+5. **`docs/applications/herdr.md`**: add a section, "Codex and agy rows",
+   covering what shows, `herdr-run`, and what happens outside herdr. Nav is
+   unchanged.
    → Verify by markdownlint on the file.
-8. **Deploy and live check** (mine):
-   - Announce on `#agents:freundcloud.org.uk`, then `just quick-deploy
+6. **Deploy and live check** (mine):
+   - Read and post on `#agents:freundcloud.org.uk`, then `just quick-deploy
      p620`.
-   - Then spec Verification 3–5: a parallel second-opinion run on a
-     trivial prompt shows both rows under the lead, done for about 3 s,
-     then the tabs close. The outputs match a run made outside herdr.
-     Ctrl-C and `kill -9` leave no `codex` process. `agent-run codex` on
-     a scratch worktree gives the same verdict.
-   - razer through `just deploy-via-p620 razer` after you agree. p510 is
-     not deployed.
+   - **Check:** a parallel second-opinion run on a trivial prompt shows two
+     `↳` rows under the lead. Both are done for about 3 s, then their tabs
+     close.
+   - **Check:** the outputs match a run made outside herdr.
+   - **Check:** Ctrl-C and `kill -9` on the helper leave no `codex`
+     process within 7 s.
+   - **Check:** `agent-run codex` on a scratch worktree gives the same
+     verdict.
+   - razer through `just deploy-via-p620 razer` once you agree. Not p510.
 
    → Record the results in the PR.
 
@@ -202,13 +264,13 @@ stays: it is what the tab shows until auto-title replaces it.
 
 | Command | Expected |
 |---|---|
-| `bash home/development/herdr-run-test.sh <built herdr-run>` | one `ok` per case, exit 0 |
-| `just check-syntax` and `just test-host p620` / `razer` | pass |
+| the self-test, in `checkPhase` | 12 `ok` lines, exit 0 |
+| `just check-syntax`, then `just test-host p620` and `razer` | pass |
 | live parallel review in herdr | two `↳` rows, outputs identical to a headless run |
-| Ctrl-C and `kill -9` during a run | `pgrep -f 'codex exec'` empty within 7 s, tab gone |
+| Ctrl-C and `kill -9` during a live run | `pgrep -f 'codex exec'` empty within 7 s, tab gone |
 
 ## Rollback
 
-Revert the PR. The only behaviour change sits behind the `herdr-run`
-prefix, and removing the prefix restores today's headless runs. A stray tab
-left by a failed run can be closed by hand. It never runs anything again.
+Revert the PR. The behaviour change sits only behind the `herdr-run`
+prefix. A stray tab from a failed run can be closed by hand, and it never
+runs anything again.
