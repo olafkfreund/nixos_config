@@ -242,7 +242,7 @@ Never edit `~/.config/nixos` (it is `/etc/nixos`).
        its check, commit, note the worker; parallel only for steps the plan
        marks independent whose files are disjoint, each agy/codex step in
        `git worktree add ../<repo>-<issue>-s<n> HEAD`, diff applied back with
-       `git -C <wt> diff | git apply`, worktree removed; on a failed apply,
+       `git -C <wt> add -A && git -C <wt> diff --cached --binary | git apply` (deviation: plain `git diff` drops new files), worktree removed; on a failed apply,
        rerun that step sequentially; at the end, fresh Opus review plus the
        plan's `reviewers:`; report which worker did each step. State: no
        Opus teammates; Claude never approves the plan.
