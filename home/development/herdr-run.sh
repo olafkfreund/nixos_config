@@ -29,9 +29,20 @@ kill_group() {
   if [[ -f $dir/cmd.pgid ]]; then
     read -r pgid <"$dir/cmd.pgid" || return 0
     if [[ $pgid =~ ^[0-9]+$ ]] && ((pgid > 1)); then
-      kill -"$1" -- "-$pgid" 2>/dev/null || :
+      kill -"$1" -- "-$pgid" 2>/dev/null || return 1
+      return 0
     fi
   fi
+  return 1
+}
+# TERM the command's group, give it up to 5 s to go, then KILL what is left.
+stop_group() {
+  kill_group TERM || return 0
+  for _ in 1 2 3 4 5 6 7 8 9 10; do
+    kill_group 0 || return 0
+    sleep_for 0.5
+  done
+  kill_group KILL || :
 }
 # shellcheck disable=SC2329 # EXIT trap
 cleanup() {
@@ -47,9 +58,7 @@ interrupt() {
     [[ -e $dir/cmd.pgid || -e $dir/status ]] && break
     sleep_for 0.5
   done
-  kill_group TERM
-  sleep_for 5
-  kill_group KILL
+  stop_group
   close_pane
   exit "$1"
 }
@@ -102,21 +111,27 @@ kill_group() {
   local pgid
   if [[ -f cmd.pgid ]]; then
     read -r pgid < cmd.pgid || return 0
-    if [[ $pgid =~ ^[0-9]+$ ]] && (( pgid > 1 )); then kill -"$1" -- "-$pgid" 2>/dev/null || :; fi
+    if [[ $pgid =~ ^[0-9]+$ ]] && (( pgid > 1 )); then kill -"$1" -- "-$pgid" 2>/dev/null || return 1; return 0; fi
   fi
+  return 1
+}
+stop_group() {
+  kill_group TERM
+  for _ in 1 2 3 4 5 6 7 8 9 10; do kill_group 0 || break; sleep_for 0.5; done
+  kill_group KILL
 }
 finish() {
   trap - EXIT
   if [[ ! -e status ]]; then printf '127\n' > status.tmp && mv status.tmp status; fi
   if [[ -n ${watchdog_pid:-} ]]; then kill "$watchdog_pid" 2>/dev/null || :; fi
+  # with the helper gone nobody else closes this pane
+  if ! kill -0 "$helper_pid" 2>/dev/null; then close_pane; fi
 }
 trap finish EXIT
 (
   while sleep_for 2; do
     if ! kill -0 "$helper_pid" 2>/dev/null; then
-      kill_group TERM
-      sleep_for 5
-      kill_group KILL
+      stop_group
       close_pane
       exit 0
     fi
@@ -219,9 +234,7 @@ while [[ ! -f $dir/status ]]; do
   sleep_for 5
   if [[ ! -f $dir/status ]]; then
     if ! same_pane || [[ ! -f $dir/runner.pid ]] || ! kill -0 "$(cat "$dir/runner.pid")" 2>/dev/null; then
-      kill_group TERM
-      sleep_for 5
-      kill_group KILL
+      stop_group
       [[ -f $dir/out ]] && cat "$dir/out"
       [[ -f $dir/err ]] && cat "$dir/err" >&2
       echo "herdr-run: $label run lost (pane closed or runner died); not re-run" >&2

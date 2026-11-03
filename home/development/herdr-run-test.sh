@@ -230,3 +230,21 @@ grep -qF "2 2" "$TEST_STATE/moves" || {
   exit 1
 }
 ok parallel-position
+
+# kill -9 of the helper: the watchdog stops the command, and the pane still closes
+reset_state
+"$tool" codex bash -c 'echo $$ > "$TEST_STATE/command-pid"; exec sleep 300' >/dev/null 2>&1 &
+helper=$!
+for _ in {1..300}; do
+  [[ -e $TEST_STATE/command-pid ]] && break
+  sleep 0.01
+done
+kill -KILL "$helper"
+wait "$helper" 2>/dev/null || :
+for _ in {1..200}; do
+  [[ -e $TEST_STATE/closed ]] && break
+  sleep 0.02
+done
+[[ -e $TEST_STATE/closed ]]
+if kill -0 "$(cat "$TEST_STATE/command-pid")" 2>/dev/null; then exit 1; fi
+ok helper-killed

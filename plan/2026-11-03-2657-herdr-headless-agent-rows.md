@@ -296,7 +296,7 @@ Everything needed to implement is here. The spec and intent are background.
 
 | Command | Expected |
 |---|---|
-| the self-test, in `checkPhase` | 12 `ok` lines, exit 0 |
+| the self-test, in `checkPhase` | 13 `ok` lines, exit 0 |
 | `just check-syntax`, then `just test-host p620` and `razer` | pass |
 | live parallel review in herdr | two `↳` rows, outputs identical to a headless run |
 | Ctrl-C and `kill -9` during a live run | the recorded `cmd.pgid` has no members (`pgrep -g <pgid>` empty) within 7 s, and that tab is gone |
@@ -306,3 +306,16 @@ Everything needed to implement is here. The spec and intent are background.
 Revert the PR. The behaviour change sits only behind the `herdr-run`
 prefix. A stray tab from a failed run can be closed by hand, and it never
 runs anything again.
+
+## Deviations found during implementation
+
+- **Live check (step 6), `kill -9` of the helper:** the watchdog sent TERM,
+  the command ended, the runner exited, and its `EXIT` trap killed the
+  watchdog mid-sleep, so the pane was never closed. Now the runner's `EXIT`
+  trap closes the pane itself when the helper is gone (identity-checked).
+  Self-test case 13, `helper-killed`, covers it (12 → 13 cases); it fails on
+  the previous code.
+- **TERM then KILL** waits only until the command's group is empty, up to
+  5 s, instead of a fixed 5 s, so the tab closes as soon as the run is gone.
+- Step 2 used `shellcheck-minimal` (the nixpkgs default's checker) and added
+  `gawk` and `gnused` to `runtimeInputs`, which `herdr-run.sh` uses.
