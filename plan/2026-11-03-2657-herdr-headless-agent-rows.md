@@ -38,7 +38,10 @@ Everything needed to implement is here. The spec and intent are background.
        `.result.root_pane.terminal_id`.
      - **Send `split_mark` at once, while still holding the lock,** so a
        parallel run sees this tab as a child.
-     - Place the tab with socket `tab.move`. Release the lock.
+     - Place the tab with socket `tab.move`, as
+       `if ! socat …; then :; fi`. A failed or refused move is ignored and
+       the run carries on in the created pane, wherever it sits. Release
+       the lock.
   3. **Handshake:** send `pane run`, then wait up to 3 s for `claim`, up
      to 3 sends.
      - A late copy finds `claim` taken and exits.
@@ -129,20 +132,34 @@ Everything needed to implement is here. The spec and intent are background.
         KILL 5 s later, and then runs `pane close` on itself, after the
         identity check.
      5. Print OSC 0.
-     6. Run:
+     6. `: > out; : > err`, so `tail` can open both files.
+     7. Start the command **in the background**, keeping its PID:
 
         ```bash
-        env -i bash --noprofile --norc -c 'source env; cd "$cwd"; echo $$ > cmd.pgid.tmp && mv cmd.pgid.tmp cmd.pgid; exec "$@"' _ "${cmd[@]}"
+        setsid -w env -i bash --noprofile --norc -c \
+          'source env && cd "$cwd" && [ ! -e cancel ] &&
+           echo $$ > cmd.pgid.tmp && mv cmd.pgid.tmp cmd.pgid &&
+           exec "$@"; exit 127' _ "${cmd[@]}" < stdin > out 2> err &
+        cpid=$!
         ```
 
-        under `setsid -w`, with `< stdin > out 2> err`. Use a subshell
-        so `exec` does not replace the runner.
-     7. Show `out` and `err` in the pane with `tail --pid=<setsid pid> -f`.
-     8. On exit, write the code to `status.tmp`, then `mv` it to `status`.
+        Each setup step must succeed before `exec`. A failed `source` or
+        `cd`, or a `cancel` file, ends in 127 without running the command.
+     8. Run `tail --pid="$cpid" -f out err &` for the live view, then
+        `wait "$cpid"; code=$?`.
+     9. Write `$code` to `status.tmp`, then `mv` it to `status`.
    - **Process groups:** every `kill` of the command's group reads
      `cmd.pgid`, requires `[[ $pgid =~ ^[0-9]+$ ]] && (( pgid > 1 ))`, and
-     sends `kill -TERM -- "-$pgid"`. With no valid `cmd.pgid` yet, it kills
-     nothing and closes the pane.
+     sends `kill -TERM -- "-$pgid"`.
+   - **Cancelling before `cmd.pgid` exists** (a signal right after the
+     claim):
+     - The helper's trap first writes `cancel`, which the inner `bash`
+       checks just before `exec`.
+     - It then waits up to 2 s (scaled) for either `cmd.pgid` or `status`
+       to appear.
+     - If `cmd.pgid` appears, it kills that group. If neither appears,
+       `cancel` keeps the command from starting.
+     - Only then does it close the pane.
    - **Insert position:**
      - Take `tab.list` and `pane.list`, and find the index of
        `HERDR_TAB_ID`.
@@ -234,9 +251,13 @@ Everything needed to implement is here. The spec and intent are background.
    - Add one sentence to each: *Inside herdr, each run shows as a `↳` row
      under this session; outside herdr, `herdr-run` just runs the command.*
 
-   → Verify by `git diff` showing every guard (`-s read-only`,
-   `-c sandbox_mode="read-only"`, `--mode plan`, `env -u`,
-   `forced_login_method`) byte-identical, and `npx markdownlint-cli2` on
+   → Verify by comparing each guard string's count before and after:
+   `git show HEAD:<file> | grep -cF -- '<guard>'` against
+   `grep -cF -- '<guard>' <file>`, for `-s read-only`,
+   `sandbox_mode="read-only"`, `--mode plan`, `env -u OPENAI_API_KEY`,
+   `env -u GEMINI_API_KEY` and `forced_login_method=chatgpt`. Every count
+   must be equal. Also check that `git diff` adds only the `herdr-run <label> `
+   prefix to command lines, and run `npx markdownlint-cli2` on
    both files.
    Traps: the pre-push markdownlint lints whole files.
 4. **Build** (mine): `just check-syntax`, `just test-host p620` and
@@ -252,8 +273,12 @@ Everything needed to implement is here. The spec and intent are background.
      `↳` rows under the lead. Both are done for about 3 s, then their tabs
      close.
    - **Check:** the outputs match a run made outside herdr.
-   - **Check:** Ctrl-C and `kill -9` on the helper leave no `codex`
-     process within 7 s.
+   - **Check:** Ctrl-C and `kill -9` on the helper leave **that run's**
+     group empty: read `cmd.pgid` from its private directory first, then
+     `pgrep -g <pgid>` is empty within 7 s.
+   - **Check** on p620 and razer: `HERDR_BIN_PATH` is set in a fresh herdr
+     pane, and `herdr-run` reaches it. If it is unset, the tool falls back
+     to `herdr` on `PATH`.
    - **Check:** `agent-run codex` on a scratch worktree gives the same
      verdict.
    - razer through `just deploy-via-p620 razer` once you agree. Not p510.
@@ -267,7 +292,7 @@ Everything needed to implement is here. The spec and intent are background.
 | the self-test, in `checkPhase` | 12 `ok` lines, exit 0 |
 | `just check-syntax`, then `just test-host p620` and `razer` | pass |
 | live parallel review in herdr | two `↳` rows, outputs identical to a headless run |
-| Ctrl-C and `kill -9` during a live run | `pgrep -f 'codex exec'` empty within 7 s, tab gone |
+| Ctrl-C and `kill -9` during a live run | the recorded `cmd.pgid` has no members (`pgrep -g <pgid>` empty) within 7 s, and that tab is gone |
 
 ## Rollback
 
