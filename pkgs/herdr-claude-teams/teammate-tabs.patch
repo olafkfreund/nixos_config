@@ -1,6 +1,6 @@
 diff -ruN a/herdr_claude_teams/relabel.py b/herdr_claude_teams/relabel.py
---- a/herdr_claude_teams/relabel.py	2026-11-02 22:40:41.163632121 +0000
-+++ b/herdr_claude_teams/relabel.py	2026-11-02 22:44:51.806208664 +0000
+--- a/herdr_claude_teams/relabel.py	2026-11-03 08:28:36.298036990 +0000
++++ b/herdr_claude_teams/relabel.py	2026-11-03 08:28:36.305593749 +0000
 @@ -10,11 +10,25 @@
  import sys
  import time
@@ -36,8 +36,8 @@ diff -ruN a/herdr_claude_teams/relabel.py b/herdr_claude_teams/relabel.py
              return sent
      return sent
 diff -ruN a/herdr_claude_teams/verbs.py b/herdr_claude_teams/verbs.py
---- a/herdr_claude_teams/verbs.py	2026-11-02 22:40:41.163746597 +0000
-+++ b/herdr_claude_teams/verbs.py	2026-11-02 22:44:51.806007053 +0000
+--- a/herdr_claude_teams/verbs.py	2026-11-03 08:28:36.298142058 +0000
++++ b/herdr_claude_teams/verbs.py	2026-11-03 08:29:40.202128992 +0000
 @@ -204,42 +204,26 @@
  # --- handlers --------------------------------------------------------
  
@@ -119,27 +119,49 @@ diff -ruN a/herdr_claude_teams/verbs.py b/herdr_claude_teams/verbs.py
  def _send_keys(parsed) -> int:
      target = parsed.value("-t") or ""
      pane_id = _require_target(target)
-@@ -599,7 +600,17 @@
+@@ -435,16 +436,13 @@
+         if target:
+             pane_id = _require_target(target)
+         else:
+-            # jcode's swarm spawn hook calls `select-pane -T <title>` with no
+-            # -t right after split-window, expecting real tmux's "current
+-            # pane" default to mean the pane just created. herdr has no
+-            # client-side "current pane" concept to mirror that, but
+-            # pane.split above sets focus on the new pane (unless -d), so the
+-            # currently-focused pane IS the one just created — use that.
++            # no -t means tmux's "current pane"; teammates open unfocused, so the
++            # focused pane is the user's: rename it only if the shim owns it
+             focused = next(
+                 (p for p in call("pane.list", {})["panes"] if p.get("focused")), None
+             )
+-            pane_id = focused["pane_id"] if focused else None
++            owned = focused and ownership.is_owned(focused.get("terminal_id", ""))
++            pane_id = focused["pane_id"] if owned else None
+         if pane_id:
+             call("pane.rename", {"pane_id": pane_id, "label": title})
+         return 0
+@@ -599,7 +597,18 @@
      return 0
  
  
-+def alone_in_tab(pane_id: str, *, _call=call) -> bool:
++def shared_with_teammate(pane_id: str, *, _call=call) -> bool:
 +    panes = _call("pane.list", {})["panes"]
 +    tab_id = next((p.get("tab_id") for p in panes if p["pane_id"] == pane_id), None)
-+    return tab_id is not None and sum(1 for p in panes if p.get("tab_id") == tab_id) == 1
++    tab = [p for p in panes if tab_id is not None and p.get("tab_id") == tab_id]
++    return len(tab) > 1 and any(ownership.is_owned(p.get("terminal_id", "")) for p in tab)
 +
 +
  def _resize_pane(parsed) -> int:
-+    # a teammate alone in its tab has nothing to resize against
-+    if alone_in_tab(_require_target(parsed.value("-t") or "")):
-+        trace.log("resize_skipped_single_pane_tab", target=parsed.value("-t"))
++    # only a tab holding a teammate is the shim's to resize; the lead's tab is the user's layout
++    if not shared_with_teammate(_require_target(parsed.value("-t") or "")):
++        trace.log("resize_skipped_no_teammate_in_tab", target=parsed.value("-t"))
 +        return 0
      for flag, direction in (("-L", "left"), ("-R", "right"), ("-U", "up"), ("-D", "down")):
          if parsed.has(flag):
              params = {"pane_id": _require_target(parsed.value("-t") or ""), "direction": direction}
 diff -ruN a/tests/_fake_herdr.py b/tests/_fake_herdr.py
---- a/tests/_fake_herdr.py	2026-11-02 22:40:41.163889627 +0000
-+++ b/tests/_fake_herdr.py	2026-11-02 22:44:51.806355711 +0000
+--- a/tests/_fake_herdr.py	2026-11-03 08:28:36.298267716 +0000
++++ b/tests/_fake_herdr.py	2026-11-03 08:28:36.306414575 +0000
 @@ -23,6 +23,8 @@
          self.requests: list[tuple[str, dict]] = []
          self.workspace = ws
@@ -219,8 +241,8 @@ diff -ruN a/tests/_fake_herdr.py b/tests/_fake_herdr.py
      def _m_workspace_focus(self, params):
          return {"type": "ok"}
 diff -ruN a/tests/test_ownership.py b/tests/test_ownership.py
---- a/tests/test_ownership.py	2026-11-02 22:40:41.163998292 +0000
-+++ b/tests/test_ownership.py	2026-11-02 22:44:51.813518375 +0000
+--- a/tests/test_ownership.py	2026-11-03 08:28:36.298359459 +0000
++++ b/tests/test_ownership.py	2026-11-03 08:28:36.306559509 +0000
 @@ -141,6 +141,45 @@
          assert code == 127
  
@@ -268,8 +290,8 @@ diff -ruN a/tests/test_ownership.py b/tests/test_ownership.py
      from herdr_claude_teams import relabel
  
 diff -ruN a/tests/test_regression.py b/tests/test_regression.py
---- a/tests/test_regression.py	2026-11-02 22:40:41.158292728 +0000
-+++ b/tests/test_regression.py	2026-11-02 22:42:18.470811094 +0000
+--- a/tests/test_regression.py	2026-11-03 08:28:36.292736374 +0000
++++ b/tests/test_regression.py	2026-11-03 08:28:36.306685557 +0000
 @@ -47,7 +47,7 @@
          # 5. enumerate panes
          code, out = run(["list-panes", "-t", window, "-F", "#{pane_id}"])
@@ -280,8 +302,8 @@ diff -ruN a/tests/test_regression.py b/tests/test_regression.py
          # leader stays focused throughout
          assert fake.state.pane("wL-1")["focused"] is True
 diff -ruN a/tests/test_trace.py b/tests/test_trace.py
---- a/tests/test_trace.py	2026-11-02 22:40:41.158686913 +0000
-+++ b/tests/test_trace.py	2026-11-02 22:42:18.470715524 +0000
+--- a/tests/test_trace.py	2026-11-03 08:28:36.292816014 +0000
++++ b/tests/test_trace.py	2026-11-03 08:28:36.306792178 +0000
 @@ -26,7 +26,7 @@
      assert "rpc" in kinds
      assert "exit" in kinds
@@ -292,8 +314,17 @@ diff -ruN a/tests/test_trace.py b/tests/test_trace.py
      assert exit_ev["code"] == 0
  
 diff -ruN a/tests/test_verbs.py b/tests/test_verbs.py
---- a/tests/test_verbs.py	2026-11-02 22:40:41.164161570 +0000
-+++ b/tests/test_verbs.py	2026-11-02 22:44:51.806658162 +0000
+--- a/tests/test_verbs.py	2026-11-03 08:28:36.298502419 +0000
++++ b/tests/test_verbs.py	2026-11-03 08:29:26.949117377 +0000
+@@ -5,7 +5,7 @@
+ import pytest
+ 
+ from _fake_herdr import FakeHerdr
+-from herdr_claude_teams import shim, verbs
++from herdr_claude_teams import ownership, shim, verbs
+ 
+ 
+ def run(fake, monkeypatch, capsys, argv):
 @@ -15,70 +15,68 @@
      return code, cap.out, cap.err
  
@@ -360,8 +391,11 @@ diff -ruN a/tests/test_verbs.py b/tests/test_verbs.py
 +        moves = calls(fake, "tab.move")
 +        assert [m["insert_index"] for m in moves] == [1, 2]
 +        assert tab_ids(fake) == ["wL:1", "wL:3", "wL:4", "wL:2"]
-+
-+
+ 
+ 
+-def test_split_window_with_trailing_command_spawns_it_and_follows_focus(monkeypatch, capsys):
+-    # jcode's swarm hook shape: `split-window -h -t <p> -c <cwd> <bin> <args>`
+-    # — a command directly on split-window, no separate respawn-pane step.
 +def test_split_window_failed_move_is_not_fatal_and_still_owned(monkeypatch, capsys):
 +    with FakeHerdr(leader_pane="wL-1") as fake:
 +        fake.state.fail("tab.move")
@@ -370,11 +404,8 @@ diff -ruN a/tests/test_verbs.py b/tests/test_verbs.py
 +        assert code == 0 and out.strip() == "%term_2"
 +        code, _, _ = run(fake, monkeypatch, capsys, ["kill-pane", "-t", "%term_2"])
 +        assert [p["pane_id"] for p in fake.state.panes] == ["wL-1"]  # owned, so it closed
- 
- 
--def test_split_window_with_trailing_command_spawns_it_and_follows_focus(monkeypatch, capsys):
--    # jcode's swarm hook shape: `split-window -h -t <p> -c <cwd> <bin> <args>`
--    # — a command directly on split-window, no separate respawn-pane step.
++
++
 +def test_split_window_with_trailing_command_types_it_and_keeps_leader_focused(monkeypatch, capsys):
      with FakeHerdr(leader_pane="wL-1") as fake:
          code, _, _ = run(fake, monkeypatch, capsys,
@@ -414,8 +445,15 @@ diff -ruN a/tests/test_verbs.py b/tests/test_verbs.py
  
  
  def test_select_pane_title_with_explicit_target_renames(monkeypatch, capsys):
-@@ -242,6 +242,8 @@
-     # tmux's "current pane" meaning the pane just created.
+@@ -236,18 +236,24 @@
+         assert fake.state.pane("wL-1")["label"] == "hello"
+ 
+ 
+-def test_select_pane_title_no_target_renames_focused_pane(monkeypatch, capsys):
+-    # jcode's swarm hook shape: bare `select-pane -T <title>` right after a
+-    # split-window that launched a command — no -t at all, relies on real
+-    # tmux's "current pane" meaning the pane just created.
++def test_select_pane_title_no_target_renames_focused_owned_pane(monkeypatch, capsys):
      with FakeHerdr(leader_pane="wL-1") as fake:
          run(fake, monkeypatch, capsys, ["split-window", "-t", "%term_1", "-h", "jcode"])
 +        fake.state.pane("wL-1")["focused"] = False  # split-window no longer moves focus
@@ -423,19 +461,37 @@ diff -ruN a/tests/test_verbs.py b/tests/test_verbs.py
          code, _, _ = run(fake, monkeypatch, capsys, ["select-pane", "-T", "swarm-agent-1"])
          assert code == 0
          assert fake.state.pane("wL-2")["label"] == "swarm-agent-1"
-@@ -296,6 +298,11 @@
+         assert fake.state.pane("wL-1").get("label") is None  # leader untouched
+ 
+ 
++def test_select_pane_title_no_target_leaves_users_focused_pane(monkeypatch, capsys):
++    with FakeHerdr(leader_pane="wL-1") as fake:  # wL-1 focused, not owned
++        code, _, _ = run(fake, monkeypatch, capsys, ["select-pane", "-T", "swarm-agent-1"])
++        assert code == 0
++        assert fake.state.pane("wL-1").get("label") is None
++
++
+ def test_select_pane_title_no_target_and_nothing_focused_is_noop(monkeypatch, capsys):
+     with FakeHerdr(leader_pane="wL-1") as fake:
+         fake.state.pane("wL-1")["focused"] = False  # nothing focused at all
+@@ -296,6 +302,16 @@
      return [p for (m, p) in fake.state.requests if m == "pane.resize"]
  
  
 +def _lead_split(fake, n=1):
++    # a teammate split into the lead's tab, recorded as owned like the shim does
++    path = ownership._leader_file()
++    path.parent.mkdir(parents=True, exist_ok=True)
 +    for _ in range(n):
-+        fake.state.handle("pane.split", {"target_pane_id": "wL-1"})
++        pane = fake.state.handle("pane.split", {"target_pane_id": "wL-1"})["pane"]
++        with open(path, "a", encoding="utf-8") as f:
++            f.write(f"{fake.path}\t{pane['pane_id']}\t{pane['terminal_id']}\n")
 +
 +
  def _right_split_layout(fake, *, ratio=0.3):
      # Matches the real herdr `pane.layout` shape captured live: leader (source,
      # left) at ratio's share, teammate (non-source, right) with the remainder.
-@@ -333,6 +340,7 @@
+@@ -333,6 +349,7 @@
  
  def test_resize_pane_absolute_x_source_pane_percentage(monkeypatch, capsys):
      with FakeHerdr(leader_pane="wL-1") as fake:
@@ -443,7 +499,7 @@ diff -ruN a/tests/test_verbs.py b/tests/test_verbs.py
          fake.state.layout = _right_split_layout(fake, ratio=0.3)
          run(fake, monkeypatch, capsys, ["resize-pane", "-t", "%term_1", "-x", "50%"])
          p = resize_params(fake)[0]
-@@ -345,7 +353,7 @@
+@@ -345,7 +362,7 @@
      # (1 - splits[].ratio), so this must NOT be treated as if -x's percentage
      # were already the source ratio (that would give amount=0.1, not 0.3).
      with FakeHerdr(leader_pane="wL-1") as fake:
@@ -452,7 +508,7 @@ diff -ruN a/tests/test_verbs.py b/tests/test_verbs.py
          fake.state.layout = _right_split_layout(fake, ratio=0.3)
          run(fake, monkeypatch, capsys, ["resize-pane", "-t", "%term_2", "-x", "40%"])
          p = resize_params(fake)[0]
-@@ -355,6 +363,7 @@
+@@ -355,6 +372,7 @@
  
  def test_resize_pane_absolute_y_percentage(monkeypatch, capsys):
      with FakeHerdr(leader_pane="wL-1") as fake:
@@ -460,7 +516,7 @@ diff -ruN a/tests/test_verbs.py b/tests/test_verbs.py
          area = {"x": 0, "y": 0, "width": 171, "height": 49}
          fake.state.layout = {
              "area": dict(area),
-@@ -376,6 +385,7 @@
+@@ -376,6 +394,7 @@
  
  def test_resize_pane_absolute_cells_no_percent_sign(monkeypatch, capsys):
      with FakeHerdr(leader_pane="wL-1") as fake:
@@ -468,7 +524,7 @@ diff -ruN a/tests/test_verbs.py b/tests/test_verbs.py
          fake.state.layout = _right_split_layout(fake, ratio=0.3)  # split rect == area, width 171
          run(fake, monkeypatch, capsys, ["resize-pane", "-t", "%term_1", "-x", "60"])
          p = resize_params(fake)[0]
-@@ -391,8 +401,7 @@
+@@ -391,8 +410,7 @@
      # percentage of the *window*, not of whichever split the pane happens to
      # border, so this must resolve against `area`, not the nested split's rect.
      with FakeHerdr(leader_pane="wL-1") as fake:
@@ -478,7 +534,7 @@ diff -ruN a/tests/test_verbs.py b/tests/test_verbs.py
          area = {"x": 0, "y": 0, "width": 171, "height": 49}
          fake.state.layout = {
              "area": dict(area),
-@@ -422,6 +431,7 @@
+@@ -422,6 +440,7 @@
  
  def test_resize_pane_absolute_no_enclosing_split_on_axis_is_noop(monkeypatch, capsys):
      with FakeHerdr(leader_pane="wL-1") as fake:
@@ -486,7 +542,7 @@ diff -ruN a/tests/test_verbs.py b/tests/test_verbs.py
          fake.state.layout = _right_split_layout(fake, ratio=0.3)  # only a "right" split exists
          code, _, _ = run(fake, monkeypatch, capsys, ["resize-pane", "-t", "%term_1", "-y", "50%"])
          assert code == 0
-@@ -430,11 +440,38 @@
+@@ -430,11 +449,46 @@
  
  def test_resize_pane_absolute_delta_below_epsilon_is_noop(monkeypatch, capsys):
      with FakeHerdr(leader_pane="wL-1") as fake:
@@ -504,6 +560,14 @@ diff -ruN a/tests/test_verbs.py b/tests/test_verbs.py
 +            assert code == 0
 +        assert resize_params(fake) == []
 +        assert "pane.layout" not in [m for m, _ in fake.state.requests]
++
++
++def test_resize_pane_lead_tab_with_only_user_panes_is_noop(monkeypatch, capsys):
++    with FakeHerdr(leader_pane="wL-1") as fake:
++        fake.state.handle("pane.split", {"target_pane_id": "wL-1"})  # the user's own split
++        for argv in (["-x", "30%"], ["-R", "5"]):
++            run(fake, monkeypatch, capsys, ["resize-pane", "-t", "%term_1", *argv])
++        assert resize_params(fake) == []
 +
 +
 +def test_resize_pane_directional_in_shared_tab_still_resizes(monkeypatch, capsys):

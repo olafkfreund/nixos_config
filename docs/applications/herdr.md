@@ -174,7 +174,8 @@ Inside herdr, `claude` is a bash/zsh function (set in
 shim on `PATH` that turns Claude Code's tmux calls into herdr socket calls.
 
 - Each teammate opens in its own tab, right after the lead's tab, labelled
-  `↳ <name>`. The tab never takes focus, so the lead's pane keeps its size.
+  `↳ <name>`. The tab never takes focus, and the lead's tab layout is left
+  alone: the shim resizes and renames only tabs and panes it created.
 - When the lead stops a teammate, that teammate's tab closes.
 - `claude-swarm-reaper`, a user timer that runs every 2 minutes, closes
   teammates that have been idle for 10 minutes.

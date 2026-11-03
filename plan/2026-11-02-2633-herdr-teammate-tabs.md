@@ -229,3 +229,19 @@ cleanup is needed.
 - **Step 2, tab label:** set only in the relabel path, so it appears
   about 2 s after launch.
 - **Step 2, result:** 173 passed.
+- **Review fixes (Opus review):**
+  - **Resize:** `alone_in_tab` became `shared_with_teammate`. It resizes
+    only when the target's tab has more than one pane and one of them is
+    owned. `resize-pane -t <lead>` no longer resizes a split the user made
+    in the lead's tab.
+  - **`select-pane -T` without `-t`:** it renames the focused pane only
+    when the shim owns it. Teammates open unfocused, so the focused pane
+    is usually the user's.
+  - **Tests:** `_lead_split` records the split as owned. Two new tests
+    cover the user's split and the user's focused pane. Result: 175 passed.
+  - **No `tab.close`:** herdr closes a tab when its last pane closes, so
+    teardown needed no change.
+  - **Lead pane:** `HERDR_PANE_ID` is used when no `-t` or `TMUX_PANE` is
+    set.
+  - **Not done:** the extra fake-herdr and placement tests the review
+    suggested as nice-to-have.
