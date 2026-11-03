@@ -64,6 +64,8 @@ case $method in
   *) exit 2 ;;
 esac
 SOCKET
+# The Nix build sandbox has no /usr/bin/env: point the fakes at this bash.
+sed -i "1s|.*|#!$(command -v bash)|" "$HERDR_BIN_PATH" "$tmp/socket-server"
 chmod +x "$HERDR_BIN_PATH" "$tmp/socket-server"
 socat UNIX-LISTEN:"$HERDR_SOCKET_PATH",fork EXEC:"$tmp/socket-server" &
 socket_pid=$!

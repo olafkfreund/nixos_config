@@ -126,7 +126,7 @@ watchdog_pid=$!
 printf '\033]0;%s\007' "$title"
 : > out; : > err
 # $0 is the private directory: the command runs in the caller's cwd.
-setsid -w env -i bash --noprofile --norc -c \
+setsid -w env -i "$BASH" --noprofile --norc -c \
   'source "$0/env" && cd "$cwd" && [ ! -e "$0/cancel" ] &&
    echo $$ > "$0/cmd.pgid.tmp" && mv "$0/cmd.pgid.tmp" "$0/cmd.pgid" &&
    exec "$@"; exit 127' "$PWD" "${cmd[@]}" < stdin > out 2> err &

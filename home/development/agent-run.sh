@@ -41,12 +41,12 @@ head=$(git rev-parse HEAD)
 log=$(mktemp -t agent-run.XXXXXX.log)
 for attempt in 1 2; do
   if [[ $tool == agy ]]; then
-    if agy-implement --output-format json --print-timeout 20m -p "$(cat "$prompt")" >"$log.json" 2>>"$log"; then
+    if herdr-run agy agy-implement --output-format json --print-timeout 20m -p "$(cat "$prompt")" >"$log.json" 2>>"$log"; then
       code=0
     else
       code=$?
     fi
-  elif codex-implement exec -o "$log.msg" - <"$prompt" >>"$log" 2>&1; then
+  elif herdr-run codex codex-implement exec -o "$log.msg" - <"$prompt" >>"$log" 2>&1; then
     code=0
   else
     code=$?
