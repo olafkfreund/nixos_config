@@ -226,9 +226,16 @@ Everything needed to implement is here. The spec and intent are background.
      ./herdr-run.sh; checkPhase = …; }`.
      - `checkPhase` replaces the default, so it must restate it:
        `runHook preCheck`, `${pkgs.stdenv.shellDryRun} "$target"`,
-       `${lib.getExe pkgs.shellcheck} "$target"`, and then
-       `PATH=${lib.makeBinPath (with pkgs; [ bash coreutils util-linux procps jq socat gnugrep ])}:$PATH bash ${./herdr-run-test.sh} "$target"`
-       and `runHook postCheck`. Read the current nixpkgs `writeShellApplication`
+       `${lib.getExe pkgs.shellcheck} "$target"`, then the test, then
+       `runHook postCheck`:
+
+       ```nix
+       testPath = lib.makeBinPath (with pkgs; [ bash coreutils util-linux procps jq socat gnugrep ]);
+       # in checkPhase:
+       PATH=${testPath}:$PATH bash ${./herdr-run-test.sh} "$target"
+       ```
+
+       Read the current nixpkgs `writeShellApplication`
        to copy its default check exactly, rather than trusting this line.
      - Add `herdr-run` to `home.packages` and to `agent-run`'s
        `runtimeInputs`.
@@ -256,7 +263,7 @@ Everything needed to implement is here. The spec and intent are background.
    `grep -cF -- '<guard>' <file>`, for `-s read-only`,
    `sandbox_mode="read-only"`, `--mode plan`, `env -u OPENAI_API_KEY`,
    `env -u GEMINI_API_KEY` and `forced_login_method=chatgpt`. Every count
-   must be equal. Also check that `git diff` adds only the `herdr-run <label> `
+   must be equal. Also check that `git diff` adds only the `herdr-run <label>`
    prefix to command lines, and run `npx markdownlint-cli2` on
    both files.
    Traps: the pre-push markdownlint lints whole files.
