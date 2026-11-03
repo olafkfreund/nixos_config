@@ -40,7 +40,7 @@ stdenvNoCC.mkDerivation {
     makeWrapper ${pythonEnv}/bin/python $out/bin/agent-say \
       --add-flags "$out/share/agent-say/agent_say.py" \
       --set AGENT_SAY_BIN $out/bin/agent-say \
-      ${lib.optionalString (omarchyVoice != null) ''--run ". <(${gnugrep}/bin/grep -v '^exec ' ${omarchyVoice}/bin/omarchy-voice)" \''}
+      ${lib.optionalString (omarchyVoice != null) ''--run ". <(${gnugrep}/bin/grep -v '^exec ' ${omarchyVoice}/bin/omarchy-voice)"''} \
       --prefix PYTHONPATH : "${sitePackages}" \
       --prefix PATH : ${lib.makeBinPath [ pulseaudio libnotify systemd ]}
 
