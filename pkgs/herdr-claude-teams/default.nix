@@ -1,6 +1,7 @@
 # herdr-claude-teams — runs Claude Code agent teams inside herdr by shimming tmux
 # onto herdr's socket API. Fork pinned, plus ownership.patch (teardown only
-# touches panes the shim created; respawn waits for the cat placeholder).
+# touches panes the shim created; respawn waits for the cat placeholder),
+# plus teammate-tabs.patch (teammates open as tabs after the lead).
 { lib
 , python3Packages
 , fetchFromGitHub
@@ -18,7 +19,7 @@ python3Packages.buildPythonApplication {
     hash = "sha256-mtmKZeB9Zi8zaDzxHKFaUX1VC7T7KumT7rXOH01F0yY=";
   };
 
-  patches = [ ./ownership.patch ];
+  patches = [ ./ownership.patch ./teammate-tabs.patch ];
 
   build-system = [ python3Packages.hatchling ];
   nativeBuildInputs = [ makeWrapper ];

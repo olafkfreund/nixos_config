@@ -167,6 +167,26 @@ Integrations are **per host**, and they are not covered by Syncthing:
 `~/.claude/.stignore` excludes `hooks/**`, which is exactly where the Claude
 hook lives. Run the install on each machine.
 
+## Claude agent teams
+
+Inside herdr, `claude` is a bash/zsh function (set in
+`home/development/herdr.nix`) that runs `herdr-claude-teams`. It puts a `tmux`
+shim on `PATH` that turns Claude Code's tmux calls into herdr socket calls.
+
+- Each teammate opens in its own tab, right after the lead's tab, labelled
+  `↳ <name>`. The tab never takes focus, and the lead's tab layout is left
+  alone: the shim resizes and renames only tabs and panes it created.
+- When the lead stops a teammate, that teammate's tab closes.
+- `claude-swarm-reaper`, a user timer that runs every 2 minutes, closes
+  teammates that have been idle for 10 minutes.
+- Only panes and tabs the shim created are ever closed. They are tracked in
+  `$XDG_RUNTIME_DIR/herdr-claude-teams/*.owned`.
+
+```bash
+# which teammate panes the shim owns for this session
+cat "$XDG_RUNTIME_DIR"/herdr-claude-teams/*.owned
+```
+
 ## Configuration worth knowing
 
 All of this lives in `home/development/herdr.nix`:
