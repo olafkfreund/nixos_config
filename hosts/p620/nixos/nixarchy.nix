@@ -177,6 +177,15 @@
     services.nixi = {
       watcher.enable = true;
       omarchyHooks.enable = true;
+      # Companion plugins (nixi-nixarchy#149): the three examples, for the
+      # slice A live check. Installed means listed in Settings → Plugins, and
+      # each stays off until switched on there.
+      companion.plugins =
+        with inputs.nixi-companion.legacyPackages.${pkgs.stdenv.hostPlatform.system}.examples; [
+          pirate-quips
+          element-chat
+          party-hat-plus
+        ];
     };
 
     # Oma: speech to speech against the OpenAI Realtime API, driving Hyprland.
