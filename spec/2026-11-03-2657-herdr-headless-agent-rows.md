@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2657
 intent: intent/2026-11-03-2657-herdr-headless-agent-rows.md
 ---
