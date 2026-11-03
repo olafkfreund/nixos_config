@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2650
 spec: spec/2026-11-03-2650-agent-team-default.md
 coders:
