@@ -75,6 +75,7 @@ check() {
   [[ $(cat "$AGENT_TEST_COUNT_FILE") == "$expected_count" ]]
   if [[ $mode == head_moved ]]; then jq -e '.head_moved == true' <<<"$output" >/dev/null; fi
   if [[ $expected_rc == 0 ]]; then jq -e '.changed == ["README.md"]' <<<"$output" >/dev/null; fi
+  if [[ $expected_rc == 0 ]]; then grep -q 'done' "$(jq -r .log <<<"$output")"; fi
   total=$((total + 1))
 }
 
@@ -92,6 +93,16 @@ check agy head_moved 1 'HEAD moved'
 check codex head_moved 1 'HEAD moved'
 check agy retry 0 '' 2
 check codex retry 0 '' 2
+
+git update-ref HEAD "$base"
+git restore -- README.md
+echo dirty >README.md
+rm -f "$AGENT_TEST_COUNT_FILE"
+if output=$(bash "$runner" agy "$tmp/prompt"); then rc=0; else rc=$?; fi
+[[ $rc == 2 && ! -e $AGENT_TEST_COUNT_FILE ]]
+jq -e '.ok == false and (.reason | startswith("worktree is dirty"))' <<<"$output" >/dev/null
+git restore -- README.md
+total=$((total + 1))
 
 git switch -qc main
 rm -f "$AGENT_TEST_COUNT_FILE"

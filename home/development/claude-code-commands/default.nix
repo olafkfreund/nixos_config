@@ -9,7 +9,7 @@ let
   # /team — run an approved plan/ as manager, dispatching steps per coders: (#2650).
   teamCommand = ''
     ---
-    description: Run an approved plan/ as manager — dispatch each step to coder, agy or codex per coders:
+    description: "Run an approved plan/ as manager: dispatch each step to coder, agy or codex as its coders: field says"
     argument-hint: <path to approved plan/>
     ---
 
@@ -24,9 +24,9 @@ let
     3. **Dispatch each step in plan order**:
        - `coder` → spawn one Sonnet `coder` agent for the task and send any later `coder` steps to that same agent via `SendMessage`.
        - `agy` or `codex` → run via the `handoff` skill (`agent-run`) in the background.
-       - Unlisted steps → follow the model-split default (large mechanical edits → `agy`; small tricky logic → `codex`; the rest → `coder`; builds, reviews, deploys and commits stay with you).
+       - Unlisted steps → the model-split default: the `coder` for a plan with three or more editing steps or files, otherwise yourself. Never agy or Codex unless `coders:` names them; deleting an entry is the user's opt-out.
     4. **Verify and commit after each step**: Run the step's check, commit the verified change on the task branch, and note which worker completed the step (including any fallback if a handoff failed).
-    5. **Parallel steps**: Run steps in parallel only when the plan explicitly marks them independent and their touched files are disjoint. Run each parallel `agy` or `codex` step in its own temporary worktree created with `git worktree add ../<repo>-<issue>-s<n> HEAD`, apply the diff back to the task worktree with `git -C <wt> add -A && git -C <wt> diff --cached --binary | git apply` (plain `git diff` drops new files), and remove the temporary worktree. On a failed apply, remove the temporary worktree and rerun that step sequentially in the task worktree.
+    5. **Parallel steps**: Run steps in parallel only when the plan explicitly marks them independent and their touched files are disjoint. Run each parallel `agy` or `codex` step in its own temporary worktree created with `git worktree add ../<repo>-<issue>-s<n> HEAD`, once its check passes, apply the diff back to the task worktree with `git -C <wt> add -A && git -C <wt> diff --cached --binary | git apply` (plain `git diff` drops new files), commit it before applying the next one (`agent-run` refuses a dirty worktree), and remove the temporary worktree with `git worktree remove --force <wt>`. On a failed apply, remove the temporary worktree and rerun that step sequentially in the task worktree.
     6. **Final reviews**: When all implementation steps are committed, run a fresh Opus review alongside every provider listed in the plan's `reviewers:` (via `second-opinion`, in parallel and read-only).
     7. **Report**: Summarize the outcome and report which worker did each step.
   '';

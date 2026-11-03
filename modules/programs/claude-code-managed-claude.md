@@ -57,7 +57,7 @@ The session model (Opus) writes intent, spec and plan, and reviews. The
   - The user opts out by deleting entries before approving the plan.
   - A provider that fails or is out of quota is reported verbatim; carry
     on without it. Their output never approves anything.
-  `agent-team: off` means this bullet does not apply.
+  - `agent-team: off`: none of this applies.
 - Finish a step the coder hands back yourself, then commit and update `plan/`
   for any deviation it reported. The PR says which steps the coder did.
 - This applies to committed, approved `plan/` files only. A plan that exists

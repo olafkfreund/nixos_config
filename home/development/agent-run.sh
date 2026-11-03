@@ -25,8 +25,14 @@ if ! root=$(git rev-parse --show-toplevel 2>/dev/null) || ! branch=$(git branch 
   verdict false
   exit 2
 fi
-if [[ $root == "$HOME/.config/nixos" || $branch == main ]]; then
+if [[ $(realpath -m -- "$root") == $(realpath -m -- "$HOME/.config/nixos") || $branch == main ]]; then
   reason='refusing shared checkout or main branch'
+  verdict false
+  exit 2
+fi
+
+if [[ -n $(git status --porcelain) ]]; then
+  reason='worktree is dirty; commit or discard first'
   verdict false
   exit 2
 fi
@@ -50,8 +56,10 @@ for attempt in 1 2; do
   fi
   break
 done
+# one log the caller can read: stderr plus the tool's own output
+cat "$log.json" "$log.msg" >>"$log" 2>/dev/null || true
 
-changed=$(git status --porcelain | jq -Rsc 'split("\n") | map(select(length > 0) | .[3:])')
+changed=$(git status --porcelain -uall | jq -Rsc 'split("\n") | map(select(length > 0) | .[3:])')
 if [[ $(git rev-parse HEAD) != "$head" ]]; then
   head_moved=true
 fi

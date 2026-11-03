@@ -298,3 +298,24 @@ Never edit `~/.config/nixos` (it is `/etc/nixos`).
 - Full: `git revert` the merge commit and redeploy p620 / razer. The state
   file is harmless when nothing reads it; delete
   `~/.local/state/agent-team` if wanted.
+
+## Deviations during implementation
+
+Recorded per the managed policy; each landed with its code.
+
+- Step 1: the check builds `managed-settings.json`'s `.source`; `.text` is null.
+- Step 2 (review fixes from Codex, agy and Opus): `agent-run` refuses a
+  dirty worktree (exit 2) so pre-existing edits can't pass as the worker's;
+  the HEAD-moved check runs before empty-diff; the returned `log` holds the
+  tool's own output too (`$log.json` / `$log.msg` appended); the
+  shared-checkout test compares `realpath`s; `changed` uses
+  `git status --porcelain -uall`. Tests: 16 cases.
+- Step 5: `handoff` keeps two caveats from the old failure list (fallback
+  noted in the PR; a guard block shows only in the response).
+- Step 6: `/team`'s merge-back stages new files (`add -A` +
+  `diff --cached --binary`), commits each applied diff before the next,
+  and removes worktrees with `--force`; its YAML description is quoted;
+  unlisted steps follow the model-split default only, never agy or Codex
+  (agy's draft had routed them by complexity, which defeated the opt-out).
+- Step 4: the "`agent-team: off`" line is a sub-bullet so it renders.
+
