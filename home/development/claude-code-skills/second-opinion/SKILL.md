@@ -85,7 +85,7 @@ own verification commands, and reports findings with severity and file:line.
 No prompt file, no pasting, no size cap.
 
 ```bash
-timeout 900 env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE \
+herdr-run codex timeout 900 env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE \
   codex review -c forced_login_method=chatgpt -c sandbox_mode="read-only" \
   --base "$base" > "$work/codex-review.md"
 echo "exit=$?"
@@ -118,7 +118,7 @@ Output is stdout, so redirect it.
 For a question, design or plan with no diff to point at.
 
 ```bash
-timeout 600 env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE \
+herdr-run codex timeout 600 env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE \
   codex exec -c forced_login_method=chatgpt -s read-only --ephemeral \
   --skip-git-repo-check -C "$repo" -o "$work/codex.md" - < "$prompt"
 echo "exit=$?"
@@ -130,7 +130,7 @@ prints to stderr, next to `model:`.
 ## Google (Antigravity subscription)
 
 ```bash
-timeout 600 env -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY \
+herdr-run agy timeout 600 env -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY \
   agy --mode plan --output-format json --print-timeout 10m \
   -p "$(cat "$prompt")" > "$work/agy.json"
 echo "exit=$?"
@@ -147,7 +147,9 @@ jq -e '.status == "SUCCESS" and (.response // "" | test("\\S"))' "$work/agy.json
   review "model not reported".
 
 Run the Codex and agy calls **in parallel**: two background Bash commands,
-each with its own output file and `timeout`, then wait for both. (Was
+each with its own output file and `timeout`, then wait for both. Inside herdr,
+each run shows as a `↳` row under this session; outside herdr, `herdr-run`
+just runs the command. (Was
 sequential with no recorded reason; if parallel runs fail where sequential
 ones did not, put the rule back and write the reason here, #2650.)
 
@@ -159,7 +161,7 @@ wrote run against a second model. `agy agents` lists the available names
 `package-resolver`, `module-refactor`, `test-generator` and others).
 
 ```bash
-timeout 900 env -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY \
+herdr-run agy timeout 900 env -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY \
   agy --agent "$agent" --mode plan --output-format json \
   --print-timeout 10m -p "$(cat "$prompt")" > "$work/agy.json"
 echo "exit=$?"

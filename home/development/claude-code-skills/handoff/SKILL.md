@@ -29,6 +29,9 @@ the task worktree, with the Bash tool's `run_in_background`:
 agent-run agy "$prompt_file"     # or: agent-run codex "$prompt_file"
 ```
 
+Inside herdr, each run shows as a `↳` row under this session; outside herdr,
+`herdr-run` just runs the command.
+
 It refuses `~/.config/nixos` and `main`, runs the six checks (exit code,
 agy `status`, `denied_actions`, empty response, empty diff, moved
 `HEAD`), retries once on `connecting to sandbox server`, and prints one
@@ -39,7 +42,7 @@ it does not change `coders:` in the plan. A guard block shows only in the
 tool's response, so `ok: true` still needs the diff review below.
 
 `agent-run` uses agy's default model; for another one, run
-`agy-implement --model <name>` directly and do the six checks by hand.
+`herdr-run agy agy-implement --model <name>` directly and do the six checks by hand.
 
 ## Prompt template
 
