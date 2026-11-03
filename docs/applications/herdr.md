@@ -167,6 +167,21 @@ Integrations are **per host**, and they are not covered by Syncthing:
 `~/.claude/.stignore` excludes `hooks/**`, which is exactly where the Claude
 hook lives. Run the install on each machine.
 
+## Codex and agy rows
+
+A headless Codex or agy run shows up as a `↳ codex` or `↳ agy` row under the
+Claude lead. The row is *working* while the run lasts, *done* for about 3 s,
+then its background tab closes. The tab streams the run's live progress.
+
+The rows come from `herdr-run <codex|agy> <command…>`, which the
+`second-opinion`, `handoff` and `agent-run` tooling puts in front of their
+commands. Outside herdr it just runs the command.
+
+- Ctrl-C and a timeout stop the run and close the tab.
+- A run herdr loses exits 1 and is never re-run.
+- `herdr-run` reads all of stdin before it starts, so a stdin pipe that never
+  closes blocks it. Claude's Bash tool always closes stdin.
+
 ## Claude agent teams
 
 Inside herdr, `claude` is a bash/zsh function (set in
