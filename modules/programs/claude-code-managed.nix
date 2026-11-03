@@ -40,6 +40,23 @@ let
     }];
   };
 
+  # Per-host persistent switch; state stays out of ~/.claude (syncthing-synced).
+  agentTeamScript = pkgs.writeShellScriptBin "agent-team" ''
+    f="''${XDG_STATE_HOME:-$HOME/.local/state}/agent-team/mode"
+    mode=$(cat "$f" 2>/dev/null || echo on)
+    case "''${1:-status}" in
+      on|off) mkdir -p "''${f%/*}" && echo "$1" > "$f" && echo "agent-team: $1" ;;
+      status) echo "agent-team: $mode" ;;
+      hook)   printf '<system-reminder>agent-team: %s</system-reminder>\n' "$mode" ;;
+      *) echo "usage: agent-team on|off|status" >&2; exit 2 ;;
+    esac
+  '';
+  agentTeamHooks = lib.optionalAttrs cfg.agentTeam.enable {
+    UserPromptSubmit = [{
+      hooks = [{ type = "command"; command = "${agentTeamScript}/bin/agent-team hook"; timeout = 5; }];
+    }];
+  };
+
   # Notification helper — surfaces Claude Code lifecycle events as desktop
   # toasts (libnotify) and/or in-tmux popups/status flashes. Triggered by
   # the Notification / Stop / SubagentStop hooks below.
@@ -713,6 +730,7 @@ let
       hooks = lib.zipAttrsWith (_event: lib.concatLists) [
         (cfg.settings.hooks or { })
         parrHooks
+        agentTeamHooks
         notifyHooks
         formatHooks
         deployGuardHooks
@@ -755,6 +773,12 @@ in
         Claude Code reads this with highest precedence and never writes back.
         Anything here is effectively unmodifiable from the CLI/UI.
       '';
+    };
+
+    agentTeam.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Codex/agy agent-team switch and its per-prompt mode hook (issue 2650).";
     };
 
     parrProtocol.enable = lib.mkOption {
@@ -987,6 +1011,8 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = lib.optional cfg.agentTeam.enable agentTeamScript;
+
     environment.etc."claude-code/managed-settings.json" = {
       source = managedJson;
       mode = "0644";
