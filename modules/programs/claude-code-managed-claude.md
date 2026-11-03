@@ -45,6 +45,19 @@ The session model (Opus) writes intent, spec and plan, and reviews. The
   and extra read-only reviewers (`reviewers:`). Follow it with the
   `handoff` and `second-opinion` skills. Steps and reviews it does not name
   follow the rules above.
+- When the prompt hook says `agent-team: on`, Codex and agy are on the
+  team for every task under the artifact workflow (not exempt ones):
+  - Before stopping on an intent, spec or plan draft, review it with
+    both through `second-opinion`, in parallel and read-only, and show
+    their findings (confirmed, refuted, unverified) with the draft.
+  - Every draft plan fills `coders:` for each step that edits files and
+    `reviewers: [codex, agy]`, one reason per entry. Default routing:
+    large mechanical edits → agy; small tricky logic → codex; the rest
+    → coder; builds, reviews, deploys and commits stay yours.
+  - The user opts out by deleting entries before approving the plan.
+  - A provider that fails or is out of quota is reported verbatim; carry
+    on without it. Their output never approves anything.
+  `agent-team: off` means this bullet does not apply.
 - Finish a step the coder hands back yourself, then commit and update `plan/`
   for any deviation it reported. The PR says which steps the coder did.
 - This applies to committed, approved `plan/` files only. A plan that exists

@@ -239,6 +239,7 @@ Things the code no longer shows, so they are easy to get wrong:
   (`modules/programs/claude-code-managed.nix`). It matches words in command
   text, so write prose (commit bodies, issue comments) to a file and pass it
   with `--body-file`.
-- Consult other models (Codex, Antigravity) only when the user asks or an
-  approved `plan/` names them in `reviewers:`, through the `second-opinion`
-  skill. Never otherwise.
+- Consult other models (Codex, Antigravity) only when the user asks, an
+  approved `plan/` names them in `reviewers:`, or Claude Code's
+  agent-team mode is on (managed CLAUDE.md, Model split), through the
+  `second-opinion` skill. Never otherwise.

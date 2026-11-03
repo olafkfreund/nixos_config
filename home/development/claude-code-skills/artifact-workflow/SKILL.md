@@ -44,6 +44,9 @@ Rules:
   Claude proposes and dispatches them. The user's plan approval is the
   consent, and they never change after approval without re-approval: they
   are not a deviation, and a handoff fallback goes in the PR, not the plan.
+- When agent-team mode is on (managed CLAUDE.md), every draft plan
+  fills `coders:` and `reviewers:`; the user opts out by deleting
+  entries before approval.
 - Open the PR linking all three files. Review compares the diff to `plan/`.
 
 ## Intent template
