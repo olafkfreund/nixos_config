@@ -50,6 +50,8 @@
   ];
 
   programs.nixarchy.enable = true;
+  # Omarchy's own apps: Hype, Monologue, Signed, Disktree and the rest (nixarchy#1572).
+  programs.nixarchy.omarchyApps.enable = true;
 
   # Puts this user in the input group. Omarchy's shell reads the keyboard
   # device directly for its own key handling, which the group grants; without
