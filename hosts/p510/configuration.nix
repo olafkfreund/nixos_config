@@ -19,6 +19,7 @@ in
       ./nixos/boot.nix
       ./nixos/nvidia.nix
       ./nixos/nixarchy.nix
+      ../common/nixos/nixi-fleet.nix
       ./nixos/network.nix # Network configuration with dual-port Intel card
       ./nixos/tailscale-serve.nix # Tailscale Serve for media services
       ../../modules/services/recyclarr.nix # Recyclarr Trash Guides sync
