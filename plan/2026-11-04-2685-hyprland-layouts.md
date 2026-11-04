@@ -193,9 +193,10 @@ These come from the spec and must all hold:
    - Render both files and parse them:
 
      ```bash
+     T=$(mktemp -d)   # TMPDIR is unset in some shells
      for f in autostart layouts; do
-       nix eval --raw --impure --expr "(import ./hosts/common/nixos/omarchy-layouts.nix {}).home-manager.users.olafkfreund.home.file.\".config/hypr/$f.lua\".text" > "$TMPDIR/$f.lua"
-       nix shell nixpkgs#lua5_4 -c luac -p "$TMPDIR/$f.lua" && echo "$f ok"
+       nix eval --raw --impure --expr "(import ./hosts/common/nixos/omarchy-layouts.nix {}).home-manager.users.olafkfreund.home.file.\".config/hypr/$f.lua\".text" > "$T/$f.lua"
+       nix shell nixpkgs#lua5_4 -c luac -p "$T/$f.lua" && echo "$f ok"
      done
      ```
 

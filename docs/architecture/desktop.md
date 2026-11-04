@@ -95,6 +95,24 @@ User-facing config lives in `~/.config/hypr/` (`hyprland.lua`, `input.lua`,
 seed does not overwrite, a Home Manager file competing for the same path needs
 `force = true`.
 
+## Layouts
+
+New workspaces open in the scrolling layout. The default is set in
+`hosts/common/nixos/omarchy-layouts.nix` and loaded from `autostart.lua`, which
+runs after Atmos's `looknfeel` (so it overrides that default) and before the
+saved SUPER+L choices, which still win.
+
+| Keys | Scrolling | Master | Monocle |
+| --- | --- | --- | --- |
+| SUPER+SHIFT+L | to master | to monocle | to scrolling |
+| SUPER+[ / SUPER+] | narrower / wider column | smaller / bigger main window | previous / next window |
+| SUPER+# (US `\`) | swap column | swap into main window | — |
+
+Master puts the big window on the right at 65%; new windows stack on the left.
+SUPER+L still cycles dwindle, scrolling and floating only: on master or monocle
+it goes to dwindle, and the bar shows the dwindle square for both. A nixarchy
+follow-up will add a load point, SUPER+L cycling master and monocle, and icons.
+
 ## Theming: Omarchy is the source of truth
 
 `omarchy theme set X` retints the 24 files Omarchy owns **immediately** and
