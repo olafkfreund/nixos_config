@@ -16,6 +16,9 @@
       enable = true;
       ollamaCloud.keyFile = "/run/agenix/api-ollama";
       deepgram.keyFile = "/run/agenix/api-deepgram";
+      # Local Norwegian speech (NB-Whisper small). Takes effect when Settings,
+      # Speech language, is Norwegian; about 2.1 GB of RAM once used.
+      whisperNb.enable = true;
       # Each finished meeting is written here as Markdown (notes, transcript,
       # screenshots, interview documents); plain files in the Obsidian vault.
       settings.exportFolder = "/home/olafkfreund/Documents/Synechron/Meetings";
