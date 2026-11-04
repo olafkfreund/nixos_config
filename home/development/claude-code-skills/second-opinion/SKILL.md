@@ -87,7 +87,7 @@ No prompt file, no pasting, no size cap.
 ```bash
 herdr-run codex timeout 900 env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE \
   codex review -c forced_login_method=chatgpt -c sandbox_mode="read-only" \
-  --base "$base" > "$work/codex-review.md"
+  --base "$base" > "$work/codex-review.md" < /dev/null
 echo "exit=$?"
 ```
 
@@ -132,7 +132,7 @@ prints to stderr, next to `model:`.
 ```bash
 herdr-run agy timeout 600 env -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY \
   agy --mode plan --output-format json --print-timeout 10m \
-  -p "$(cat "$prompt")" > "$work/agy.json"
+  -p "$(cat "$prompt")" > "$work/agy.json" < /dev/null
 echo "exit=$?"
 jq -e '.status == "SUCCESS" and (.response // "" | test("\\S"))' "$work/agy.json" >/dev/null \
   && jq -r .response "$work/agy.json" || echo "agy: review not obtained"
@@ -163,7 +163,7 @@ wrote run against a second model. `agy agents` lists the available names
 ```bash
 herdr-run agy timeout 900 env -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY \
   agy --agent "$agent" --mode plan --output-format json \
-  --print-timeout 10m -p "$(cat "$prompt")" > "$work/agy.json"
+  --print-timeout 10m -p "$(cat "$prompt")" > "$work/agy.json" < /dev/null
 echo "exit=$?"
 jq -e '.status == "SUCCESS" and (.response // "" | test("\\S"))' "$work/agy.json" >/dev/null \
   && jq -r .response "$work/agy.json" || echo "agy: review not obtained"

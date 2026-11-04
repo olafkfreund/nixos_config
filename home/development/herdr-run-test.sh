@@ -318,3 +318,83 @@ for _ in {1..200}; do
 done
 if kill -0 "$(cat "$TEST_STATE/child-pid")" 2>/dev/null; then exit 1; fi
 ok term-resistant-child
+
+# stdin that never sends EOF (Claude Code's Bash tool gives a socket): a command
+# that does not read stdin still finishes, and no feeder is left behind (#2679)
+holders() {
+  local p n=0
+  for p in /proc/[0-9]*; do
+    [[ $(readlink "$p/fd/0" 2>/dev/null) == "$tmp/never" ]] && n=$((n + 1))
+  done
+  echo "$n"
+}
+mkfifo "$tmp/never"
+exec 7<>"$tmp/never"
+reset_state
+code=0
+timeout 20 "$tool" codex bash -c 'printf "hi\n"' <"$tmp/never" >"$tmp/out" 2>"$tmp/err" || code=$?
+assert_code 0
+[[ $(cat "$tmp/out") == hi ]]
+sleep 0.5
+[[ $(holders) == 0 ]]
+ok stdin-never-closes
+
+reset_state
+: >"$TEST_STATE/fail-tab-create"
+code=0
+timeout 20 "$tool" codex bash -c 'printf "hi\n"' <"$tmp/never" >"$tmp/out" 2>"$tmp/err" || code=$?
+assert_code 0
+[[ $(cat "$tmp/out") == hi ]]
+sleep 0.5
+[[ $(holders) == 0 ]]
+ok stdin-never-closes-headless
+
+# kill -9 of the helper while stdin stays open: the feeder and the command go too
+reset_state
+"$tool" codex bash -c 'echo $$ > "$TEST_STATE/command-pid"; exec sleep 300' <"$tmp/never" >/dev/null 2>&1 &
+helper=$!
+for _ in {1..300}; do
+  [[ -e $TEST_STATE/command-pid ]] && break
+  sleep 0.01
+done
+kill -KILL "$helper"
+wait "$helper" 2>/dev/null || :
+for _ in {1..200}; do
+  [[ $(holders) == 0 ]] && ! kill -0 "$(cat "$TEST_STATE/command-pid")" 2>/dev/null && break
+  sleep 0.02
+done
+[[ $(holders) == 0 ]]
+if kill -0 "$(cat "$TEST_STATE/command-pid")" 2>/dev/null; then exit 1; fi
+ok helper-killed-open-stdin
+
+# the helper's whole group is killed before any runner starts; the late runner,
+# blocked opening the FIFO with no writer left, must still end (no hang)
+reset_state
+: >"$TEST_STATE/no-claim"
+# setsid execs in place here (an async job is no group leader), so $! is both
+# the helper's PID and its process-group ID; never search for it by name
+setsid "$tool" codex bash -c 'printf x >> "$TEST_STATE/runs"' <"$tmp/never" >/dev/null 2>&1 &
+group=$!
+for _ in {1..300}; do
+  [[ -s $TEST_STATE/late-line ]] && break
+  sleep 0.01
+done
+[[ $(ps -o pgid= -p "$group" | tr -d ' ') == "$group" ]]
+kill -KILL -- "-$group"
+code=0
+timeout 15 bash -c "$(cat "$TEST_STATE/late-line")" >/dev/null 2>&1 || code=$?
+[[ $code != 124 ]]
+ok group-killed-before-runner
+
+# the headless fallback hands the command the caller's stdin, unread
+reset_state
+: >"$TEST_STATE/fail-tab-create"
+code=0
+out=$({
+  printf 'line one\n'
+  sleep 30
+} | timeout 20 "$tool" codex bash -c 'read -r l; printf "%s\n" "$l"') || code=$?
+assert_code 0
+[[ $out == "line one" ]]
+ok headless-keeps-stdin
+exec 7>&-
