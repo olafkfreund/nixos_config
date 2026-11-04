@@ -44,7 +44,7 @@ in
     voice.elevenLabsKeyFile = mkOption {
       type = types.nullOr types.str;
       default = null;
-      description = "File holding the ElevenLabs key, read at run time when ELEVENLABS_API_KEY is unset (for hosts where the keyring has none).";
+      description = "File holding the ElevenLabs key, read at run time when ELEVENLABS_API_KEY is unset. When set, the narrator uses ElevenLabs with this key, ignoring the keyring and omarchy-voice's elevenlabs.enabled; if it cannot be read, those apply as usual.";
     };
 
     summary = {

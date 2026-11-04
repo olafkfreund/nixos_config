@@ -489,6 +489,41 @@ def test_key_file_exported_unless_set(dirs, monkeypatch):
     assert os.environ["ELEVENLABS_API_KEY"] == "mine"
 
 
+@pytest.mark.parametrize(
+    ("key_file", "expected"),
+    [
+        ("present", {"elevenlabs_enabled": True, "elevenlabs_key_slot": ""}),
+        ("missing", {}),
+        (None, {}),
+    ],
+)
+def test_key_file_overrides_voice_config(dirs, monkeypatch, key_file, expected):
+    k = dirs / "key"
+    if key_file == "present":
+        k.write_text("sekrit\n")
+    monkeypatch.delenv("ELEVENLABS_API_KEY", raising=False)
+    loaded = {}
+
+    class Speaker:
+        def __init__(self, config):
+            pass
+
+        def _speak_now(self, text):
+            pass
+
+    sys_modules = __import__("sys").modules
+    pkg = SimpleNamespace(
+        config=SimpleNamespace(load=lambda **kw: loaded.update(kw)),
+        feedback=SimpleNamespace(Feedback=Speaker),
+    )
+    monkeypatch.setitem(sys_modules, "omarchy_voice", pkg)
+    monkeypatch.setitem(sys_modules, "omarchy_voice.config", pkg.config)
+    monkeypatch.setitem(sys_modules, "omarchy_voice.feedback", pkg.feedback)
+    a.speak({**CFG, "elevenLabsKeyFile": str(k) if key_file else None}, "x")
+    assert loaded == {"elevenlabs_voice_id": CFG["voiceId"], **expected}
+    monkeypatch.delenv("ELEVENLABS_API_KEY", raising=False)
+
+
 def test_think_stripped(monkeypatch):
     class R(io.BytesIO):
         def __enter__(self):

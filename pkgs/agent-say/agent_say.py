@@ -369,12 +369,17 @@ def speak(cfg, text):
             key = Path(cfg["elevenLabsKeyFile"]).read_text().strip()
             if key:
                 os.environ["ELEVENLABS_API_KEY"] = key
+    overrides = {"elevenlabs_voice_id": cfg["voiceId"]}
+    if cfg.get("elevenLabsKeyFile") and os.environ.get("ELEVENLABS_API_KEY"):
+        # omarchy-voice tries the keyring before the environment, and its own
+        # config may leave ElevenLabs off; the key file decides for this narrator.
+        overrides.update(elevenlabs_enabled=True, elevenlabs_key_slot="")
     # Lazy: only the package wrapper has omarchy-voice on PYTHONPATH.
     from omarchy_voice import config as voice_config
     from omarchy_voice.feedback import Feedback
 
     # speak() returns on a daemon thread; _speak_now plays to the end.
-    Feedback(voice_config.load(elevenlabs_voice_id=cfg["voiceId"]))._speak_now(text)
+    Feedback(voice_config.load(**overrides))._speak_now(text)
 
 
 def say_gated(cfg, text):
