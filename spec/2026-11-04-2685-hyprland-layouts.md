@@ -37,39 +37,58 @@ hl.config({
 
 The same file defines the keys. They are Lua functions bound with
 `o.bind(keys, description, function)`, as Omarchy's own `utilities.lua:134`
-does. Each one reads the layout from `hl.get_active_workspace().tiled_layout`
-(checked live on p620: it returns `dwindle` on workspace 1).
+does. They are bound by keycode, as Omarchy binds `code:34`/`code:35`, so they
+don't depend on the keyboard layout.
 
-| Key | scrolling | master | monocle |
-|---|---|---|---|
-| SUPER+SHIFT+L | to master | to monocle | to scrolling |
-| SUPER+[ | `colresize -conf` | `mfact -0.05` | `cycleprev` |
-| SUPER+] | `colresize +conf` | `mfact +0.05` | `cyclenext` |
-| SUPER+\ | `swapcol r` | `swapwithmaster master` | — |
+**The current mode** is read the way `omarchy-hyprland-workspace-layout-current`
+reads it, because Omarchy's floating mode keeps the workspace's old tiled
+layout underneath (`workspace-modes.lua:396`), so `tiled_layout` alone would
+call a floating workspace "scrolling" or "master". In order, the mode is:
+1. `mode = "<x>"` from `$XDG_STATE_HOME/omarchy/workspace-layouts/<id>.lua`
+2. otherwise `default = "<x>"` from `workspace-layouts/default.lua`
+3. otherwise `hl.get_active_workspace().tiled_layout` (checked live on p620:
+   it returns `dwindle` on workspace 1)
 
-- **Cycle key on other layouts.** On dwindle, or on Omarchy's floating
-  workspace mode, SUPER+SHIFT+L goes to scrolling.
-- **How the cycle key saves a choice.** It does exactly what Omarchy's
+**The default** is read the way `omarchy-hyprland-workspace-layout-default`
+reads it: `default.lua` if it exists, otherwise the `general.layout` this file
+sets, `scrolling`.
+
+| Key (keycode; gb label) | scrolling | master | monocle | floating |
+|---|---|---|---|---|
+| SUPER+SHIFT+L | to master | to monocle | to scrolling | to scrolling |
+| SUPER+`code:34` (`[`) | `colresize -conf` | `mfact -0.05` | `cycleprev` | nothing |
+| SUPER+`code:35` (`]`) | `colresize +conf` | `mfact +0.05` | `cyclenext` | nothing |
+| SUPER+`code:51` (`#`, `\` on US) | `swapcol r` | `swapwithmaster master` | nothing | nothing |
+
+On dwindle, SUPER+SHIFT+L goes to scrolling and the other three keys do
+nothing.
+
+- **How the cycle key saves a choice.** It does what Omarchy's
   `omarchy-hyprland-workspace-layout-toggle` does:
   - it calls `o.workspace_mode({ workspace = "<id>", mode = "<new>" })`, which
     sets the workspace rule and undoes floating mode
-  - it writes that same line to
-    `$XDG_STATE_HOME/omarchy/workspace-layouts/<id>.lua`
-  - when the new mode is the default (`scrolling`), it removes that file
-    instead, so the workspace follows the default again
-  - it refreshes the bar with `omarchy-shell -q omarchy.workspaces refresh`
+  - if the new mode equals the default read above, it removes `<id>.lua` so
+    the workspace follows the default again; otherwise it writes that same
+    line to `<id>.lua`
+  - if the call or the file write fails, it sends an Omarchy notification
+    saying the layout was not saved, as the toggle does
+  - it refreshes the bar and the dock with
+    `omarchy-shell -q omarchy.workspaces refresh` and
+    `omarchy-shell -q omarchy.dock refresh`. The dock shows only on floating
+    workspaces, so leaving floating mode needs its refresh.
 
   Omarchy's restore at login replays these files. `workspace-modes.lua:399`
   passes any non-floating mode name straight to `hl.workspace_rule`, so
   master and monocle survive a reload.
 - **Workspaces it skips.** Named and special workspaces (id < 1) are left
   alone, as the toggle leaves them.
-- **Free keys.** SUPER+SHIFT+L, SUPER+[, SUPER+] and SUPER+\ (keycodes 34, 35
-  and 51) are bound neither by Omarchy's `default/hypr/bindings/*.lua` nor
-  by `~/.config/hypr/bindings.lua`. Omarchy binds only SUPER+ALT+34/35, for
-  the webcam overlay.
-- **Keybindings menu.** Each key gets a description, so it is listed in the
-  SUPER+K menu.
+- **Free keys.** SUPER+SHIFT+L and SUPER+`code:34`/`35`/`51` are free:
+  - not bound by Omarchy's `default/hypr/bindings/*.lua`, which binds only
+    SUPER+ALT+34/35, for the webcam overlay
+  - not bound by any `~/.config/hypr/*.lua` on p620 or razer (checked)
+- **Keybindings menu.** Each key gets a description, so SUPER+K lists it.
+  Running a function bind from the menu needs an `o.bind_expressions` entry;
+  that is not added, because the user runs these from the keyboard.
 
 ### 2. `~/.config/hypr/autostart.lua` (taken over)
 
@@ -96,8 +115,9 @@ pcall(require, "hypr.layouts") -- managed by NixOS (#2685)
 ```
 
 `pcall` matches every other optional require in these files, so a broken or
-missing `layouts.lua` cannot stop the session from loading. It still shows
-in Hyprland's error bar.
+missing `layouts.lua` cannot stop the session from loading. It also hides
+the error. Verification therefore checks the loaded settings and the four
+keys on both hosts, not just the config error list.
 
 ## Alternatives rejected
 
@@ -117,8 +137,8 @@ in Hyprland's error bar.
   the nixarchy follow-up. A local patch to the Omarchy tree would be
   overwritten on every nixarchy bump.
 - **A shell script for the cycle key**, like the toggle. It needs a packaged
-  script and a `hyprctl eval` round trip. A Lua function reads
-  `tiled_layout` directly and is only a few lines.
+  script and a `hyprctl eval` round trip. A Lua function reads the state
+  files and `tiled_layout` directly in a few lines.
 
 ## Risks
 
@@ -135,8 +155,11 @@ in Hyprland's error bar.
 - **The Appearance menu's default still wins** over `general.layout`, if it
   is ever used, because `default.lua` loads later. That is the menu doing its
   job; neither host has the file today.
-- **razer changes default layout**, from dwindle to scrolling. Workspaces
-  1, 2, 6 and 24 keep their saved choices.
+- **razer changes default layout**, from dwindle to scrolling. Its saved
+  choices (workspaces 1, 2, 6, 24) are all already scrolling, in Omarchy's
+  older `hl.workspace_rule` form. The cycle key's mode read doesn't parse that
+  form, so on those workspaces it falls back to `tiled_layout`, which is
+  `scrolling` and correct.
 - **Hyprland 0.57's Lua API has no version-pinned docs.**
   - **Known:** `tiled_layout` was checked live on p620.
   - **Unchecked:** the `layoutmsg` strings (`colresize`, `swapcol`, `mfact`,
@@ -148,8 +171,9 @@ in Hyprland's error bar.
 1. **Builds.** `just check-syntax`, then `just test-host p620` and
    `just test-host razer` build.
 2. **Files are generated correctly.** Both generated files are in the built
-   HM files, and `luac -p` (from the `lua` package) parses each one.
-3. **Live on p620, after the deploy and a `hyprctl reload`:**
+   HM files, and `luac -p` (from the `lua` package) parses each one. This
+   checks syntax only; steps 3 and 6 prove the file actually ran.
+3. **Live on p620, after the switch and a `hyprctl reload`:**
    - `hyprctl getoption general:layout` prints `scrolling`
    - `master:orientation` prints `right`, `master:mfact` prints `0.65` and
      `master:new_status` prints `slave`
@@ -157,13 +181,17 @@ in Hyprland's error bar.
 4. **Behaviour, on an empty workspace on p620 with 3 terminals:**
    - SUPER+SHIFT+L → master: one large window on the right, two stacked on
      the left. A 4th window joins the left stack.
-   - SUPER+[ and SUPER+] resize, and SUPER+\ swaps into the big slot.
+   - In master: SUPER+[ and SUPER+] resize, and SUPER+# swaps into the big
+     slot.
    - SUPER+SHIFT+L → monocle: SUPER+[ and SUPER+] cycle windows.
-   - SUPER+SHIFT+L → scrolling: the saved file for that workspace is gone,
-     and SUPER+[ and SUPER+] resize columns.
+   - SUPER+SHIFT+L → scrolling: the workspace's saved file is gone. SUPER+[
+     and SUPER+] resize columns, and SUPER+# swaps columns.
    - Set master, then `hyprctl reload`: the workspace comes back in master.
+   - From dwindle (SUPER+L), SUPER+SHIFT+L goes to scrolling.
+   - From floating (SUPER+L twice from scrolling), SUPER+SHIFT+L goes to
+     scrolling, the windows tile, and the dock hides.
 5. **Saved choices kept.** p620's saved files for workspaces 1, 3, 4, 5, 13,
-   14 and 22 are unchanged (checksums taken before and after the deploy).
-6. **razer, after `just deploy-via-p620 razer`:** checks 3 and 5 for razer's
-   own files.
+   14 and 22 are unchanged (checksums taken before and after the switch).
+6. **razer, after it is rolled out via p620:** checks 3 and 5 for razer's own
+   files.
 7. **No new errors.** `hyprctl configerrors` is empty on both hosts.
