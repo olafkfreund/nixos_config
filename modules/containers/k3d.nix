@@ -53,6 +53,8 @@
 let
   inherit (lib) mkOption mkIf mkMerge mkEnableOption mkPackageOption types optionalString optional concatStringsSep;
   cfg = config.modules.containers.k3d;
+  # Three full self-heal attempts plus GitOps; see #2676.
+  bootstrapTimeout = 3 * (cfg.apiWaitSeconds + 300) + 600;
 
   # Declared resolver for the cluster, mounted into every node and handed to
   # k3s via --resolv-conf. Docker Engine 29 moved its embedded resolver from
@@ -109,7 +111,7 @@ let
     # Run "$@" with a pin pass every 2s (bounded to TimeoutStartSec), reap it, pin once more.
     hosts_pinned() {
       local pid rc=0
-      ( for _ in $(seq 1 450); do pin_server_hosts || true; sleep 2; done ) &
+      ( for _ in $(seq 1 ${toString (bootstrapTimeout / 2)}); do pin_server_hosts || true; sleep 2; done ) &
       pid=$!
       "$@" || rc=$?
       kill "$pid" 2>/dev/null || true
@@ -231,6 +233,36 @@ let
         KUBECONFIG=/tmp/k3d-bootstrap-healthcheck kubectl get --raw=/readyz >/dev/null 2>&1
       }
 
+      datastore_report() {
+        local vol db wal db_mib wal_mib largest_root incremental mode
+        vol=$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/var/lib/rancher/k3s"}}{{.Source}}{{end}}{{end}}' \
+          "k3d-$CLUSTER-server-0" 2>/dev/null) || vol=
+        db=$vol/server/db/state.db
+        wal=$db-wal
+        if [ -z "$vol" ] || [ ! -f "$db" ]; then
+          echo "[k3d-bootstrap] datastore: not found" || return 0
+          return 0
+        fi
+        db_mib=$(stat -c %s "$db") || return 0
+        db_mib=$((db_mib / 1048576))
+        wal_mib=$(stat -c %s "$wal" 2>/dev/null || echo 0) || return 0
+        wal_mib=$((wal_mib / 1048576))
+        largest_root=$(od -An -tu4 --endian=big -j52 -N4 "$db" | tr -d ' ') || return 0
+        incremental=$(od -An -tu4 --endian=big -j64 -N4 "$db" | tr -d ' ') || return 0
+        if [ "$largest_root" = 0 ]; then
+          mode=none
+        elif [ "$incremental" != 0 ]; then
+          mode=incremental
+        else
+          mode=full
+        fi
+        if [ "$db_mib" -gt 2048 ] || [ "$wal_mib" -gt 256 ] || [ "$mode" != full ]; then
+          echo "<4>[k3d-bootstrap] WARNING: datastore $db_mib MiB, wal $wal_mib MiB, auto_vacuum=$mode" || return 0
+        else
+          echo "[k3d-bootstrap] datastore $db_mib MiB, wal $wal_mib MiB, auto_vacuum=$mode" || return 0
+        fi
+      }
+
       # The API binds to ${cfg.apiHostBind}. On a host reboot that interface
       # (e.g. tailscale0) can come up AFTER docker, so wait for the address to
       # exist before (re)starting the cluster — otherwise the serverlb fails to
@@ -274,6 +306,7 @@ let
         # upstream lookup of k3d-<cluster>-server-0 to public DNS, nginx exits,
         # and the create never gets "start worker processes". Found in the
         # #1497 rehearsal.
+        # Defaults came from the pinned k3sImage binary; reread when it changes.
         ${pinned}k3d cluster create "$CLUSTER" \
           --image "${cfg.k3sImage}" \
           --api-port "${cfg.apiHostBind}:$API_PORT" \
@@ -281,6 +314,7 @@ let
           --agents "${toString cfg.agents}" \
           --k3s-arg "--disable=traefik@server:*" \
           --k3s-arg "--disable=servicelb@server:*" \
+          --k3s-arg "--datastore-endpoint=sqlite:///var/lib/rancher/k3s/server/db/state.db?_journal=WAL&cache=shared&_busy_timeout=30000&_txlock=immediate&_auto_vacuum=full@server:0" \
           --volume "$STORAGE_DIR:/var/lib/rancher/k3s/storage@server:*;agent:*" \
           --volume "${resolvStateFile}:/etc/resolv.conf@server:*;agent:*" \
           --volume "${resolvStateFile}:/etc/rancher/k3s/resolv.conf@all:*" \
@@ -376,6 +410,7 @@ let
         sleep 2
       done
       kubectl get nodes
+      datastore_report || true
 
       # 3b. PV state (#1497). Restore when a fresh cluster owes one; otherwise
       #     refresh the snapshot. A failed restore stops here, before step 5
@@ -908,7 +943,7 @@ in
         # never returns used to hang activating forever; on 2026-08-30 it was
         # still "activating (start)" five minutes after boot with no way to
         # notice short of reading list-jobs. Fail loudly instead.
-        TimeoutStartSec = "15min";
+        TimeoutStartSec = "${toString bootstrapTimeout}s";
       };
 
       # Give up after 5 tries rather than retrying forever. On 2026-08-11
