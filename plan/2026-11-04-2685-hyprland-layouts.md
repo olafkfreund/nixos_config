@@ -142,18 +142,20 @@ These come from the spec and must all hold:
              local id = tostring(ws.id)
              local new = NEXT[mode(ws)] or "scrolling"
              local path = dir .. "/" .. id .. ".lua"
-             local ok = pcall(o.workspace_mode, { workspace = id, mode = new })
-             if ok and new == (saved_default() or DEFAULT) then
-               os.remove(path) -- a missing file is fine
-             elseif ok then
-               os.execute("mkdir -p '" .. dir .. "'")
-               local f = io.open(path, "w")
-               ok = f ~= nil and f:write(string.format('o.workspace_mode({ workspace = "%s", mode = "%s" })\n', id, new)) ~= nil
-               if f then
-                 f:close()
-               end
+             if not pcall(o.workspace_mode, { workspace = id, mode = new }) then
+               hl.exec_cmd("omarchy-notification-send 'Workspace layout not changed'")
+               return
              end
-             if not ok then
+             local saved
+             if new == (saved_default() or DEFAULT) then
+               os.remove(path)
+               saved = io.open(path, "r") == nil -- gone, or was never there
+             else
+               local f = os.execute("mkdir -p " .. o.shell_quote(dir)) and io.open(path, "w")
+               saved = f and f:write(string.format('o.workspace_mode({ workspace = "%s", mode = "%s" })\n', id, new)) ~= nil
+               saved = (f and f:close() and saved) or false
+             end
+             if not saved then
                hl.exec_cmd("omarchy-notification-send 'Workspace layout not saved'")
              end
              hl.exec_cmd("omarchy-shell -q omarchy.workspaces refresh")
@@ -188,16 +190,26 @@ These come from the spec and must all hold:
 
    **Verify:**
    - `nix-instantiate --parse hosts/common/nixos/omarchy-layouts.nix >/dev/null`
-   - extract both `text` blocks to the scratchpad and run
-     `nix shell nixpkgs#lua -c luac -p <file>` on each
+   - Render both files and parse them:
+
+     ```bash
+     for f in autostart layouts; do
+       nix eval --raw --impure --expr "(import ./hosts/common/nixos/omarchy-layouts.nix {}).home-manager.users.olafkfreund.home.file.\".config/hypr/$f.lua\".text" > "$TMPDIR/$f.lua"
+       nix shell nixpkgs#lua5_4 -c luac -p "$TMPDIR/$f.lua" && echo "$f ok"
+     done
+     ```
 
    **Traps:**
    - Nix `''` strings: no `${` in the Lua (there is none), and `''` must not
      appear inside it.
-   - `o` is Omarchy's global, and `o.workspace_mode` is defined only after
-     `default.hypr.toggles` loads, so it is called only at key-press time,
-     never at load.
-   - `f:read("*a")` works on every Lua version; `"a"` is 5.3+ only.
+   - `o` is Omarchy's global (`helpers.lua:5`). `o.workspace_mode` comes from
+     `default.hypr.workspace-modes`, which is first required by
+     `workspace-layouts.lua` after this file loads, so it is referenced only
+     inside `cycle()`, at key-press time.
+   - Hyprland embeds Lua 5.5 (checked live), which keeps `io` and `os`.
+     `f:read("*a")` is still accepted there.
+   - The Hyprland 0.57 `layoutmsg` strings are not checked at build time;
+     step 6 exercises each key.
    - Comments only for the why (repo rule: minimal comments).
    - Never `git checkout` in `~/.config/nixos`; work in the
      `~/.config/nixos-2685` worktree.
@@ -234,8 +246,17 @@ These come from the spec and must all hold:
    - No nav change, so `mkdocs.yml` and `mkdocs-full.yml` stay as they are.
 
 4. **Build** (Claude). Run `just check-syntax`, `just test-host p620` and
-   `just test-host razer`. Then confirm that both files are in each host's
-   home-manager-files, and that `luac -p` passes on the built copies.
+   `just test-host razer`. Then check the built copies:
+
+   ```bash
+   set -o pipefail
+   for h in p620 razer; do
+     hm=$(nix build --no-link --print-out-paths ".#nixosConfigurations.$h.config.home-manager.users.olafkfreund.home-files")
+     for f in autostart layouts; do
+       nix shell nixpkgs#lua5_4 -c luac -p "$hm/.config/hypr/$f.lua" && echo "$h $f ok"
+     done
+   done
+   ```
 
    **Traps:** `nix build … | tail` hides the exit code. Use `set -o pipefail`
    or check `$?` directly (repo memory).
@@ -246,15 +267,31 @@ These come from the spec and must all hold:
    design updates this plan in the same commit.
 
 6. **Switch p620 from the branch and verify** (Claude). Steps:
-   - Record checksums:
-     `sha256sum ~/.local/state/omarchy/workspace-layouts/*.lua`
+   - Record checksums for both hosts now, before either switch:
+
+     ```bash
+     W=/tmp/claude-1000/-home-olafkfreund--config-nixos/695015ad-b670-442c-bd18-f0346d3c7bdb/scratchpad/layouts
+     sha256sum ~/.local/state/omarchy/workspace-layouts/*.lua > "$W/p620-before.sha"
+     ssh razer 'sha256sum ~/.local/state/omarchy/workspace-layouts/*.lua' > "$W/razer-before.sha"
+     ```
    - Announce on the bus, then run
      `AGENT_BUS_ANNOUNCED=1 ALLOW_BRANCH_DEPLOY=1 just quick-deploy p620`
    - Run `hyprctl reload`
-   - Run the spec's checks 3, 4, 5 and 7. For check 4, use a free empty
-     workspace and 3 foot terminals, and press the keys with `hyprctl
-     dispatch` equivalents only where a key press can't be simulated.
-     Report which checks were done by hand.
+   - Run the spec's checks 3, 5 and 7:
+
+     ```bash
+     for o in general:layout master:orientation master:mfact master:new_status; do hyprctl getoption "$o" | head -1; done
+     hyprctl binds -j | jq -r '.[].description' | grep -c -e 'Cycle workspace layout: scrolling' -e '^Layout: '   # expect 4
+     sha256sum -c "$W/p620-before.sha"
+     hyprctl configerrors
+     ```
+   - Check 4 needs real key presses, because `cycle` and `by_layout` are local
+     closures that `hyprctl dispatch` cannot reach. Either drive them through
+     ai-mirror `input` (only if the user grants control), or ask the user to
+     press the keys. Read the result after each press from
+     `hyprctl activeworkspace -j` (tiledLayout), `hyprctl clients -j` (window
+     sizes and positions) and the state file. Report which checks the user
+     did.
 
    **Traps:**
    - First merge `origin/main` into the branch if `main` moved; a stale
@@ -264,9 +301,10 @@ These come from the spec and must all hold:
 7. **Roll out razer and verify** (Claude). Steps:
    - Announce on the bus, then run
      `AGENT_BUS_ANNOUNCED=1 ALLOW_BRANCH_DEPLOY=1 just deploy-via-p620 razer`
-   - Then, over SSH, with `HYPRLAND_INSTANCE_SIGNATURE` taken from
-     `/run/user/1000/hypr/`: `hyprctl reload`, then the spec's checks 3, 5
-     and 7
+   - Then, over SSH, with
+     `HYPRLAND_INSTANCE_SIGNATURE=$(ls -t /run/user/1000/hypr | head -1)`:
+     `hyprctl reload`, then the same check-3 and check-7 commands as step 6,
+     and `sha256sum -c` against `$W/razer-before.sha`
 
    **Traps:**
    - razer's `switch` may exit 4 from syncthing, which is cosmetic (repo
@@ -289,16 +327,36 @@ These come from the spec and must all hold:
 | Lua parses | `luac -p` on both built files | exit 0 |
 | Hosts build | `just test-host p620`, `just test-host razer` | both succeed |
 | Settings loaded | `hyprctl getoption general:layout`, `master:orientation`, `master:mfact`, `master:new_status` | `scrolling`, `right`, `0.65`, `slave` |
-| Keys loaded | `hyprctl binds -j \| jq` for the four descriptions | 4 matches |
+| Keys loaded | the `hyprctl binds -j` count in step 6 | 4 |
 | Behaviour | spec check 4 | as described |
 | Saved choices kept | checksums before and after | identical |
 | No errors | `hyprctl configerrors` | empty |
 
 ## Rollback
 
-- **Revert the PR** (or, before merge, switch p620 back to `main` with
-  `just quick-deploy p620`). Home Manager then removes both managed files.
-- **Then recreate `~/.config/hypr/autostart.lua`.** The seed restores it at
-  the next login. To restore it straight away, copy p620's content from this
-  plan's step 1 without the layouts line.
-- **Saved choices are never touched,** so there is nothing else to restore.
+For each host that was switched (p620, and razer once step 7 has run):
+
+1. **Go back to `main`.**
+   - **After merge:** revert the PR, then switch the host normally.
+   - **Before merge:** run the switch from the main checkout,
+     `~/.config/nixos`, which is on `main`. The task worktree is refused by
+     `_require-main`. Announce on the bus first, then:
+
+     ```bash
+     cd ~/.config/nixos && AGENT_BUS_ANNOUNCED=1 just quick-deploy p620
+     cd ~/.config/nixos && AGENT_BUS_ANNOUNCED=1 just deploy-via-p620 razer
+     ```
+
+   Home Manager then removes both managed files.
+2. **Restore `autostart.lua` straight away**, because Omarchy's `hyprland.lua`
+   requires it and the seed only restores it at the next login. Write
+   Omarchy's two comment lines; on p620, add the hyprflip line from step 1:
+
+   ```bash
+   printf '%s\n' '-- Extra autostart processes.' '-- o.launch_on_start("my-service")' > ~/.config/hypr/autostart.lua
+   printf '\n%s\n%s\n' '-- Hyprflip rotating cards (plugin installed by programs.hyprflip).' 'pcall(require, "hypr.hyprflip")' >> ~/.config/hypr/autostart.lua   # p620 only
+   ```
+3. **`hyprctl reload`** on the host. The old layout, master settings and four
+   keys stay in memory until then.
+
+Saved choices are never touched, so there is nothing else to restore.
