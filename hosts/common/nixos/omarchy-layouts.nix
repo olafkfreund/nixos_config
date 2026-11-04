@@ -124,6 +124,20 @@
         o.bind("SUPER + code:51", "Layout: swap column, swap into main window", by_layout({
           scrolling = "swapcol r", master = "swapwithmaster master",
         }))
+
+        -- shortcut: the direction is not saved, so a config reload returns every workspace to horizontal.
+        local directions = {}
+        o.bind("SUPER + CTRL + SHIFT + L", "Layout: flip scrolling between horizontal and vertical", function()
+          local ws = active()
+          if not ws or mode(ws) ~= "scrolling" then
+            return
+          end
+          local direction = directions[ws.id] == "down" and "right" or "down"
+          directions[ws.id] = direction
+          hl.workspace_rule({ workspace = tostring(ws.id), layout_opts = { direction = direction } })
+          -- The rule applies at the next re-tile; a zero resize forces one now.
+          hl.dispatch(hl.dsp.layout("colresize +0"))
+        end)
       '';
     };
   };
