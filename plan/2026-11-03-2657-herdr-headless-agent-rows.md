@@ -338,3 +338,41 @@ runs anything again.
     own PATH.
   - Self-test: 13 → 18 cases. `runner-signalled`, `socket-error`,
     `headless-term` and `term-resistant-child` fail on the previous code.
+- **Hotfix #2679 (2026-11-04): stdin is streamed, not read up front.**
+  - **The bug:** `herdr-run` read all of stdin before starting the command.
+    In Claude Code's Bash tool stdin is a socket that never sends EOF, so
+    calls without a redirect, such as the `second-opinion` agy calls and
+    `agent-run agy`, hung before the wrapped `timeout` even started. Two agy
+    reviews hung for 90 min.
+  - **The fix:** a non-terminal stdin is now a FIFO, fed by a background
+    `cat` that is killed on exit. The headless fallback kills the feeder
+    (still blocked opening the FIFO, so it has read nothing) and `exec`s
+    the command with the caller's stdin untouched. A terminal still gives
+    an empty input on the pane path.
+  - **Tests:** cases `stdin-never-closes` and `stdin-never-closes-headless`
+    (18 → 20); both fail on the previous code. The claim "Claude's Bash tool
+    always closes stdin" in an earlier deviation entry and in
+    `docs/applications/herdr.md` was wrong; the docs are corrected.
+- **#2679 review fixes (Codex `codex review`, agy, Opus):**
+  - **`kill -9` of the helper left the feeder:** a `cat` blocked forever on
+    a stdin that never closes. The runner now learns `feeder_pid` and kills
+    it once the helper is gone, checking the process is still a
+    `cat`/`herdr-run` copy.
+  - **Killing the helper's whole group before a runner started** left the
+    late runner blocked opening the FIFO with no writer, and the tab open
+    (a regression from the FIFO). The runner's watchdog now also kills its
+    still-pending `cpid`.
+  - **`stop_jobs` replaces the separate `marker_pid` and `feeder_pid`
+    kills** in `cleanup` and `headless`: it kills and *waits* for every
+    background job. This covers a feeder whose PID was not yet recorded
+    and never hits a reused PID. In the headless fallback it reaps the
+    feeder before the directory goes, so the feeder cannot recreate
+    `stdin` as a regular file and read the caller's input.
+  - **The feeder** takes stdin through an fd duplicated synchronously
+    (`3<&0`), and its stderr is `/dev/null`.
+  - **Call sites:** the `second-opinion` `codex review` and agy calls and
+    `agent-run agy` now redirect `< /dev/null`, so nothing depends on the
+    tool not reading stdin.
+  - **Tests:** 20 → 23. `helper-killed-open-stdin` and
+    `group-killed-before-runner` fail on the previous commit;
+    `headless-keeps-stdin` guards the reap-before-exec.

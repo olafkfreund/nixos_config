@@ -179,8 +179,9 @@ commands. Outside herdr it just runs the command.
 
 - Ctrl-C and a timeout stop the run and close the tab.
 - A run herdr loses exits 1 and is never re-run.
-- `herdr-run` reads all of stdin before it starts, so a stdin pipe that never
-  closes blocks it. Claude's Bash tool always closes stdin.
+- `herdr-run` streams stdin to the command through a FIFO and never reads it
+  up front, so a stdin that never closes (Claude Code's Bash tool gives a
+  socket) only matters to a command that actually reads it (#2679).
 
 ## Claude agent teams
 
