@@ -2652,11 +2652,11 @@
         "systems": "systems_9"
       },
       "locked": {
-        "lastModified": 1793805888,
-        "narHash": "sha256-D6hcYgB9FnRSHzNlV0lxslDlEdymcm/lQXX+XMATzck=",
+        "lastModified": 1793827339,
+        "narHash": "sha256-H5M3JHBlkg8hoYkYqu9uRSP8Dle4JOVKC9c54yKVi/U=",
         "owner": "olafkfreund",
         "repo": "nixarchy-meetingai",
-        "rev": "cc2e66873396d4cbde736daf846b48281484c520",
+        "rev": "1e3273d17ea705a247fa0d27791275a94ba7a0c7",
         "type": "github"
       },
       "original": {
