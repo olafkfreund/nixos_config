@@ -379,3 +379,37 @@ For each host that was switched (p620, and razer once step 7 has run):
    keys stay in memory until then.
 
 Saved choices are never touched, so there is nothing else to restore.
+
+## Run record
+
+- **Step 4:** p620 and razer build. Both built Lua files parse, and p510's
+  Home Manager files have no `layouts.lua`.
+- **Step 5:** three reviews ran on the code.
+  - **Codex:** no findings.
+  - **agy and Opus:** both found `os.execute` returning no status inside
+    Hyprland (fixed). Opus also found the layout keys trusting the saved file
+    over the live layout, a hidden `pcall` load error and an open file handle
+    (all fixed).
+  - **Refuted (Opus):** that the Atmos `layout = "scrolling"` line is
+    commented out. Line 58 of p620's `looknfeel.lua` is live.
+- **Step 6, p620, 2026-11-04.**
+  - **Static checks:** all passed — settings `scrolling`/`right`/`0.65`/
+    `slave`, 4 keys, no config errors, 7 of 7 saved files unchanged.
+  - **Key test:** driven through ai-mirror with the user's grant, on
+    workspace 9 with four foot windows:
+    - SUPER+SHIFT+L → master. One window at 1636 px on the right (65%), two
+      stacked on the left, saved. A 4th window joined the left stack.
+    - SUPER+] and SUPER+[ resized the main window, 1636 → 1763 → 1636.
+      SUPER+\ (keycode 51) swapped L4 into the main slot.
+    - Master survived `hyprctl reload`.
+    - SUPER+SHIFT+L → monocle: every window full size, saved. SUPER+] and
+      SUPER+[ cycled focus L4 → L2 → L4.
+    - SUPER+SHIFT+L → scrolling: the saved file was removed. SUPER+] widened
+      the column through the presets, and SUPER+\ swapped it.
+    - From floating (SUPER+L), SUPER+SHIFT+L tiled the windows into
+      scrolling.
+    - From dwindle (SUPER+L twice), SUPER+SHIFT+L went to scrolling.
+  - **Not verified:** that the dock hides after leaving floating. The
+    `omarchy-dock` layer stays mapped, so the window list cannot show it.
+- **Step 7, razer, rolled out via p620:** settings, 4 keys and no config
+  errors all checked. 4 of 4 saved files unchanged.
