@@ -338,3 +338,18 @@ runs anything again.
     own PATH.
   - Self-test: 13 → 18 cases. `runner-signalled`, `socket-error`,
     `headless-term` and `term-resistant-child` fail on the previous code.
+- **Hotfix #2679 (2026-11-04): stdin is streamed, not read up front.**
+  - **The bug:** `herdr-run` read all of stdin before starting the command.
+    In Claude Code's Bash tool stdin is a socket that never sends EOF, so
+    calls without a redirect, such as the `second-opinion` agy calls and
+    `agent-run agy`, hung before the wrapped `timeout` even started. Two agy
+    reviews hung for 90 min.
+  - **The fix:** a non-terminal stdin is now a FIFO, fed by a background
+    `cat` that is killed on exit. The headless fallback kills the feeder
+    (still blocked opening the FIFO, so it has read nothing) and `exec`s
+    the command with the caller's stdin untouched. A terminal still gives
+    an empty input on the pane path.
+  - **Tests:** cases `stdin-never-closes` and `stdin-never-closes-headless`
+    (18 → 20); both fail on the previous code. The claim "Claude's Bash tool
+    always closes stdin" in an earlier deviation entry and in
+    `docs/applications/herdr.md` was wrong; the docs are corrected.

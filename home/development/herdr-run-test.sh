@@ -318,3 +318,34 @@ for _ in {1..200}; do
 done
 if kill -0 "$(cat "$TEST_STATE/child-pid")" 2>/dev/null; then exit 1; fi
 ok term-resistant-child
+
+# stdin that never sends EOF (Claude Code's Bash tool gives a socket): a command
+# that does not read stdin still finishes, and no feeder is left behind (#2679)
+holders() {
+  local p n=0
+  for p in /proc/[0-9]*; do
+    [[ $(readlink "$p/fd/0" 2>/dev/null) == "$tmp/never" ]] && n=$((n + 1))
+  done
+  echo "$n"
+}
+mkfifo "$tmp/never"
+exec 7<>"$tmp/never"
+reset_state
+code=0
+timeout 20 "$tool" codex bash -c 'printf "hi\n"' <"$tmp/never" >"$tmp/out" 2>"$tmp/err" || code=$?
+assert_code 0
+[[ $(cat "$tmp/out") == hi ]]
+sleep 0.5
+[[ $(holders) == 0 ]]
+ok stdin-never-closes
+
+reset_state
+: >"$TEST_STATE/fail-tab-create"
+code=0
+timeout 20 "$tool" codex bash -c 'printf "hi\n"' <"$tmp/never" >"$tmp/out" 2>"$tmp/err" || code=$?
+assert_code 0
+[[ $(cat "$tmp/out") == hi ]]
+sleep 0.5
+[[ $(holders) == 0 ]]
+ok stdin-never-closes-headless
+exec 7>&-

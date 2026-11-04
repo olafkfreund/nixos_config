@@ -45,6 +45,7 @@ stop_group() {
 cleanup() {
   trap - EXIT
   if [[ -n ${marker_pid:-} ]]; then kill "$marker_pid" 2>/dev/null || :; fi
+  if [[ -n ${feeder_pid:-} ]]; then kill "$feeder_pid" 2>/dev/null || :; fi
   rm -rf -- "$dir"
 }
 # shellcheck disable=SC2329 # signal traps
@@ -66,7 +67,9 @@ interrupt() {
 headless() {
   trap - INT TERM HUP EXIT
   if [[ -n ${marker_pid:-} ]]; then kill "$marker_pid" 2>/dev/null || :; fi
-  exec 0<"$dir/stdin"
+  # The feeder is still blocked opening the FIFO, so it has read nothing:
+  # the command gets the caller's stdin untouched.
+  if [[ -n ${feeder_pid:-} ]]; then kill "$feeder_pid" 2>/dev/null || :; fi
   rm -rf -- "$dir"
   exec "$@"
 }
@@ -86,7 +89,17 @@ trap cleanup EXIT
 trap 'interrupt 130' INT
 trap 'interrupt 143' TERM
 trap 'interrupt 129' HUP
-if [[ -t 0 ]]; then : >"$dir/stdin"; else cat >"$dir/stdin"; fi
+# Stream stdin to the command through a FIFO; never read it up front. In
+# Claude Code's Bash tool stdin is a socket that never sends EOF (#2679).
+feeder_pid=
+if [[ -t 0 ]]; then
+  : >"$dir/stdin"
+else
+  mkfifo "$dir/stdin"
+  # explicit <&0, or an async command gets /dev/null as stdin
+  (exec cat >"$dir/stdin") <&0 &
+  feeder_pid=$!
+fi
 
 # The caller's exported environment, one `declare -p` per variable, so values
 # with newlines survive.
