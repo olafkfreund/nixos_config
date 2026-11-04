@@ -16,11 +16,12 @@ author: olafkfreund
 
   A theme change, a reinstall or a new host can therefore change the layout
   without the repo knowing.
-- **Two layouts can't be reached.** Hyprland 0.57 ships four tiled layouts:
+- **Two layouts have no key.** Hyprland 0.57 ships four tiled layouts:
   dwindle, scrolling, master and monocle. Omarchy's SUPER+L
   (`omarchy-hyprland-workspace-layout-toggle`) cycles only dwindle →
-  scrolling → floating, so master and monocle are installed but no key
-  reaches them.
+  scrolling → floating, and no other key switches layouts. Master and
+  monocle are installed, but reaching them takes a hand-typed `hyprctl`
+  command.
 - **The wanted arrangement doesn't exist.** The user wants one large window
   on the right with the other windows stacked small in a column on the left.
 - **Every layout setting is either Omarchy's default or hand-edited.**
@@ -29,14 +30,18 @@ author: olafkfreund
 
 ## Proposed outcome
 
-- **Same default everywhere.** p620 and razer both start every workspace in
-  `scrolling` after a deploy, whatever Atmos or the seeded files say.
+- **Same default on p620 and razer.** On both hosts, every workspace without
+  a saved SUPER+L choice starts in `scrolling` after a deploy, whatever Atmos
+  or the seeded files say.
 - **Big window on the right.** Switching a workspace to master puts one large
   window on the right and stacks the others in a column on the left. A new
-  window joins the left stack, and the big window stays where it is.
+  window joins the left stack, and the big window stays where it is. The big
+  window starts at a set share of the width and can still be resized.
 - **One key reaches master and monocle.** It cycles the current workspace
   through scrolling, master and monocle, and the choice is saved the same
-  way SUPER+L saves its choice. SUPER+L keeps working as it does now.
+  way SUPER+L saves its choice. SUPER+L is unchanged in this task: on a
+  master or monocle workspace it moves to dwindle, as it does today for any
+  layout outside its cycle.
 - **Layout-specific keys.** Inside each layout, a few keys do its common
   moves:
   - master: swap with the big window, grow or shrink it
@@ -44,19 +49,20 @@ author: olafkfreund
   - monocle: cycle windows
 - **Declared in the repo.** All of this is in this repo, shared by p620 and
   razer.
-- **Upstreamed to nixarchy.** A follow-up PR there adds:
-  - a supported load point for a user `hypr/layouts.lua` after `looknfeel`
-  - SUPER+L also cycling master and monocle
+
+Out of scope here, as a follow-up issue in nixarchy once this works locally:
+a supported way to load layout settings after `looknfeel`, and SUPER+L
+cycling master and monocle. When that lands, the extra key here can be
+retired.
 
 ## Affected users and systems
 
 - **Hosts:** p620 and razer, the Omarchy desktop session only. p510 is not
   touched.
-- **Repo:** a new shared file under `hosts/common/nixos/` (the
-  `omarchy-input.nix` pattern), imported by both hosts' `nixarchy.nix`.
-- **User files:** `~/.config/hypr/` on both hosts. One file becomes
-  Home Manager-managed.
-- **nixarchy:** a separate PR in that repo.
+- **Repo:** the shared Omarchy host config used by p620 and razer.
+- **User files:** `~/.config/hypr/` and the saved layout choices under
+  `~/.local/state/omarchy/workspace-layouts/` on both hosts.
+- **nixarchy:** only through the follow-up issue.
 
 ## Constraints
 
@@ -81,10 +87,10 @@ author: olafkfreund
 
 1. **Old saved layout choices.** The saved per-workspace choices predate this
    change: p620 has 1, 3, 13, 14, 22 (dwindle) and 4, 5 (scrolling); razer
-   has 1, 2, 6, 24. Should they be cleared so every workspace starts in
-   scrolling, or kept? **Proposed:** clear them once on deploy.
-2. **Which key cycles scrolling/master/monocle?** **Proposed:** SUPER+SHIFT+L,
-   which is free on both hosts.
-3. **How big is the big window?** **Proposed:** 65% of the width.
-4. **Should the nixarchy upstream PR be part of this task or a follow-up
-   issue in nixarchy?** **Proposed:** a follow-up, after this works locally.
+   has 1, 2, 6, 24. Keep them, or clear them so those workspaces also start
+   in scrolling? Clearing loses those preferences. If cleared, it is a
+   one-time manual step at rollout, never something every rebuild repeats.
+   No proposal: your call.
+
+The exact key, the big window's starting width and the file layout are
+design choices for the spec.
