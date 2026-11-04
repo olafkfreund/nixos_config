@@ -3164,11 +3164,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793803615,
-        "narHash": "sha256-6eBwKgsRbDT/UupdsTza9VLM977/VrGGoQE4ETHrlrk=",
+        "lastModified": 1793804435,
+        "narHash": "sha256-kSvZ91IAwyu94aDBSRfB7gOfUT1pigyXrCS9DI6Vk4k=",
         "owner": "olafkfreund",
         "repo": "nixoarchy-snowflake",
-        "rev": "32d407551c37a211204878a3981385539a9c159a",
+        "rev": "655bbe9522bf067101677fdbe8e4733b1dcd14f7",
         "type": "github"
       },
       "original": {
