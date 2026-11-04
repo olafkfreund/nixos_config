@@ -173,6 +173,15 @@
       inputs.home-manager.follows = "home-manager";
     };
 
+    # nixarchy-flea: Flea file manager (prebuilt upstream binaries in an FHS
+    # runtime); hosts/common/nixos/omarchy-flea.nix.
+    nixarchy-flea = {
+      url = "github:olafkfreund/nixarchy-flea";
+      inputs.nixpkgs.follows = "nixpkgs";
+      # Used only by nixarchy-flea's own checks; follow ours so the lock has one copy.
+      inputs.home-manager.follows = "home-manager";
+    };
+
     # ai-mirror: MCP server + bar indicator letting coding agents drive the
     # Omarchy desktop behind a kill switch (hosts/common/nixos/omarchy-ai-mirror.nix).
     # Tracks ai-mirror's default branch (master). Its PRs land as MERGE COMMITS,
