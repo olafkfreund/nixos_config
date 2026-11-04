@@ -190,6 +190,15 @@ in
     # Don't re-run it on switch — it loads models at next boot when DNS is up.
     systemd.services.ollama-model-loader.restartIfChanged = false;
 
+    # Wait up to 60 s for DNS at boot; on timeout still exit 0 so the pulls fail as before.
+    systemd.services.ollama-model-loader.preStart = ''
+      for ((i = 0; i < 60; i++)); do
+        ${pkgs.getent}/bin/getent hosts registry.ollama.ai >/dev/null && exit 0
+        sleep 1
+      done
+      exit 0
+    '';
+
     # Lower priority + higher OOM score: the user's interactive desktop
     # wins tiebreaks under contention.
     systemd.services.ollama.serviceConfig = {
