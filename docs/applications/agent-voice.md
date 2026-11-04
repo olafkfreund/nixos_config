@@ -10,8 +10,8 @@ headless media server and is not wanted.
 
 p620 writes the summary with its local Ollama. razer runs no Ollama, so it uses
 the **claude backend** (`summary.backend = "claude"`): `claude -p --model haiku`
-writes the summary, and the ElevenLabs key comes from agenix through
-`voice.elevenLabsKeyFile`, read at run time (the keyring has none there).
+writes the summary. On both hosts the ElevenLabs key comes from agenix through
+`voice.elevenLabsKeyFile`, read at run time.
 
 ## How it works
 
@@ -57,7 +57,7 @@ features.agentVoice.enable = true;
 | `agents.agy.enable` | `true` | Hook agy's Stop event |
 | `summary.backend` | `ollama` | `ollama` or `claude` (`claude -p`) |
 | `summary.claudeModel` | `haiku` | Model for the claude backend |
-| `voice.elevenLabsKeyFile` | `null` | Key file read at run time when `ELEVENLABS_API_KEY` is unset |
+| `voice.elevenLabsKeyFile` | `null` | Key file read at run time when `ELEVENLABS_API_KEY` is unset. When set, the narrator uses ElevenLabs with it, ignoring the keyring and omarchy-voice's `elevenlabs.enabled` |
 | `voice.elevenLabsVoiceId` | Lily | Narrator voice |
 | `summary.ollamaUrl` | `http://127.0.0.1:11434` | Where the summary is written |
 | `summary.model` | `qwen3:14b` | Summary model |
