@@ -54,6 +54,12 @@ in
       model = mkOption { type = types.str; default = "qwen3:14b"; description = "Ollama model that writes the summary."; };
     };
 
+    speaker = mkOption {
+      type = types.enum [ "agent-say" "nixi" ];
+      default = "agent-say";
+      description = "Who speaks the summary. \"agent-say\" is its own voice; \"nixi\" hands the summary to Nixi, falling back to agent-say's voice only when Nixi is not running.";
+    };
+
     minTurnSeconds = mkOption { type = types.int; default = 60; description = "Turns shorter than this stay silent."; };
     startEnabled = mkOption { type = types.bool; default = true; description = "Speak by default; `agent-say off` mutes at runtime."; };
 
@@ -92,7 +98,7 @@ in
       ollamaUrl = cfg.summary.ollamaUrl;
       inherit (cfg.summary) model backend claudeModel;
       elevenLabsKeyFile = cfg.voice.elevenLabsKeyFile;
-      inherit (cfg) minTurnSeconds startEnabled;
+      inherit (cfg) minTurnSeconds startEnabled speaker;
       microphoneGate = { inherit (cfg.microphoneGate) enable ignore; };
     };
 
