@@ -251,6 +251,36 @@ sudo systemctl restart k3d-cluster-bootstrap
 If Docker itself didn't start, that's a different problem — check
 `systemctl status docker`.
 
+Start the cluster through `sudo systemctl start k3d-cluster-bootstrap`, not
+a bare `k3d cluster start factory`. By hand, k3d fails with "Cannot
+activate DNS fix (K3D_FIX_DNS) when there's a file mounted at
+/etc/resolv.conf"; the bootstrap supplies the settings that avoid it.
+
+### Slow start: the datastore size line
+
+The kine/SQLite datastore (`server/db/state.db` in the server's volume)
+uses `auto_vacuum = FULL`, so the file shrinks when k3s compacts old
+revisions. Without it the file only grows. On p620 it reached 11.5 GB, 99.8%
+of it free pages, which k3s read at every start, so the cluster took 15+
+minutes to come back after a reboot (#2676).
+
+Each bootstrap logs one line:
+
+```text
+[k3d-bootstrap] datastore 24 MiB, wal 4 MiB, auto_vacuum=full
+```
+
+It logs at warning level when the db passes 2048 MiB, the WAL passes 256 MiB,
+or the mode is not `full`. New clusters get `auto_vacuum=full` from the
+`--datastore-endpoint` in `k3d cluster create`. If the warning appears on an
+existing cluster, stop it and run `PRAGMA auto_vacuum = FULL; VACUUM;` on a
+backed-up copy: `plan/2026-11-04-2676-p620-boot-k3d-dns.md` step 6 is the
+tested procedure.
+
+```bash
+sudo journalctl -u k3d-cluster-bootstrap -b | grep datastore
+```
+
 ### Full reset
 
 Destroys the cluster and all in-cluster PVC data. ArgoCD will re-sync
