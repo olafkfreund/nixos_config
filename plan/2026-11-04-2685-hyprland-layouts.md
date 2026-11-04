@@ -28,7 +28,10 @@ These come from the spec and must all hold:
   - nothing that restates Omarchy's dwindle or scrolling defaults
 - **`~/.config/hypr/autostart.lua`** is taken over. It keeps p620's current
   content (two comment lines and `pcall(require, "hypr.hyprflip")`) and adds
-  `pcall(require, "hypr.layouts")`. It loads after `looknfeel` (Atmos) and
+  `local layouts_ok, layouts_err = pcall(require, "hypr.layouts")
+if not layouts_ok then
+  hl.exec_cmd("omarchy-notification-send " .. o.shell_quote("hypr/layouts.lua failed: " .. tostring(layouts_err)))
+end`. It loads after `looknfeel` (Atmos) and
   before the saved SUPER+L choices (`default.hypr.toggles`), so the saved
   choices still win. Nothing is cleared.
 - **How a workspace's mode is read** matches
@@ -149,7 +152,11 @@ These come from the spec and must all hold:
              local saved
              if new == (saved_default() or DEFAULT) then
                os.remove(path)
-               saved = io.open(path, "r") == nil -- gone, or was never there
+               local left = io.open(path, "r")
+               saved = left == nil -- gone, or was never there
+               if left then
+                 left:close()
+               end
              else
                local f = o.shell_succeeds("mkdir -p " .. o.shell_quote(dir)) and io.open(path, "w")
                saved = f and f:write(string.format('o.workspace_mode({ workspace = "%s", mode = "%s" })\n', id, new)) ~= nil
@@ -165,7 +172,8 @@ These come from the spec and must all hold:
            local function by_layout(messages)
              return function()
                local ws = active()
-               local message = ws and messages[mode(ws)]
+               -- The saved file only tells floating apart; otherwise trust the live layout.
+               local message = ws and mode(ws) ~= "floating" and messages[ws.tiled_layout]
                if message then
                  hl.dispatch(hl.dsp.layout(message))
                end
@@ -207,6 +215,10 @@ These come from the spec and must all hold:
      `default.hypr.workspace-modes`, which is first required by
      `workspace-layouts.lua` after this file loads, so it is referenced only
      inside `cycle()`, at key-press time.
+   - Step 5 review deviations (Opus): the layout keys trust `tiled_layout`
+     except on a floating workspace; `autostart.lua` notifies when
+     `layouts.lua` fails to load instead of hiding it; the stale-file probe is
+     closed.
    - Hyprland reaps its own children, so `os.execute` returns no exit status
      inside the compositor; use Omarchy's `o.shell_succeeds` (`helpers.lua:25`).
      Deviation found in step 5 review (agy): the first draft used `os.execute`.

@@ -21,7 +21,10 @@
         -- Hyprflip rotating cards (plugin installed by programs.hyprflip).
         pcall(require, "hypr.hyprflip")
 
-        pcall(require, "hypr.layouts")
+        local layouts_ok, layouts_err = pcall(require, "hypr.layouts")
+        if not layouts_ok then
+          hl.exec_cmd("omarchy-notification-send " .. o.shell_quote("hypr/layouts.lua failed: " .. tostring(layouts_err)))
+        end
       '';
     };
 
@@ -83,7 +86,11 @@
           local saved
           if new == (saved_default() or DEFAULT) then
             os.remove(path)
-            saved = io.open(path, "r") == nil -- gone, or was never there
+            local left = io.open(path, "r")
+            saved = left == nil -- gone, or was never there
+            if left then
+              left:close()
+            end
           else
             local f = o.shell_succeeds("mkdir -p " .. o.shell_quote(dir)) and io.open(path, "w")
             saved = f and f:write(string.format('o.workspace_mode({ workspace = "%s", mode = "%s" })\n', id, new)) ~= nil
@@ -99,7 +106,8 @@
         local function by_layout(messages)
           return function()
             local ws = active()
-            local message = ws and messages[mode(ws)]
+            -- The saved file only tells floating apart; otherwise trust the live layout.
+            local message = ws and mode(ws) ~= "floating" and messages[ws.tiled_layout]
             if message then
               hl.dispatch(hl.dsp.layout(message))
             end
