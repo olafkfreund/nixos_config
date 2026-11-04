@@ -181,6 +181,11 @@ in
   #   agenix -e secrets/agent-bus-matrix-token.age
   "secrets/agent-bus-matrix-token.age".publicKeys = allUsers ++ allHosts;
 
+  # Nixi's fleet status token (nixi-nixarchy#168): the companion on p620 and
+  # razer sends it to nixi-status on every fleet host. Read-only status only.
+  #   head -c 32 /dev/urandom | base64 | agenix -e secrets/nixi-status-token.age
+  "secrets/nixi-status-token.age".publicKeys = allUsers ++ allHosts;
+
   # ntfy-sh environment file (EnvironmentFile) on p510 — push notification
   # server. Contains: NTFY_AUTH_DEFAULT_ACCESS (deny-all for public instance).
   # Add admin user post-deploy with: ssh p510 -- sudo ntfy user add --role=admin <user>
