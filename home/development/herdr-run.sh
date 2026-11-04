@@ -41,11 +41,20 @@ stop_group() {
   done
   kill_group KILL || :
 }
+# Stop and reap every background job (marker, stdin feeder). jobs -p also
+# covers a feeder whose PID was not recorded yet, and never names a reused PID.
+stop_jobs() {
+  local pids
+  pids=$(jobs -p) || :
+  [[ -n $pids ]] || return 0
+  # shellcheck disable=SC2086 # one PID per word
+  kill $pids 2>/dev/null || :
+  wait 2>/dev/null || :
+}
 # shellcheck disable=SC2329 # EXIT trap
 cleanup() {
   trap - EXIT
-  if [[ -n ${marker_pid:-} ]]; then kill "$marker_pid" 2>/dev/null || :; fi
-  if [[ -n ${feeder_pid:-} ]]; then kill "$feeder_pid" 2>/dev/null || :; fi
+  stop_jobs
   rm -rf -- "$dir"
 }
 # shellcheck disable=SC2329 # signal traps
@@ -66,10 +75,10 @@ interrupt() {
 # herdr-run reaches the command itself.
 headless() {
   trap - INT TERM HUP EXIT
-  if [[ -n ${marker_pid:-} ]]; then kill "$marker_pid" 2>/dev/null || :; fi
-  # The feeder is still blocked opening the FIFO, so it has read nothing:
-  # the command gets the caller's stdin untouched.
-  if [[ -n ${feeder_pid:-} ]]; then kill "$feeder_pid" 2>/dev/null || :; fi
+  # The feeder is still blocked opening the FIFO (no reader ever opened it),
+  # so it has read nothing; it is reaped before the directory goes, so it
+  # cannot recreate stdin as a file. The command gets the caller's stdin.
+  stop_jobs
   rm -rf -- "$dir"
   exec "$@"
 }
@@ -96,8 +105,9 @@ if [[ -t 0 ]]; then
   : >"$dir/stdin"
 else
   mkfifo "$dir/stdin"
-  # explicit <&0, or an async command gets /dev/null as stdin
-  (exec cat >"$dir/stdin") <&0 &
+  # fd 3 is duplicated synchronously, so the async feeder surely reads the
+  # caller's stdin; its stderr is closed so it never holds the caller's pipe.
+  { (exec cat >"$dir/stdin" 2>/dev/null) <&3 3<&- & } 3<&0
   feeder_pid=$!
 fi
 
@@ -129,7 +139,7 @@ done
   printf 'cmd=('
   printf '%q ' "$@"
   printf ')\n'
-  printf 'helper_pid=%q\nlabel=%q\ntitle=%q\nscale=%q\nherdr_bin=%q\n' "$$" "$label" "$title" "$scale" "${HERDR_BIN_PATH:-herdr}"
+  printf 'helper_pid=%q\nfeeder_pid=%q\nlabel=%q\ntitle=%q\nscale=%q\nherdr_bin=%q\n' "$$" "$feeder_pid" "$label" "$title" "$scale" "${HERDR_BIN_PATH:-herdr}"
   cat <<'RUNNER'
 mkdir claim || exit 0
 printf '%s\n' "$$" > runner.pid.tmp && mv runner.pid.tmp runner.pid
@@ -154,6 +164,14 @@ stop_group() {
   for _ in 1 2 3 4 5 6 7 8 9 10; do kill_group 0 || return 0; sleep_for 0.5; done
   kill_group KILL
 }
+# With the helper gone nobody else stops its stdin feeder (it would block
+# forever on a stdin that never closes). Only a process that is still a cat
+# or a herdr-run copy is killed, so a reused PID is left alone.
+kill_feeder() {
+  [[ -n ${feeder_pid:-} ]] || return 0
+  grep -qa -E 'cat|herdr-run' "/proc/$feeder_pid/cmdline" 2>/dev/null || return 0
+  kill "$feeder_pid" 2>/dev/null
+}
 finish() {
   trap - EXIT
   trap '' HUP INT TERM
@@ -164,7 +182,7 @@ finish() {
   if [[ ! -e $dir/status ]]; then printf 'lost\n' > "$dir/status.tmp" && mv "$dir/status.tmp" "$dir/status"; fi
   if [[ -n ${watchdog_pid:-} ]]; then kill "$watchdog_pid" 2>/dev/null; fi
   # with the helper gone nobody else cleans up
-  if [[ -z $helper_alive ]]; then rm -rf -- "$dir"; close_pane; fi
+  if [[ -z $helper_alive ]]; then kill_feeder; rm -rf -- "$dir"; close_pane; fi
 }
 trap finish EXIT
 trap 'exit 129' HUP
@@ -186,7 +204,10 @@ done
 read -r pgid < cmd.pgid 2>/dev/null || pgid=
 (
   while sleep_for 2; do
-    if ! kill -0 "$helper_pid" 2>/dev/null; then stop_group; exit 0; fi
+    if ! kill -0 "$helper_pid" 2>/dev/null; then
+      # cpid may still be blocked opening stdin (no group yet), so end it too
+      stop_group; kill_feeder; kill "$cpid" 2>/dev/null; exit 0
+    fi
   done
 ) &
 watchdog_pid=$!
@@ -272,7 +293,6 @@ report working
   sleep_for 9
   mark
 ) &
-marker_pid=$!
 
 # Wait in 1 s steps so a signal is handled promptly. Every 5 s check that the
 # pane and runner still exist; two misses in a row mean the run is lost.
