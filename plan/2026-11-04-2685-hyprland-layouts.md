@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2685
 spec: spec/2026-11-04-2685-hyprland-layouts.md
 coders:
