@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2694
 intent: intent/2026-11-04-2694-flea-file-manager.md
 ---
