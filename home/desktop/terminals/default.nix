@@ -148,12 +148,13 @@ in
           # Appearance — keep native GNOME window decorations so the window
           # has a titlebar + min/max/close buttons. Previously this was
           # `true` which left Kitty borderless and hard to manage in GNOME.
-          window_margin_width = 8;
+          window_padding_width = 8;
+          scrollbar = "scrolled-or-hovered";
+          show_hyperlink_targets = "ctrl";
           hide_window_decorations = false;
           # Theme the CSD titlebar to the terminal background (Stylix)
           # instead of the default white "system" colour. Applies wherever Kitty
-          # draws its own decorations (GNOME, and niri/labwc for clients that
-          # ignore prefer-no-csd).
+          # draws its own decorations (GNOME).
           wayland_titlebar_color = "background";
           placement_strategy = "center";
           background_opacity = mkDefault (
@@ -229,7 +230,8 @@ in
           "${commonKeybinds.prevTab}" = "previous_tab";
           "ctrl+shift+enter" = "new_window";
           "ctrl+shift+l" = "next_layout";
-          "ctrl+shift+f" = "show_scrollback";
+          "ctrl+shift+f" = "search_scrollback";
+          "ctrl+shift+y" = "copy_last_command_output";
         };
 
         extraConfig =
@@ -242,12 +244,8 @@ in
           ''
           + optionalString cfg.features.mouseSupport ''
 
-            # Mouse mappings
-            mouse_map left press ungrabbed mouse_selection normal
-            mouse_map left doublepress ungrabbed mouse_selection word
-            mouse_map left triplepress ungrabbed mouse_selection line
+            # Right-click pastes; the other buttons keep kitty's defaults
             mouse_map right press ungrabbed mouse_paste
-            mouse_map middle release ungrabbed paste_from_selection
           '';
 
         shellIntegration = mkIf cfg.features.shellIntegration {
