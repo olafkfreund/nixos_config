@@ -21,7 +21,7 @@ intent: intent/2026-11-04-2694-flea-file-manager.md
 ### Files
 
 ```text
-flake.nix                                  + input nixarchy-flea (nixpkgs follows)
+flake.nix                                  + input nixarchy-flea (nixpkgs + home-manager follow)
 hosts/common/nixos/omarchy-flea.nix        new: NixOS + HM wiring, header with the one-time steps
 hosts/p620/nixos/nixarchy.nix              + import ../../common/nixos/omarchy-flea.nix
 hosts/razer/nixos/nixarchy.nix             + import ../../common/nixos/omarchy-flea.nix
@@ -37,11 +37,10 @@ Next to the other `nixarchy-*` inputs:
 nixarchy-flea = {
   url = "github:olafkfreund/nixarchy-flea";
   inputs.nixpkgs.follows = "nixpkgs";
+  # Used only by nixarchy-flea's own checks; follow ours so the lock has one copy.
+  inputs.home-manager.follows = "home-manager";
 };
 ```
-
-`nixarchy-flea` also has a `home-manager` input, used only by its own checks.
-`inputs.home-manager.follows = "home-manager"` keeps the lock from carrying a second copy.
 
 ### `hosts/common/nixos/omarchy-flea.nix`
 
@@ -88,11 +87,13 @@ app with an HM bind file:
 The header comment states:
 
 - what Flea is, and that the package registers the portal backend and FileManager1;
-- the two one-time steps per machine:
-  1. append `pcall(require, "hypr.flea-binds")` at the **end** of
-     `~/.config/hypr/bindings.lua`. It must come after Omarchy's defaults, which
-     `hyprland.lua` loads first, so that Flea's `hl.unbind` replaces Nautilus's keys.
-  2. before the first switch: `mv ~/.config/xdg-desktop-portal/hyprland-portals.conf{,.pre-flea}`.
+- the one-time step per machine: append `pcall(require, "hypr.flea-binds")` at the **end**
+  of `~/.config/hypr/bindings.lua`. It must come after Omarchy's defaults, which
+  `hyprland.lua` loads first, so that Flea's `hl.unbind` replaces Nautilus's keys. It is
+  safe to add before the deploy, because `pcall` ignores a missing file.
+- no manual move of the mutable `hyprland-portals.conf`. This repo's `home-manager.backupCommand`
+  (`flake.nix`) moves a conflicting file to `~/.hm-backups/<timestamp>/` on the switch. A
+  manual `mv` after the switch would move the new HM symlink instead (agy).
 - never to use `flea --default`, `--picker` or Settings > About on these hosts.
 
 **Repo rule 1 ("services belong in `modules/`")**: the NixOS module defines no service of
@@ -110,16 +111,24 @@ Each host gets one line, next to `../../common/nixos/omarchy-ai-mirror.nix`, in
 
 ## Rollout (test deploy, then PR)
 
-1. `just test-host p620` and `just test-host razer` from the worktree.
-2. Agent bus: `read_new("#agents:freundcloud.org.uk")`, then `post` the deploy plan.
-3. p620: from the worktree, `ALLOW_BRANCH_DEPLOY=1 just p620`.
-4. The owner adds the `pcall` line and moves the portal file aside (on p620), then logs out
-   and in (or restarts the portal service and reloads Hyprland).
-5. Runtime checks 7–10 and the portal routing check on p620 (Verification).
-6. razer: `ALLOW_BRANCH_DEPLOY=1 just deploy-via-p620 razer`, the same two one-time steps,
-   then spot checks.
-7. Open the PR to `main`. After merge, the normal `main` deploys bring both hosts back onto
+1. `just validate`, `just test-host p620` and `just test-host razer` from the worktree.
+2. The owner adds the `pcall` line on p620 (safe before the deploy).
+3. Agent bus for p620: `read_new("#agents:freundcloud.org.uk")`, then `post` "deploying p620
+   from feat/2694 (Flea), ~5 min". If someone is mid-flight, wait.
+4. p620: `AGENT_BUS_ANNOUNCED=1 ALLOW_BRANCH_DEPLOY=1 just p620` from the worktree. HM backs up
+   the mutable `hyprland-portals.conf` to `~/.hm-backups/`.
+5. The owner logs out and in, so the portal and Hyprland pick up the new files.
+6. Runtime checks 7–10 and P on p620 (Verification).
+7. razer: the `pcall` line there, a fresh bus read and post, then
+   `AGENT_BUS_ANNOUNCED=1 ALLOW_BRANCH_DEPLOY=1 just deploy-via-p620 razer`, a re-login, and spot
+   checks.
+8. Open the PR to `main`. After merge, the normal `main` deploys bring both hosts back onto
    `main` with the same config.
+
+Rollback: `just p620` / `just deploy-via-p620 razer` from `main`. That removes Flea and the
+HM portal file, and the system `hyprland-portals.conf` (from `pkgs.hyprland`) then applies.
+That file keeps ScreenCast on hyprland but lacks the `Secret=gnome-keyring` line, so also
+restore the old user file from `~/.hm-backups/<timestamp>/.config/xdg-desktop-portal/` (agy).
 
 ## Alternatives rejected
 
@@ -137,11 +146,11 @@ Each host gets one line, next to `../../common/nixos/omarchy-ai-mirror.nix`, in
 | Risk | Mitigation |
 |---|---|
 | Screen sharing regresses: the user `hyprland-portals.conf` now overrides the system one | The file keeps `default=hyprland;gtk` and has no ScreenCast key, so ScreenCast falls through to `hyprland`. Verified by a screen-share test (check P). |
-| HM refuses to clobber the mutable `hyprland-portals.conf` or `mimeapps.list` | `mimeapps.list` is HM-managed already (checked). The portal file is moved aside first (rollout 4). If activation still fails, `home-manager-olafkfreund.service` says which file. |
+| HM meets the mutable `hyprland-portals.conf` | `backupCommand` moves it to `~/.hm-backups/` (checked in `flake.nix`). `mimeapps.list` is HM-managed already (checked). If activation fails, `home-manager-olafkfreund.service` says which file. |
 | Nautilus still wins "Show in folder" | The HM file in `~/.local/share/dbus-1/services` is read before system files. Check 7 verifies it. |
 | Super+Shift+F still opens Nautilus | The `pcall` line goes at the end of `bindings.lua`. Check 9. |
 | A branch deploy is left running if the PR stalls | The PR is opened right after the checks. `just p620` from `main` reverts. |
-| razer's build on p620 takes long | Flea itself is a download; only the FHS env is assembled. |
+| razer's build on p620 takes long | Flea is not compiled, but `htmlPreview` (qt6-webengine) and the optional packages make a large closure. They come from `cache.nixos.org`, so it is mostly download time. |
 
 ## Verification
 
