@@ -107,6 +107,7 @@ saved SUPER+L choices, which still win.
 | SUPER+SHIFT+L | to master | to monocle | to scrolling |
 | SUPER+[ / SUPER+] | narrower / wider column | smaller / bigger main window | previous / next window |
 | SUPER+# (US `\`) | swap column | swap into main window | — |
+| SUPER+CTRL+SHIFT+L | horizontal / vertical strip (not kept across a config reload) | — | — |
 
 Master puts the big window on the right at 65%; new windows stack on the left.
 SUPER+L still cycles dwindle, scrolling and floating only: on master or monocle
