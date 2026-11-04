@@ -151,7 +151,7 @@ These come from the spec and must all hold:
                os.remove(path)
                saved = io.open(path, "r") == nil -- gone, or was never there
              else
-               local f = os.execute("mkdir -p " .. o.shell_quote(dir)) and io.open(path, "w")
+               local f = o.shell_succeeds("mkdir -p " .. o.shell_quote(dir)) and io.open(path, "w")
                saved = f and f:write(string.format('o.workspace_mode({ workspace = "%s", mode = "%s" })\n', id, new)) ~= nil
                saved = (f and f:close() and saved) or false
              end
@@ -207,6 +207,9 @@ These come from the spec and must all hold:
      `default.hypr.workspace-modes`, which is first required by
      `workspace-layouts.lua` after this file loads, so it is referenced only
      inside `cycle()`, at key-press time.
+   - Hyprland reaps its own children, so `os.execute` returns no exit status
+     inside the compositor; use Omarchy's `o.shell_succeeds` (`helpers.lua:25`).
+     Deviation found in step 5 review (agy): the first draft used `os.execute`.
    - Hyprland embeds Lua 5.5 (checked live), which keeps `io` and `os`.
      `f:read("*a")` is still accepted there.
    - The Hyprland 0.57 `layoutmsg` strings are not checked at build time;

@@ -85,7 +85,7 @@
             os.remove(path)
             saved = io.open(path, "r") == nil -- gone, or was never there
           else
-            local f = os.execute("mkdir -p " .. o.shell_quote(dir)) and io.open(path, "w")
+            local f = o.shell_succeeds("mkdir -p " .. o.shell_quote(dir)) and io.open(path, "w")
             saved = f and f:write(string.format('o.workspace_mode({ workspace = "%s", mode = "%s" })\n', id, new)) ~= nil
             saved = (f and f:close() and saved) or false
           end
