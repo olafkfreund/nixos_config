@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2685
 author: olafkfreund
 ---
@@ -85,12 +85,9 @@ retired.
 
 ## Open questions
 
-1. **Old saved layout choices.** The saved per-workspace choices predate this
-   change: p620 has 1, 3, 13, 14, 22 (dwindle) and 4, 5 (scrolling); razer
-   has 1, 2, 6, 24. Keep them, or clear them so those workspaces also start
-   in scrolling? Clearing loses those preferences. If cleared, it is a
-   one-time manual step at rollout, never something every rebuild repeats.
-   No proposal: your call.
+1. **Old saved layout choices.** Decided 2026-11-04: **keep** them. The
+   saved choices on p620 and razer stay, and keep overriding the default for
+   their workspaces. Nothing is cleared.
 
 The exact key, the big window's starting width and the file layout are
 design choices for the spec.
