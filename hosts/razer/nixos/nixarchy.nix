@@ -34,6 +34,7 @@
     ../../common/nixos/omarchy-screenshots.nix
     ../../common/nixos/omarchy-ai-mirror.nix
     ../../common/nixos/omarchy-nixi-companion.nix
+    ../../common/nixos/nixi-fleet.nix
     ../../common/nixos/omarchy-microvm.nix
     ../../common/nixos/omarchy-omadroid.nix
     ../../common/nixos/omarchy-altscape.nix

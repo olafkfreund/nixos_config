@@ -420,6 +420,7 @@
           modules =
             [
               { nixpkgs.overlays = overlays; }
+              { system.configurationRevision = inputs.self.rev or inputs.self.dirtyRev or null; }
               ./hosts/${host}/configuration.nix
               nur.modules.nixos.default
               home-manager.nixosModules.home-manager
