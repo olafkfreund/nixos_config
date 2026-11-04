@@ -274,6 +274,7 @@ These come from the spec and must all hold:
      sha256sum ~/.local/state/omarchy/workspace-layouts/*.lua > "$W/p620-before.sha"
      ssh razer 'sha256sum ~/.local/state/omarchy/workspace-layouts/*.lua' > "$W/razer-before.sha"
      ```
+
    - Announce on the bus, then run
      `AGENT_BUS_ANNOUNCED=1 ALLOW_BRANCH_DEPLOY=1 just quick-deploy p620`
    - Run `hyprctl reload`
@@ -285,6 +286,7 @@ These come from the spec and must all hold:
      sha256sum -c "$W/p620-before.sha"
      hyprctl configerrors
      ```
+
    - Check 4 needs real key presses, because `cycle` and `by_layout` are local
      closures that `hyprctl dispatch` cannot reach. Either drive them through
      ai-mirror `input` (only if the user grants control), or ask the user to
@@ -356,6 +358,7 @@ For each host that was switched (p620, and razer once step 7 has run):
    printf '%s\n' '-- Extra autostart processes.' '-- o.launch_on_start("my-service")' > ~/.config/hypr/autostart.lua
    printf '\n%s\n%s\n' '-- Hyprflip rotating cards (plugin installed by programs.hyprflip).' 'pcall(require, "hypr.hyprflip")' >> ~/.config/hypr/autostart.lua   # p620 only
    ```
+
 3. **`hyprctl reload`** on the host. The old layout, master settings and four
    keys stay in memory until then.
 

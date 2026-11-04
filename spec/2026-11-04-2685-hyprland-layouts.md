@@ -44,6 +44,7 @@ don't depend on the keyboard layout.
 reads it, because Omarchy's floating mode keeps the workspace's old tiled
 layout underneath (`workspace-modes.lua:396`), so `tiled_layout` alone would
 call a floating workspace "scrolling" or "master". In order, the mode is:
+
 1. `mode = "<x>"` from `$XDG_STATE_HOME/omarchy/workspace-layouts/<id>.lua`
 2. otherwise `default = "<x>"` from `workspace-layouts/default.lua`
 3. otherwise `hl.get_active_workspace().tiled_layout` (checked live on p620:
