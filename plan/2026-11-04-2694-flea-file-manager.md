@@ -171,6 +171,11 @@ Repo traps (AGENTS.md):
    plus Codex and agy (read-only). After you merge, the normal `main` deploys (`just p620`,
    `just deploy-via-p620 razer`) bring both hosts back onto `main`.
 
+**Deviation (found in step 3):** `backupCommand` receives the file's **absolute** path,
+so the backup is `~/.hm-backups/<timestamp>/home/olafkfreund/.config/xdg-desktop-portal/hyprland-portals.conf`,
+not `~/.hm-backups/<timestamp>/.config/…`. The rollback command and the module header
+are corrected.
+
 ## Tests
 
 | Command | Expected |
@@ -193,7 +198,7 @@ Then, **on that host** (`ssh razer` for razer), restore the newest backup of the
 portal file and reload the portal:
 
 ```bash
-b=$(ls -d ~/.hm-backups/*/.config/xdg-desktop-portal/hyprland-portals.conf | sort | tail -1)
+b=$(ls -d ~/.hm-backups/*"$HOME"/.config/xdg-desktop-portal/hyprland-portals.conf | sort | tail -1)
 mkdir -p ~/.config/xdg-desktop-portal && cp "$b" ~/.config/xdg-desktop-portal/
 systemctl --user restart xdg-desktop-portal
 ```

@@ -11,7 +11,7 @@
 #   Flea's hl.unbind replaces Nautilus's keys. pcall makes it safe before the deploy.
 #
 # The first switch backs up the old mutable ~/.config/xdg-desktop-portal/hyprland-portals.conf
-# to ~/.hm-backups/<timestamp>/ (home-manager.backupCommand in flake.nix). After a
+# to ~/.hm-backups/<timestamp>/$HOME/... (backupCommand gets the absolute path). After a
 # rollback, restore it from there: it carries the Secret=gnome-keyring line.
 #
 # Never use `flea --default`, `flea --picker` or Flea's Settings > About switch here:
