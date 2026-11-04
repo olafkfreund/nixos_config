@@ -244,6 +244,10 @@ let
           return 0
         fi
         db_mib=$(stat -c %s "$db") || return 0
+        if [ "$db_mib" -lt 100 ]; then
+          echo "[k3d-bootstrap] datastore: header unreadable ($db_mib bytes)" || return 0
+          return 0
+        fi
         db_mib=$((db_mib / 1048576))
         wal_mib=$(stat -c %s "$wal" 2>/dev/null || echo 0) || return 0
         wal_mib=$((wal_mib / 1048576))
@@ -306,7 +310,8 @@ let
         # upstream lookup of k3d-<cluster>-server-0 to public DNS, nginx exits,
         # and the create never gets "start worker processes". Found in the
         # #1497 rehearsal.
-        # Defaults came from the pinned k3sImage binary; reread when it changes.
+        # --datastore-endpoint below is k3s v1.31.5's default sqlite DSN (read from the
+        # pinned k3sImage binary) plus _auto_vacuum=full (#2676); reread it when k3sImage changes.
         ${pinned}k3d cluster create "$CLUSTER" \
           --image "${cfg.k3sImage}" \
           --api-port "${cfg.apiHostBind}:$API_PORT" \
