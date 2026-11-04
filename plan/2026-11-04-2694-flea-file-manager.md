@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2694
 spec: spec/2026-11-04-2694-flea-file-manager.md
 coders:
