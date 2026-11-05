@@ -98,9 +98,9 @@ seed does not overwrite, a Home Manager file competing for the same path needs
 ## Layouts
 
 New workspaces open in the scrolling layout. The default is set in
-`hosts/common/nixos/omarchy-layouts.nix` and loaded from `autostart.lua`, which
-runs after Atmos's `looknfeel` (so it overrides that default) and before the
-saved SUPER+L choices, which still win.
+`hosts/common/nixos/omarchy-layouts.nix` and loaded by the store's
+`hyprland.lua` since nixarchy#1598, after Atmos's `looknfeel` (so it overrides
+that default) and before the saved SUPER+L choices, which still win.
 
 | Keys | Scrolling | Master | Monocle |
 | --- | --- | --- | --- |
@@ -111,8 +111,126 @@ saved SUPER+L choices, which still win.
 
 Master puts the big window on the right at 65%; new windows stack on the left.
 SUPER+L still cycles dwindle, scrolling and floating only: on master or monocle
-it goes to dwindle, and the bar shows the dwindle square for both. A nixarchy
-follow-up will add a load point, SUPER+L cycling master and monocle, and icons.
+it goes to dwindle, and the bar shows the dwindle square for both.
+
+## Keys
+
+Shared keys are declared as data in `hosts/common/nixos/omarchy-keys.nix`,
+imported by p620 and razer. It writes `~/.config/hypr/repo-keys.lua` and
+`repo-keys.json`, and `autostart.lua` loads the Lua after `bindings.lua`. Each
+declared key runs `hl.unbind` then `o.bind`, so the repo wins on a declared chord.
+Keys on other chords that were added by hand keep working. p510 does not import
+the module. Chords are written `SUPER+CTRL+ALT+SHIFT+K`: modifiers in that order,
+no spaces.
+
+### Declared keys (both hosts)
+
+| Chord | Description |
+| --- | --- |
+| `SUPER+CTRL+M` | Gmail (freundcloud) |
+| `SUPER+CTRL+SHIFT+M` | New email (freundcloud) |
+| `SUPER+SHIFT+C` | Calendar (freundcloud) |
+| `SUPER+CTRL+J` | AI Kit |
+| `SUPER+CTRL+SHIFT+D` | New Google Doc (freundcloud) |
+| `SUPER+CTRL+SHIFT+S` | New Google Sheet (freundcloud) |
+| `SUPER+CTRL+SHIFT+P` | New Google Slides (freundcloud) |
+| `SUPER+SHIFT+S` | Google Maps |
+| `SUPER+SHIFT+P` | Google Photos |
+| `SUPER+CTRL+SHIFT+G` | Google Messages |
+| `SUPER+ALT+SHIFT+G` | WhatsApp |
+| `SUPER+E` | Exposé |
+| `SUPER+H` | Nixi (nixarchy help) |
+| `SUPER+M` | Toggle voice control |
+| `SUPER+N` | Minimize window to the dock |
+| `SUPER+SHIFT+H` | Herdr sessions menu |
+| `SUPER+ALT+A` | GitHub Actions |
+| `SUPER+CTRL+ALT+A` | GitHub Actions keybindings |
+| `SUPER+ALT+P` | GitLab Pipelines |
+| `SUPER+CTRL+ALT+P` | GitLab Pipelines keybindings |
+| `SUPER+ALT+B` | Bar settings |
+| `SUPER+ALT+Q` | Quick actions |
+| `SUPER+ALT+N` | nixarchy packages |
+| `SUPER+ALT+E` | Dev environments |
+| `SUPER+ALT+D` | Distrobox |
+| `SUPER+ALT+O` | Podman |
+| `SUPER+SHIFT+K` | OmaFob |
+
+### Per-host keys
+
+| Chord | Description |
+| --- | --- |
+| `SUPER+CTRL+ALT+G` | Govee lights |
+
+Govee is p620 only. razer gets Exposé, Dev environments, Distrobox and Podman
+from the shared list; Govee and Meeting AI stay p620 only.
+
+Unbound on both hosts: `SUPER+SHIFT+E` and `SUPER+SHIFT+ALT+E`.
+
+### External keys
+
+These are bound by other repo modules or plugins. They are declared so the check
+sees them and the menu lists them, but `omarchy-keys.nix` does not bind them.
+
+| Chord | Description |
+| --- | --- |
+| `SUPER+ALT+I` | Agent voice: tell me more |
+| `SUPER+ALT+SHIFT+V` | Agent voice: toggle spoken summaries on/off |
+| `SUPER+SHIFT+ESCAPE` | ai-mirror: stop agent control |
+| `ALT+TAB` | Altscape: next window |
+| `ALT+SHIFT+TAB` | Altscape: previous window |
+| `SUPER+ALT+SHIFT+W` | Altscape settings |
+| `SUPER+SHIFT+V` | New Google Meet (link copied) |
+| `SUPER+CTRL+ALT+M` | Meeting record/transcribe/summarize |
+| `SUPER+ALT+V` | MicroVMs |
+| `SUPER+ALT+H` | Nixi companion: show or hide |
+| `SUPER+ALT+SHIFT+S` | Nixi companion: listen |
+| `SUPER+ALT+U` | Plugin browser |
+| `SUPER+SHIFT+L` | Cycle workspace layout: scrolling, master, monocle |
+| `SUPER+CTRL+SHIFT+L` | Layout: flip scrolling between horizontal and vertical |
+
+p620 only (Meeting AI):
+
+| Chord | Description |
+| --- | --- |
+| `SUPER+ALT+M` | Meeting AI overlay |
+| `SUPER+ALT+T` | Meeting AI: start recording |
+| `SUPER+ALT+SHIFT+T` | Meeting AI: stop recording |
+| `SUPER+ALT+SHIFT+N` | Meeting AI: toggle microphone |
+| `SUPER+ALT+Y` | Meeting AI: toggle system audio |
+| `SUPER+ALT+SHIFT+P` | Meeting AI: screenshot |
+
+### Keys that are not declared
+
+- Omgato (plugin-owned): `SUPER+CTRL+ALT+L` lights, `SUPER+ALT+R` record area,
+  `SUPER+ALT+SHIFT+R` stop.
+- The layout keys on `code:` keycodes (SUPER+[, SUPER+] and SUPER+#, in the
+  Layouts table) and Altscape's `ALT+Alt_L` and `ALT+Alt_R`. `hyprctl binds`
+  doesn't name them as chords, so the check skips them.
+- Vimarchy's submap and `ALT+SPACE`, which stay in `bindings.lua`.
+- Hyprforge is dormant: its optional file would use `SUPER+ALT+H` and
+  `SUPER+ALT+SHIFT+P`, which now belong to Nixi companion and Meeting AI. If it
+  returns, one side has to move.
+
+### Changing a key
+
+Edit `shared` or the host's `extra` in `omarchy-keys.nix` or the host's
+`nixarchy.nix`, update the row above, and deploy. Hyprland reloads when the
+files change. Do not add a declared key to `bindings.lua`: the repo unbinds that
+chord first.
+
+### Checking keys
+
+`hypr-keys-check` compares `repo-keys.json` with `hyprctl binds -j` and
+`omarchy-menu-keybindings --print`. It fails on a missing key, a wrong
+description, a key absent from the menu, a still-bound `unbind` chord and a
+chord bound twice. `--keys FILE` reads another declaration and `--docs FILE`
+also requires each chord and description to share a line in that file:
+
+```bash
+hypr-keys-check --docs docs/architecture/desktop.md
+```
+
+Run it inside a live session; `hyprctl` is not useful outside one.
 
 ## Theming: Omarchy is the source of truth
 

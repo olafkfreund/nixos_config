@@ -50,6 +50,11 @@ let
   '';
 in
 {
+  imports = [
+    ./omarchy-bar-free-once.nix
+    ./omarchy-keys-check.nix
+  ];
+
   options.local.omarchy.keys = {
     shared = lib.mkOption { type = lib.types.listOf binding; default = [ ]; };
     extra = lib.mkOption { type = lib.types.listOf binding; default = [ ]; };
@@ -282,6 +287,14 @@ in
           }
         ];
       };
+
+    local.omarchy.barFreeOnce = [
+      "nixarchy.microvm"
+      "nixarchy.distrobox"
+      "nixarchy.podman"
+      "nixarchy.devenv"
+      "io.github.olafkfreund.nixarchy-plugin-browser"
+    ];
 
     programs.nixarchy.menu.extraEntries = {
       "apps.distrobox" = {
