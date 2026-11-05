@@ -26,6 +26,7 @@
     ../nixarchy-apps.nix
     ../../common/nixos/omarchy-input.nix
     ../../common/nixos/omarchy-layouts.nix
+    ../../common/nixos/omarchy-keys.nix
     ../../common/nixos/bash-devshell-readline.nix
     ../../common/nixos/omarchy-sddm.nix
     ../../common/nixos/omarchy-gog.nix
@@ -307,5 +308,22 @@
       # while that line is missing, and stops saying it once it is there.
       keybinding = "SUPER + M";
     };
+  };
+
+  local.omarchy.keys = {
+    workProfile = "Profile 4";
+    calendarCommand = ''omarchy-launch-or-focus "chrome-kjbdgfilnfhdoflbpgamdcdgpehopbep-Profile_4" 'google-chrome-stable --profile-directory="Profile 4" --app-id=kjbdgfilnfhdoflbpgamdcdgpehopbep' '';
+    fragments = [ "hypr.meetingai-binds" ];
+    extra = [
+      { key = "SUPER + CTRL + ALT + G"; description = "Govee lights"; action = "omarchy-shell shell toggle olafkfreund.govee '{}'"; }
+    ];
+    external = [
+      { key = "SUPER + ALT + M"; description = "Meeting AI overlay"; }
+      { key = "SUPER + ALT + T"; description = "Meeting AI: start recording"; }
+      { key = "SUPER + ALT + SHIFT + T"; description = "Meeting AI: stop recording"; }
+      { key = "SUPER + ALT + SHIFT + N"; description = "Meeting AI: toggle microphone"; }
+      { key = "SUPER + ALT + Y"; description = "Meeting AI: toggle system audio"; }
+      { key = "SUPER + ALT + SHIFT + P"; description = "Meeting AI: screenshot"; }
+    ];
   };
 }
