@@ -99,6 +99,9 @@
       inputs.nixarchy-voice.url = "github:olafkfreund/nixarchy-voice";
       inputs.nixarchy-voice.inputs.nixpkgs.follows = "nixpkgs";
       inputs.nixarchy-voice.inputs.ai-mirror.follows = "nixarchy/ai-mirror";
+      # #2732: slow-login fix; remove once nixarchy pins this commit or later.
+      inputs.nixarchy-omatheme.url = "github:olafkfreund/nixarchy-omatheme/d734fc3652a432e2d331d5f2a253ec0d7d498842";
+      inputs.nixarchy-omatheme.inputs.nixpkgs.follows = "nixpkgs";
 
       # nixarchy's NixOS module imports home-manager.nixosModules.home-manager
       # itself. From its own pin that is a second copy of nixos/common.nix, and
