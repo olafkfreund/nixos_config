@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2717
 intent: intent/2026-11-05-2717-declare-hypr-keys.md
 ---
