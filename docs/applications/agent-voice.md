@@ -10,8 +10,8 @@ headless media server and is not wanted.
 
 p620 writes the summary with its local Ollama. razer runs no Ollama, so it uses
 the **claude backend** (`summary.backend = "claude"`): `claude -p --model haiku`
-writes the summary, and the ElevenLabs key comes from agenix through
-`voice.elevenLabsKeyFile`, read at run time (the keyring has none there).
+writes the summary. On both hosts the ElevenLabs key comes from agenix through
+`voice.elevenLabsKeyFile`, read at run time.
 
 ## How it works
 
@@ -57,10 +57,11 @@ features.agentVoice.enable = true;
 | `agents.agy.enable` | `true` | Hook agy's Stop event |
 | `summary.backend` | `ollama` | `ollama` or `claude` (`claude -p`) |
 | `summary.claudeModel` | `haiku` | Model for the claude backend |
-| `voice.elevenLabsKeyFile` | `null` | Key file read at run time when `ELEVENLABS_API_KEY` is unset |
+| `voice.elevenLabsKeyFile` | `null` | Key file read at run time when `ELEVENLABS_API_KEY` is unset. When set, the narrator uses ElevenLabs with it, ignoring the keyring and omarchy-voice's `elevenlabs.enabled` |
 | `voice.elevenLabsVoiceId` | Lily | Narrator voice |
 | `summary.ollamaUrl` | `http://127.0.0.1:11434` | Where the summary is written |
 | `summary.model` | `qwen3:14b` | Summary model |
+| `speaker` | `agent-say` | `agent-say` speaks with its own voice; `nixi` hands the summary to Nixi |
 | `minTurnSeconds` | `60` | Shorter turns stay silent |
 | `startEnabled` | `true` | Speak by default |
 | `moreKey` | `SUPER + ALT + I` | Key that speaks the long version of the last turn; `""` disables |
@@ -71,6 +72,25 @@ features.agentVoice.enable = true;
 It needs `programs.omarchy-voice.enable` for the user (checked by an
 assertion). Settings render to `/etc/agent-say/config.json`.
 
+## Working with Nixi
+
+With `speaker = "nixi"`, `agent-say` still owns the hooks, the summary and the
+silence checks. It hands the whole summary to Nixi once and exits. Nixi owns the
+queue, each sentence, stopping and replay, and speaks in his own voice.
+
+- The old voice is used only when Nixi isn't running at all. If he's running but
+  hidden, in Do Not Disturb, quiet, in a call or a meeting, or his voice is
+  unavailable (cap reached), the summary is silent or stays as text. It is never
+  spoken in another voice, and never twice.
+- Click, Space or Esc while he speaks a summary stops only the speech. It doesn't
+  stop the agent's work or open the mic.
+- Settings → Voice has a mute switch per agent (Claude, Codex, agy). A muted
+  agent's summary isn't even written.
+- Replay keeps the last 5 summaries in Nixi's memory only: they are lost when he
+  restarts, and nothing is saved to disk.
+- "Tell me more" (the `moreKey`) speaks the long version through Nixi too.
+- `speaker = "agent-say"` is the way back, with no other change.
+
 ## When it stays silent
 
 Every gate fails closed and is checked again right before each sound.
@@ -80,7 +100,8 @@ Every gate fails closed and is checked again right before each sound.
 - **Do not disturb:** if the Omarchy shell reports DND on, or its state is
   unreadable, it is silent.
 - **Snooze and quiet state:** a global notification snooze still running, or any
-  "silenced" state, keeps it silent.
+  "silenced" state, keeps it silent. An empty quiet-state file stops holding it
+  silent after 5 seconds.
 - **Microphone:** an application capturing the mic (outside the ignore list)
   keeps it silent. A failing `pactl` also does.
 - **Delegated or scripted runs:** only sessions you start speak. Coder

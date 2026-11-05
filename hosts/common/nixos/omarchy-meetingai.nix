@@ -19,6 +19,15 @@
       # Each finished meeting is written here as Markdown (notes, transcript,
       # screenshots, interview documents); plain files in the Obsidian vault.
       settings.exportFolder = "/home/olafkfreund/Documents/Synechron/Meetings";
+      # The defaults collide with Omgato, Nixi, Omarchy's scratchpad and Music (#2714).
+      keybindings = {
+        overlay = "SUPER + ALT + M";
+        record = "SUPER + ALT + T";
+        stop = "SUPER + ALT + SHIFT + T";
+        mic = "SUPER + ALT + SHIFT + N";
+        system = "SUPER + ALT + Y";
+        screenshot = "SUPER + ALT + SHIFT + P";
+      };
     };
   };
 }

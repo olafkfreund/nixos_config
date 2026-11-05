@@ -44,7 +44,7 @@ in
     voice.elevenLabsKeyFile = mkOption {
       type = types.nullOr types.str;
       default = null;
-      description = "File holding the ElevenLabs key, read at run time when ELEVENLABS_API_KEY is unset (for hosts where the keyring has none).";
+      description = "File holding the ElevenLabs key, read at run time when ELEVENLABS_API_KEY is unset. When set, the narrator uses ElevenLabs with this key, ignoring the keyring and omarchy-voice's elevenlabs.enabled; if it cannot be read, those apply as usual.";
     };
 
     summary = {
@@ -52,6 +52,12 @@ in
       claudeModel = mkOption { type = types.str; default = "haiku"; description = "Model for the claude backend."; };
       ollamaUrl = mkOption { type = types.str; default = "http://127.0.0.1:11434"; description = "Ollama endpoint that writes the summary."; };
       model = mkOption { type = types.str; default = "qwen3:14b"; description = "Ollama model that writes the summary."; };
+    };
+
+    speaker = mkOption {
+      type = types.enum [ "agent-say" "nixi" ];
+      default = "agent-say";
+      description = "Who speaks the summary. \"agent-say\" is its own voice; \"nixi\" hands the summary to Nixi, falling back to agent-say's voice only when Nixi is not running.";
     };
 
     minTurnSeconds = mkOption { type = types.int; default = 60; description = "Turns shorter than this stay silent."; };
@@ -92,7 +98,7 @@ in
       ollamaUrl = cfg.summary.ollamaUrl;
       inherit (cfg.summary) model backend claudeModel;
       elevenLabsKeyFile = cfg.voice.elevenLabsKeyFile;
-      inherit (cfg) minTurnSeconds startEnabled;
+      inherit (cfg) minTurnSeconds startEnabled speaker;
       microphoneGate = { inherit (cfg.microphoneGate) enable ignore; };
     };
 

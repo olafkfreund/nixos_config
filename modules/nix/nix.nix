@@ -1,4 +1,5 @@
-{ pkgs
+{ config
+, pkgs
 , lib
 , ...
 }:
@@ -17,8 +18,11 @@
   };
 
   # A failed github: fetch falls back to a stale cached flake (#2409); skip the night instead.
-  systemd.services.nixos-upgrade.serviceConfig.ExecCondition =
-    "${pkgs.curl}/bin/curl -sfI -o /dev/null --max-time 20 --retry 5 --retry-delay 30 --retry-all-errors https://api.github.com";
+  # (only with auto-upgrade on: a host that turns it off, like p510, would get a unit with no ExecStart, #2709)
+  systemd.services.nixos-upgrade = lib.mkIf config.system.autoUpgrade.enable {
+    serviceConfig.ExecCondition =
+      "${pkgs.curl}/bin/curl -sfI -o /dev/null --max-time 20 --retry 5 --retry-delay 30 --retry-all-errors https://api.github.com";
+  };
 
   nix.settings = {
     experimental-features = [ "nix-command" "flakes" ];

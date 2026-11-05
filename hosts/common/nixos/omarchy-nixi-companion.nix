@@ -3,7 +3,7 @@
 # ride in their own lua file, loaded from the user-owned bindings.lua with
 #   pcall(require, "hypr.nixi-companion-binds")
 # pcall for the reason omarchy-gog.nix gives: bindings.lua outlives a
-# generation that stops providing the file. SUPER+ALT+H is Herdr, hence S.
+# generation that stops providing the file. SUPER+ALT+S is Omarchy's scratchpad (#2714).
 { ... }:
 {
   home-manager.users.olafkfreund = {
@@ -14,7 +14,7 @@
     home.file.".config/hypr/nixi-companion-binds.lua".text = ''
       -- Managed by hosts/common/nixos/omarchy-nixi-companion.nix -- edits here
       -- are overwritten on the next deploy.
-      o.bind("SUPER + ALT + S", "Nixi companion: show or hide", "nixi-companion")
+      o.bind("SUPER + ALT + H", "Nixi companion: show or hide", "nixi-companion")
       o.bind("SUPER + ALT + SHIFT + S", "Nixi companion: listen", "nixi-companion listen")
       -- Start him with the session: activation only restarts a running one, so a fresh host never got him.
       o.exec_on_start("nixi-companion show")

@@ -152,6 +152,8 @@ deploy recipes refuse a branch other than `main` (a worktree detached at
 
 Things the code no longer shows, so they are easy to get wrong:
 
+- **Declared Hyprland keys live in `hosts/common/nixos/omarchy-keys.nix`**, not
+  `bindings.lua`; the repo wins on a declared chord. See `docs/architecture/desktop.md`, Keys.
 - **No binary cache of our own.** There is no nix-serve/harmonia anywhere in the repo;
   nothing listens on p620:5000. `modules/nix/nix.nix` substitutes from cache.nixos.org and
   nix-community.cachix.org; `flake.nix` adds cuda-maintainers and devenv as flake-level

@@ -26,6 +26,7 @@
     ../nixarchy-apps.nix
     ../../common/nixos/omarchy-input.nix
     ../../common/nixos/omarchy-layouts.nix
+    ../../common/nixos/omarchy-keys.nix
     ../../common/nixos/bash-devshell-readline.nix
     ../../common/nixos/omarchy-sddm.nix
     ../../common/nixos/omarchy-gog.nix
@@ -228,5 +229,10 @@
       # warning: bindings.lua is hand-written and not ours to generate.
       keybinding = "SUPER + M";
     };
+  };
+
+  local.omarchy.keys = {
+    workProfile = "Profile 5";
+    calendarCommand = ''google-chrome-stable --profile-directory="Profile 5" --app="https://calendar.google.com/calendar/u/olaf@freundcloud.com/r"'';
   };
 }

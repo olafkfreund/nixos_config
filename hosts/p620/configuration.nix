@@ -494,7 +494,11 @@ in
   features.claudeSwarmReaper = { enable = true; dryRun = false; };
   modules.programs.claude-code-managed.subagentMetadata.codex = true;
 
-  features.agentVoice.enable = true;
+  features.agentVoice = {
+    enable = true;
+    speaker = "nixi";
+    voice.elevenLabsKeyFile = config.age.secrets."api-elevenlabs".path;
+  };
 
   # Terminals follow whichever shell owns the session: DMS in the DMS sessions,
   # omarchy in the Omarchy one. p620 only for now — razer and p510 stay on

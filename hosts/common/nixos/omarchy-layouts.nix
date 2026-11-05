@@ -2,12 +2,13 @@
 #
 # Omarchy's store hyprland.lua requires monitors, input, bindings,
 # looknfeel, autostart, then default.hypr.toggles, which replays the
-# per-workspace choices SUPER+L saved. layouts.lua is required from
-# autostart.lua: after looknfeel, where Atmos writes its own
+# per-workspace choices SUPER+L saved. Since nixarchy#1598 the store file
+# loads layouts.lua itself: after looknfeel, where Atmos writes its own
 # layout = "scrolling", and before the saved choices, which still win.
 #
-# force: the nixarchy seed copies Omarchy's autostart.lua here with
-# `cp -rn`, so without it home-manager refuses to link over it.
+# autostart.lua loads Hyprflip and the declared keys (omarchy-keys.nix). force: the nixarchy seed copies
+# Omarchy's autostart.lua here with `cp -rn`, so without it home-manager
+# refuses to link over it.
 { ... }:
 {
   home-manager.users.olafkfreund.home.file = {
@@ -21,9 +22,12 @@
         -- Hyprflip rotating cards (plugin installed by programs.hyprflip).
         pcall(require, "hypr.hyprflip")
 
-        local layouts_ok, layouts_err = pcall(require, "hypr.layouts")
-        if not layouts_ok then
-          hl.exec_cmd("omarchy-notification-send " .. o.shell_quote("hypr/layouts.lua failed: " .. tostring(layouts_err)))
+        -- Declared keys from omarchy-keys.nix.
+        if package.searchpath("hypr.repo-keys", package.path) then
+          local ok, err = pcall(require, "hypr.repo-keys")
+          if not ok then
+            hl.exec_cmd("omarchy-notification-send " .. o.shell_quote("hypr/repo-keys.lua failed: " .. tostring(err)))
+          end
         end
       '';
     };
@@ -124,6 +128,20 @@
         o.bind("SUPER + code:51", "Layout: swap column, swap into main window", by_layout({
           scrolling = "swapcol r", master = "swapwithmaster master",
         }))
+
+        -- shortcut: the direction is not saved, so a config reload returns every workspace to horizontal.
+        local directions = {}
+        o.bind("SUPER + CTRL + SHIFT + L", "Layout: flip scrolling between horizontal and vertical", function()
+          local ws = active()
+          if not ws or mode(ws) ~= "scrolling" then
+            return
+          end
+          local direction = directions[ws.id] == "down" and "right" or "down"
+          directions[ws.id] = direction
+          hl.workspace_rule({ workspace = tostring(ws.id), layout_opts = { direction = direction } })
+          -- The rule applies at the next re-tile; a zero resize forces one now.
+          hl.dispatch(hl.dsp.layout("colresize +0"))
+        end)
       '';
     };
   };
