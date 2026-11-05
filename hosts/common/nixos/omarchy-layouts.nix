@@ -6,7 +6,7 @@
 # loads layouts.lua itself: after looknfeel, where Atmos writes its own
 # layout = "scrolling", and before the saved choices, which still win.
 #
-# autostart.lua stays only for Hyprflip. force: the nixarchy seed copies
+# autostart.lua loads Hyprflip and the declared keys (omarchy-keys.nix). force: the nixarchy seed copies
 # Omarchy's autostart.lua here with `cp -rn`, so without it home-manager
 # refuses to link over it.
 { ... }:
@@ -21,6 +21,14 @@
 
         -- Hyprflip rotating cards (plugin installed by programs.hyprflip).
         pcall(require, "hypr.hyprflip")
+
+        -- Declared keys from omarchy-keys.nix.
+        if package.searchpath("hypr.repo-keys", package.path) then
+          local ok, err = pcall(require, "hypr.repo-keys")
+          if not ok then
+            hl.exec_cmd("omarchy-notification-send " .. o.shell_quote("hypr/repo-keys.lua failed: " .. tostring(err)))
+          end
+        end
       '';
     };
 
