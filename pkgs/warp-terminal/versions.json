@@ -1,10 +1,10 @@
 {
   "linux_x86_64": {
-    "hash": "sha256-VUeXoEnFRRC9ZDtlpqtn2i2I6u8xvnP6L23cpU+9J2c=",
-    "version": "0.2026.10.21.08.25.stable_02"
+    "hash": "sha256-JnwZ0z5nBbWPWVLRyS32VhMZ5nSl8ULgmKSubMsaZWE=",
+    "version": "0.2026.11.03.17.08.stable_00"
   },
   "linux_aarch64": {
-    "hash": "sha256-fmU4FqI/Mo+CZlUiMB6gDx+35/gqX4GCEaJPAPQawds=",
-    "version": "0.2026.10.21.08.25.stable_02"
+    "hash": "sha256-R+pAJ3/qYcuQyKPju0n6lxeOFXmnS2Q45GHXJ43grDc=",
+    "version": "0.2026.11.03.17.08.stable_00"
   }
 }
