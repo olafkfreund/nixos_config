@@ -164,7 +164,7 @@ no spaces.
 Govee is p620 only. razer gets Exposé, Dev environments, Distrobox and Podman
 from the shared list; Govee and Meeting AI stay p620 only.
 
-Unbound on both hosts: `SUPER+SHIFT+E` and `SUPER+SHIFT+ALT+E`.
+Unbound on both hosts: `SUPER+SHIFT+E` and `SUPER+ALT+SHIFT+E`.
 
 ### External keys
 

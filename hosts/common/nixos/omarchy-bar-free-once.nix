@@ -75,12 +75,12 @@ in
                 .value |= map(select((type == "object" and .id == $id) | not))
               else . end
             ) |
-            if any(.plugins[]?; .id == $id) then . else .plugins += [{id: $id}] end
+            if any(.plugins[]?; .id? == $id) then . else .plugins += [{id: $id}] end
           )
         ' "$file" >"$tmp" || exit 0
         if ! cmp -s "$file" "$tmp"; then
-          [ "$(stat -c %y "$file")" = "$before" ] || exit 0
           chmod --reference="$file" "$tmp" || exit 0
+          [ "$(stat -c %y "$file")" = "$before" ] || exit 0
           mv -- "$tmp" "$file" || exit 0
         fi
       fi
@@ -88,7 +88,7 @@ in
       sleep 3
       for id in "''${todo[@]}"; do
         if ${pkgs.jq}/bin/jq -e --arg id "$id" '
-          any(.plugins[]?; .id == $id) and
+          any(.plugins[]?; .id? == $id) and
           ([.bar.layout | .[] | select(type == "array") | .[] |
             select(type == "object" and (.id == $id or any(.widgets[]?; . == $id)))] | length == 0)
         ' "$file" >/dev/null; then

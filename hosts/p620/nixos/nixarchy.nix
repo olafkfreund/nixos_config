@@ -312,7 +312,7 @@
 
   local.omarchy.keys = {
     workProfile = "Profile 4";
-    calendarCommand = ''omarchy-launch-or-focus "chrome-kjbdgfilnfhdoflbpgamdcdgpehopbep-Profile_4" 'google-chrome-stable --profile-directory="Profile 4" --app-id=kjbdgfilnfhdoflbpgamdcdgpehopbep' '';
+    calendarCommand = "omarchy-launch-or-focus \"chrome-kjbdgfilnfhdoflbpgamdcdgpehopbep-Profile_4\" 'google-chrome-stable --profile-directory=\"Profile 4\" --app-id=kjbdgfilnfhdoflbpgamdcdgpehopbep'";
     fragments = [ "hypr.meetingai-binds" ];
     extra = [
       { key = "SUPER + CTRL + ALT + G"; description = "Govee lights"; action = "omarchy-shell shell toggle olafkfreund.govee '{}'"; }

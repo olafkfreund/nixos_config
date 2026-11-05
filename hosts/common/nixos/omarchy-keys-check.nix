@@ -14,6 +14,9 @@ let
         esac
       done
 
+      jq -e '(.keys | type == "array") and (.external | type == "array") and (.unbind | type == "array") and ((.keys + .external) | length > 0)' "$keys" >/dev/null \
+        || { echo "FAIL: cannot read a key declaration from $keys"; exit 1; }
+
       # shellcheck disable=SC2016
       # Canonical chord: SUPER, CTRL, ALT, SHIFT, then the key.
       canon='def canon:
@@ -23,7 +26,8 @@ let
         | (($pre | map(select(. != "SUPER" and . != "CTRL" and . != "ALT" and . != "SHIFT"))) + [$p[-1]])
         | [$mods] + . | map(select(. != "")) | join("+");'
 
-      binds=$(hyprctl binds -j | jq -r "$canon"'
+      raw=$(hyprctl binds -j) || { echo "FAIL: hyprctl binds -j failed; run this inside a session"; exit 1; }
+      binds=$(printf '%s\n' "$raw" | jq -r "$canon"'
         def mods($m): [(if ($m/64|floor)%2==1 then "SUPER" else empty end),
                        (if ($m/4|floor)%2==1 then "CTRL" else empty end),
                        (if ($m/8|floor)%2==1 then "ALT" else empty end),
@@ -56,7 +60,7 @@ let
 
       if [ -n "$docs" ]; then
         while IFS=$'\t' read -r chord desc; do
-          grep -F -- "$chord" "$docs" | grep -F -- "$desc" >/dev/null || problem "$docs has no line with $chord and '$desc'"
+          grep -F -- "| \`$chord\` | $desc |" "$docs" >/dev/null || problem "$docs has no line with $chord and '$desc'"
         done < <(jq -r "$canon"' (.keys + .external)[] | [(.key | canon), .description] | @tsv' "$keys")
       fi
 

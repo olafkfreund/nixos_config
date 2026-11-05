@@ -139,7 +139,7 @@ Chords are written in one canonical order everywhere new: `SUPER`, `CTRL`, `ALT`
      - SUPER + ALT + SHIFT + P "Meeting AI: screenshot"
    - razer values: `workProfile = "Profile 5"`; `calendarCommand` is `google-chrome-stable --profile-directory="Profile 5" --app="https://calendar.google.com/calendar/u/olaf@freundcloud.com/r"`.
 
-   Verify: `nix build --no-link .#nixosConfigurations.p620.config.system.build.toplevel` and the same for razer. `nix eval --raw .#nixosConfigurations.p510.config.system.build.toplevel.drvPath` equals the same value from `origin/main`. Don't build p510.
+   Verify: `nix build --no-link .#nixosConfigurations.p620.config.system.build.toplevel` and the same for razer. p510's `drvPath`, evaluated with `system.configurationRevision` forced to one fixed value through `extendModules`, equals the same value from `origin/main`; the revision is part of the build, so an unpinned comparison always differs. Don't build p510.
    Traps: use pipefail with `nix build`; `listOf` merges, so per-host `fragments` and `external` add to the shared ones.
 
 4. **New `hosts/common/nixos/omarchy-bar-free-once.nix`,** a self-contained module; don't edit `omarchy-keys.nix`. NixOS option `local.omarchy.barFreeOnce`: `listOf str`, default `[ ]`. The lead sets it to `nixarchy.microvm`, `nixarchy.distrobox`, `nixarchy.podman`, `nixarchy.devenv`, `io.github.olafkfreund.nixarchy-plugin-browser`. Write `omarchy/hooks/post-boot.d/zz-bar-free-once` through `home-manager.users.olafkfreund.xdg.configFile`, `executable = true`, using `enable-once`'s header and PATH. Omarchy's hook runner goes through the directory in order, one at a time.
@@ -160,7 +160,7 @@ Chords are written in one canonical order everywhere new: `SUPER`, `CTRL`, `ALT`
    - a key is missing from `omarchy-menu-keybindings --print`, run with a 30 s `timeout`, which itself is a failure;
    - an `unbind` chord is still among those binds;
    - any chord among those binds appears more than once;
-   - with `--docs <file>`, no single line of the file contains both the canonical chord without spaces (`SUPER+ALT+D`) and the description.
+   - with `--docs <file>`, the file has no table row exactly like ``| `SUPER+ALT+D` | description |``.
 
    Map `hyprctl`'s `modmask`: SHIFT 1, CTRL 4, ALT 8, SUPER 64.
 
@@ -181,13 +181,13 @@ Chords are written in one canonical order everywhere new: `SUPER`, `CTRL`, `ALT`
    1. Before switching anything, ask the user to log out and in on razer, so a reload can't drop its layout keys. Confirm with `ps` that it's a new session.
    2. Read and post on the bus. Switch p620 with `just p620`, then razer with `just deploy-via-p620 razer`. p510 stays out. Keys now come from `repo-keys`, and the old lines in `bindings.lua` are harmless.
    3. Ask the user to log out and in on both hosts, so menu rows and the hook arrive. Until then p620 keeps its local menu rows.
-   4. On each host, back up, then remove from `~/.config/hypr/bindings.lua` exactly the binds in step 2's table and p620's Govee, plus `hl.unbind` of SUPER+SHIFT+E, SUPER+SHIFT+ALT+E and SUPER+SHIFT+C, the voice block, and the then-unused `gmail`, `work_profile`, `gsuite` and `webapp_focus`. Keep every `pcall(require, ...)` line, including `hypr.omgato-bindings`, and all of Vimarchy, with ALT+SPACE. Read the diff, check `luac -p`, then run `hypr-keys-check` before going on.
-   5. On p620, remove `apps.distrobox` and `apps.podman` from `~/.config/omarchy/extensions/omarchy-menu.jsonc`, keeping every other row. Check that the generated menu has them first.
+   4. On each host, back up, then remove from `~/.config/hypr/bindings.lua` exactly the binds in step 2's table and p620's Govee, plus `hl.unbind` of SUPER+SHIFT+E, SUPER+SHIFT+ALT+E and SUPER+SHIFT+C, the voice block, and the then-unused `gmail`, `work_profile`, `gsuite` and `webapp_focus`. Keep every `pcall(require, ...)` line, including `hypr.omgato-bindings`, and all of Vimarchy, with ALT+SPACE. Read the diff, check `luac -p`, run `hyprctl reload` on that host, then run `hypr-keys-check`. A pass before this point proves nothing, since `bindings.lua` still supplied the keys.
+   5. On p620, remove `apps.distrobox` and `apps.podman` from `~/.config/omarchy/extensions/omarchy-menu.jsonc`, keeping every other row. Check that the generated menu has them first. Also remove the string `nixarchy.devenv` from the bar folder's `widgets` in `shell.json`, which step 4's hook deliberately doesn't touch; the user asked for this plugin off the panel, and without this its marker never appears.
    6. Run the Tests below on both hosts.
 
 ## Tests
 
-- p620 and razer build, and p510's `drvPath` is unchanged.
+- p620 and razer build, and p510's `drvPath` is unchanged with the revision pinned as in step 3.
 - A temporary duplicate chord, including one with reordered modifiers, fails evaluation. Setting razer's `workProfile` to `"Profile 4"` fails the assertion.
 - `luac -p` passes on the generated `repo-keys.lua`. A deliberately broken fragment raises a notification and the config still loads; a missing fragment is skipped quietly.
 - After login on each host:
