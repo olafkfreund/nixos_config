@@ -46,11 +46,13 @@ Super+K itself is not the gap. `omarchy-menu-keybindings` builds its list from t
 - A running session only picks up a new Omarchy tree at login.
 - p510 is not built or deployed without asking.
 
-## Open questions
+## Decisions
 
-1. **How much of `bindings.lua` moves into the repo?** The user asked for all keys, including manual ones, so the assumption is every top-level bind on p620 and razer. That leaves the Vimarchy submap block (33 `hl.bind` calls, using a plugin path outside Nix): move it too, or leave it local?
-2. **Which p620-only keys should razer get?** Exposé, Dev environments, Distrobox and Podman look shared. Govee, Omgato and Meeting AI are currently p620 features, so the assumption is they stay p620 only.
-3. **Should Omgato's keys be declared?** Its plugin rewrites `omgato-bindings.lua` when a key changes in its panel, so declaring them could conflict with that panel. The alternative is leaving them plugin-owned and documenting them.
-4. **Who wins after a later live change?** If a plugin is turned back on in Settings, or a menu row or key is changed by hand, should the next rebuild restore the repo's version, or should the live change stay?
-5. **Does p510 get anything now?** It runs the same desktop, but its role and package set differ. The assumption is that it stays out of this change, apart from evaluating cleanly.
-6. **Should Hyprforge's future keys be reserved?** Assumed no: resolve the clash if it comes back, and note it in the docs.
+The user approved these on 2026-11-05.
+
+1. **Scope:** every top-level bind on p620 and razer moves into the repo. The Vimarchy submap block stays local.
+2. **Shared keys:** razer gets Exposé, Dev environments, Distrobox and Podman. Govee, Omgato and Meeting AI stay p620 only.
+3. **Omgato:** its keys stay plugin-owned and are documented, not declared.
+4. **Live changes:** a later live change stays. The repo sets up panel placement once and doesn't undo it on rebuild, so it won't correct later drift there.
+5. **p510:** stays out of this change, apart from evaluating cleanly.
+6. **Hyprforge:** its old keys aren't reserved. The clash is noted in the docs and resolved if Hyprforge returns.
