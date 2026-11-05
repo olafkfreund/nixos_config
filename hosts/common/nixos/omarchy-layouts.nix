@@ -2,12 +2,13 @@
 #
 # Omarchy's store hyprland.lua requires monitors, input, bindings,
 # looknfeel, autostart, then default.hypr.toggles, which replays the
-# per-workspace choices SUPER+L saved. layouts.lua is required from
-# autostart.lua: after looknfeel, where Atmos writes its own
+# per-workspace choices SUPER+L saved. Since nixarchy#1598 the store file
+# loads layouts.lua itself: after looknfeel, where Atmos writes its own
 # layout = "scrolling", and before the saved choices, which still win.
 #
-# force: the nixarchy seed copies Omarchy's autostart.lua here with
-# `cp -rn`, so without it home-manager refuses to link over it.
+# autostart.lua stays only for Hyprflip. force: the nixarchy seed copies
+# Omarchy's autostart.lua here with `cp -rn`, so without it home-manager
+# refuses to link over it.
 { ... }:
 {
   home-manager.users.olafkfreund.home.file = {
@@ -20,11 +21,6 @@
 
         -- Hyprflip rotating cards (plugin installed by programs.hyprflip).
         pcall(require, "hypr.hyprflip")
-
-        local layouts_ok, layouts_err = pcall(require, "hypr.layouts")
-        if not layouts_ok then
-          hl.exec_cmd("omarchy-notification-send " .. o.shell_quote("hypr/layouts.lua failed: " .. tostring(layouts_err)))
-        end
       '';
     };
 
