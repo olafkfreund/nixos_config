@@ -6,6 +6,7 @@ import json
 import os
 import subprocess
 import time
+import urllib.error
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -24,6 +25,7 @@ def dirs(tmp_path, monkeypatch):
     monkeypatch.setenv("HOME", str(tmp_path))
     monkeypatch.setenv("XDG_STATE_HOME", str(tmp_path / "state"))
     monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "run"))
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
     for k in a.ENV_KEYS:
         monkeypatch.delenv(k, raising=False)
     (tmp_path / "run").mkdir()
@@ -220,7 +222,7 @@ def test_hook_never_fails_or_prints(dirs, monkeypatch, capsys):
         )
         assert a.main(["x", "hook", "claude"]) == 0
         assert capsys.readouterr().out == ""
-    saved = json.loads((a.run_dir() / "last-claude.json").read_text())
+    saved = json.loads(next(a.run_dir().glob("last-claude-*.json")).read_text())
     assert saved["env"] == {"CLAUDE_CODE_ENTRYPOINT": "cli"}
 
 
@@ -242,7 +244,7 @@ def prepare_run(dirs, monkeypatch, reply="Did the thing."):
     t = dirs / "c.jsonl"
     t.write_text(json.dumps({"type": "user", "promptId": "p", "timestamp": iso(300)}))
     (a.run_dir()).mkdir(parents=True, exist_ok=True)
-    (a.run_dir() / "last-claude.json").write_text(
+    (a.run_dir() / "last-claude-test.json").write_text(
         json.dumps(
             {
                 "payload": {
@@ -265,7 +267,7 @@ def test_run_speaks_when_clear(dirs, monkeypatch):
     spoken = prepare_run(dirs, monkeypatch)
     clear_gates(monkeypatch)
     monkeypatch.setattr(a, "summarise", lambda cfg, ins, text: "All done.")
-    a.run("claude")
+    a.run("claude", "test")
     assert " ".join(spoken) == "From Claude. All done."
 
 
@@ -274,7 +276,7 @@ def test_run_held_gate_is_silent(dirs, monkeypatch):
     clear_gates(monkeypatch)
     monkeypatch.setattr(a, "gate_dnd", lambda cfg: "dnd")
     monkeypatch.setattr(a, "summarise", lambda cfg, ins, text: "All done.")
-    a.run("claude")
+    a.run("claude", "test")
     assert spoken == []
 
 
@@ -286,7 +288,7 @@ def test_run_ollama_down_is_silent(dirs, monkeypatch):
         "urlopen",
         lambda *x, **k: (_ for _ in ()).throw(OSError("down")),
     )
-    a.run("claude")
+    a.run("claude", "test")
     assert spoken == []
 
 
@@ -295,7 +297,7 @@ def test_run_short_turn_is_silent(dirs, monkeypatch):
     clear_gates(monkeypatch)
     monkeypatch.setattr(a, "config", lambda: {**CFG, "minTurnSeconds": 3600})
     monkeypatch.setattr(a, "summarise", lambda *x: pytest.fail("asked ollama"))
-    a.run("claude")
+    a.run("claude", "test")
     assert spoken == []
 
 
@@ -310,7 +312,7 @@ def test_more_rechecks_gates(dirs, monkeypatch):
         "offer_more",
         lambda *x: (setattr(a, "gate_dnd", lambda cfg: "dnd"), True)[1],
     )
-    a.run("claude")  # speaks short, click arrives, DND turned on meanwhile
+    a.run("claude", "test")  # speaks short, click arrives, DND turned on meanwhile
     assert " ".join(spoken) == "From Claude. short"
 
 
@@ -391,7 +393,7 @@ def test_run_and_more_use_label_and_title(dirs, monkeypatch):
     )
     titles = []
     monkeypatch.setattr(a, "offer_more", lambda text, title: titles.append(title))
-    a.run("claude")
+    a.run("claude", "test")
     a.more()
     assert titles == ["Claude · Fix the bar"]
     assert " ".join(spoken) == (
@@ -559,7 +561,8 @@ def test_hook_unit_argv_has_path_and_absolute_bin(dirs, monkeypatch):
     monkeypatch.setattr(a.subprocess, "run", lambda cmd, **k: seen.append(cmd))
     a.hook("claude")
     assert "--setenv=PATH=/x/bin" in seen[0]
-    assert seen[0][-3:] == ["/store/bin/agent-say", "run", "claude"]
+    assert seen[0][-4:-1] == ["/store/bin/agent-say", "run", "claude"]
+    assert len(seen[0][-1]) == 32
 
 
 def test_gate_closing_mid_text_cuts_after_current_sentence(dirs, monkeypatch):
@@ -591,6 +594,179 @@ def test_hook_unit_is_non_blocking_with_timeout(dirs, monkeypatch):
     monkeypatch.setattr(a.subprocess, "run", lambda cmd, **k: seen.append((cmd, k)))
     a.hook("claude")
     assert "--no-block" in seen[0][0] and seen[0][1]["timeout"] == 5
+
+
+def fake_nixi(dirs, monkeypatch, ready={"speak": True}, delivery={"accepted": True}):
+    runtime = dirs / "data/nixi-companion/runtime.json"
+    runtime.parent.mkdir(parents=True, exist_ok=True)
+    runtime.write_text(
+        json.dumps({"port": 47777, "tool_token": "limited", "token": "full"})
+    )
+    calls = []
+
+    def urlopen(req, timeout):
+        body = json.loads(req.data)
+        calls.append((req.full_url, dict(req.header_items()), body, timeout))
+        result = ready if req.full_url.endswith("/ready") else delivery
+        if isinstance(result, Exception):
+            raise result
+        return io.BytesIO(json.dumps(result).encode())
+
+    monkeypatch.setattr(a.urllib.request, "urlopen", urlopen)
+    return calls
+
+
+@pytest.mark.parametrize(
+    "ready,state",
+    [
+        ({"speak": True}, "go"),
+        ({"speak": False, "reason": "hidden"}, "no"),
+        (urllib.error.HTTPError("url", 404, "missing", {}, None), "absent"),
+        (urllib.error.HTTPError("url", 403, "forbidden", {}, None), "no"),
+        (urllib.error.URLError(ConnectionRefusedError()), "absent"),
+        (TimeoutError(), "no"),
+    ],
+)
+def test_nixi_ready_outcomes(dirs, monkeypatch, ready, state):
+    calls = fake_nixi(dirs, monkeypatch, ready=ready)
+    assert a.nixi_ready("claude")[0] == state
+    assert calls[0][2] == {"from": "claude"} and calls[0][3] == 2
+    assert calls[0][1]["X-nixi-token"] == "limited"
+    assert "full" not in str(calls)
+
+
+def test_nixi_missing_runtime_falls_back(dirs, monkeypatch):
+    spoken = prepare_run(dirs, monkeypatch)
+    clear_gates(monkeypatch)
+    monkeypatch.setattr(a, "config", lambda: {**CFG, "speaker": "nixi"})
+    monkeypatch.setattr(a, "summarise", lambda *args: "short")
+    a.run("claude", "test")
+    assert " ".join(spoken) == "From Claude. short"
+
+
+@pytest.mark.parametrize(
+    "ready",
+    [{"speak": False, "reason": "muted-agent"}, {"speak": False, "reason": "meeting"}],
+)
+def test_nixi_refusal_skips_summary(dirs, monkeypatch, ready):
+    spoken = prepare_run(dirs, monkeypatch)
+    clear_gates(monkeypatch)
+    fake_nixi(dirs, monkeypatch, ready=ready)
+    monkeypatch.setattr(a, "config", lambda: {**CFG, "speaker": "nixi"})
+    monkeypatch.setattr(a, "summarise", lambda *args: pytest.fail("summariser called"))
+    a.run("claude", "test")
+    assert spoken == []
+
+
+@pytest.mark.parametrize(
+    "delivery",
+    [
+        {"accepted": False, "reason": "no-page"},
+        urllib.error.HTTPError("url", 403, "forbidden", {}, None),
+        TimeoutError(),
+    ],
+)
+def test_nixi_delivery_failure_never_falls_back(dirs, monkeypatch, delivery):
+    spoken = prepare_run(dirs, monkeypatch, "private raw reply")
+    clear_gates(monkeypatch)
+    calls = fake_nixi(dirs, monkeypatch, delivery=delivery)
+    monkeypatch.setattr(a, "config", lambda: {**CFG, "speaker": "nixi"})
+    monkeypatch.setattr(a, "summarise", lambda *args: "short")
+    a.run("claude", "test")
+    assert spoken == []
+    assert calls[-1][2] == {
+        "from": "claude",
+        "turn": "test",
+        "name": "",
+        "text": "short",
+        "kind": "short",
+    }
+    assert "private raw reply" not in str(calls)
+
+
+def test_more_uses_same_turn_through_nixi(dirs, monkeypatch):
+    prepare_run(dirs, monkeypatch)
+    clear_gates(monkeypatch)
+    calls = fake_nixi(dirs, monkeypatch)
+    monkeypatch.setattr(a, "config", lambda: {**CFG, "speaker": "nixi"})
+    monkeypatch.setattr(
+        a,
+        "summarise",
+        lambda cfg, instruction, text: "long" if instruction == a.LONG else "short",
+    )
+    a.run("claude", "test")
+    a.more()
+    assert [
+        call[2]["kind"] for call in calls if call[0].endswith("/api/agent-say")
+    ] == ["short", "more"]
+    assert calls[-1][2]["turn"] == "test"
+
+
+def test_more_for_another_turn_does_nothing(dirs, monkeypatch):
+    prepare_run(dirs, monkeypatch)
+    clear_gates(monkeypatch)
+    calls = fake_nixi(dirs, monkeypatch)
+    monkeypatch.setattr(a, "config", lambda: {**CFG, "speaker": "nixi"})
+    monkeypatch.setattr(a, "summarise", lambda *args: "short")
+    a.run("claude", "test")
+    n = len(calls)
+    monkeypatch.setattr(a, "summarise", lambda *args: pytest.fail("summariser called"))
+    a.more(turn="other")
+    assert len(calls) == n
+    monkeypatch.setattr(a, "summarise", lambda *args: "long")
+    a.more(turn="test")
+    assert calls[-1][2]["kind"] == "more"
+
+
+@pytest.mark.parametrize("ready", [("no", "meeting", 0, ""), None])
+def test_more_in_nixi_mode_checks_held_and_nixi_first(dirs, monkeypatch, ready):
+    prepare_run(dirs, monkeypatch)
+    clear_gates(monkeypatch)
+    fake_nixi(dirs, monkeypatch)
+    monkeypatch.setattr(a, "config", lambda: {**CFG, "speaker": "nixi"})
+    monkeypatch.setattr(a, "summarise", lambda *args: "short")
+    a.run("claude", "test")
+    monkeypatch.setattr(a, "summarise", lambda *args: pytest.fail("summariser called"))
+    if ready:
+        monkeypatch.setattr(a, "nixi_ready", lambda agent: ready)
+    else:
+        monkeypatch.setattr(a, "held", lambda cfg, quiet=False: "dnd")
+    a.more()
+
+
+def test_long_summary_is_cut_at_a_sentence_end(dirs, monkeypatch):
+    prepare_run(dirs, monkeypatch)
+    clear_gates(monkeypatch)
+    calls = fake_nixi(dirs, monkeypatch)
+    monkeypatch.setattr(a, "config", lambda: {**CFG, "speaker": "nixi"})
+    monkeypatch.setattr(a, "summarise", lambda *args: "Version 1.5 is out. " * 200)
+    a.run("claude", "test")
+    text = calls[-1][2]["text"]
+    assert len(text) <= 2000 and text.endswith("is out.")
+
+
+def test_workers_keep_distinct_payloads(dirs, monkeypatch):
+    clear_gates(monkeypatch)
+    prepare_run(dirs, monkeypatch, "first")
+    first = a.run_dir() / "last-claude-test.json"
+    second = a.run_dir() / "last-claude-second.json"
+    second.write_text(first.read_text().replace("first", "second"))
+    seen = []
+    monkeypatch.setattr(
+        a, "summarise", lambda cfg, ins, reply: seen.append(reply) or reply
+    )
+    a.run("claude", "second")
+    a.run("claude", "test")
+    assert seen == ["second", "first"]
+    assert not first.exists() and not second.exists()
+
+
+def test_held_command_is_quiet(dirs, monkeypatch, capsys):
+    clear_gates(monkeypatch)
+    assert a.main(["agent-say", "held"]) == 0
+    monkeypatch.setattr(a, "gate_mic", lambda cfg: "mic")
+    assert a.main(["agent-say", "held"]) == 1
+    assert capsys.readouterr() == ("", "")
 
 
 def test_agy_reply_skips_empty_last_step(dirs):

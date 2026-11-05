@@ -61,6 +61,7 @@ features.agentVoice.enable = true;
 | `voice.elevenLabsVoiceId` | Lily | Narrator voice |
 | `summary.ollamaUrl` | `http://127.0.0.1:11434` | Where the summary is written |
 | `summary.model` | `qwen3:14b` | Summary model |
+| `speaker` | `agent-say` | `agent-say` speaks with its own voice; `nixi` hands the summary to Nixi |
 | `minTurnSeconds` | `60` | Shorter turns stay silent |
 | `startEnabled` | `true` | Speak by default |
 | `moreKey` | `SUPER + ALT + I` | Key that speaks the long version of the last turn; `""` disables |
@@ -70,6 +71,25 @@ features.agentVoice.enable = true;
 
 It needs `programs.omarchy-voice.enable` for the user (checked by an
 assertion). Settings render to `/etc/agent-say/config.json`.
+
+## Working with Nixi
+
+With `speaker = "nixi"`, `agent-say` still owns the hooks, the summary and the
+silence checks. It hands the whole summary to Nixi once and exits. Nixi owns the
+queue, each sentence, stopping and replay, and speaks in his own voice.
+
+- The old voice is used only when Nixi isn't running at all. If he's running but
+  hidden, in Do Not Disturb, quiet, in a call or a meeting, or his voice is
+  unavailable (cap reached), the summary is silent or stays as text. It is never
+  spoken in another voice, and never twice.
+- Click, Space or Esc while he speaks a summary stops only the speech. It doesn't
+  stop the agent's work or open the mic.
+- Settings → Voice has a mute switch per agent (Claude, Codex, agy). A muted
+  agent's summary isn't even written.
+- Replay keeps the last 5 summaries in Nixi's memory only: they are lost when he
+  restarts, and nothing is saved to disk.
+- "Tell me more" (the `moreKey`) speaks the long version through Nixi too.
+- `speaker = "agent-say"` is the way back, with no other change.
 
 ## When it stays silent
 

@@ -9,6 +9,7 @@ A held line in the journal names the gate. The reply itself is never logged.
 """
 
 import contextlib
+import errno
 import fcntl
 import json
 import os
@@ -18,6 +19,8 @@ import subprocess
 import sys
 import time
 import urllib.request
+import urllib.error
+import uuid
 from datetime import datetime
 from pathlib import Path
 
@@ -30,6 +33,7 @@ DEFAULTS = {
     "elevenLabsKeyFile": None,
     "minTurnSeconds": 60,
     "startEnabled": True,
+    "speaker": "agent-say",
     "microphoneGate": {
         "enable": True,
         "ignore": ["Echo-Cancel Capture", "Echo-Cancel Sink", "parecord"],
@@ -76,6 +80,56 @@ def state_dir():
 
 def run_dir():
     return Path(os.environ.get("XDG_RUNTIME_DIR") or "/tmp") / "agent-say"
+
+
+def nixi_ready(agent):
+    """Return (state, reason, port, tool token); only absence permits fallback."""
+    path = (
+        Path(os.environ.get("XDG_DATA_HOME") or Path.home() / ".local/share")
+        / "nixi-companion/runtime.json"
+    )
+    try:
+        runtime = json.loads(path.read_text())
+        port, tool_token = runtime["port"], runtime["tool_token"]
+        if (
+            not isinstance(port, int)
+            or isinstance(port, bool)
+            or not 1 <= port <= 65535
+        ):
+            raise ValueError("invalid port")
+        if not isinstance(tool_token, str) or not tool_token:
+            raise ValueError("invalid tool token")
+    except FileNotFoundError:
+        return "absent", "runtime missing", None, None
+    except (OSError, ValueError, KeyError, TypeError) as e:
+        return "no", f"runtime unavailable: {type(e).__name__}", None, None
+    req = urllib.request.Request(
+        f"http://127.0.0.1:{port}/api/agent-say/ready",
+        json.dumps({"from": agent}).encode(),
+        {"Content-Type": "application/json", "X-Nixi-Token": tool_token},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=2) as response:
+            result = json.load(response)
+        if result.get("speak") is True:
+            return "go", None, port, tool_token
+        return "no", result.get("reason", "ready refused"), port, tool_token
+    except urllib.error.HTTPError as e:
+        return (
+            ("absent" if e.code == 404 else "no"),
+            f"ready HTTP {e.code}",
+            port,
+            tool_token,
+        )
+    except urllib.error.URLError as e:
+        if (
+            isinstance(e.reason, ConnectionRefusedError)
+            or getattr(e.reason, "errno", None) == errno.ECONNREFUSED
+        ):
+            return "absent", "connection refused", port, tool_token
+        return "no", f"ready failed: {type(e.reason).__name__}", port, tool_token
+    except (OSError, ValueError, TypeError, AttributeError) as e:
+        return "no", f"ready failed: {type(e).__name__}", port, tool_token
 
 
 # -- gates: each returns None when clear, else its name ------------------------
@@ -149,12 +203,13 @@ def gate_mic(cfg):
         return "mic"
 
 
-def held(cfg):
+def held(cfg, quiet=False):
     """First closed gate among 1-4, or None. Called again right before every sound."""
     for gate in (gate_switch, gate_dnd, gate_quiet, gate_mic):
         name = gate(cfg)
         if name:
-            log(f"held {name}")
+            if not quiet:
+                log(f"held {name}")
             return name
 
 
@@ -402,6 +457,43 @@ def say_gated(cfg, text):
         return spoke
 
 
+def fit(text, limit=2000):
+    """The page refuses more than `limit` characters: cut at the last sentence end that fits."""
+    if len(text) <= limit:
+        return text
+    ends = [m.end() for m in re.finditer(r"[.!?]['\")\]]*(?=\s|$)", text[:limit])]
+    return text[: ends[-1] if ends else limit].strip()
+
+
+def deliver(cfg, agent, turn, who, name, text, kind, ready=None):
+    if cfg.get("speaker") != "nixi":
+        return "absent" if say_gated(cfg, spoken_prefix(who, name) + text) else "no"
+    state, reason, port, tool_token = ready or nixi_ready(agent)
+    if state == "absent":
+        return "absent" if say_gated(cfg, spoken_prefix(who, name) + text) else "no"
+    if state == "no":
+        log(f"nixi held: {reason}")
+        return "no"
+    req = urllib.request.Request(
+        f"http://127.0.0.1:{port}/api/agent-say",
+        json.dumps(
+            {"from": agent, "turn": turn, "name": name, "text": fit(text), "kind": kind}
+        ).encode(),
+        {"Content-Type": "application/json", "X-Nixi-Token": tool_token},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=2) as response:
+            result = json.load(response)
+        if result.get("accepted") is True:
+            return "go"
+        log(f"nixi delivery refused: {result.get('reason', 'unknown')}")
+    except urllib.error.HTTPError as e:
+        log(f"nixi delivery HTTP {e.code}")
+    except (OSError, ValueError, TypeError, AttributeError) as e:
+        log(f"nixi delivery failed: {type(e).__name__}")
+    return "no"
+
+
 def offer_more(text, title="Agent finished"):
     """Notification with a 'Tell me more' action; True when it was clicked.
 
@@ -442,7 +534,8 @@ def hook(agent):
             log("held delegated")
             return
         run_dir().mkdir(parents=True, exist_ok=True)
-        (run_dir() / f"last-{agent}.json").write_text(
+        payload_id = uuid.uuid4().hex
+        (run_dir() / f"last-{agent}-{payload_id}.json").write_text(
             json.dumps({"payload": payload, "env": env})
         )
         subprocess.run(
@@ -457,6 +550,7 @@ def hook(agent):
                 os.environ.get("AGENT_SAY_BIN", "agent-say"),
                 "run",
                 agent,
+                payload_id,
             ],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
@@ -467,9 +561,13 @@ def hook(agent):
         log(f"hook failed: {e}")
 
 
-def run(agent):
+def run(agent, payload_id):
     cfg = config()
-    saved = json.loads((run_dir() / f"last-{agent}.json").read_text())
+    path = run_dir() / f"last-{agent}-{payload_id}.json"
+    try:
+        saved = json.loads(path.read_text())
+    finally:
+        path.unlink(missing_ok=True)
     payload = saved["payload"]
     secs = turn_seconds(agent, payload)
     if secs is None:
@@ -481,23 +579,40 @@ def run(agent):
     if not reply.strip():
         log("no reply text")
         return
+    ready = None
+    if (
+        cfg.get("speaker") == "nixi"
+    ):  # (the old speaker keeps today's order: summary first)
+        if held(cfg):
+            return
+        ready = nixi_ready(agent)
+    if ready and ready[0] == "no":
+        log(f"nixi held: {ready[1]}")
+        return
     short = summarise(cfg, SHORT, reply)
     if not short:
         return
     who, name = label(agent, payload)
     (run_dir() / "last-summary.json").write_text(
         json.dumps(
-            {"agent": agent, "reply": reply, "short": short, "who": who, "name": name}
+            {
+                "agent": agent,
+                "turn": payload_id,
+                "reply": reply,
+                "short": short,
+                "who": who,
+                "name": name,
+            }
         )
     )
     log(f"summary: {short}")
-    if not say_gated(cfg, spoken_prefix(who, name) + short):
+    if deliver(cfg, agent, payload_id, who, name, short, "short", ready) != "absent":
         return
     if offer_more(short, f"{who} · {name}" if name else who):
         more(cfg)
 
 
-def more(cfg=None):
+def more(cfg=None, turn=None):
     cfg = cfg or config()
     try:
         saved = json.loads((run_dir() / "last-summary.json").read_text())
@@ -505,20 +620,43 @@ def more(cfg=None):
     except (OSError, ValueError, KeyError):
         log("nothing to tell more about")
         return
+    if turn and saved.get("turn") != turn:
+        log("that turn is no longer the last one")
+        return
+    ready = None
+    if (
+        cfg.get("speaker") == "nixi"
+    ):  # (as run does: gates and Nixi first, then the long summary)
+        if held(cfg):
+            return
+        ready = nixi_ready(saved.get("agent", "claude"))
+        if ready[0] == "no":
+            log(f"nixi held: {ready[1]}")
+            return
     long = summarise(cfg, LONG, reply)
     if long:
-        prefix = spoken_prefix(saved.get("who") or "the agent", saved.get("name", ""))
-        say_gated(cfg, prefix + long)
+        deliver(
+            cfg,
+            saved.get("agent", "claude"),
+            saved.get("turn") or uuid.uuid4().hex,
+            saved.get("who") or "the agent",
+            saved.get("name", ""),
+            long,
+            "more",
+            ready,
+        )
 
 
 def main(argv):
     cmd = argv[1] if len(argv) > 1 else "status"
     if cmd == "hook" and len(argv) > 2:
         hook(argv[2])
-    elif cmd == "run" and len(argv) > 2:
-        run(argv[2])
+    elif cmd == "run" and len(argv) > 3:
+        run(argv[2], argv[3])
     elif cmd == "more":
-        more()
+        more(turn=argv[2] if len(argv) > 2 else None)
+    elif cmd == "held":
+        return 1 if held(config(), quiet=True) else 0
     elif cmd in ("on", "off"):
         set_switch(cmd)
     elif cmd == "toggle":
@@ -535,7 +673,7 @@ def main(argv):
         print("off" if gate_switch(config()) else "on")
     else:
         print(
-            "usage: agent-say hook|run <claude|codex> | more | on | off | toggle | status",
+            "usage: agent-say hook <agent> | run <agent> <id> | more [turn] | held | on | off | toggle | status",
             file=sys.stderr,
         )
         return 2
