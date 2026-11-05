@@ -40,6 +40,7 @@
     ../../common/nixos/omarchy-microvm.nix
     ../../common/nixos/omarchy-omadroid.nix
     ../../common/nixos/omarchy-altscape.nix
+    ../../common/nixos/omarchy-expose.nix
     ../../common/nixos/omarchy-omateams.nix
     ../../common/nixos/omarchy-hello-lock.nix
     ../../common/nixos/omarchy-omaoutlook.nix

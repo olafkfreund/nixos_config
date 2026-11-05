@@ -130,7 +130,6 @@ no spaces.
 | `SUPER+CTRL+M` | Gmail (freundcloud) |
 | `SUPER+CTRL+SHIFT+M` | New email (freundcloud) |
 | `SUPER+SHIFT+C` | Calendar (freundcloud) |
-| `SUPER+CTRL+J` | AI Kit |
 | `SUPER+CTRL+SHIFT+D` | New Google Doc (freundcloud) |
 | `SUPER+CTRL+SHIFT+S` | New Google Sheet (freundcloud) |
 | `SUPER+CTRL+SHIFT+P` | New Google Slides (freundcloud) |
