@@ -702,6 +702,49 @@ def test_more_uses_same_turn_through_nixi(dirs, monkeypatch):
     assert calls[-1][2]["turn"] == "test"
 
 
+def test_more_for_another_turn_does_nothing(dirs, monkeypatch):
+    prepare_run(dirs, monkeypatch)
+    clear_gates(monkeypatch)
+    calls = fake_nixi(dirs, monkeypatch)
+    monkeypatch.setattr(a, "config", lambda: {**CFG, "speaker": "nixi"})
+    monkeypatch.setattr(a, "summarise", lambda *args: "short")
+    a.run("claude", "test")
+    n = len(calls)
+    monkeypatch.setattr(a, "summarise", lambda *args: pytest.fail("summariser called"))
+    a.more(turn="other")
+    assert len(calls) == n
+    monkeypatch.setattr(a, "summarise", lambda *args: "long")
+    a.more(turn="test")
+    assert calls[-1][2]["kind"] == "more"
+
+
+@pytest.mark.parametrize("ready", [("no", "meeting", 0, ""), None])
+def test_more_in_nixi_mode_checks_held_and_nixi_first(dirs, monkeypatch, ready):
+    prepare_run(dirs, monkeypatch)
+    clear_gates(monkeypatch)
+    fake_nixi(dirs, monkeypatch)
+    monkeypatch.setattr(a, "config", lambda: {**CFG, "speaker": "nixi"})
+    monkeypatch.setattr(a, "summarise", lambda *args: "short")
+    a.run("claude", "test")
+    monkeypatch.setattr(a, "summarise", lambda *args: pytest.fail("summariser called"))
+    if ready:
+        monkeypatch.setattr(a, "nixi_ready", lambda agent: ready)
+    else:
+        monkeypatch.setattr(a, "held", lambda cfg, quiet=False: "dnd")
+    a.more()
+
+
+def test_long_summary_is_cut_at_a_sentence_end(dirs, monkeypatch):
+    prepare_run(dirs, monkeypatch)
+    clear_gates(monkeypatch)
+    calls = fake_nixi(dirs, monkeypatch)
+    monkeypatch.setattr(a, "config", lambda: {**CFG, "speaker": "nixi"})
+    monkeypatch.setattr(a, "summarise", lambda *args: "Version 1.5 is out. " * 200)
+    a.run("claude", "test")
+    text = calls[-1][2]["text"]
+    assert len(text) <= 2000 and text.endswith("is out.")
+
+
 def test_workers_keep_distinct_payloads(dirs, monkeypatch):
     clear_gates(monkeypatch)
     prepare_run(dirs, monkeypatch, "first")

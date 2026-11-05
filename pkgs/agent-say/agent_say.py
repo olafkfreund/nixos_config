@@ -457,6 +457,14 @@ def say_gated(cfg, text):
         return spoke
 
 
+def fit(text, limit=2000):
+    """The page refuses more than `limit` characters: cut at the last sentence end that fits."""
+    if len(text) <= limit:
+        return text
+    ends = [m.end() for m in re.finditer(r"[.!?]['\")\]]*(?=\s|$)", text[:limit])]
+    return text[: ends[-1] if ends else limit].strip()
+
+
 def deliver(cfg, agent, turn, who, name, text, kind, ready=None):
     if cfg.get("speaker") != "nixi":
         return "absent" if say_gated(cfg, spoken_prefix(who, name) + text) else "no"
@@ -469,7 +477,7 @@ def deliver(cfg, agent, turn, who, name, text, kind, ready=None):
     req = urllib.request.Request(
         f"http://127.0.0.1:{port}/api/agent-say",
         json.dumps(
-            {"from": agent, "turn": turn, "name": name, "text": text, "kind": kind}
+            {"from": agent, "turn": turn, "name": name, "text": fit(text), "kind": kind}
         ).encode(),
         {"Content-Type": "application/json", "X-Nixi-Token": tool_token},
     )
@@ -604,7 +612,7 @@ def run(agent, payload_id):
         more(cfg)
 
 
-def more(cfg=None):
+def more(cfg=None, turn=None):
     cfg = cfg or config()
     try:
         saved = json.loads((run_dir() / "last-summary.json").read_text())
@@ -612,6 +620,19 @@ def more(cfg=None):
     except (OSError, ValueError, KeyError):
         log("nothing to tell more about")
         return
+    if turn and saved.get("turn") != turn:
+        log("that turn is no longer the last one")
+        return
+    ready = None
+    if (
+        cfg.get("speaker") == "nixi"
+    ):  # (as run does: gates and Nixi first, then the long summary)
+        if held(cfg):
+            return
+        ready = nixi_ready(saved.get("agent", "claude"))
+        if ready[0] == "no":
+            log(f"nixi held: {ready[1]}")
+            return
     long = summarise(cfg, LONG, reply)
     if long:
         deliver(
@@ -622,6 +643,7 @@ def more(cfg=None):
             saved.get("name", ""),
             long,
             "more",
+            ready,
         )
 
 
@@ -632,7 +654,7 @@ def main(argv):
     elif cmd == "run" and len(argv) > 3:
         run(argv[2], argv[3])
     elif cmd == "more":
-        more()
+        more(turn=argv[2] if len(argv) > 2 else None)
     elif cmd == "held":
         return 1 if held(config(), quiet=True) else 0
     elif cmd in ("on", "off"):
@@ -651,7 +673,7 @@ def main(argv):
         print("off" if gate_switch(config()) else "on")
     else:
         print(
-            "usage: agent-say hook <agent> | run <agent> <id> | more | held | on | off | toggle | status",
+            "usage: agent-say hook <agent> | run <agent> <id> | more [turn] | held | on | off | toggle | status",
             file=sys.stderr,
         )
         return 2
