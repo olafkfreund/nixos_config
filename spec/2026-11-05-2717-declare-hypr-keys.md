@@ -109,9 +109,9 @@ A new "Keys" section in `docs/architecture/desktop.md` lists declared, per-host 
 - **Timing.** Keys arrive at the next config load. Menu rows, the hook's panel move and the store's `layouts.lua` load all need a login, so razer's check is only meaningful after one.
 - **Two keys may do nothing today.** No plugin on p620 or razer was found that handles `expose.window-overview`, and `aikit` isn't on `PATH` on either host. They stay declared, as the intent requires, with a follow-up issue to fix or remove them.
 
-## Open question for spec approval
+## Decision at spec approval
 
-**Repo wins on a declared chord.** Decision 4 says live changes stay. This spec applies that to panel placement and menu rows, and treats keys as repo-owned, since the goal is for them to stick. Is that right?
+The repo wins on a declared chord (user, 2026-11-05). To change a declared key, edit the repo. Hand-added keys on other chords keep working, and live panel and menu changes stay.
 
 ## Verification
 
