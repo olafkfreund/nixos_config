@@ -2771,23 +2771,22 @@
           "home-manager"
         ],
         "nixpkgs": [
-          "nixarchy",
           "nixpkgs"
         ],
         "omarchroma": "omarchroma"
       },
       "locked": {
-        "lastModified": 1792493917,
-        "narHash": "sha256-pKg53tLOvpY1c2rgqRSEFLuUCl61BMBRiwxzvTNLWbU=",
+        "lastModified": 1793894731,
+        "narHash": "sha256-muVxwDmTApM/TkHC+JK4u3D6Xw34CYv2newBqWA2Aqw=",
         "owner": "olafkfreund",
         "repo": "nixarchy-omatheme",
-        "rev": "51fb12943b66389da778af42926e06e80691dd53",
+        "rev": "d734fc3652a432e2d331d5f2a253ec0d7d498842",
         "type": "github"
       },
       "original": {
         "owner": "olafkfreund",
         "repo": "nixarchy-omatheme",
-        "rev": "51fb12943b66389da778af42926e06e80691dd53",
+        "rev": "d734fc3652a432e2d331d5f2a253ec0d7d498842",
         "type": "github"
       }
     },
