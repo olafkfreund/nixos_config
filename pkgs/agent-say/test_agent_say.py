@@ -89,6 +89,34 @@ def test_quiet(dirs, body, silent):
 
 
 @pytest.mark.parametrize(
+    "body,age,silent",
+    [
+        ("", -60, False),
+        ("", 0, True),
+        ("", 60, True),
+        ("   ", -60, True),
+    ],
+)
+def test_quiet_empty_file(dirs, body, age, silent):
+    path = dirs / ".local/state/omarchy/notifications/quiet.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(body)
+    os.utime(path, (time.time() + age, time.time() + age))
+    assert bool(a.gate_quiet(CFG)) is silent
+
+
+def test_quiet_unreadable_empty_file(dirs):
+    if os.geteuid() == 0:
+        pytest.skip("root can read mode 0000 files")
+    path = dirs / ".local/state/omarchy/notifications/quiet.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("")
+    os.utime(path, (time.time() - 60, time.time() - 60))
+    path.chmod(0)
+    assert a.gate_quiet(CFG) == "quiet"
+
+
+@pytest.mark.parametrize(
     "streams,silent",
     [
         ([], False),

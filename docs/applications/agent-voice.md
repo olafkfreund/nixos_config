@@ -100,7 +100,8 @@ Every gate fails closed and is checked again right before each sound.
 - **Do not disturb:** if the Omarchy shell reports DND on, or its state is
   unreadable, it is silent.
 - **Snooze and quiet state:** a global notification snooze still running, or any
-  "silenced" state, keeps it silent.
+  "silenced" state, keeps it silent. An empty quiet-state file stops holding it
+  silent after 5 seconds.
 - **Microphone:** an application capturing the mic (outside the ignore list)
   keeps it silent. A failing `pactl` also does.
 - **Delegated or scripted runs:** only sessions you start speak. Coder
