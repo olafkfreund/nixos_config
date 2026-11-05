@@ -496,6 +496,7 @@ in
 
   features.agentVoice = {
     enable = true;
+    speaker = "nixi";
     voice.elevenLabsKeyFile = config.age.secrets."api-elevenlabs".path;
   };
 
