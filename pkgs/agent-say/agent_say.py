@@ -39,6 +39,7 @@ DEFAULTS = {
         "ignore": ["Echo-Cancel Capture", "Echo-Cancel Sink", "parecord"],
     },
 }
+QUIET_SETTLE = 5
 # What the transient unit must be told, since it does not inherit the agent's env.
 ENV_KEYS = (
     "CLAUDE_CODE_ENTRYPOINT",
@@ -165,7 +166,10 @@ def gate_dnd(cfg):
 def gate_quiet(cfg):
     path = Path.home() / ".local/state/omarchy/notifications/quiet.json"
     try:
-        q = json.loads(path.read_text())
+        text = path.read_text()
+        if not text and time.time() - path.stat().st_mtime > QUIET_SETTLE:
+            return None  # an old empty file isn't a request for quiet; a new one may be mid-rewrite
+        q = json.loads(text)
         if not isinstance(q, dict):
             return "quiet"
         until = (q.get("snoozes") or {}).get("*", {}).get("until") or 0
