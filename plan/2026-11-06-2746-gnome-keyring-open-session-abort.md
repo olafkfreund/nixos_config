@@ -106,8 +106,8 @@ Work in the worktree `/home/olafkfreund/.config/nixos-2746` on branch
    nothing aborted and the assertion never fired, because that proves nothing.
 
    Every `busctl` call uses `--auto-start=no`, and the ready check uses `--acquired`, because a
-   private bus still lists the system service as activatable, and auto-starting it reached the real
-   daemon during early lab runs. `HOME` and the XDG directories are also set on `dbus-run-session`
+   private bus still lists the system service as activatable, and journal lines from early lab runs fit
+   auto-starting having reached the real daemon. `HOME` and the XDG directories are also set on `dbus-run-session`
    itself, as a backstop.
 
    → verify with `shellcheck`, then step 5.
