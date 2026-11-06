@@ -115,6 +115,10 @@ Work in the worktree `/home/olafkfreund/.config/nixos-2746` on branch
    and ask if any compiled package other than `gnome-keyring` and `gnome-shell`
    (plus its helper patch) rebuilds.
    Traps: do not run `nhs`. Check nothing else is mid-build first.
+   Result on 2026-11-06: beyond those two, the overlay also rebuilds `gnome-session`,
+   `gnome-tweaks`, `gnome-browser-connector`, the `firefox` wrapper and `github-desktop`,
+   and downloads 1.1 GiB. The owner accepted this and the ongoing cost on later
+   `nixpkgs` updates.
 
 5. Run the reproducer on both packages, `plain` path: the current store path must
    exit `1` in at least one invocation, and the patched path must exit `0`. Then run
