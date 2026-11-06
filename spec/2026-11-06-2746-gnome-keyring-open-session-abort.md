@@ -32,7 +32,10 @@ if (error == NULL && output == NULL) {
 The check sits in the shared caller, so it covers `aes_negotiate` and
 `plain_negotiate` without touching either. The existing `error != NULL` branch
 then replies with the error and skips publishing the session. The session object
-is released by the `g_object_unref` already at the end of the function.
+is released by the `g_object_unref` already at the end of the function. When the
+caller has already left, nobody receives that reply, so the tests can only observe
+the daemon surviving and still serving other clients. The error reply itself is
+established by reading the code.
 
 ### 2. Apply it through the existing overlay
 
@@ -55,8 +58,9 @@ the daemon on a private bus (`dbus-run-session`) with a temporary `HOME`, then
 fires bursts of `OpenSession` from `busctl --expect-reply=no` clients that exit
 without waiting. It reports one of: daemon died, survived with the assertion hit,
 or survived without hitting it. The last result proves nothing, so the script
-must not report it as a pass. It disables core dumps and never touches the real
-keyring.
+must not report it as a pass. It never touches the real keyring, but an abort on
+the unpatched daemon does reach `coredumpctl`, even with `ulimit -c 0`. Lab runs
+therefore have to be separated from real crashes by time.
 
 It stays in the repo because the patch has to be rechecked whenever nixpkgs moves
 `gnome-keyring`.
@@ -65,12 +69,18 @@ It stays in the repo because the patch has to be rechecked whenever nixpkgs move
 
 Nine prompts started on 6 November against two crashes. One untested explanation
 is that the keyring stayed locked after each crash and every later client asked
-again. After the deploy, compare prompter starts with crashes for 7 days:
+again. After the deploy, compare the timestamps of prompter starts and crashes for
+7 days. A count alone cannot test this, so record whether each prompt had a crash
+before it with no successful unlock in between:
 
 ```bash
 journalctl --user --since '-7 days' --no-pager -g 'Started dbus.*SystemPrompter'
 coredumpctl list --since '-7 days' --no-pager | grep keyring
 ```
+
+If the explanation holds, prompts should nearly stop with the crashes. Any prompt
+in a session with no crash and no user lock disproves it, and that goes to a new
+issue.
 
 Also worth watching: the journal shows `discover_other_daemon: 1` 25 times since
 3 November, and two declarations (`services.gnome.gnome-keyring` in
@@ -91,11 +101,18 @@ private bus:
 | Algorithm | Runs | Current daemon | Patched daemon |
 | --------- | ---- | -------------- | -------------- |
 | `plain` | 4 | Aborted in 3, with the journal's `g_variant_new` error | Survived all 4; the assertion fired in 3 |
-| AES | 1 | Survived; assertion not hit | Survived; assertion not hit |
+| AES | 7 | Survived; assertion not hit | Survived; assertion not hit |
 
-So a client exiting mid-call does trigger this abort. The AES path, which the
-journal shows on p620, has not been reproduced yet. Its failure takes the same
-route through the patched check, but that is from reading the source.
+A second reproducer froze the daemon with `SIGSTOP` while clients sent and exited,
+then resumed it. It hit nothing on either algorithm in 3 runs per daemon, so a
+client being gone before its call is handled is not enough. The race is tighter
+than that, and its exact order is unknown.
+
+So clients exiting mid-call can trigger this abort on the `plain` path. **The AES
+path, which is the one the journal shows on p620, has not been reproduced in the
+lab.** From the source, its failure returns through the same patched check, but
+that is reading the code, not a test. Attempts stopped here after two approaches
+failed. The direct proof comes from p620 itself, in Verification step 4.
 
 ## Alternatives rejected
 
@@ -115,7 +132,8 @@ route through the patched check, but that is from reading the source.
 
 - **Rebuild cost:** a dry run of `gnome-shell`'s closure rebuilds `gnome-shell`
   and one helper patch, on top of `gnome-keyring`. The full p620 closure still
-  has to be measured, and the plan does that before deploying.
+  has to be measured before deploying. Stop and ask if any compiled package beyond
+  those two rebuilds.
 - **A bump can break the build:** if nixpkgs changes that code, the patch stops
   applying and the build fails. That is loud, which is preferred to a silently
   dropped fix.
@@ -124,7 +142,11 @@ route through the patched check, but that is from reading the source.
   is stopped, which means one unlock.
 - **The deploy may start a second daemon:** Home Manager started
   `gnome-keyring.service` during the 14:29 activation on 6 November. The effect on
-  the unlock is unknown, so check the lock state right after deploying.
+  the unlock is unknown, so check the lock state and the daemon count right after
+  deploying.
+- **Lab runs inflate the crash record:** 3 of the 5 keyring entries in `coredumpctl`
+  for 6 November came from building this evidence. The 7-day window starts after the
+  last lab run on that host.
 - **`gnome-shell` rebuilt locally:** low risk, same source and inputs, but a GNOME
   session on any host would run the local build.
 
@@ -132,10 +154,20 @@ route through the patched check, but that is from reading the source.
 
 1. `just check-syntax`, then `just test-host p620`, and measure what actually
    rebuilds.
-2. Run the reproducer against current and patched packages. Current must abort in
-   at least one run; patched must never abort and must hit the assertion in at
-   least one run. Try to hit the AES path too, and report plainly if it isn't hit.
-3. After deploying p620 and logging in again: the running daemon is the patched
-   store path, the keyring is unlocked, and `timeout 10 gh auth status` succeeds.
-4. Over 7 days on p620: no aborts with this signature, and the prompter comparison
-   above.
+2. Run the reproducer against current and patched packages on the `plain` path.
+   Current must abort in at least one run; patched must never abort and must hit
+   the assertion in at least one run. This proves the `plain` path only.
+3. After deploying p620 and logging in again: exactly one daemon is running, it is
+   the patched store path, the keyring is unlocked, and
+   `timeout 10 gh auth status` succeeds.
+4. Over 7 days on p620, starting after the last lab run: no aborts with this
+   signature, and the prompter comparison above. p620 had 5 real aborts in the 4
+   days before, so a quiet week means something. The AES path counts as proven
+   only if the journal shows `aes_negotiate: assertion 'session' failed` with the
+   daemon still running afterwards. A quiet week without that line means "no
+   crashes seen", and the report must say so.
+5. razer, after p620 has been deployed and checked: build with
+   `just deploy-via-p620 razer`, then repeat step 3 there. razer has shown no
+   crashes, so its 7-day check is only that none appear.
+6. p510 is outside this task's verification unless you ask. It picks up the patch
+   at its next deploy, because the overlay is flake-wide.
