@@ -71,10 +71,12 @@ Work in the worktree `/home/olafkfreund/.config/nixos-2746` on branch
    });
    ```
 
-   → verify with `just check-syntax`, then
+   → run `git add overlays/gnome-keyring-open-session-null-output.patch` first,
+   then verify with `just check-syntax`, then
    `nix build --no-link .#nixosConfigurations.p620.pkgs.gnome-keyring`.
-   Traps: services belong in `modules/`, but this is a package patch, so the
-   overlay is the right place. Use `set -o pipefail` if piping a `nix build`.
+   Traps: flakes ignore untracked files, so an unstaged patch fails the build.
+   Services belong in `modules/`, but this is a package patch, so the overlay is
+   the right place. Use `set -o pipefail` if piping a `nix build`.
 
 3. Create `scripts/test-gnome-keyring-open-session.sh`, executable, usage
    `<gnome-keyring store path> [plain|aes] [runs, default 4]`. For each run, under
@@ -83,7 +85,8 @@ Work in the worktree `/home/olafkfreund/.config/nixos-2746` on branch
 
    - start `"$pkg/bin/gnome-keyring-daemon" --foreground --components=secrets`,
      logging to a file, and wait for `org.freedesktop.secrets` on the bus
-   - make one call that waits for its reply and must succeed
+   - make one call that waits for its reply. Success means `busctl` exits 0 and prints
+     a session path. Otherwise the run counts as failed, not as evidence
    - send 40 rounds of 8 parallel calls with `--expect-reply=false`, stopping early
      if the daemon has died:
 
@@ -94,8 +97,9 @@ Work in the worktree `/home/olafkfreund/.config/nixos-2746` on branch
      ```
 
      `plain` passes `sv plain s ""`. `aes` passes
-     `sv dh-ietf1024-sha256-aes128-cbc-pkcs7 ay 128` followed by 128 byte values.
-   - if alive, make one more call that waits for its reply. It must succeed
+     `sv dh-ietf1024-sha256-aes128-cbc-pkcs7 ay 128` followed by the value `7` repeated
+     128 times, as `$(seq 1 128 | sed 's/.*/7/')`.
+   - if alive, make one more waiting call, with the same success test
    - count `assertion 'client' failed` in the log and delete the temporary home
 
    Print one line per run, then a summary. Exit codes: `1` if any run aborted, `0`
@@ -125,8 +129,10 @@ Work in the worktree `/home/olafkfreund/.config/nixos-2746` on branch
    matches words in command text, and backticks in `-m` run as commands. Merge main
    into the branch first if it has moved.
 
-7. Deploy p620 from `main`. Read `#agents:freundcloud.org.uk`, post the plan and how
-   long it takes, then run `AGENT_BUS_ANNOUNCED=1 just p620`.
+7. Run `just validate` and `just test-host p620` on the merged `main`; both must pass.
+   Deploy p620 from `main`. Read `#agents:freundcloud.org.uk`, post the plan and how
+   long it takes, then run `AGENT_BUS_ANNOUNCED=1 just p620`. Record the finish time as
+   an exact timestamp.
    Traps: exit 4 from an unrelated unit is a known pattern, so read which unit failed
    before reacting. Do not run `omarchy` restarts as part of this.
    Then, right after the deploy and before the next login, check the lock state and
@@ -135,23 +141,26 @@ Work in the worktree `/home/olafkfreund/.config/nixos-2746` on branch
    Confirm: exactly one daemon, running the patched store path, keyring unlocked,
    and `timeout 10 gh auth status` succeeds.
 
-8. Over 7 days on p620, counted from the later of step 5's last run and this deploy.
-   Check back once that week is over:
+8. Over at least 7 days on p620. Set `START` to the later of step 5's last run and the
+   deploy finish, as a fixed timestamp recorded on #2746. Check back once that week is
+   over, using that timestamp however late the check runs:
 
    ```bash
-   journalctl --user --since '-7 days' --no-pager -t gnome-keyring-daemon -g "aes_negotiate: assertion|g_variant_new: expected"
-   journalctl --user --since '-7 days' --no-pager -g 'Started dbus.*SystemPrompter'
-   coredumpctl list --since '-7 days' --no-pager | grep keyring
+   journalctl --user --since "$START" --no-pager -t gnome-keyring-daemon -g "aes_negotiate: assertion|g_variant_new: expected"
+   journalctl --user --since "$START" --no-pager -g 'Started dbus.*SystemPrompter'
+   coredumpctl list --since "$START" --no-pager | grep keyring
    ```
 
-   Pass: no aborts. AES counts as proven only if the `aes_negotiate` line appears
-   with the daemon still running after it. Otherwise the report says "no crashes
-   seen". For each prompt, record whether a crash came before it with no unlock in
+   Pass: no aborts. If the `aes_negotiate` line appears with the daemon still running
+   after it, report that the AES path failed and the patched daemon survived. That the
+   new check handled it is from reading the source. Without that line, the report says
+   "no crashes seen". For each prompt, record whether a crash came before it with no unlock in
    between. A prompt with no crash and no user lock disproves the explanation, and
    gets a new issue starting from `discover_other_daemon` and the two daemon
    declarations.
 
-9. razer, after step 7's checks pass: post on the bus, then
+9. razer, after step 7's checks pass: `just test-host razer` must pass, then post on
+   the bus, then
    `AGENT_BUS_ANNOUNCED=1 just deploy-via-p620 razer`. Repeat step 7's checks there,
    and its own 7-day no-crash check. razer's 511 MiB ESP and its known cosmetic exit 4
    both apply. p510 is not touched. It picks up the patch at its next deploy, so tell
@@ -159,7 +168,7 @@ Work in the worktree `/home/olafkfreund/.config/nixos-2746` on branch
 
 10. Report upstream: check gnome-keyring's GitLab for an existing fix or issue. If it
     is not fixed, file it with the reproducer and patch. If it is fixed, note the
-    commit in the overlay comment. Close #2746 after step 8.
+    commit in the overlay comment. Close #2746 only after steps 8 and 9 both finish.
 
 ## Tests
 
