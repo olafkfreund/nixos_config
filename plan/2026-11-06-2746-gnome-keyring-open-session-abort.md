@@ -105,6 +105,11 @@ Work in the worktree `/home/olafkfreund/.config/nixos-2746` on branch
    only if none aborted and the assertion fired in at least one run, and `2` if
    nothing aborted and the assertion never fired, because that proves nothing.
 
+   Every `busctl` call uses `--auto-start=no`, and the ready check uses `--acquired`, because a
+   private bus still lists the system service as activatable, and auto-starting it reached the real
+   daemon during early lab runs. `HOME` and the XDG directories are also set on `dbus-run-session`
+   itself, as a backstop.
+
    → verify with `shellcheck`, then step 5.
    Traps: never touch the real keyring or the real session bus. `ulimit -c 0` does
    not stop aborts reaching `coredumpctl`, so say that in a one-line comment. Bash

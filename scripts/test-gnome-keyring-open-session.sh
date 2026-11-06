@@ -21,7 +21,7 @@ if [[ ${1-} == --run ]]; then
 
   ready=0 failed=0 aborted=0 reason=''
   for ((i = 0; i < 50; i++)); do
-    if busctl --address="$DBUS_SESSION_BUS_ADDRESS" --no-pager --no-legend list 2>/dev/null \
+    if busctl --address="$DBUS_SESSION_BUS_ADDRESS" --no-pager --no-legend --acquired list 2>/dev/null \
       | awk '$1 == "org.freedesktop.secrets" { found = 1 } END { exit !found }'; then
       ready=1
       break
@@ -31,7 +31,7 @@ if [[ ${1-} == --run ]]; then
   done
 
   if ((ready)); then
-    reply=$(busctl --address="$DBUS_SESSION_BUS_ADDRESS" call \
+    reply=$(busctl --address="$DBUS_SESSION_BUS_ADDRESS" --auto-start=no call \
       org.freedesktop.secrets /org/freedesktop/secrets \
       org.freedesktop.Secret.Service OpenSession "${args[@]}" 2>/dev/null)
     if [[ $? -ne 0 || $reply != *'/org/freedesktop/secrets/session/'* ]]; then
@@ -42,7 +42,7 @@ if [[ ${1-} == --run ]]; then
         kill -0 "$daemon_pid" 2>/dev/null || break
         pids=()
         for ((call = 0; call < 8; call++)); do
-          busctl --address="$DBUS_SESSION_BUS_ADDRESS" --expect-reply=false call \
+          busctl --address="$DBUS_SESSION_BUS_ADDRESS" --auto-start=no --expect-reply=false call \
             org.freedesktop.secrets /org/freedesktop/secrets \
             org.freedesktop.Secret.Service OpenSession "${args[@]}" >/dev/null 2>&1 &
           pids+=("$!")
@@ -50,7 +50,7 @@ if [[ ${1-} == --run ]]; then
         for pid in "${pids[@]}"; do wait "$pid" || :; done
       done
       if kill -0 "$daemon_pid" 2>/dev/null; then
-        reply=$(busctl --address="$DBUS_SESSION_BUS_ADDRESS" call \
+        reply=$(busctl --address="$DBUS_SESSION_BUS_ADDRESS" --auto-start=no call \
           org.freedesktop.secrets /org/freedesktop/secrets \
           org.freedesktop.Secret.Service OpenSession "${args[@]}" 2>/dev/null)
         if [[ $? -ne 0 || $reply != *'/org/freedesktop/secrets/session/'* ]]; then
@@ -109,7 +109,8 @@ aborts=0 failures=0 assertions=0
 for ((run = 1; run <= runs; run++)); do
   run_dir="$root/$run"
   mkdir -m 700 "$run_dir"
-  output=$(env -u DBUS_SESSION_BUS_ADDRESS dbus-run-session -- bash "$0" --run "$pkg" "$mode" "$run" "$run_dir")
+  # dbus-daemon gets these too: an activated service inherits its environment.
+  output=$(env -u DBUS_SESSION_BUS_ADDRESS HOME="$run_dir/home" XDG_DATA_HOME="$run_dir/data" XDG_RUNTIME_DIR="$run_dir/runtime" XDG_CONFIG_HOME="$run_dir/config" dbus-run-session -- bash "$0" --run "$pkg" "$mode" "$run" "$run_dir")
   status=$?
   rm -rf "$run_dir"
   if [[ $output == run\ "$run":* ]]; then
