@@ -74,6 +74,16 @@ for arg in "$@"; do
     -c | --config) expect=config ;;
     --config=* | -c=*) check_config "${arg#*=}" ;;
     -c*) check_config "${arg#-c}" ;;
+    # Default-deny: an option Codex adds later, or an attached value like -sfoo, stays out.
+    - | --) ;;
+    --*)
+      case ${arg%%=*} in
+        --ephemeral | --skip-git-repo-check | --json | --color | --output-last-message | --output-schema | --cd | --image | --base | --uncommitted | --commit | --title) ;;
+        *) refuse "option not allowed: ${arg%%=*}" ;;
+      esac
+      ;;
+    -o | -C | -i) ;;
+    -*) refuse "option not allowed: $arg" ;;
     sandbox_mode=* | sandbox_permissions=* | approval_policy=* | mcp_servers=*) refuse 'protected Codex config' ;;
   esac
 done

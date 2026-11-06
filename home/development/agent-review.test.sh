@@ -21,7 +21,7 @@ env | cut -d= -f1 | sort >"$w/envnames"
   for p in /run/agenix /mnt /var "$HOME/.ssh" /nix/var/nix/daemon-socket/socket; do
     [ -e "$p" ] && echo "present $p"
   done
-  [ -w "$WORKTREE" ] && echo "worktree-writable"
+  [ -w "$PWD" ] && echo "worktree-writable"
   [ -w "$w" ] && echo "workdir-writable"
 } >"$w/probe" 2>&1
 FAKE
@@ -42,7 +42,7 @@ reset() { rm -f "$w/work/bin/ran" "$w/work/bin/args" "$w/work/bin/envnames" "$w/
 # run <args...>: run the wrapper with the fake codex first on PATH.
 run() {
   reset
-  PATH="$w/work/bin:$PATH" WORKTREE="$root" bash "$script" "$@" >/dev/null 2>&1 </dev/null
+  PATH="$w/work/bin:$PATH" bash "$script" "$@" >/dev/null 2>&1 </dev/null
 }
 # refused <label> <dir> <args...>: must exit 2 and never start codex.
 refused() {
@@ -67,6 +67,12 @@ refused '--enable x' codex "$W" -- exec --enable x
 refused '--oss' codex "$W" -- exec --oss
 refused '-s workspace-write' codex "$W" -- exec -s workspace-write
 refused '--sandbox=danger-full-access' codex "$W" -- exec --sandbox=danger-full-access
+refused '-sdanger-full-access' codex "$W" -- exec -sdanger-full-access
+refused '-pimplement' codex "$W" -- exec -pimplement
+refused '-a never' codex "$W" -- exec -a never
+refused '--ask-for-approval=never' codex "$W" -- exec --ask-for-approval=never
+refused '--search' codex "$W" -- exec --search
+refused 'unknown long option' codex "$W" -- review --some-future-flag
 for k in sandbox_mode mcp_servers model_provider; do
   refused "-c $k" codex "$W" -- exec -c "$k=v"
   refused "-c$k" codex "$W" -- exec "-c$k=v"
@@ -94,7 +100,7 @@ if [ $rc -ne 0 ] && [ ! -e "$W/bin/ran" ]; then ok 'failing bwrap'; else bad "fa
 # Real sandbox.
 if command -v bwrap >/dev/null && bwrap --ro-bind / / true >/dev/null 2>&1; then
   reset
-  PATH="$W/bin:$PATH" WORKTREE="$root" bash "$script" codex "$W" -- exec -c model=x >/dev/null 2>&1 </dev/null
+  PATH="$W/bin:$PATH" bash "$script" codex "$W" -- exec -c model=x >/dev/null 2>&1 </dev/null
   rc=$?
   if [ $rc -eq 0 ] && [ -e "$W/bin/ran" ]; then ok 'allowed call runs'; else bad "allowed call runs (rc=$rc)"; fi
   for opt in forced_login_method=chatgpt 'mcp_servers={}' 'sandbox_mode="read-only"' model=x; do

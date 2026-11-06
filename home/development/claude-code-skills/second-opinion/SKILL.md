@@ -117,7 +117,8 @@ Three selectors, pick one:
 
 Output is stdout, so redirect it.
 
-**What `agent-review` refuses.** It allows only `exec` and `review`. It
+**What `agent-review` refuses.** It allows only `exec` and `review`, and only
+the options reviews use: anything else is refused, including new ones. It
 refuses `--dangerously-*`, `--yolo`, `--full-auto`, `--add-dir`, `--model`,
 `-p`/`--profile`, `--enable`/`--disable`, `--oss`, any `--sandbox` other than
 `read-only`, and any `-c` key except `model`, `model_reasoning_effort` and
