@@ -51,6 +51,8 @@
 
   # Altscape: Alt+Tab window switcher for the Omarchy shell (#2503).
   altscape = pkgs.callPackage ./altscape { };
+  # Exposé: window overview for the Omarchy shell (#2723).
+  expose-plugin = pkgs.callPackage ./expose-plugin { };
   # Omateams: Microsoft Teams web in an Omarchy-themed window (#2505).
   omateams = pkgs.callPackage ./omateams { };
   hello-lock = pkgs.callPackage ./hello-lock { };

@@ -89,11 +89,6 @@ in
             action = cfg.calendarCommand;
           }
           {
-            key = "SUPER + CTRL + J";
-            description = "AI Kit";
-            action = "aikit";
-          }
-          {
             key = "SUPER + CTRL + SHIFT + D";
             description = "New Google Doc (freundcloud)";
             action = "google-chrome-stable --profile-directory=\"${profile}\" --app=\"https://docs.new\"";
