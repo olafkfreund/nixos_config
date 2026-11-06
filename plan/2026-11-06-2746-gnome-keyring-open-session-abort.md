@@ -8,7 +8,6 @@ coders:
   3: codex # small but tricky: the result classification must never call an inconclusive run a pass
 reviewers:
   - codex # independent read of the C change and the exit-code logic
-  - agy # second independent read of the same diff
 ---
 
 # Plan: Stop gnome-keyring crashes from locking the keyring
