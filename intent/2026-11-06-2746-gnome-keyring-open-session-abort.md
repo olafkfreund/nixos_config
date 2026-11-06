@@ -26,21 +26,29 @@ Evidence for the abort, from the journal and the 50.0 source:
   `aes_negotiate: assertion 'session' failed`, then GLib's fatal
   `g_variant_new: expected GVariant of type 'v' but received value has type '(null)'`.
 - `service_method_open_session` in `daemon/dbus/gkd-secret-service.c` only
-  checks `error`. `aes_negotiate` can fail without setting one, so a NULL output
-  reaches `gkd_exported_service_complete_open_session`.
-- The daemon removes a client's record when that client leaves the bus, so the
-  likeliest trigger is a client disconnecting mid-call. This is inferred: no
-  disconnect has been observed directly, and the client is unknown.
+  checks `error`. `aes_negotiate` and `plain_negotiate` can both fail without
+  setting one, so a NULL output reaches
+  `gkd_exported_service_complete_open_session`. Only the AES path has been seen
+  to crash here.
+- The `'client'` assertion means the daemon had no record of the caller. It
+  removes a record when that client leaves the bus, so a client disconnecting
+  mid-call is one possible trigger. This is inferred: no disconnect has been
+  observed, and the client is unknown.
 
 Fedora crash reports show the same stack on 46.x and 48.x. No upstream fix was
 found, but upstream's git history has not been checked.
 
 ## Proposed outcome
 
-- A client that disappears during `OpenSession` no longer kills the daemon.
-- The keyring stays unlocked for the whole login session unless the user locks
-  it, so `gh` and other keyring clients do not hang.
-- `coredumpctl` shows no new `gnome-keyring` aborts with this signature.
+- A failed `OpenSession` negotiation, on either algorithm, returns a D-Bus error
+  to the caller and the daemon keeps running with its unlock intact.
+- A repeatable check reproduces the failure: it aborts the unpatched daemon and
+  not the patched one.
+- `coredumpctl` shows no `gnome-keyring` aborts with this signature on p620 for
+  7 days after deploying. There were 5 in the 4 days before.
+
+This does not promise the keyring never locks or never prompts. Those symptoms
+may have other causes, covered by the open questions below.
 
 ## Affected users and systems
 
