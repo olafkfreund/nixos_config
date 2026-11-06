@@ -42,6 +42,8 @@ Approved decisions:
 Work in the worktree `/home/olafkfreund/.config/nixos-2748` on branch
 `feat/2748-agent-delegated-permissions`. Never check out a branch in `~/.config/nixos`.
 
+**Gate outcome, 2026-11-06 (see #2748).** Step 1 stopped: the Gemini models hit their quota, and `gpt-oss-120b-medium` only planned. As this plan requires, Codex ships alone. Skip step 4 and every agy part of steps 2, 5, 6 and 8. For now `agent-review` accepts only `codex`, and agy keeps its 14 commands until the owner decides.
+
 ## Steps
 
 1. **agy gate, with no repo edits.** In the scratchpad, write a throwaway script that uses
@@ -96,7 +98,7 @@ Work in the worktree `/home/olafkfreund/.config/nixos-2748` on branch
      no guard behind it
 
    Build `bwrap`, in this order: `--ro-bind` `/nix`, `/etc`, `/usr`, `/bin`, `/lib`, `/lib64`
-   and `/run/current-system` where they exist; `--tmpfs /nix/var/nix/daemon-socket` on every host;
+   `/run/current-system`, `/run/systemd/resolve` and `/run/nscd` where they exist (the last two provide DNS, and without them the tool cannot reach its model); `--tmpfs /nix/var/nix/daemon-socket` on every host;
    `--dev /dev`, `--proc /proc`, `--tmpfs /tmp`, `--tmpfs /home`; `--unshare-pid`, `--unshare-ipc`,
    `--die-with-parent`; `--ro-bind` the worktree and `git rev-parse --git-common-dir`; `--bind` the
    work dir; `--chdir` the worktree. Then `--clearenv` and exactly these variables: `HOME` set to the
@@ -220,7 +222,7 @@ Work in the worktree `/home/olafkfreund/.config/nixos-2748` on branch
    - blocked: writing to the repo and the real `~/.gemini`, also checked after the run, and outbound
      network from a command
    - no MCP server process runs for either tool. If one does, stop and report
-   - blocked for Codex: a command writing to `~/.codex`
+   - blocked for Codex: a command writing to `~/.codex`, and a command doing a DNS lookup
    - hidden: the Nix daemon socket. `nix build` and a flake evaluation both fail
    - working: `tar`, a plain `nix eval --expr`, `nix-instantiate --parse`, `statix`, `git log`, and login
    - forbidden: `git commit`, `git push` and `ssh p510` fail, and show up in the caller's output
