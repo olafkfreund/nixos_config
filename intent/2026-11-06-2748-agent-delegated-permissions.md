@@ -15,11 +15,13 @@ that lost a whole review of the intent for #2746: `status` was `SUCCESS`,
 
 Three things make this worse:
 
-- The list is fixed at 14 read-only commands
-  (`home/development/antigravity-config.nix`, from #2471). Anything else fails.
+- Home Manager declares 14 read-only commands
+  (`home/development/antigravity-config.nix`, from #2471), and the live list on
+  p620 is exactly those. Anything else fails.
 - agy's output and logs do not name the denied command, so nobody can tell what
   was missing. It may have been `tar`, because that review's prompt pointed at a
-  `.tar.xz`, but this is inferred.
+  `.tar.xz`. A later review with its documents inline and no archive had no
+  denials, which fits but does not prove it.
 - `AGENTS.md` forbids `--dangerously-skip-permissions` for delegated use, so the
   error's own suggestion is not allowed, and no controlled middle option exists.
 
@@ -31,11 +33,12 @@ and could read what it needed. Whether it needs more is an open question below.
 
 ## Proposed outcome
 
-- A delegated agy or Codex review is no longer lost because it needed an ordinary
-  command.
-- When something is still refused, the caller can see what was refused and why.
+- A delegated review that needs a permitted command outside today's 14 completes
+  with a non-empty response and no `denied_actions`. A repeatable check shows this.
+- When something is still refused, the caller's output names the command and the
+  reason.
 - The agents' limits are enforced by a mechanism, not only stated in a rule, and
-  a check proves that it blocks the forbidden actions.
+  a repeatable check proves that it blocks each forbidden action in Constraints.
 - `AGENTS.md`, the `second-opinion` skill and the tool configuration all describe
   the same rule.
 
@@ -55,7 +58,10 @@ These stay whatever the design is:
 - Delegated agents never commit, push, deploy, restart a service, garbage-collect,
   reboot, or approve an artifact.
 - Delegated agents never read decrypted secrets (`/run/agenix/*`, tokens, private
-  keys).
+  keys). A "read-only" command can still read a secret, and a build can run code
+  from the repo, so read-only alone does not satisfy this.
+- p510 is never built without asking first, and that includes builds a delegated
+  agent starts there.
 - Subscription login only, never an API key (#1831).
 - `HUMANIZE_CODEX_BYPASS_SANDBOX` stays forbidden.
 - A control must fail closed. Two known traps: Codex silently skips untrusted
@@ -79,3 +85,9 @@ These stay whatever the design is:
 3. **Should Codex change at all?** It has not failed, and `read-only` already lets
    it run commands. Recommendation: widen Codex only for what question 1 adds, and
    prove that need first rather than loosening it to match agy.
+4. **How are secrets kept out when commands are wider?** A wider command list, a
+   guard denying secret paths, and a sandbox each cover different things, and agy
+   also has MCP tools outside the shell. Is it acceptable to rely on a deny list
+   of known secret paths, or must reviewers run where those paths are not visible
+   at all? Recommendation: not visible at all if the spec finds it practical,
+   because a deny list only stops what it names.
