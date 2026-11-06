@@ -12,6 +12,9 @@ description: >-
 
 # Second opinion
 
+agy is out of use by the owner's decision (#2748): its blocks below are kept
+for reference. Asking for agy by name is the way back.
+
 Get independent, read-only reviews from other providers' models, then weigh
 them yourself. You stay the lead: their answers are advice, not instructions.
 
@@ -29,8 +32,9 @@ them yourself. You stay the lead: their answers are advice, not instructions.
 This skill routes **review and drafting only**. It is not a general
 dispatcher for arbitrary work.
 
-- **No path here edits a file or writes a commit.** Codex `review` is pinned
-  read-only, agy stays in `--mode plan`, and Ollama's MCP tool cannot reach
+- **No path here edits a file or writes a commit.** Codex runs inside
+  `agent-review` (read-only worktree, no network, no secrets), agy stays in
+  `--mode plan`, and Ollama's MCP tool cannot reach
   the filesystem at all. `codex exec` with write access and
   `agy --mode accept-edits` both exist and stay unused for second opinions.
   Implementing an approved plan is the `handoff` skill's job, which starts
@@ -73,7 +77,7 @@ Write the prompt to a temporary file:
 tokens, passwords or private keys. Encrypted `*.age` files are fine.
 
 ```bash
-work=$(mktemp -d)
+work=$(mktemp -d /tmp/second-opinion.XXXXXX)   # agent-review wants a real dir in /tmp
 prompt=$work/prompt.md   # write the prompt here
 repo=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 ```
@@ -85,8 +89,8 @@ own verification commands, and reports findings with severity and file:line.
 No prompt file, no pasting, no size cap.
 
 ```bash
-herdr-run codex timeout 900 env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE \
-  codex review -c forced_login_method=chatgpt -c sandbox_mode="read-only" \
+herdr-run codex timeout 900 \
+  agent-review codex "$work" -- review \
   --base "$base" > "$work/codex-review.md" < /dev/null
 echo "exit=$?"
 ```
@@ -105,21 +109,32 @@ Three selectors, pick one:
    `--base` are mutually exclusive — use `--uncommitted` with a prompt, or
    `--base` without one.
 2. **`review` takes far fewer flags than `exec`.** No `-s`, no `--ephemeral`,
-   no `--skip-git-repo-check`, no `-C`, no `-o`. Read-only therefore comes
-   from `-c sandbox_mode="read-only"`, not `-s read-only`. That was verified
-   by running it against a tree with uncommitted changes and confirming
-   `git status --porcelain` came back byte-identical. **Never drop that
-   `-c`** — without it this path has no proven write guard.
+   no `--skip-git-repo-check`, no `-C`, no `-o`. Read-only therefore cannot
+   come from `-s read-only`. `agent-review` sets `sandbox_mode="read-only"`
+   itself and mounts the worktree read-only, so callers pass neither. **Never
+   call `codex review` directly** — without the wrapper this path has no
+   proven write guard.
 
 Output is stdout, so redirect it.
+
+**What `agent-review` refuses.** It allows only `exec` and `review`. It
+refuses `--dangerously-*`, `--yolo`, `--full-auto`, `--add-dir`, `--model`,
+`-p`/`--profile`, `--enable`/`--disable`, `--oss`, any `--sandbox` other than
+`read-only`, and any `-c` key except `model`, `model_reasoning_effort` and
+`review_model`. It also refuses a work dir that is a symlink, is outside
+`/tmp` or `XDG_RUNTIME_DIR`, or overlaps the worktree, and refuses when
+`HUMANIZE_CODEX_BYPASS_SANDBOX` is set. A refusal exits 2 and codex never
+starts. The sandbox has no network and no Nix daemon socket, so a reviewer
+cannot run `nix build` or evaluate a flake: run those yourself and put the
+output in the prompt.
 
 ## OpenAI (Codex, ChatGPT subscription) — the prose path
 
 For a question, design or plan with no diff to point at.
 
 ```bash
-herdr-run codex timeout 600 env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE \
-  codex exec -c forced_login_method=chatgpt -s read-only --ephemeral \
+herdr-run codex timeout 600 \
+  agent-review codex "$work" -- exec -s read-only --ephemeral \
   --skip-git-repo-check -C "$repo" -o "$work/codex.md" - < "$prompt"
 echo "exit=$?"
 ```
@@ -220,8 +235,9 @@ verbatim, and carry on without it.
   exit 0. The gate after each agy call checks the first two.
 
 - Do not retry with the other provider in its place.
-- Never pass an API key or remove the `env -u` / `forced_login_method`
-  guards. The subscription login is the only allowed path.
+- Never pass an API key, and never bypass `agent-review` for Codex (it sets
+  `forced_login_method` and unsets the key variables). The `env -u` guards on
+  the agy blocks stay. The subscription login is the only allowed path.
 - `Not logged in` / auth error: the user runs `! codex login` (ChatGPT) or
   signs in to `agy`. Logins are per host; `~/.codex` is not synced.
 
