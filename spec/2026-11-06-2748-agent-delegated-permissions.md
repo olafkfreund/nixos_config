@@ -19,10 +19,12 @@ intent: intent/2026-11-06-2748-agent-delegated-permissions.md
 | Probe | Result |
 | ----- | ------ |
 | `codex sandbox` as used today | **Can read `~/.ssh/id_ed25519`, `~/.config/gh/hosts.yml`, other tools' credentials, and `/run/agenix/api-openai`.** The session bus is visible. Network and repo writes are blocked |
-| Real `codex exec -s read-only` inside an empty-home `bwrap` | Secrets hidden, `tar` and `nix eval` work, network and repo writes blocked, login still works |
-| Real `agy --mode plan --sandbox` inside the same `bwrap` | Login works |
+| Real `codex exec -s read-only` inside the allow-only `bwrap` below, with `--unshare-pid` | Secrets, `/mnt` and `/var/lib` hidden, 4 processes visible, `tar` and `nix eval` work, network and repo writes blocked, login works |
+| Shell inside the same `bwrap` | `nix config show` has no `access-tokens` (they live in `~/.config/nix`). Environment names that look like credentials hold file paths only, and `/etc` profile files re-add variables despite `--clearenv` |
+| Real `agy --mode plan` inside the allow-only `bwrap`, full `~/.gemini` bound | Login works, no tools used |
+| agy with a disposable home holding only its OAuth token and `config/` | **Fails: no usable model.** Writes to `config/` and the token were blocked from a shell in that layout |
 | agy session allow-rule with named commands, on compound commands | Denied, so named rules may not cover them |
-| agy session allow-rule `command(*)` | Accepted, no denials. The model only planned, so running commands under it is **not proven** |
+| agy session allow-rule `command(*)`, on its default model | Accepted, no denials. The model only planned, so running commands under it is **not proven** |
 
 The first row is a live hole. Nothing Codex reads is stopped from going back to its
 model. Fixing it does not depend on widening anything.
@@ -40,18 +42,21 @@ agent-review <agy|codex> <work-dir> -- <tool arguments>
 It starts the whole tool inside `bwrap`, so its file tools and MCP servers are
 confined as well as its shell commands:
 
-- **Default-deny home:** `--ro-bind / /`, then `--tmpfs "$HOME"`, then only that tool's
-  own config directory: `~/.codex` or `~/.gemini`. Neither tool can see the other's
-  credentials.
-- **Hidden:** `/run/agenix.d` (the real target of `/run/agenix`) and `/run/user/$UID`,
-  which removes the session bus and the keyring. `/tmp` is a fresh tmpfs.
+- **Allow-only filesystem:** nothing is mounted unless listed. Read-only: `/nix`, `/etc`,
+  `/usr`, `/bin`, `/lib`, `/lib64`, `/run/current-system`. Fresh tmpfs: `/tmp` and `/home`.
+  `/run/agenix`, `/run/user/$UID`, `/mnt`, `/var`, `/root` and `/run/wrappers` simply do
+  not exist inside, so the secrets, the session bus, the keyring, other users' homes and
+  setuid helpers are all out of reach without having to name each one.
+- **Credentials:** only that tool's own. Neither tool can see the other's login. See
+  sections 2 and 3.
 - **Repo:** the current worktree read-only, plus the main `.git` read-only, because a
   worktree's git data lives there.
 - **Writable:** only `<work-dir>`, which the caller creates and removes, and a tmpfs home.
 - **Other processes:** `--unshare-pid` with a new `/proc`, so `/proc/<pid>/environ` of
   other processes cannot leak tokens.
-- **Environment:** `--clearenv`, then an allow-list (`PATH`, `HOME`, `LANG`, `TERM`,
-  `TMPDIR`, `NIX_*`), so tokens in the caller's environment do not come along.
+- **Environment:** `--clearenv`, then only `PATH`, `HOME`, `LANG`, `TERM`, `TMPDIR` and
+  `SSL_CERT_FILE`, so tokens in the caller's environment do not come along. No `NIX_*`
+  wildcard, because `NIX_CONFIG` can carry access tokens.
 - **p510:** on that host, also hide `/nix/var/nix/daemon-socket`, so a reviewer cannot
   start a build there. Reviews still run.
 
@@ -62,18 +67,26 @@ other than `plan`, `--gemini_dir` or a config-dir flag, a Codex sandbox other th
 
 ### 2. Codex
 
-Run through `agent-review` with `-s read-only` or `sandbox_mode="read-only"`, as now.
-Its own sandbox keeps blocking network and writes, and `bwrap` adds the hiding. Tested
-together in the table above. No capability is added.
+Run through `agent-review` with `-s read-only` or `sandbox_mode="read-only"`, as now,
+binding only `~/.codex`. Its own sandbox blocks network and writes for commands, and
+`bwrap` adds the hiding. Tested together in the table above. No capability is added.
+
+Codex's sandbox covers its commands, not MCP servers it starts, and `bwrap` cannot block
+network because Codex must reach its model. So the wrapper passes `-c 'mcp_servers={}'`.
+That was passed in the test, but the log still showed `rmcp` errors, so the plan must
+confirm no MCP server process actually runs. If one does, stop.
 
 ### 3. agy
 
-Run through `agent-review` with `--mode plan --sandbox` and a session-only
-`--settings` allow-rule, which is never saved to the synced `settings.json`.
+Run through `agent-review` with `--mode plan --sandbox`, a pinned `--model` and a
+session-only `--settings` allow-rule, which is never saved to the synced `settings.json`.
 
-- **Protect agy's own config:** `~/.gemini` must stay writable for logs and state, but
-  `settings.json`, `config/` and `hooks` are mounted read-only over it. Otherwise a
-  reviewer could widen its own permissions and Syncthing would carry that to every host.
+- **Disposable agy home:** the real `~/.gemini` is never writable, because Syncthing
+  would carry any change to every host, and leaving part of it writable would let a
+  reviewer keep changes after the run. Inside, `~/.gemini` is a tmpfs, with only
+  what agy needs mounted read-only from the real one: its OAuth token, `config/` for the
+  guard hook, and whatever else the plan's probe finds it needs for its model list. That
+  also keeps its past conversations out of reach. Nothing there may be a writable bind.
 - **Reviewer guard:** add an `AGY_REVIEWER=1` branch to
   `modules/programs/agy-guard-adapter.sh`, deny by default like the coder branch. It
   allows the read tools and `run_command` without `BypassSandbox`, allows writes only
@@ -89,8 +102,12 @@ repo and config writes blocked, and network blocked:
 | Probe result | What ships for agy |
 | ------------- | ------------------ |
 | Everything holds under `command(*)` | The wildcard rule, confined as above |
-| Commands run, but agy's terminal has network | A named allow-list instead, adding `tar`, `nix eval`, `nix build`, `git` read commands, without `curl`, `ssh` or similar. A named list cannot truly stop network, so the report says so |
+| agy's terminal has network | Stop and come back to you. A named list of commands cannot stop network, so it would break the approved "no network" decision |
+| agy cannot pick a model in a disposable home, or an OAuth refresh needs to write | Stop and come back to you. Do not fall back to a writable `~/.gemini` |
 | agy will not run commands in plan mode | Stop and come back to you. **Do not reach for `--dangerously-skip-permissions`** |
+
+If the gate stops, Codex and the rule text for it still ship, and agy keeps today's
+14-command list until you decide.
 
 ### 4. Show what was refused
 
@@ -132,9 +149,10 @@ The log can contain command text, so `<work-dir>` is removed with the review.
 ## Risks
 
 - **Things that stay visible:** each tool can read its own login (`~/.codex/auth.json`
-  or `~/.gemini/oauth_creds.json`), because it needs it. So a reviewer's model could see
-  that provider's own token. Anything world-readable outside `$HOME` also stays visible,
-  as does the repo, including its encrypted `.age` files.
+  or agy's OAuth token), because it needs it. So a reviewer's model could see that
+  provider's own token. Everything world-readable under `/nix`, `/etc` and `/usr` also
+  stays visible, as does the repo, including its encrypted `.age` files. This is why the
+  plan lists readable credential-like files under those paths.
 - **`nix build` runs repo code:** builds run through the daemon, with `sandbox = relaxed`
   on p620, and fixed-output builds have network. A reviewer could send repo contents out
   that way. It is accepted because no secret is mounted and each provider is already sent the
@@ -161,15 +179,20 @@ The log can contain command text, so `<work-dir>` is removed with the review.
 2. Live probe for each tool on p620, recording each result, with `test -r` only and never
    printing a value:
    - Hidden: an agenix secret, `~/.ssh/id_ed25519`, `~/.config/gh/hosts.yml`, the other
-     tool's login, the session bus, and another process's `/proc/<pid>/environ`.
-   - Blocked: writing to the repo, `~/.gemini/settings.json` and `~/.gemini/config/`, and
-     outbound network from a command.
-   - Working: `tar`, `nix eval`, a small `nix build`, `git log`, and login.
+     tool's login, the session bus, `/mnt`, `/var/lib`, other users' homes, Nix
+     `access-tokens`, and another process's `/proc/<pid>/environ`.
+   - Environment: list names only, and confirm none holds a credential value.
+   - Listed: readable credential-like files under `/nix`, `/etc` and `/usr`, names only,
+     each one explained or removed from the mounts.
+   - Blocked: writing to the repo and to agy's real `~/.gemini`, including after the run,
+     and outbound network from a command.
+   - No MCP server process runs for either tool.
+   - Working: `tar`, `nix eval`, a small `nix build`, `git log`, and login, including
+     after agy's access token has expired, because its OAuth file is read-only.
 3. A forbidden action check: commit, push, and `ssh p510` must all fail, and the failures
    must show up in the caller's output.
 4. Repeat the review that failed: a prompt that needs `tar` on a `.tar.xz` completes through
-   agy with a non-empty response and no `denied_actions`. If agy took the named-list route,
-   `tar` must be on it.
+   agy with a non-empty response and no `denied_actions`.
 5. A refused command is named in the caller's output, or reported as unnamed if agy's own
    layer refused it.
 6. Repeat steps 1 and 2 on razer, and on p510 only when you agree. On p510, confirm a build
