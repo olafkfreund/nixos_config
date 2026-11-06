@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2746
 intent: intent/2026-11-06-2746-gnome-keyring-open-session-abort.md
 ---
