@@ -20,10 +20,19 @@ Delegated reviews move into a new `agent-review` wrapper that runs the whole too
 sandbox can read SSH keys and API keys. It also lets agy run ordinary commands without
 `--dangerously-skip-permissions`.
 
+**Change from the approved spec, needing your approval with this plan.** The spec allowed
+reviewers `nix eval` and `nix build`. `modules/nix/nix.nix:29` makes `olafkfreund` a daemon
+`trusted-users` member, which Nix's documentation treats as essentially root, and a process
+inside `bwrap` connects to the host daemon as that same user. So the daemon socket is hidden
+on every host. Tested with it hidden: plain expressions, `nix-instantiate --parse`, `statix`,
+`deadnix` and `nixpkgs-fmt` work; `nix build` and flake evaluation do not. When a reviewer
+needs a flake evaluated or a build run, Claude runs it and passes the output in. This also
+replaces the spec's p510 special case.
+
 Approved decisions:
 
-- Reviewers may run read-only commands, archive tools, `nix eval` and `nix build`. No
-  network for their commands.
+- Reviewers may run read-only commands, archive tools and Nix evaluation without the
+  daemon, as changed above. No network for their commands.
 - Reviewers write only to a temporary directory for the run, never the repo.
 - Codex gains no capability. It only gains the hiding.
 - Secrets are not visible at all, by not being mounted.
@@ -35,8 +44,9 @@ Work in the worktree `/home/olafkfreund/.config/nixos-2748` on branch
 
 ## Steps
 
-1. **agy gate, with no repo edits.** In the scratchpad, using the mounts from step 2, find
-   the least agy state that gives a usable model. Start from a tmpfs `~/.gemini` with
+1. **agy gate, with no repo edits.** In the scratchpad, write a throwaway script that uses
+   the `bwrap` mount list in step 2, including the hidden daemon socket. With it, find the
+   least agy state that gives a usable model. Start from a tmpfs `~/.gemini` with
    read-only binds of `antigravity-cli/antigravity-oauth-token` and `config/`, then add a
    **disposable copy** of `antigravity-cli/settings.json` and read-only `cache/`, one at a
    time. Use `--model gemini-3.1-pro-high`, named for reviews in
@@ -47,7 +57,10 @@ Work in the worktree `/home/olafkfreund/.config/nixos-2748` on branch
    with a prompt that says the commands are approved and not to plan. Use `test -r` only,
    never printing a value. Record each result on #2748:
    - commands actually run
-   - a command can reach no network: `timeout 5 bash -c "echo > /dev/tcp/1.1.1.1/443"`
+   - a command can reach no network, by each of: TCP to `1.1.1.1:443`, UDP to `1.1.1.1:53`,
+     and a DNS lookup. agy itself needs the network, so `bwrap` cannot use `--unshare-net`,
+     and this block comes from agy's `--sandbox` alone. The guarantee is what these routes
+     show, and is worded that way
    - writes to the repo and to any real `~/.gemini` path fail
    - secrets are hidden
    - agy still logs in with its OAuth token read-only. If the token is near expiry, wait
@@ -67,29 +80,43 @@ Work in the worktree `/home/olafkfreund/.config/nixos-2748` on branch
 
    Refuse, with a message and exit 2, when:
 
-   - the first argument is not `agy` or `codex`, `<work-dir>` is not an existing directory,
-     or the current directory is not a git worktree
-   - any argument matches `--dangerously-*`, `--yolo`, `--full-auto`, `--add-dir`,
-     `--mode`, `--model` for Codex, `-*gemini_dir*`, `-*gemini-dir*`, `-*config*dir*`,
-     `-*config_override*`, or `--sandbox`/`-s` with anything but `read-only`, or a
-     `sandbox_mode=` other than `read-only`
+   - the first argument is not `agy` or `codex`, or the current directory is not a git worktree
+   - `<work-dir>` is unsafe. It must be an existing real directory (no symlinks) under `/tmp` or
+     `$XDG_RUNTIME_DIR`, compared after `realpath`. It must not contain, or sit inside, the
+     worktree, the git common dir, `~/.codex` or `~/.gemini`. Otherwise a later `--bind` would
+     turn a protected path writable
+   - any argument matches `--dangerously-*`, `--yolo`, `--full-auto`, `--add-dir`, `--settings`,
+     `--mode` and `--model` for agy (the wrapper sets these itself), `-*gemini_dir*`,
+     `-*gemini-dir*`, `-*config*dir*`, `-*config_override*`, or `--sandbox`/`-s` with anything but
+     `read-only`, or a `sandbox_mode=` other than `read-only`
    - `HUMANIZE_CODEX_BYPASS_SANDBOX` is set in its environment
+   - for agy: `/etc/antigravity/hooks/coder-guard` is not executable, or `~/.gemini/config/hooks.json`
+     does not hold the declared `coder-guard` entry. Use the same check as `agy-implement` in
+     `home/development/antigravity-config.nix`. Without the hook, the `command(*)` rule would have
+     no guard behind it
 
    Build `bwrap`, in this order: `--ro-bind` `/nix`, `/etc`, `/usr`, `/bin`, `/lib`, `/lib64`
-   and `/run/current-system` where they exist; `--dev /dev`, `--proc /proc`, `--tmpfs /tmp`,
-   `--tmpfs /home`; `--unshare-pid`, `--unshare-ipc`, `--die-with-parent`; `--ro-bind` the
-   worktree and `git rev-parse --git-common-dir`; `--bind` the work dir; `--chdir` the
-   worktree; `--clearenv`, then `--setenv` for `HOME`, `PATH`, `LANG`, `TERM`, `TMPDIR` set to
-   the work dir, and `SSL_CERT_FILE`. On a host named `p510`, add `--tmpfs
-   /nix/var/nix/daemon-socket`.
+   and `/run/current-system` where they exist; `--tmpfs /nix/var/nix/daemon-socket` on every host;
+   `--dev /dev`, `--proc /proc`, `--tmpfs /tmp`, `--tmpfs /home`; `--unshare-pid`, `--unshare-ipc`,
+   `--die-with-parent`; `--ro-bind` the worktree and `git rev-parse --git-common-dir`; `--bind` the
+   work dir; `--chdir` the worktree. Then `--clearenv` and exactly these variables: `HOME` set to the
+   real home path (the mounts below sit under it), `TMPDIR` set to the work dir, `PATH`, `LANG`,
+   `TERM`, `SSL_CERT_FILE`, `NIX_REMOTE='local?read-only=true'`, and
+   `NIX_CONFIG='experimental-features = nix-command flakes read-only-local-store'`. Nothing from the
+   caller's `NIX_CONFIG` is passed through.
 
    - **codex:** add `--bind "$HOME/.codex" "$HOME/.codex"`, and run the arguments with
-     `-c forced_login_method=chatgpt -c 'mcp_servers={}' -c 'sandbox_mode="read-only"'`.
+     `-c forced_login_method=chatgpt -c 'mcp_servers={}' -c 'sandbox_mode="read-only"'`. Codex must
+     be able to rewrite `auth.json` when its login refreshes, so this bind stays writable for the
+     parent process only: its read-only sandbox stops commands writing there, and step 8 proves it.
    - **agy:** add step 1's minimal mounts, `--setenv AGY_CODER 1`, `--setenv AGY_REVIEWER 1`,
      `--setenv AGY_WORKTREE <work-dir>` and `--setenv AGY_GUARD_LOG <work-dir>/guard.log`, and
      run with `--mode plan --sandbox --model <step 1's model> --settings <allow rule>`. After
      it exits, print `guard.log`'s deny lines. If `denied_actions` is non-empty and no deny
-     line matches, print that agy's own layer refused a command it did not name.
+     line matches, print that agy's own layer refused a command it did not name. If the response
+     shows tools were used but `guard.log` is empty, exit non-zero and say the guard did not fire.
+     A reviewer could edit that log, because the hook runs inside the same mounts, so treat it as a
+     diagnostic and not as proof. The caller removes the work dir with a `trap`.
 
    Exit with the tool's exit code. If `bwrap` cannot start, exit non-zero: never run the tool
    without it.
@@ -142,6 +169,9 @@ Work in the worktree `/home/olafkfreund/.config/nixos-2748` on branch
    needing no login. With a stub tool on `PATH` and a stub `bwrap` for the failure case:
    - each refused argument from step 2 exits 2 and never starts the tool
    - `HUMANIZE_CODEX_BYPASS_SANDBOX` set refuses
+   - a work dir that is a symlink, outside `/tmp` and `$XDG_RUNTIME_DIR`, equal to or inside the worktree,
+     or containing it, refuses
+   - for agy, a missing guard or a `hooks.json` without the entry refuses
    - a `bwrap` that fails means the tool never runs
    - a real `bwrap` run of a small script shows `/run/agenix`, `/mnt`, `/var` and `$HOME/.ssh` absent,
      the worktree not writable, the work dir writable, and the environment cleared
@@ -190,17 +220,20 @@ Work in the worktree `/home/olafkfreund/.config/nixos-2748` on branch
    - blocked: writing to the repo and the real `~/.gemini`, also checked after the run, and outbound
      network from a command
    - no MCP server process runs for either tool. If one does, stop and report
-   - working: `tar`, `nix eval`, a small `nix build`, `git log`, and login
+   - blocked for Codex: a command writing to `~/.codex`
+   - hidden: the Nix daemon socket. `nix build` and a flake evaluation both fail
+   - working: `tar`, a plain `nix eval --expr`, `nix-instantiate --parse`, `statix`, `git log`, and login
    - forbidden: `git commit`, `git push` and `ssh p510` fail, and show up in the caller's output
    - repeat the review that failed: a prompt needing `tar` on a `.tar.xz` completes with a non-empty
      response and no `denied_actions`
    - a refused command is named, or reported as unnamed
 
 9. razer: post on the bus, `AGENT_BUS_ANNOUNCED=1 just deploy-via-p620 razer`, and repeat steps 5 and 8's
-   checks there. p510 only when you agree: there, confirm a build fails while a review still runs.
+   checks there. p510 only when you agree.
 
-10. Open a separate issue for `agy-implement` and `codex-implement`, which may have the same exposure. Do
-    not change them here. Close #2748 after step 9.
+10. Open two separate issues, and change neither here: `agy-implement` and `codex-implement` may have the
+    same exposure, including the daemon socket; and `trusted-users` itself in `modules/nix/nix.nix:29`,
+    since any process running as you can reach the daemon. Close #2748 after step 9.
 
 ## Tests
 
