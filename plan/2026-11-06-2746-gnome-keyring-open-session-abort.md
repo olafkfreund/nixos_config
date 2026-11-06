@@ -33,7 +33,11 @@ Work in the worktree `/home/olafkfreund/.config/nixos-2746` on branch
 ## Steps
 
 1. Create `overlays/gnome-keyring-open-session-null-output.patch` with exactly
-   this content, keeping the tabs:
+   this change. The block below shows it, but the repo's Markdown formatter strips
+   tabs from it, so do not copy its whitespace. Generate the file instead: unpack
+   `nixpkgs#gnome-keyring.src`, make the edit in
+   `daemon/dbus/gkd-secret-service.c` using tabs like the code around it, and write
+   the result with `diff -u` using `a/` and `b/` paths:
 
    ```diff
    --- a/daemon/dbus/gkd-secret-service.c
@@ -53,7 +57,8 @@ Work in the worktree `/home/olafkfreund/.config/nixos-2746` on branch
    ```
 
    → verified by the build in step 2.
-   Traps: a formatter must not convert the tabs, or the patch stops applying.
+   Traps: `.patch` files must keep their tabs, or the patch stops applying. Check
+   with `grep -P '\t' overlays/gnome-keyring-open-session-null-output.patch`.
 
 2. `overlays/upstream-fixes.nix`, after the `playerctl` entry that ends at line 49,
    add:
