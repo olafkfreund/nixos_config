@@ -176,6 +176,14 @@ so the backup is `~/.hm-backups/<timestamp>/home/olafkfreund/.config/xdg-desktop
 not `~/.hm-backups/<timestamp>/.config/…`. The rollback command and the module header
 are corrected.
 
+**Deviation (owner's decision, 2026-11-06):** main deploys kept removing Flea from p620
+before step 4 could run, so the owner chose to merge first. Step 6 runs before steps 4 and
+5, and those checks run after the merge, at the next login on each host. A merge reaches
+razer through the nightly upgrade even if step 5 has not run. #2694 stays open until they
+pass. Once merged, the rollback below no longer removes Flea: use `git revert -m 1 <PR merge
+commit>` on main, then deploy, because a local `--rollback` only lasts until the next nightly
+upgrade. If the file picker breaks portal dialogs, that revert is the supported fix.
+
 ## Tests
 
 | Command | Expected |
