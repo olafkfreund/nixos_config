@@ -43,11 +43,19 @@ Work in the worktree `/home/olafkfreund/.config/nixos-2748` on branch
 
 **Owner decision, 2026-11-06:** leave agy out and use Codex only. The gate is not rerun.
 
-**Step 2 review added beyond this plan:** `agent-review` allows only `exec` and `review`, refuses `-p`/`--profile`, `--enable`, `--disable`, `--oss` and `--sandbox-state*`, and allows `-c` only for `model`, `model_reasoning_effort` and `review_model`. Callers no longer pass `-c sandbox_mode` or `-c forced_login_method`, because the wrapper sets them.
+**Step 2 review added beyond this plan:** `agent-review` allows only `exec` and `review`, refuses
+`-p`/`--profile`, `--enable`, `--disable`, `--oss` and `--sandbox-state*`, and allows `-c` only for
+`model`, `model_reasoning_effort` and `review_model`. Callers no longer pass `-c sandbox_mode` or
+`-c forced_login_method`, because the wrapper sets them.
 
-**Step 6 as done:** the "Reviewer mode" docs section and the agy-model note are skipped, because there is no reviewer branch. `agy-standards.md` no longer names a model, since `gemini-3.1-pro-high` is gone.
+**Step 6 as done:** the "Reviewer mode" docs section and the agy-model note are skipped, because
+there is no reviewer branch. `agy-standards.md` no longer names a model, since `gemini-3.1-pro-high`
+is gone.
 
-**Gate outcome, 2026-11-06 (see #2748).** Step 1 stopped: the Gemini models hit their quota, and `gpt-oss-120b-medium` only planned. As this plan requires, Codex ships alone. Skip step 4 and every agy part of steps 2, 5, 6 and 8. For now `agent-review` accepts only `codex`, and agy keeps its 14 commands until the owner decides.
+**Gate outcome, 2026-11-06 (see #2748).** Step 1 stopped: the Gemini models hit their quota, and
+`gpt-oss-120b-medium` only planned. As this plan requires, Codex ships alone. Skip step 4 and every
+agy part of steps 2, 5, 6 and 8. For now `agent-review` accepts only `codex`, and agy keeps its 14
+commands until the owner decides.
 
 ## Steps
 
@@ -103,7 +111,9 @@ Work in the worktree `/home/olafkfreund/.config/nixos-2748` on branch
      no guard behind it
 
    Build `bwrap`, in this order: `--ro-bind` `/nix`, `/etc`, `/usr`, `/bin`, `/lib`, `/lib64`
-   `/run/current-system`, `/run/systemd/resolve` and `/run/nscd` where they exist (the last two provide DNS, and without them the tool cannot reach its model); `--tmpfs /nix/var/nix/daemon-socket` on every host;
+   `/run/current-system`, `/run/systemd/resolve` and `/run/nscd` where they exist (the last two
+   provide DNS, and without them the tool cannot reach its model); `--tmpfs
+   /nix/var/nix/daemon-socket` on every host;
    `--dev /dev`, `--proc /proc`, `--tmpfs /tmp`, `--tmpfs /home`; `--unshare-pid`, `--unshare-ipc`,
    `--die-with-parent`; `--ro-bind` the worktree and `git rev-parse --git-common-dir`; `--bind` the
    work dir; `--chdir` the worktree. Then `--clearenv` and exactly these variables: `HOME` set to the

@@ -76,7 +76,7 @@ for k in sandbox_mode mcp_servers model_provider; do
 done
 reset
 HUMANIZE_CODEX_BYPASS_SANDBOX=1 PATH="$W/bin:$PATH" bash "$script" codex "$W" -- exec >/dev/null 2>&1 </dev/null
-[ $? -eq 2 ] && [ ! -e "$W/bin/ran" ] && ok 'HUMANIZE_CODEX_BYPASS_SANDBOX' || bad 'HUMANIZE_CODEX_BYPASS_SANDBOX'
+if [ $? -eq 2 ] && [ ! -e "$W/bin/ran" ]; then ok 'HUMANIZE_CODEX_BYPASS_SANDBOX'; else bad 'HUMANIZE_CODEX_BYPASS_SANDBOX'; fi
 
 ln -s "$W" "$w/link"
 refused 'work dir symlink' codex "$w/link" -- exec
@@ -89,16 +89,16 @@ refused 'work dir contains worktree' codex "$(dirname "$root")" -- exec
 reset
 PATH="$w/fakebwrap:$W/bin:$PATH" bash "$script" codex "$W" -- exec >/dev/null 2>&1 </dev/null
 rc=$?
-[ $rc -ne 0 ] && [ ! -e "$W/bin/ran" ] && ok 'failing bwrap' || bad "failing bwrap (rc=$rc)"
+if [ $rc -ne 0 ] && [ ! -e "$W/bin/ran" ]; then ok 'failing bwrap'; else bad "failing bwrap (rc=$rc)"; fi
 
 # Real sandbox.
 if command -v bwrap >/dev/null && bwrap --ro-bind / / true >/dev/null 2>&1; then
   reset
   PATH="$W/bin:$PATH" WORKTREE="$root" bash "$script" codex "$W" -- exec -c model=x >/dev/null 2>&1 </dev/null
   rc=$?
-  [ $rc -eq 0 ] && [ -e "$W/bin/ran" ] && ok 'allowed call runs' || bad "allowed call runs (rc=$rc)"
+  if [ $rc -eq 0 ] && [ -e "$W/bin/ran" ]; then ok 'allowed call runs'; else bad "allowed call runs (rc=$rc)"; fi
   for opt in forced_login_method=chatgpt 'mcp_servers={}' 'sandbox_mode="read-only"' model=x; do
-    grep -qxF -- "$opt" "$W/bin/args" && ok "arg $opt" || bad "arg $opt"
+    if grep -qxF -- "$opt" "$W/bin/args"; then ok "arg $opt"; else bad "arg $opt"; fi
   done
   if [ -s "$W/bin/probe" ]; then
     while IFS= read -r l; do
@@ -108,11 +108,11 @@ if command -v bwrap >/dev/null && bwrap --ro-bind / / true >/dev/null 2>&1; then
       esac
     done <"$W/bin/probe"
   fi
-  grep -qx workdir-writable "$W/bin/probe" && ok 'work dir writable' || bad 'work dir not writable'
+  if grep -qx workdir-writable "$W/bin/probe"; then ok 'work dir writable'; else bad 'work dir not writable'; fi
   grep -q present "$W/bin/probe" || ok 'secret and daemon paths absent'
   grep -qx worktree-writable "$W/bin/probe" || ok 'worktree read-only'
   extra=$(grep -vxE 'HOME|TMPDIR|PATH|LANG|TERM|SSL_CERT_FILE|NIX_REMOTE|NIX_CONFIG|PWD|OLDPWD|SHLVL|_' "$W/bin/envnames")
-  [ -z "$extra" ] && ok 'environment only listed variables' || bad "unexpected env names: $extra"
+  if [ -z "$extra" ]; then ok 'environment only listed variables'; else bad "unexpected env names: $extra"; fi
 else
   echo 'SKIP sandbox checks: real bwrap or user namespaces unavailable (not counted as pass)'
 fi
