@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2748
 spec: spec/2026-11-06-2748-agent-delegated-permissions.md
 coders:
