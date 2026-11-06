@@ -42,7 +42,7 @@ Work in the worktree `/home/olafkfreund/.config/nixos-2746` on branch
    ```diff
    --- a/daemon/dbus/gkd-secret-service.c
    +++ b/daemon/dbus/gkd-secret-service.c
-   @@ -428,6 +428,11 @@
+   @@ -433,6 +433,11 @@
          &error);
      g_variant_unref (input_payload);
 

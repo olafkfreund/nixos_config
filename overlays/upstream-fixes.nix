@@ -48,6 +48,12 @@ _final: prev: {
     patches = (old.patches or [ ]) ++ [ ./playerctl-null-variant.patch ];
   });
 
+  # gnome-keyring 50.0 aborts when OpenSession fails without setting an error,
+  # which loses the login unlock (#2746). Drop or rebase once upstream fixes it.
+  gnome-keyring = prev.gnome-keyring.overrideAttrs (old: {
+    patches = (old.patches or [ ]) ++ [ ./gnome-keyring-open-session-null-output.patch ];
+  });
+
   # azure-cli 2.81.0 expects azure-mgmt-web v2024_11_01 which isn't packaged yet;
   # disable installCheck until nixpkgs catches up.
   azure-cli = prev.azure-cli.overrideAttrs (_old: {
