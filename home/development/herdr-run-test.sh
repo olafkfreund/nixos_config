@@ -415,6 +415,8 @@ ok headless-env
 
 reset_state
 export GITHUB_API_TOKEN=$marker HERDR_RUN_TEST_DECOY=$marker SSH_AUTH_SOCK=$marker HERDR_PANE_ID=$marker
+# A login shell's NIX_CONFIG carries the GitHub token (api-keys.nix), so it must not pass (#2762 review).
+export NIX_CONFIG="access-tokens = github.com=$marker"
 "$tool" codex bash -c 'touch "$TMPDIR/state/started"; timeout 10 bash -c "until [ -e \$TMPDIR/state/go ]; do sleep 0.01; done"; '"$names_cmd" >"$tmp/out" 2>"$tmp/err" </dev/null &
 helper=$!
 for _ in {1..300}; do
@@ -432,7 +434,7 @@ wait "$helper" || code=$?
 assert_code 0
 [[ -s $tmp/out ]]
 while IFS= read -r n; do [[ -n ${allowed[$n]:-} ]] || exit 1; done <"$tmp/out"
-if grep -qxE 'GITHUB_API_TOKEN|HERDR_RUN_TEST_DECOY|SSH_AUTH_SOCK|HERDR_PANE_ID' "$tmp/out"; then exit 1; fi
-unset GITHUB_API_TOKEN HERDR_RUN_TEST_DECOY SSH_AUTH_SOCK HERDR_PANE_ID
+if grep -qxE 'GITHUB_API_TOKEN|HERDR_RUN_TEST_DECOY|SSH_AUTH_SOCK|HERDR_PANE_ID|NIX_CONFIG' "$tmp/out"; then exit 1; fi
+unset GITHUB_API_TOKEN HERDR_RUN_TEST_DECOY SSH_AUTH_SOCK HERDR_PANE_ID NIX_CONFIG
 ok env-allow-list
 exec 7>&-
