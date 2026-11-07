@@ -22,13 +22,14 @@ How each one starts today:
   `CODEX_CODER=1 codex -p implement`. The profile is `sandbox_mode = "workspace-write"`,
   `approval_policy = "on-request"` and `network_access = false`. The coder guard is a managed
   hook (`modules/programs/claude-code-managed.nix:331`) that judges shell commands only. The
-  guard exits 0 when a call has no `.tool_input.command`.
+  guard exits 0 when a call has no `.tool_input.command`. Unlike agy-implement, the
+  launcher does not check that the managed hook is installed before it starts.
 - **agy-implement** (`home/development/antigravity-config.nix:146`) runs
   `agy --mode accept-edits --sandbox --dangerously-skip-permissions` with the real `HOME`
   and the caller's environment. Under that flag the coder-guard adapter
   (`modules/programs/agy-guard-adapter.sh`) is the only barrier for file tools.
   It allows `view_file`, `read_file`, `grep_search`, `list_dir` and `find_by_name` on
-  **any path** that does not contain `.gemini` (line 69). agy's terminal sandbox makes
+  **any path**, as long as no string argument contains `.gemini` (lines 52 and 69). agy's terminal sandbox makes
   the workspace read-only for commands, and `nix build` still works through the daemon
   there (`spec/2026-10-14-2298-agy-sandbox-bypass.md`, section 2).
 
@@ -56,8 +57,9 @@ There are three more exposures that the probe does not show:
 
 - **Environment.** The Claude Code session that calls `agent-run` holds literal tokens,
   for example `GITHUB_API_TOKEN`, `CACHIX_AUTH_TOKEN`, `OLLAMA_API_KEY` and
-  `CLAUDE_CODE_MESSAGING_TOKEN`. Values were checked for shape only. Neither launcher clears
-  the environment. Codex's `shell_environment_policy` default may filter names that contain
+  `CLAUDE_CODE_MESSAGING_TOKEN`. Values were checked for shape only. Neither launcher sanitizes
+  the environment. agy-implement unsets only `CASCADE_GLOBAL_CONFIG_OVERRIDE`.
+  Codex's `shell_environment_policy` default may filter names that contain
   `KEY` or `TOKEN` from commands. That is not verified. agy's handling is not known.
 - **Codex MCP servers.** `codex -p implement` layers its profile over `~/.codex/config.toml`,
   which lists about 30 MCP servers. Among them are `github`, `agent-bus`, `ai-mirror` (drives
@@ -77,7 +79,7 @@ code alone establishes the file-tool exposure.
 | -------- | --------------- | ------------- |
 | Reads agenix secrets, SSH key, gh token, other tool's login | yes, from commands | yes, from file tools |
 | Nix daemon (a trusted user is root-equivalent, #2758) | refused by the sandbox | reachable from commands |
-| Caller's environment tokens | possibly filtered, unverified | passed through |
+| Caller's environment tokens | maybe filtered from commands, unverified | inherited; reach to commands unknown |
 | Unsandboxed MCP tools | about 30 configured; whether they run is unverified | denied by the adapter |
 | Network from commands | blocked | not known |
 
@@ -89,6 +91,10 @@ code alone establishes the file-tool exposure.
 - Neither implementer inherits a credential from the caller's environment, apart from its
   own login.
 - Neither implementer can reach an MCP server that acts outside its sandbox.
+- Commands keep no outbound network, and cannot connect to local sockets such as
+  1Password's abstract sockets (`@1PASSWORD_MCP`, #2748 plan step 8).
+- The one secret left in reach is each tool's own login, which it needs to work. The
+  model could read it, as #2748 accepted for reviewers. This is written down.
 - Each implementer can still write its task worktree, and nothing else that matters, and can
   still run the checks a plan step names.
 - A repeatable probe, using the list from #2748 plan step 8 plus a write and a file-tool
@@ -109,14 +115,22 @@ code alone establishes the file-tool exposure.
 
 ## Constraints
 
-- Implementers must write their task worktree, including its git index under the main
-  `.git` for `git add` and `git diff`, but never the history. The coder guard stays.
+- Implementers must edit files in their task worktree and stage new files. Staging writes
+  the worktree's index under `.git/worktrees/<name>` and objects under the common `.git`.
+  History must stay out of reach. The coder guard calls itself "a best-effort tripwire,
+  not a sandbox" (`modules/programs/claude-coder-guard.sh:9`). So if the spec makes `.git`
+  writable, it must say what still prevents a ref or history change.
 - Implementers must still run the checks a plan step names: `just check-syntax`, `statix`,
-  `deadnix`, shell tests, `nix eval`. If the daemon is hidden, `nix build` and flake evaluation
-  stop working, the same trade-off #2748 made for reviewers. Claude would then run builds
+  `deadnix`, shell tests, `nix eval`. With the daemon hidden, `nix build` and flake evaluation
+  failed in #2748's tested setup. That is the trade-off #2748 made for reviewers. Claude would then run builds
   after the step.
-- Fail closed. A launcher refuses to start if its sandbox cannot be set up. The known traps
+- Fail closed. A launcher refuses to start if its sandbox cannot be set up. The sandbox keeps
+  the variables the guards depend on: `CODEX_CODER=1`, `AGY_CODER=1` and `AGY_WORKTREE`.
+  Without them, both guards allow everything. agy-implement's existing checks for the guard
+  file, the hooks entry and the version probe stay. The known traps
   still apply: Codex skips untrusted hooks, and agy's payload differs from Claude Code's.
+- Each tool's login must still refresh an expired token and write the cache or state it
+  needs, as in #2748's acceptance checks.
 - Logins stay by subscription only, never an API key (#1831). `HUMANIZE_CODEX_BYPASS_SANDBOX`
   stays forbidden. `--dangerously-skip-permissions` is passed only by `agy-implement` itself
   (#2296).
@@ -129,7 +143,8 @@ code alone establishes the file-tool exposure.
 
 1. **Sandbox or document?** The issue offers either one.
    Recommendation: sandbox both. The reads are live, the model sees whatever it reads, and
-   `agent-review` already shows how to do it.
+   `agent-review` already does it for Codex. It refuses agy (line 15), but #2748's tests
+   showed agy's login works inside the same `bwrap`.
 2. **One wrapper or two?** Options: extend `agent-review` with a writable-worktree mode, or
    add a sibling. Recommendation: share the mount and environment logic and keep the argument
    allow-lists separate. A reviewer and an implementer accept different flags, and one
