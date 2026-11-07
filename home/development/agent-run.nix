@@ -22,5 +22,10 @@ in
       runtimeInputs = with pkgs; [ git jq coreutils gnugrep herdr-run ];
       text = builtins.readFile ./agent-run.sh;
     })
+    (pkgs.writeShellApplication {
+      name = "agent-review";
+      runtimeInputs = with pkgs; [ bubblewrap git coreutils ];
+      text = builtins.readFile ./agent-review.sh;
+    })
   ];
 }
