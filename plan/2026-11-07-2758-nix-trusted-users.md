@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2758
 spec: spec/2026-11-07-2758-nix-trusted-users.md
 coders:
