@@ -25,7 +25,7 @@ in
     (pkgs.writeShellApplication {
       name = "agent-review";
       runtimeInputs = with pkgs; [ bubblewrap git coreutils ];
-      text = builtins.readFile ./agent-review.sh;
+      text = builtins.readFile ./agent-sandbox.sh + builtins.readFile ./agent-review.sh;
     })
   ];
 }

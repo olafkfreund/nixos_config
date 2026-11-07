@@ -403,3 +403,6 @@ are Claude's: the gate, builds, the deploy and the live probes.
   `writeShellApplication` wrapper gives it. A file-level `shellcheck disable=SC2034,SC2329` covers the globals and
   the launcher-only helpers. A plain-repo worktree must list `--rw "$root"` before `--ro "$common"`; the wrong
   order fails closed.
+- **Step 3 (coder):** `agent-review.sh` carries `# shellcheck disable=SC2154` on line 2, because pre-push lints the
+  file alone and `root`, `common` and `home` are assigned in the library. The test builds `$w/agent-review` from
+  `agent-sandbox.sh` plus `agent-review.sh` when `AGENT_REVIEW` is unset. 78 checks pass, the same as `origin/main`.
