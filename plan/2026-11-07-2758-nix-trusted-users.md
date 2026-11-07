@@ -265,3 +265,7 @@ One numbered list across all stages: stage A is steps 1-7, stage B steps 8-9, st
   `extra-trusted-public-keys`, with `nix.checkConfig = false`. `alice` uses the nixpkgs snakeoil ed25519 key with
   host-key checking off. Case 6 copies from the client with `--from ssh-ng://builder --to ssh-ng://stranger`.
   All six subtests pass; the check needs KVM, which p620 has, and `nix flake check` now runs it.
+- **Step 5 (coder), done before steps 2-4:** it does not depend on the signing keys, so it ran while step 2 waits for
+  the owner. `CACHE-STRATEGY.md` also loses the sentence about the commented Cachix example that step 3 deletes, and
+  its new text describes the state after step 3. Two comment lines at `modules/services/nixarchy-runner.nix:214-215`
+  still match the grep; they describe nixarchy's own flake, so they stay. Stage A must not roll out before step 3.

@@ -490,16 +490,16 @@ check-syntax:
 
 # Deploy to razer laptop (Intel/NVIDIA) - OPTIMIZED
 razer: _require-main
-    nixos-rebuild switch --flake .#razer --target-host razer --build-host razer --sudo --no-reexec --keep-going --accept-flake-config
+    nixos-rebuild switch --flake .#razer --target-host razer --build-host razer --sudo --no-reexec --keep-going
 
 # Deploy to p620 workstation (AMD) - OPTIMIZED
 p620: _require-main
-    sudo nixos-rebuild switch --flake .#p620 --accept-flake-config
+    sudo nixos-rebuild switch --flake .#p620
 
 # Deploy to p510 workstation (Intel Xeon/NVIDIA) - OPTIMIZED
 p510: _require-main
     just p510-clear-sessions
-    nixos-rebuild switch --flake .#p510 --target-host p510 --build-host p510 --sudo --no-reexec --keep-going --accept-flake-config
+    nixos-rebuild switch --flake .#p510 --target-host p510 --build-host p510 --sudo --no-reexec --keep-going
 
 # p510 runs GNOME for gnome-remote-desktop, so a leftover session keeps a
 # systemd --user manager alive with ~47 GUI units that can't start without a
@@ -865,7 +865,7 @@ emergency-deploy HOST: _require-main
     @echo "🚨 EMERGENCY deployment to {{HOST}} (skipping tests)..."
     @echo "This will skip ALL safety checks and validation!"
     @read -p "Are you absolutely sure? (type 'emergency'): " confirm && [ "$confirm" = "emergency" ] || exit 1
-    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo --no-reexec --keep-going --accept-flake-config
+    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo --no-reexec --keep-going
 
 # =============================================================================
 # UTILITIES AND HELPERS
@@ -975,12 +975,12 @@ deploy-all-parallel:
 # Fast deployment with minimal builds
 deploy-fast HOST: _require-main
     @echo "⚡ Fast deployment to {{HOST}}..."
-    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo --no-reexec --keep-going --no-build-nix --accept-flake-config
+    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo --no-reexec --keep-going --no-build-nix
 
 # Build locally, deploy remotely (for slow remote hosts)
 deploy-local-build HOST: _require-main
     @echo "🏗️ Building {{HOST}} locally, deploying remotely..."
-    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --sudo --no-reexec --keep-going --accept-flake-config
+    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --sudo --no-reexec --keep-going
 
 # Deploy only if changed (smart deployment)
 deploy-smart HOST: _require-main
@@ -1004,7 +1004,7 @@ build-all-parallel:
 # Deploy with binary cache optimization
 deploy-cached HOST: _require-main
     @echo "💾 Deploying {{HOST}} with cache optimization..."
-    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo --no-reexec --keep-going --accept-flake-config
+    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo --no-reexec --keep-going
 
 # Build on P620, deploy to target host
 deploy-via-p620 HOST: _require-main
@@ -1013,18 +1013,18 @@ deploy-via-p620 HOST: _require-main
     @# Already on p620? Build locally — SSHing to ourselves just to build is a
     @# pointless round-trip (and used to fail outright when p620.lan died).
     if [ "$(hostname)" = "p620" ]; then \
-        nixos-rebuild build --flake .#{{HOST}} --accept-flake-config; \
+        nixos-rebuild build --flake .#{{HOST}}; \
     else \
-        nixos-rebuild build --flake .#{{HOST}} --build-host p620 --accept-flake-config; \
+        nixos-rebuild build --flake .#{{HOST}} --build-host p620; \
     fi
     @echo "📦 Step 2: Deploying to {{HOST}}..."
-    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --sudo --no-reexec --keep-going --accept-flake-config
+    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --sudo --no-reexec --keep-going
     @echo "✅ Deployment complete! {{HOST}} is using P620's cache."
 
 # Build on P620 for target host (build only, no deployment)
 build-on-p620 HOST:
     @echo "🏗️ Building {{HOST}} on P620 (build only)..."
-    nixos-rebuild build --flake .#{{HOST}} --build-host p620 --accept-flake-config
+    nixos-rebuild build --flake .#{{HOST}} --build-host p620
     @echo "✅ Build complete! Deploy with: just deploy-via-p620 {{HOST}}"
 
 # Test all hosts can be reached
