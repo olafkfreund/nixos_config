@@ -358,3 +358,13 @@ present inside.
      `agent-run agy` on a one-line throwaway plan step, which return `ok: true`.
    - The agy-guard-probe passes from a cleared `probed` cache.
 6. The same probe on razer after `just deploy-via-p620 razer`.
+
+## Owner decisions, 2026-11-07
+
+The owner accepted every recommendation:
+
+1. Neither implementer stages files. Claude runs `git add` after each step, after reviewing the diff.
+   This changes the approved intent, which had the implementers stage, and the owner accepted that.
+2. If agy's commands can reach abstract sockets such as `@1PASSWORD_MCP`, stop and ask the owner
+   before shipping.
+3. `herdr-run` writing the caller's environment to a file is its own issue, #2762.
