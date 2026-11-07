@@ -105,27 +105,33 @@ ln -s "$W" "$w/link"
 refused 'work dir symlink' codex "$w/link" -- exec
 refused 'work dir outside /tmp' codex /etc -- exec
 
-# A codex planted in the reviewed repo, found through a relative or in-repo PATH entry, must never run.
-plant=$w/plant
-git init -q "$plant"
-printf '#!/bin/sh\ntouch %s/planted\n' "$W" >"$plant/codex"
-chmod +x "$plant/codex"
-rm -f "$W/planted"
-rm -f "$W/bin/ran"
-(cd "$plant" && PATH="/nonexistent::.:$W/bin:$PATH" bash "$script" codex "$W" -- exec >/dev/null 2>&1 </dev/null)
-rc=$?
-if [ ! -e "$W/planted" ] && [ -e "$W/bin/ran" ]; then ok 'codex planted in the repo, empty PATH entry'; else bad "codex planted in the repo, empty PATH entry (rc=$rc)"; fi
-rm -f "$W/planted"
-rm -f "$W/bin/ran"
-(cd "$plant" && PATH="$plant:$W/bin:$PATH" bash "$script" codex "$W" -- exec >/dev/null 2>&1 </dev/null)
-rc=$?
-if [ ! -e "$W/planted" ] && [ -e "$W/bin/ran" ]; then ok 'codex planted in the repo, absolute PATH entry'; else bad "codex planted in the repo, absolute PATH entry (rc=$rc)"; fi
-ln -sfn "$plant" "$W/plantlink"
-rm -f "$W/planted" "$W/bin/ran"
-(cd "$plant" && PATH="$W/plantlink:$w/./plant:$W/bin:$PATH" bash "$script" codex "$W" -- exec >/dev/null 2>&1 </dev/null)
-rc=$?
-if [ ! -e "$W/planted" ] && [ -e "$W/bin/ran" ]; then ok 'codex planted in the repo, symlinked or /./ PATH entry'; else bad "codex planted in the repo, symlinked or /./ PATH entry (rc=$rc)"; fi
-rm -f "$W/plantlink"
+if ! command -v bwrap >/dev/null || ! bwrap --ro-bind / / true >/dev/null 2>&1; then
+  skip 'planted codex checks: real bwrap or user namespaces unavailable'
+elif [ ! -f "$HOME/.codex/auth.json" ]; then
+  skip 'planted codex checks: no codex dir/auth.json to mount'
+else
+  # A codex planted in the reviewed repo, found through a relative or in-repo PATH entry, must never run.
+  plant=$w/plant
+  git init -q "$plant"
+  printf '#!/bin/sh\ntouch %s/planted\n' "$W" >"$plant/codex"
+  chmod +x "$plant/codex"
+  rm -f "$W/planted"
+  rm -f "$W/bin/ran"
+  (cd "$plant" && PATH="/nonexistent::.:$W/bin:$PATH" bash "$script" codex "$W" -- exec >/dev/null 2>&1 </dev/null)
+  rc=$?
+  if [ ! -e "$W/planted" ] && [ -e "$W/bin/ran" ]; then ok 'codex planted in the repo, empty PATH entry'; else bad "codex planted in the repo, empty PATH entry (rc=$rc)"; fi
+  rm -f "$W/planted"
+  rm -f "$W/bin/ran"
+  (cd "$plant" && PATH="$plant:$W/bin:$PATH" bash "$script" codex "$W" -- exec >/dev/null 2>&1 </dev/null)
+  rc=$?
+  if [ ! -e "$W/planted" ] && [ -e "$W/bin/ran" ]; then ok 'codex planted in the repo, absolute PATH entry'; else bad "codex planted in the repo, absolute PATH entry (rc=$rc)"; fi
+  ln -sfn "$plant" "$W/plantlink"
+  rm -f "$W/planted" "$W/bin/ran"
+  (cd "$plant" && PATH="$W/plantlink:$w/./plant:$W/bin:$PATH" bash "$script" codex "$W" -- exec >/dev/null 2>&1 </dev/null)
+  rc=$?
+  if [ ! -e "$W/planted" ] && [ -e "$W/bin/ran" ]; then ok 'codex planted in the repo, symlinked or /./ PATH entry'; else bad "codex planted in the repo, symlinked or /./ PATH entry (rc=$rc)"; fi
+  rm -f "$W/plantlink"
+fi
 refused 'work dir equals worktree' codex "$root" -- exec
 refused 'work dir inside worktree' codex "$root/home" -- exec
 refused 'work dir contains worktree' codex "$(dirname "$root")" -- exec
