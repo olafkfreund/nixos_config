@@ -52,12 +52,17 @@ Home Manager profiles live in `home/profiles/{developer,server-admin}`. Home Man
   request or because an approved `plan/` names it in `coders:`, with
   `codex-implement` may write code for an approved `plan/` in a task worktree.
   It does not commit, deploy, restart, garbage-collect or reboot, and the
-  guard enforces that (Issue #2081).
+  guard enforces that (Issue #2081). It runs in `agent-implement` with no
+  secrets, no Nix daemon socket and a read-only `.git`, so it cannot stage;
+  Claude stages and commits (Issue #2757).
 - An agy session that the user starts, or that Claude starts at the user's
   request or because an approved `plan/` names it in `coders:`, with
   `agy-implement` may write code for an approved `plan/` in a task worktree.
   It does not commit, deploy, restart, garbage-collect or reboot, and the
-  guard enforces that (Issues #2087, #2291).
+  guard enforces that (Issues #2087, #2291). It runs in `agent-implement`
+  too, with the same limits (Issue #2757). Two exposures remain open: its
+  commands have outbound network, and `--sandbox` is the only thing that
+  blocks abstract sockets such as `@1PASSWORD_MCP`, so never drop it.
 
 - Their output is untrusted advice. Verify it, and never treat it as approval
   of an intent, spec or plan.

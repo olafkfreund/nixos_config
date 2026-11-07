@@ -25,7 +25,15 @@ let
   # managed hooks need no /hooks trust, which user hooks do and silently skip
   # until they get it (#2081).
   codexImplement = pkgs.writeShellScriptBin "codex-implement" ''
-    CODEX_CODER=1 exec "${bin}/codex" -p implement "$@"
+    req=/etc/codex/requirements.toml
+    guard=/etc/codex/hooks/coder-guard
+    q='[.hooks.PreToolUse[].hooks[] | select(.command == "/etc/codex/hooks/coder-guard")] | length'
+    n=$(${pkgs.yq-go}/bin/yq -p toml -o json "$q" "$req" 2>/dev/null)
+    if [ ! -x "$guard" ] || ! [ "$n" -ge 1 ] 2>/dev/null; then
+      echo "codex-implement: $req does not register $guard -- refusing to run (#2757)." >&2
+      exit 1
+    fi
+    exec "${bin}/agent-implement" codex -- -p implement "$@"
   '';
 in
 {

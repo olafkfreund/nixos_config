@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2154 # root, common, home and safe_path are set by agent-sandbox.sh
 set -euo pipefail
 
 refuse() {
@@ -6,23 +7,12 @@ refuse() {
   exit 2
 }
 
-# A caller's GIT_* could point the repo mounts at home.
-for var in GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR GIT_INDEX_FILE GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES GIT_CEILING_DIRECTORIES GIT_CONFIG GIT_CONFIG_GLOBAL GIT_CONFIG_SYSTEM GIT_CONFIG_COUNT GIT_NAMESPACE GIT_PREFIX; do
-  unset "$var"
-done
-
 tool=${1:-}
 [[ $tool != agy ]] || refuse 'agy is not yet supported (#2748)'
 [[ $tool == codex && $# -ge 3 && $3 == -- ]] || refuse 'usage: agent-review codex <work-dir> -- <tool arguments>'
 [[ ! ${HUMANIZE_CODEX_BYPASS_SANDBOX+x} ]] || refuse 'HUMANIZE_CODEX_BYPASS_SANDBOX is set'
 
-[[ $(git rev-parse --is-inside-work-tree 2>/dev/null) == true ]] || refuse 'current directory is not a git worktree'
-root=$(realpath -e -- "$(git rev-parse --show-toplevel)")
-common=$(realpath -e -- "$(git rev-parse --git-common-dir)")
-home=$(realpath -e -- "$HOME")
-for path in "$root" "$common"; do
-  [[ $path != "$home" && $home != "$path/"* && $path != / ]] || refuse 'repo must not contain the home directory'
-done
+sandbox_repo_checks
 
 work_dir=$2
 [[ -d $work_dir && ! -L $work_dir ]] || refuse 'work dir must be an existing real directory'
@@ -108,39 +98,9 @@ for arg in "$@"; do
 done
 [[ -z $expect ]] || refuse "missing value for $expect"
 
-mounts=()
-for path in /nix /etc /usr /bin /lib /lib64 /run/current-system /run/systemd/resolve /run/nscd; do
-  [[ ! -e $path ]] || mounts+=(--ro-bind "$path" "$path")
-done
+sandbox_safe_path
 
-# A relative PATH entry, or one inside the reviewed repo, would find a codex planted there,
-# and it would run as the parent, outside Codex's own sandbox.
-safe_path=
-IFS=: read -ra entries <<<"${PATH:-}"
-for entry in "${entries[@]}"; do
-  case $entry in
-    /*) ;;
-    *) continue ;;
-  esac
-  # Compare the resolved path, so `/./`, `..` and symlinks cannot reach into the repo.
-  real=$(realpath -e -- "$entry" 2>/dev/null) || continue
-  case $real/ in
-    "$root"/* | "$common"/*) continue ;;
-  esac
-  safe_path+=${safe_path:+:}$entry
-done
-
-exec bwrap "${mounts[@]}" \
-  --tmpfs /nix/var/nix/daemon-socket \
-  --dev /dev --proc /proc --tmpfs /tmp --tmpfs /home \
-  --unshare-pid --unshare-ipc --die-with-parent \
-  --ro-bind "$root" "$root" --ro-bind "$common" "$common" \
-  --bind "$work_dir" "$work_dir" --chdir "$root" \
-  --clearenv \
-  --setenv HOME "$home" --setenv TMPDIR "$work_dir" \
-  --setenv PATH "$safe_path" --setenv LANG "${LANG:-}" \
-  --setenv TERM "${TERM:-dumb}" --setenv SSL_CERT_FILE /etc/ssl/certs/ca-certificates.crt \
-  --setenv NIX_REMOTE 'local?read-only=true' \
-  --setenv NIX_CONFIG 'experimental-features = nix-command flakes read-only-local-store' \
+sandbox_exec_bwrap --ro-bind "$root" "$root" --ro-bind "$common" "$common" \
+  --bind "$work_dir" "$work_dir" --chdir "$root" --setenv TMPDIR "$work_dir" \
   --dir "$home/.codex" --bind "$home/.codex/auth.json" "$home/.codex/auth.json" \
   -- codex -c forced_login_method=chatgpt -c 'mcp_servers={}' -c 'sandbox_mode="read-only"' "$@"

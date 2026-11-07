@@ -38,8 +38,10 @@ if [[ -n $(git status --porcelain) ]]; then
 fi
 
 head=$(git rev-parse HEAD)
-log=$(mktemp -t agent-run.XXXXXX.log)
+logdir=$(mktemp -d -t agent-run.XXXXXX)
+log=$logdir/log
 for attempt in 1 2; do
+  rm -f -- "$log.msg"
   if [[ $tool == agy ]]; then
     if herdr-run agy agy-implement --output-format json --print-timeout 20m -p "$(cat "$prompt")" >"$log.json" 2>>"$log" </dev/null; then
       code=0
