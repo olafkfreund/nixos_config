@@ -111,18 +111,8 @@ else
   feeder_pid=$!
 fi
 
-# The caller's exported environment, one `declare -p` per variable, so values
-# with newlines survive.
-declare -A readonly_names=()
-while IFS= read -r name; do readonly_names[$name]=1; done < <(readonly -p | sed -n 's/^declare -[^ ]*r[^ ]* \([^=]*\).*/\1/p')
-# Names come from `env -0`: nixpkgs' minimal bash has no compgen.
-while IFS= read -r -d '' entry; do
-  name=${entry%%=*}
-  [[ $name =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || continue
-  case $name in BASH* | SHELLOPTS | EUID | UID | PPID | GROUPS | FUNCNAME | DIRSTACK | PIPESTATUS) continue ;; esac
-  [[ -z ${readonly_names[$name]:-} ]] || continue
-  declare -p "$name" 2>/dev/null || :
-done < <(env -0) >"$dir/env"
+# Only allow-listed names (agent-env.sh), one `declare -p` each so values with newlines survive.
+while IFS= read -r -d '' name; do declare -p "$name"; done < <(agent_env_exported) >"$dir/env"
 printf 'cwd=%q\n' "$PWD" >>"$dir/env"
 
 title="$label review"

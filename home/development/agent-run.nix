@@ -4,7 +4,7 @@ let
   herdr-run = pkgs.writeShellApplication {
     name = "herdr-run";
     runtimeInputs = with pkgs; [ jq socat coreutils util-linux procps gawk gnused ];
-    text = builtins.readFile ./herdr-run.sh;
+    text = builtins.readFile ./agent-env.sh + builtins.readFile ./herdr-run.sh;
     checkPhase = ''
       runHook preCheck
       ${pkgs.stdenv.shellDryRun} "$target"
