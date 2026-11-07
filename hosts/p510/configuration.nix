@@ -546,6 +546,9 @@ in
   # Deploy with `just p510` instead.
   system.autoUpgrade.enable = lib.mkForce false;
 
+  # Keeps NOPASSWD sudo here until the owner schedules p510's own change (#2759).
+  security.sudo.wheelNeedsPassword = false;
+
   # Local Ollama model server on NVIDIA GPU (CUDA).
   # Bound to 0.0.0.0:11434 with OLLAMA_ORIGINS=* so tailnet/LAN clients
   # and browser UIs can hit it directly. p510's firewall is disabled —
