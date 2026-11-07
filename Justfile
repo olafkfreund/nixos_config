@@ -489,7 +489,7 @@ check-syntax:
 # =============================================================================
 
 # Deploy to razer laptop (Intel/NVIDIA) - OPTIMIZED
-razer: _require-main
+razer: _require-main (_sign-drv "razer")
     nixos-rebuild switch --flake .#razer --target-host razer --build-host razer --sudo --no-reexec --keep-going
 
 # Deploy to p620 workstation (AMD) - OPTIMIZED
@@ -497,7 +497,7 @@ p620: _require-main
     sudo nixos-rebuild switch --flake .#p620
 
 # Deploy to p510 workstation (Intel Xeon/NVIDIA) - OPTIMIZED
-p510: _require-main
+p510: _require-main (_sign-drv "p510")
     just p510-clear-sessions
     nixos-rebuild switch --flake .#p510 --target-host p510 --build-host p510 --sudo --no-reexec --keep-going
 
@@ -861,7 +861,7 @@ quick-all:
     just deploy-all-parallel
 
 # Emergency deployment (skip tests) - USE WITH CAUTION
-emergency-deploy HOST: _require-main
+emergency-deploy HOST: _require-main (_sign-drv HOST)
     @echo "🚨 EMERGENCY deployment to {{HOST}} (skipping tests)..."
     @echo "This will skip ALL safety checks and validation!"
     @read -p "Are you absolutely sure? (type 'emergency'): " confirm && [ "$confirm" = "emergency" ] || exit 1
@@ -973,7 +973,7 @@ deploy-all-parallel:
     wait && echo "✅ All deployments completed!"
 
 # Fast deployment with minimal builds
-deploy-fast HOST: _require-main
+deploy-fast HOST: _require-main (_sign-drv HOST)
     @echo "⚡ Fast deployment to {{HOST}}..."
     nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo --no-reexec --keep-going --no-build-nix
 
@@ -1002,12 +1002,21 @@ build-all-parallel:
     wait && echo "✅ All builds completed!"
 
 # Deploy with binary cache optimization
-deploy-cached HOST: _require-main
+deploy-cached HOST: _require-main (_sign-drv HOST)
     @echo "💾 Deploying {{HOST}} with cache optimization..."
     nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo --no-reexec --keep-going
 
+# Sign the .drv closure so an untrusted --build-host accepts the upload (#2758).
+_sign-drv HOST:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    # shortcut: skips when the invoking host has no key (p510); the copy then needs a trusted receiver
+    [ -e /run/agenix/nix-signing-key ] || { echo "no signing key here, skipping"; exit 0; }
+    drv=$(nix eval --raw ".#nixosConfigurations.{{HOST}}.config.system.build.toplevel.drvPath")
+    sudo nix store sign -r --key-file /run/agenix/nix-signing-key "$drv"
+
 # Build on P620, deploy to target host
-deploy-via-p620 HOST: _require-main
+deploy-via-p620 HOST: _require-main (_sign-drv HOST)
     @echo "🏗️ Building {{HOST}} on P620 cache server, deploying to {{HOST}}..."
     @echo "📡 Step 1: Building on P620..."
     @# Already on p620? Build locally — SSHing to ourselves just to build is a
@@ -1022,7 +1031,7 @@ deploy-via-p620 HOST: _require-main
     @echo "✅ Deployment complete! {{HOST}} is using P620's cache."
 
 # Build on P620 for target host (build only, no deployment)
-build-on-p620 HOST:
+build-on-p620 HOST: (_sign-drv HOST)
     @echo "🏗️ Building {{HOST}} on P620 (build only)..."
     nixos-rebuild build --flake .#{{HOST}} --build-host p620
     @echo "✅ Build complete! Deploy with: just deploy-via-p620 {{HOST}}"

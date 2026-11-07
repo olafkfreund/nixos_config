@@ -269,3 +269,6 @@ One numbered list across all stages: stage A is steps 1-7, stage B steps 8-9, st
   the owner. `CACHE-STRATEGY.md` also loses the sentence about the commented Cachix example that step 3 deletes, and
   its new text describes the state after step 3. Two comment lines at `modules/services/nixarchy-runner.nix:214-215`
   still match the grep; they describe nixarchy's own flake, so they stay. Stage A must not roll out before step 3.
+- **Step 6 (coder), done before steps 2-4:** `build-on-p620` had no `_require-main`, so it only gains
+  `(_sign-drv HOST)`. The live check (`just _sign-drv razer`, then `nix path-info --sigs`) moves to step 7,
+  because it needs the key.
