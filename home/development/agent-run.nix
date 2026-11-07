@@ -4,7 +4,7 @@ let
   herdr-run = pkgs.writeShellApplication {
     name = "herdr-run";
     runtimeInputs = with pkgs; [ jq socat coreutils util-linux procps gawk gnused ];
-    text = builtins.readFile ./herdr-run.sh;
+    text = builtins.readFile ./agent-env.sh + builtins.readFile ./herdr-run.sh;
     checkPhase = ''
       runHook preCheck
       ${pkgs.stdenv.shellDryRun} "$target"
@@ -26,6 +26,28 @@ in
       name = "agent-review";
       runtimeInputs = with pkgs; [ bubblewrap git coreutils ];
       text = builtins.readFile ./agent-sandbox.sh + builtins.readFile ./agent-review.sh;
+    })
+    (pkgs.writeShellApplication {
+      name = "agent-env";
+      text = builtins.readFile ./agent-env.sh + ''
+        args=()
+        while IFS= read -r -d "" name; do args+=("$name=''${!name}"); done < <(agent_env_exported)
+        exec env -i "''${args[@]}" "$@"
+      '';
+      checkPhase = ''
+        runHook preCheck
+        ${pkgs.stdenv.shellDryRun} "$target"
+        ${lib.getExe pkgs.shellcheck-minimal} "$target"
+        names=$(AGENT_ENV_DECOY=1 NIX_CONFIG='access-tokens = github.com=decoy' HOME=/homeless \
+          "$target" ${pkgs.coreutils}/bin/env -0 </dev/null | tr '\0' '\n' | cut -d= -f1)
+        if grep -qx AGENT_ENV_DECOY <<<"$names"; then exit 1; fi
+        if grep -qx NIX_CONFIG <<<"$names"; then exit 1; fi
+        grep -qx HOME <<<"$names" || exit 1
+        grep -qx PATH <<<"$names" || exit 1
+        code=0; "$target" ${pkgs.bash}/bin/bash -c 'exit 7' </dev/null || code=$?
+        [ "$code" = 7 ] || exit 1
+        runHook postCheck
+      '';
     })
     (pkgs.writeShellApplication {
       name = "agent-implement";

@@ -182,6 +182,10 @@ commands. Outside herdr it just runs the command.
 - `herdr-run` streams stdin to the command through a FIFO and never reads it
   up front, so a stdin that never closes (Claude Code's Bash tool gives a
   socket) only matters to a command that actually reads it (#2679).
+- The pane's command gets only the variables named in
+  `home/development/agent-env.sh` (no tokens, no `HERDR_*`, no `SSH_AUTH_SOCK`),
+  not the caller's whole environment. Outside herdr it gets the caller's
+  (#2762).
 
 ## Claude agent teams
 

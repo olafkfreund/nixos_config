@@ -154,7 +154,7 @@ prints to stderr, next to `model:`.
 ## Google (Antigravity subscription)
 
 ```bash
-herdr-run agy timeout 600 env -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY \
+herdr-run agy timeout 600 agent-env \
   agy --mode plan --output-format json --print-timeout 10m \
   -p "$(cat "$prompt")" > "$work/agy.json" < /dev/null
 echo "exit=$?"
@@ -185,7 +185,7 @@ wrote run against a second model. `agy agents` lists the available names
 `package-resolver`, `module-refactor`, `test-generator` and others).
 
 ```bash
-herdr-run agy timeout 900 env -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY \
+herdr-run agy timeout 900 agent-env \
   agy --agent "$agent" --mode plan --output-format json \
   --print-timeout 10m -p "$(cat "$prompt")" > "$work/agy.json" < /dev/null
 echo "exit=$?"
@@ -245,8 +245,10 @@ verbatim, and carry on without it.
 
 - Do not retry with the other provider in its place.
 - Never pass an API key, and never bypass `agent-review` for Codex (it sets
-  `forced_login_method` and unsets the key variables). The `env -u` guards on
-  the agy blocks stay. The subscription login is the only allowed path.
+  `forced_login_method` and unsets the key variables). The agy blocks run
+  under `agent-env`, which clears the environment and passes only the names in
+  `home/development/agent-env.sh`, so no API key or token reaches agy (#2762).
+  The subscription login is the only allowed path.
 - `Not logged in` / auth error: the user runs `! codex login` (ChatGPT) or
   signs in to `agy`. Logins are per host; `~/.codex` is not synced.
 

@@ -116,14 +116,14 @@ ok pane-io
 
 reset_state
 : >"$TEST_STATE/fail-tab-create"
-run_capture bash -c 'printf "x\n" >> "$TEST_STATE/runs"'
+run_capture bash -c 'printf "x\n" >> "$TMPDIR/state/runs"'
 assert_code 0
 count_runs 1
 ok create-fails
 
 reset_state
 : >"$TEST_STATE/no-claim"
-"$tool" codex bash -c 'printf "x\n" >> "$TEST_STATE/runs"; sleep 0.3' >"$tmp/out" 2>"$tmp/err" &
+"$tool" codex bash -c 'printf "x\n" >> "$TMPDIR/state/runs"; sleep 0.3' >"$tmp/out" 2>"$tmp/err" &
 job=$!
 for _ in {1..100}; do
   claim=$(find "$TMPDIR" -name claim -type d -print -quit)
@@ -140,7 +140,7 @@ count_runs 1
 ok claim-race
 
 reset_state
-"$tool" codex bash -c 'printf "partial\n"; printf "x\n" >> "$TEST_STATE/runs"; sleep 2' >"$tmp/out" 2>"$tmp/err" &
+"$tool" codex bash -c 'printf "partial\n"; printf "x\n" >> "$TMPDIR/state/runs"; sleep 2' >"$tmp/out" 2>"$tmp/err" &
 job=$!
 for _ in {1..100}; do
   [[ -e $TEST_STATE/runs ]] && break
@@ -156,7 +156,7 @@ count_runs 1
 ok pane-vanishes
 
 reset_state
-"$tool" codex bash -c 'printf "x\n" >> "$TEST_STATE/runs"; sleep 2' >"$tmp/out" 2>"$tmp/err" &
+"$tool" codex bash -c 'printf "x\n" >> "$TMPDIR/state/runs"; sleep 2' >"$tmp/out" 2>"$tmp/err" &
 job=$!
 for _ in {1..100}; do
   runner=$(find "$TMPDIR" -name runner.pid -path '*/tmp.*/*' -print -quit 2>/dev/null || :)
@@ -172,7 +172,7 @@ ok runner-dies
 
 reset_state
 : >"$TEST_STATE/drop-first"
-run_capture bash -c 'printf "x\n" >> "$TEST_STATE/runs"'
+run_capture bash -c 'printf "x\n" >> "$TMPDIR/state/runs"'
 assert_code 0
 count_runs 1
 ok resend
@@ -198,7 +198,7 @@ ok changed-terminal-id
 
 reset_state
 # A background job starts with SIGINT ignored, which a shell cannot trap; restore it.
-script -qec "$(printf '%q ' env --default-signal=INT "$tool" codex bash -c 'echo $$ > "$TEST_STATE/command-pid"; exec sleep 300')" /dev/null >"$tmp/out" 2>"$tmp/err" &
+script -qec "$(printf '%q ' env --default-signal=INT "$tool" codex bash -c 'echo $$ > "$TMPDIR/state/command-pid"; exec sleep 300')" /dev/null >"$tmp/out" 2>"$tmp/err" &
 script_pid=$!
 for _ in {1..100}; do
   [[ -e $TEST_STATE/command-pid ]] && break
@@ -235,7 +235,7 @@ ok parallel-position
 
 # kill -9 of the helper: the watchdog stops the command, and the pane still closes
 reset_state
-"$tool" codex bash -c 'echo $$ > "$TEST_STATE/command-pid"; exec sleep 300' >/dev/null 2>&1 &
+"$tool" codex bash -c 'echo $$ > "$TMPDIR/state/command-pid"; exec sleep 300' >/dev/null 2>&1 &
 helper=$!
 for _ in {1..300}; do
   [[ -e $TEST_STATE/command-pid ]] && break
@@ -253,7 +253,7 @@ ok helper-killed
 
 # the runner is signalled (its tab closed): the command group stops, the helper reports a lost run
 reset_state
-"$tool" codex bash -c 'echo $$ > "$TEST_STATE/command-pid"; exec sleep 300' >"$tmp/out" 2>"$tmp/err" &
+"$tool" codex bash -c 'echo $$ > "$TMPDIR/state/command-pid"; exec sleep 300' >"$tmp/out" 2>"$tmp/err" &
 helper=$!
 for _ in {1..300}; do
   [[ -e $TEST_STATE/command-pid ]] && break
@@ -272,7 +272,7 @@ ok runner-signalled
 reset_state
 : >"$TEST_STATE/socket-error"
 printf '9\n' >>"$TEST_STATE/tabs" # a tab after the lead, so the pane lookup runs
-run_capture bash -c 'printf "x\n" >> "$TEST_STATE/runs"'
+run_capture bash -c 'printf "x\n" >> "$TMPDIR/state/runs"'
 assert_code 0
 count_runs 1
 ok socket-error
@@ -280,7 +280,7 @@ ok socket-error
 # SIGTERM to herdr-run in the headless fallback reaches the command
 reset_state
 : >"$TEST_STATE/fail-tab-create"
-"$tool" codex bash -c 'echo $$ > "$TEST_STATE/command-pid"; exec sleep 300' >/dev/null 2>&1 &
+"$tool" codex bash -c 'echo $$ > "$TMPDIR/state/command-pid"; exec sleep 300' >/dev/null 2>&1 &
 helper=$!
 for _ in {1..300}; do
   [[ -e $TEST_STATE/command-pid ]] && break
@@ -295,16 +295,16 @@ ok headless-term
 
 # an exported value with newlines (and a line that looks like an excluded name) arrives intact
 reset_state
-export HERDR_RUN_TEST_MULTI=$'one\nBASH_LOOKALIKE="two\nthree'
-run_capture bash -c 'printf %s "$HERDR_RUN_TEST_MULTI"'
-unset HERDR_RUN_TEST_MULTI
+export AGY_GUARD_LOG=$'one\nBASH_LOOKALIKE="two\nthree'
+run_capture bash -c 'printf %s "$AGY_GUARD_LOG"'
+unset AGY_GUARD_LOG
 assert_code 0
 [[ $(cat "$tmp/out") == $'one\nBASH_LOOKALIKE="two\nthree' ]]
 ok multiline-env
 
 # kill -9 of the helper; the command dies on TERM but its child ignores it: the child is KILLed too
 reset_state
-"$tool" codex bash -c '(trap "" TERM; exec sleep 300) & echo $! > "$TEST_STATE/child-pid"; wait' >/dev/null 2>&1 &
+"$tool" codex bash -c '(trap "" TERM; exec sleep 300) & echo $! > "$TMPDIR/state/child-pid"; wait' >/dev/null 2>&1 &
 helper=$!
 for _ in {1..300}; do
   [[ -e $TEST_STATE/child-pid ]] && break
@@ -351,7 +351,7 @@ ok stdin-never-closes-headless
 
 # kill -9 of the helper while stdin stays open: the feeder and the command go too
 reset_state
-"$tool" codex bash -c 'echo $$ > "$TEST_STATE/command-pid"; exec sleep 300' <"$tmp/never" >/dev/null 2>&1 &
+"$tool" codex bash -c 'echo $$ > "$TMPDIR/state/command-pid"; exec sleep 300' <"$tmp/never" >/dev/null 2>&1 &
 helper=$!
 for _ in {1..300}; do
   [[ -e $TEST_STATE/command-pid ]] && break
@@ -373,7 +373,7 @@ reset_state
 : >"$TEST_STATE/no-claim"
 # setsid execs in place here (an async job is no group leader), so $! is both
 # the helper's PID and its process-group ID; never search for it by name
-setsid "$tool" codex bash -c 'printf x >> "$TEST_STATE/runs"' <"$tmp/never" >/dev/null 2>&1 &
+setsid "$tool" codex bash -c 'printf x >> "$TMPDIR/state/runs"' <"$tmp/never" >/dev/null 2>&1 &
 group=$!
 for _ in {1..300}; do
   [[ -s $TEST_STATE/late-line ]] && break
@@ -397,4 +397,44 @@ out=$({
 assert_code 0
 [[ $out == "line one" ]]
 ok headless-keeps-stdin
+
+# only allow-listed names reach the command, by name, never by value
+eval "$(sed -n '/^agent_env_base=(/,/^agent_env_exported() {/{/^agent_env_exported/d;p}' "$tool")"
+declare -A allowed=()
+# shellcheck disable=SC2154  # agent_env_names comes from the eval above
+for n in "${agent_env_names[@]}" PWD SHLVL _ OLDPWD; do allowed[$n]=1; done
+names_cmd='env -0 | cut -z -d= -f1 | tr "\0" "\n"'
+marker=$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')
+
+reset_state
+export HERDR_RUN_TEST_DECOY=$marker
+HERDR_ENV=0 "$tool" codex bash -c "$names_cmd" >"$tmp/out" 2>"$tmp/err" </dev/null
+grep -qx HERDR_RUN_TEST_DECOY "$tmp/out"
+unset HERDR_RUN_TEST_DECOY
+ok headless-env
+
+reset_state
+export GITHUB_API_TOKEN=$marker HERDR_RUN_TEST_DECOY=$marker SSH_AUTH_SOCK=$marker HERDR_PANE_ID=$marker
+# A login shell's NIX_CONFIG carries the GitHub token (api-keys.nix), so it must not pass (#2762 review).
+export NIX_CONFIG="access-tokens = github.com=$marker"
+"$tool" codex bash -c 'touch "$TMPDIR/state/started"; timeout 10 bash -c "until [ -e \$TMPDIR/state/go ]; do sleep 0.01; done"; '"$names_cmd" >"$tmp/out" 2>"$tmp/err" </dev/null &
+helper=$!
+for _ in {1..300}; do
+  [[ -e $TEST_STATE/started ]] && break
+  sleep 0.01
+done
+[[ -e $TEST_STATE/started ]]
+if grep -rqF -- "$marker" "$tmp"/tmp.*/; then exit 1; fi
+envfiles=("$tmp"/tmp.*/env)
+[[ ${#envfiles[@]} == 1 && -f ${envfiles[0]} ]]
+while IFS= read -r n; do [[ -n ${allowed[$n]:-} ]] || exit 1; done < <(sed -n 's/^declare -[^ ]* \([A-Za-z_][A-Za-z0-9_]*\)=.*/\1/p' "${envfiles[0]}")
+: >"$TEST_STATE/go"
+code=0
+wait "$helper" || code=$?
+assert_code 0
+[[ -s $tmp/out ]]
+while IFS= read -r n; do [[ -n ${allowed[$n]:-} ]] || exit 1; done <"$tmp/out"
+if grep -qxE 'GITHUB_API_TOKEN|HERDR_RUN_TEST_DECOY|SSH_AUTH_SOCK|HERDR_PANE_ID|NIX_CONFIG' "$tmp/out"; then exit 1; fi
+unset GITHUB_API_TOKEN HERDR_RUN_TEST_DECOY SSH_AUTH_SOCK HERDR_PANE_ID NIX_CONFIG
+ok env-allow-list
 exec 7>&-
