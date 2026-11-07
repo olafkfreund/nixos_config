@@ -11,7 +11,7 @@ nixpkgs=$(nix eval --raw .#nixosConfigurations.p620.pkgs.path) || exit 2
 while read -r scenario expected extra; do
   [[ -z $scenario || $scenario == \#* ]] && continue
   expected=${expected:-}
-  if [[ -n ${extra:-} || ! $scenario =~ ^(abort|hang|dismiss|many|normal)$ || ! $expected =~ ^(ABORT|HANG|OK|INCONCLUSIVE)$ ]]; then
+  if [[ -n ${extra:-} || ! $scenario =~ ^(abort|hang|dismiss|dismiss-waiter|many|normal)$ || ! $expected =~ ^(ABORT|HANG|OK|INCONCLUSIVE)$ ]]; then
     printf 'invalid expectation: %s %s\n' "$scenario" "$expected" >&2
     exit 2
   fi

@@ -79,6 +79,12 @@ arrives as a GLib cancel, logged as "couldn't create credential for collection: 
 cancelled", and completes nothing more. So the success-after-Dismiss guard is not exercised by the
 lab.
 
+**Review of the PR, 2026-11-07.** A fresh Opus review found no reference or use-after-free defect
+and reproduced the lab results. It found three lab gaps, now closed: a `dismiss-waiter` scenario
+(B waits, B is dismissed, A is answered), a record of any prompting that begins while another
+dialog is active, and `INCONCLUSIVE` when the daemon logs that its unlock state is out of sync. On
+50.0, `dismiss-waiter` also aborts on the same assertion; patched, all six scenarios give `OK`.
+
 ## Steps
 
 Work only in the worktree `~/.config/nixos-2750` on `fix/2750-gnome-keyring-unlock-queue-abort`. Never check out a

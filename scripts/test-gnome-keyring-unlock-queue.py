@@ -144,6 +144,11 @@ class Lab:
             path = message.body[0]
             self.bus.send(Message.new_method_return(message))
             if message.member == "BeginPrompting":
+                # The stub serialises dialogs itself, so record a second caller here.
+                if self.active is not None:
+                    self.errors.append(
+                        "prompting began while another dialog was active"
+                    )
                 self.waiting.append((sender, path))
                 await self.next_ready()
             elif message.member == "PerformPrompt":
@@ -368,10 +373,7 @@ class Lab:
             await self.answer(first, cancel=True)
             await self.wait_completed(self.prompts["A"], True)
             for label in ("B", "C"):
-                dialog = await self.dialog()
-                if not self.dialogs.empty():
-                    raise ValueError("two dialogs appeared together")
-                await self.answer(dialog)
+                await self.answer(await self.dialog())
                 await self.wait_completed(self.prompts[label], False)
         elif name == "dismiss":
             # B needs its own collection, or A's late unlock would satisfy it without a dialog.
@@ -387,6 +389,19 @@ class Lab:
                 await self.answer(first)
             await self.answer(await self.dialog())
             await self.wait_completed(self.prompts["B"], False)
+        elif name == "dismiss-waiter":
+            await self.new_prompt("B")
+            await self.start_prompt("B")
+            await self.secret_call(
+                self.prompts["B"], "org.freedesktop.Secret.Prompt", "Dismiss"
+            )
+            await self.wait_completed(self.prompts["B"], True)
+            if self.active != first[:2]:
+                raise ValueError("dismissing a waiter closed the active dialog")
+            await self.answer(first)
+            await self.wait_completed(self.prompts["A"], False)
+            if self.dialog_count != 1:
+                raise ValueError("unexpected additional dialog")
         elif name == "many":
             for index in range(20):
                 label = f"B{index}"
@@ -412,6 +427,9 @@ def classify(process, log, lab, error):
     ):
         return "ABORT"
     if error is None:
+        if "out of sync" in log:
+            print("lab: daemon reported its unlock state out of sync", file=sys.stderr)
+            return "INCONCLUSIVE"
         return "OK"
     if (
         isinstance(error, TimeoutError)
@@ -430,7 +448,8 @@ async def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("keyring")
     parser.add_argument(
-        "scenario", choices=("abort", "hang", "dismiss", "many", "normal")
+        "scenario",
+        choices=("abort", "hang", "dismiss", "dismiss-waiter", "many", "normal"),
     )
     parser.add_argument("log", type=Path)
     args = parser.parse_args()
