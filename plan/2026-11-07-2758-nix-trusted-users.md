@@ -272,3 +272,7 @@ One numbered list across all stages: stage A is steps 1-7, stage B steps 8-9, st
 - **Step 6 (coder), done before steps 2-4:** `build-on-p620` had no `_require-main`, so it only gains
   `(_sign-drv HOST)`. The live check (`just _sign-drv razer`, then `nix path-info --sigs`) moves to step 7,
   because it needs the key.
+- **Step 2 (lead):** each public key is derived after encryption, `agenix -d | nix key convert-secret-to-public`,
+  instead of `tee >(…)`, whose process substitution can still be writing when the next command reads the file.
+  Public keys: `p620-nix-1:hqZIIrJ1DQAb3yBFhxW5ww6DV0XG9NBxQY7E0yyPoH8=` and
+  `razer-nix-1:5C9bEvpGznTuMVhzQ0yzZR6HKMwdWEjfjh+pC2lW0aw=`.
