@@ -1027,7 +1027,14 @@ deploy-via-p620 HOST: _require-main (_sign-drv HOST)
         nixos-rebuild build --flake .#{{HOST}} --build-host p620; \
     fi
     @echo "📦 Step 2: Deploying to {{HOST}}..."
-    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --sudo --no-reexec --keep-going
+    @# Deploying to ourselves? Activate locally. --target-host SSHes to our own
+    @# name, so a host entry in ~/.ssh/config that no longer resolves fails the
+    @# copy step after a build that already succeeded. Same reasoning as Step 1.
+    if [ "$(hostname)" = "{{HOST}}" ]; then \
+        sudo nixos-rebuild switch --flake .#{{HOST}} --no-reexec; \
+    else \
+        nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --sudo --no-reexec --keep-going; \
+    fi
     @echo "✅ Deployment complete! {{HOST}} is using P620's cache."
 
 # Build on P620 for target host (build only, no deployment)

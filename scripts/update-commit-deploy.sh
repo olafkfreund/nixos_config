@@ -49,6 +49,21 @@
 
 set -euo pipefail
 
+# --- Authenticate nix's github: fetches (#2773) ------------------------------
+# GitHub allows an unauthenticated client 60 API requests/hour per IP. Step 2
+# re-resolves every input in the lock, which needs more than that, so the run
+# dies part-way with "HTTP error 403". Authenticated is 5000/hour.
+#
+# load-api-keys exports this for interactive shells, but set it here too: this
+# script must not depend on having been started from one (a fresh shell after a
+# rebuild, cron, or another agent's non-interactive session all lack it).
+# Appends rather than assigns, so a NIX_CONFIG from a devshell survives.
+if [ -r /run/agenix/api-github-token ] \
+  && ! printf '%s' "${NIX_CONFIG:-}" | grep -q access-tokens; then
+  export NIX_CONFIG="${NIX_CONFIG:+${NIX_CONFIG}
+}access-tokens = github.com=$(cat /run/agenix/api-github-token)"
+fi
+
 # --- Argument parsing -------------------------------------------------------
 # Positional args: HOST [SCOPE]. Flag --no-deploy can appear anywhere.
 # --no-deploy: run update + build + commit + PR-merge but skip the final
