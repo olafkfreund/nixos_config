@@ -490,7 +490,7 @@ check-syntax:
 
 # Deploy to razer laptop (Intel/NVIDIA) - OPTIMIZED
 razer: _require-main
-    nixos-rebuild switch --flake .#razer --target-host razer --build-host razer --sudo --no-reexec --keep-going --accept-flake-config
+    nixos-rebuild switch --flake .#razer --target-host razer --build-host razer --sudo --ask-elevate-password --no-reexec --keep-going --accept-flake-config
 
 # Deploy to p620 workstation (AMD) - OPTIMIZED
 p620: _require-main
@@ -520,6 +520,7 @@ p510-clear-sessions:
     # TTY (a live login / tmux) and never our own ssh session.
     self="${XDG_SESSION_ID:-none}"
     killed=0
+    failed=0
     while read -r id uid _user _seat _leader class tty _rest; do
       [ "$uid" = "1000" ] || continue
       [ "$class" = "user" ] || continue
@@ -531,12 +532,13 @@ p510-clear-sessions:
       # (seen: a wedged `docker run … | head` from an old debug session held one
       # open for 3 days). Stop the scope directly in that case.
       if loginctl show-session "$id" -p Id >/dev/null 2>&1; then
-        sudo systemctl stop "session-$id.scope" 2>/dev/null || true
+        sudo -n systemctl stop "session-$id.scope" || failed=$((failed+1))
       fi
       loginctl show-session "$id" -p Id >/dev/null 2>&1 || killed=$((killed+1))
     done < <(loginctl list-sessions --no-legend)
     systemctl --user reset-failed 2>/dev/null || true
     echo "  terminated $killed stale session(s); user manager: $(systemctl --user is-system-running 2>&1)"
+    [ "$failed" -eq 0 ] || { echo "  failed to stop $failed scope(s)" >&2; exit 1; }
     REMOTE
 
 
@@ -865,7 +867,7 @@ emergency-deploy HOST: _require-main
     @echo "🚨 EMERGENCY deployment to {{HOST}} (skipping tests)..."
     @echo "This will skip ALL safety checks and validation!"
     @read -p "Are you absolutely sure? (type 'emergency'): " confirm && [ "$confirm" = "emergency" ] || exit 1
-    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo --no-reexec --keep-going --accept-flake-config
+    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo {{ if HOST == "p510" { "" } else { "--ask-elevate-password" } }} --no-reexec --keep-going --accept-flake-config
 
 # =============================================================================
 # UTILITIES AND HELPERS
@@ -938,16 +940,12 @@ secrets-status:
 # Check secrets status on specific host
 secrets-status-host HOST:
     @echo "🔑 Checking secrets status on {{HOST}}..."
-    ssh {{HOST}} "sudo ls -la /run/agenix/ || echo 'Agenix directory not found'"
-    ssh {{HOST}} "sudo systemctl status agenix --no-pager || echo 'Agenix service not running'"
+    ssh -t {{HOST}} "sudo sh -c 'ls -la /run/agenix/ || echo Agenix directory not found; systemctl status agenix --no-pager || echo Agenix service not running'"
 
 # Fix agenix issues on remote host
 fix-agenix-remote HOST:
     @echo "🔧 Attempting to fix agenix issues on {{HOST}}..."
-    ssh {{HOST}} "sudo systemctl stop agenix || true"
-    ssh {{HOST}} "sudo rm -rf /run/agenix.d || true"
-    ssh {{HOST}} "sudo systemctl start agenix || echo 'Agenix service failed to start'"
-    ssh {{HOST}} "sudo systemctl status agenix --no-pager"
+    ssh -t {{HOST}} "sudo sh -c 'systemctl stop agenix || true; rm -rf /run/agenix.d || true; systemctl start agenix || echo Agenix service failed to start; systemctl status agenix --no-pager'"
 
 # =============================================================================
 # NETWORKING AND MONITORING
@@ -975,12 +973,12 @@ deploy-all-parallel:
 # Fast deployment with minimal builds
 deploy-fast HOST: _require-main
     @echo "⚡ Fast deployment to {{HOST}}..."
-    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo --no-reexec --keep-going --no-build-nix --accept-flake-config
+    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo {{ if HOST == "p510" { "" } else { "--ask-elevate-password" } }} --no-reexec --keep-going --no-build-nix --accept-flake-config
 
 # Build locally, deploy remotely (for slow remote hosts)
 deploy-local-build HOST: _require-main
     @echo "🏗️ Building {{HOST}} locally, deploying remotely..."
-    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --sudo --no-reexec --keep-going --accept-flake-config
+    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --sudo {{ if HOST == "p510" { "" } else { "--ask-elevate-password" } }} --no-reexec --keep-going --accept-flake-config
 
 # Deploy only if changed (smart deployment)
 deploy-smart HOST: _require-main
@@ -1004,7 +1002,7 @@ build-all-parallel:
 # Deploy with binary cache optimization
 deploy-cached HOST: _require-main
     @echo "💾 Deploying {{HOST}} with cache optimization..."
-    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo --no-reexec --keep-going --accept-flake-config
+    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo {{ if HOST == "p510" { "" } else { "--ask-elevate-password" } }} --no-reexec --keep-going --accept-flake-config
 
 # Build on P620, deploy to target host
 deploy-via-p620 HOST: _require-main
@@ -1018,7 +1016,7 @@ deploy-via-p620 HOST: _require-main
         nixos-rebuild build --flake .#{{HOST}} --build-host p620 --accept-flake-config; \
     fi
     @echo "📦 Step 2: Deploying to {{HOST}}..."
-    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --sudo --no-reexec --keep-going --accept-flake-config
+    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --sudo {{ if HOST == "p510" { "" } else { "--ask-elevate-password" } }} --no-reexec --keep-going --accept-flake-config
     @echo "✅ Deployment complete! {{HOST}} is using P620's cache."
 
 # Build on P620 for target host (build only, no deployment)
