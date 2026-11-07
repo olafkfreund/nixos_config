@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2750
 spec: spec/2026-11-07-2750-gnome-keyring-unlock-queue-abort.md
 coders:
