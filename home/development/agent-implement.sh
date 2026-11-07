@@ -15,7 +15,13 @@ tool=${1:-}
 shift 2
 [[ ! ${HUMANIZE_CODEX_BYPASS_SANDBOX+x} ]] || refuse 'HUMANIZE_CODEX_BYPASS_SANDBOX is set'
 # An exported function or LD_* would run inside the tools the sandbox is built from.
-[[ -z $(declare -Fx) && -z $(compgen -v LD_) && -z $(compgen -v BASH_FUNC_) ]] || refuse 'exported function, LD_* or BASH_FUNC_* in the environment'
+# env -0: writeShellApplication's bash lacks the completion builtins, which made the old check a no-op (#2757).
+[[ -z $(declare -Fx) ]] || refuse 'exported function, LD_* or BASH_FUNC_* in the environment'
+while IFS= read -r -d '' entry; do
+  case ${entry%%=*} in
+    LD_* | BASH_FUNC_*) refuse 'exported function, LD_* or BASH_FUNC_* in the environment' ;;
+  esac
+done < <(env -0)
 
 sandbox_repo_checks
 sandbox_safe_path

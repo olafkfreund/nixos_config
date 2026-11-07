@@ -177,7 +177,11 @@ refused 'BASH_FUNC_mount%% in the environment' "${CX[@]}" -
 refused 'BASH_FUNC_mount%% in the environment (agy)' "${AG[@]}" -p hi
 XENV=(LD_PRELOAD=/nonexistent.so)
 refused 'LD_PRELOAD in the environment' "${CX[@]}" -
+XENV=(LD_PROBE=1)
+refused 'any LD_* name in the environment' "${CX[@]}" -
 XENV=()
+# writeShellApplication's bash has no compgen, so a check built on it passes everything (#2757 live probe).
+if grep -q 'compgen' "$script"; then bad 'agent-implement uses compgen'; else ok 'agent-implement does not use compgen'; fi
 refused 'agy: --model value starting with -' "${AG[@]}" --model --no-sandbox
 refused 'agy: --effort value starting with -' "${AG[@]}" --effort -x
 
@@ -254,7 +258,8 @@ else
   FAKEDIR=$FAKEDIR_SAVE
 
   # env -i: with the refusal removed, a planted function must not reach the namespace.
-  sed '/declare -Fx/d' "$script" >"$w/noref"
+  sed '/declare -Fx/,/done < <(env -0)/d' "$script" >"$w/noref"
+  ! grep -qE 'declare -Fx|LD_\* \| BASH_FUNC_\*\)' "$w/noref" || bad 'noref still holds the env refusal'
   sed 's/env)" -i /env)" /' "$w/noref" >"$w/mutant"
   grep -q 'env)" -i ' "$w/noref" && ! grep -q 'env)" -i ' "$w/mutant" || bad 'mutant not built'
   planted() { # <script> <tool args…>: run with a planted mount function
