@@ -112,6 +112,7 @@ sandbox_exec_bwrap() {
 #   --sub-tmpfs PATH      empty tmpfs over PATH if it is a directory
 #   --chdir DIR, --env NAME=VALUE
 # Any failed step aborts before the command starts.
+# shellcheck disable=SC2329  # shipped into the namespace with declare -f, so never called here
 sandbox_setup() {
   set -euo pipefail
   local tool_path=$1 run_path=$2 home=$3 uid=$4 gid=$5

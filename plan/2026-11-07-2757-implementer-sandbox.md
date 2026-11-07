@@ -418,3 +418,7 @@ are Claude's: the gate, builds, the deploy and the live probes.
   and still passes its 78 checks. The descriptor check ignores fd 3 (the probe's glob) and 255 (bash's script fd).
   The daemon-socket mutant turns red only where the daemon socket exists. The test adds one tiny directory of
   static fakes with `nix-store --add`, and SKIPs without user namespaces, `bwrap` or `nix-store --add`.
+- **Step 9 (lead):** the first `just test-host p620` failed in `agent-implement`'s build-time shellcheck: SC2329 on
+  `sandbox_setup`, which is shipped into the namespace with `declare -f` and so never called in the script. The
+  library's file-level `disable` stops being file-level once `writeShellApplication` puts its preamble first, so
+  the directive now sits on the function. p620 and razer then build, and both tests still pass.
