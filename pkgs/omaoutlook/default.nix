@@ -39,6 +39,10 @@ stdenv.mkDerivation rec {
       --replace-fail 'readonly property string hostBinary: (Quickshell.env("XDG_DATA_HOME") || (home + "/.local/share")) + "/omaoutlook/bin/omaoutlook"' 'readonly property string hostBinary: "@out@/bin/omaoutlook"' \
       --replace-fail 'Component.onCompleted: ensureHost()' 'Component.onCompleted: checkInstalled()' \
       --replace-fail 'if (!installed) { ensureHost(); return }' 'if (!installed) { checkInstalled(); return }'
+    # Color.bar is not constructed yet when the plugin's binding first runs, so
+    # the unguarded read throws and leaves the marker's ring colourless (#2778).
+    substituteInPlace ui/BarWidget.qml \
+      --replace-fail 'border.color: Color.bar.background' 'border.color: Color.bar ? Color.bar.background : Color.background'
     substituteInPlace host/qml/Main.qml \
       --replace-fail 'readonly property string teamsBinary: Sys.home() + "/.local/share/omateams/bin/omateams"' 'readonly property string teamsBinary: "${omateams}/bin/omateams"'
     # Main.qml is compiled in through qml.qrc, so check the patch landed.
