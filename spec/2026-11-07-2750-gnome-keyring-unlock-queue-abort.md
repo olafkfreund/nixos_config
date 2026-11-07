@@ -64,8 +64,8 @@ with nobody listening. Cancelling waiters on disconnect is a separate change.
   carried in this patch.
 - **The smallest guard: `mark_as_complete` skips a head whose `current` is set.** It stops the issue's abort but leaves
   the hang, and the hang is the worse failure because nothing logs it.
-- **The patch attached to upstream issue 202.** Downloading it needs a GitLab login, so it is unread. Its reporter says it
-  is "like 45%" certain. The plan compares it if it can be read.
+- **The patch attached to upstream issue 202.** Downloading it needs a GitLab login, so it is unread. Its reporter
+  says it is "like 45%" certain. The plan compares it if it can be read.
 - **Removing Home Manager's second daemon.** Out of scope, by the owner's decision on the intent.
 
 ## Risks
