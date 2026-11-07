@@ -401,6 +401,7 @@ ok headless-keeps-stdin
 # only allow-listed names reach the command, by name, never by value
 eval "$(sed -n '/^agent_env_base=(/,/^agent_env_exported() {/{/^agent_env_exported/d;p}' "$tool")"
 declare -A allowed=()
+# shellcheck disable=SC2154  # agent_env_names comes from the eval above
 for n in "${agent_env_names[@]}" PWD SHLVL _ OLDPWD; do allowed[$n]=1; done
 names_cmd='env -0 | cut -z -d= -f1 | tr "\0" "\n"'
 marker=$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')
