@@ -436,3 +436,8 @@ are Claude's: the gate, builds, the deploy and the live probes.
 - **Codex review of PR #2772:** razer runs no systemd-resolved, so `/run/systemd/resolve` is absent and its staging
   bind is skipped, but the later `mount --move` ran anyway, failed, and aborted setup before agy started. Both
   optional resolver directories are now moved only if they were staged. Step 11 (the razer probe) proves it.
+- **Rest of the Opus review, fixed:** the writable worktree let the model plant project config (`.codex/config.toml`,
+  or edits to the tracked `.gemini/`) for a later run. Both backends now bind `$root/.codex` and `$root/.gemini`
+  read-only; a missing one is created empty on the host just before the run as a mountpoint and removed by the
+  cleanup trap (left behind, empty, only after a SIGKILL). A symlink or non-directory there refuses the run. The
+  probe now ends with `probe-done`, and the negative checks count only when it is present.

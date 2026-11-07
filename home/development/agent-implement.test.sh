@@ -82,9 +82,14 @@ done
     [ -n "$(ls -A "$g/antigravity-browser-profile" 2>/dev/null)" ] && echo browser-profile-visible
   fi
   [ -n "${AGY_GUARD_LOG:-}" ] && ( : >>"$AGY_GUARD_LOG" ) 2>/dev/null && echo guardlog-writable
+  for pd in .codex .gemini; do
+    [ -d "$PWD/$pd" ] && ( : >"$PWD/$pd/x" ) 2>/dev/null && echo "project-dir-writable $pd"
+  done
+  [ -r "$PWD/.gemini/GEMINI.md" ] && echo gemini-tracked-readable
   umount /home 2>/dev/null && echo umount-worked
   unshare -Urm umount /home 2>/dev/null && echo umount-nested-worked
   [ -n "$(ls -A /home 2>/dev/null)" ] && echo home-uncovered
+  echo probe-done
 } >"$o.probe" 2>&1
 exit 0
 FAKE
@@ -110,7 +115,8 @@ ln -s ../config/mcp_config.json "$g/antigravity/mcp_config.json"
 
 repo=$w/repo
 git init -q "$repo"
-mkdir -p "$w/outdir"
+mkdir -p "$w/outdir" "$repo/.gemini"
+echo tracked >"$repo/.gemini/GEMINI.md"
 
 # runi <args…>: the wrapper from the test repo, test HOME, a caller sentinel and an open fd 9.
 XENV=()
@@ -276,6 +282,13 @@ else
       bad "$tool did not run: $(head -c 300 "$w/last.out")"
       return
     fi
+    grep -qx probe-done "$probe" && ok "$tool: probe finished" || {
+      bad "$tool: probe did not finish, negative checks are void"
+      return
+    }
+    grep -q '^project-dir-writable' "$probe" && bad "$tool: project .codex/.gemini writable" || ok "$tool: project .codex and .gemini read-only"
+    grep -qx gemini-tracked-readable "$probe" && ok "$tool: tracked .gemini content readable" || bad "$tool: tracked .gemini content unreadable"
+    [ ! -e "$repo/.codex" ] && ok "$tool: no .codex left on the host" || bad "$tool: .codex left on the host"
     while IFS= read -r l; do
       case $l in
         present*) bad "$tool: sandbox leaks: $l" ;;

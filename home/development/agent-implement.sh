@@ -107,11 +107,26 @@ check_agy_args() {
 }
 
 tmp=$(mktemp -d /tmp/agent-implement.XXXXXX)
-trap 'rm -rf -- "$tmp"' EXIT
+made=()
+trap 'rm -rf -- "$tmp"; for d in "${made[@]}"; do rmdir -- "$d" 2>/dev/null || true; done' EXIT
+
+# The worktree is writable, so a planted $root/.codex or $root/.gemini would configure the next run.
+# A missing one gets an empty mountpoint for the read-only bind and is removed again on exit.
+protect_project_dirs() {
+  local d
+  for d in "$root/.codex" "$root/.gemini"; do
+    [[ ! -L $d && (! -e $d || -d $d) ]] || refuse "not a plain directory: $d"
+    [[ -d $d ]] || {
+      mkdir -- "$d"
+      made+=("$d")
+    }
+  done
+}
 
 run_codex() {
   local config
   check_codex_args "$@"
+  protect_project_dirs
   config=$(realpath -e -- "$home/.codex/implement.config.toml") || refuse 'missing ~/.codex/implement.config.toml'
   local binds=()
   if [[ -n $out_file ]]; then
@@ -119,6 +134,7 @@ run_codex() {
     binds=(--bind "$out_file" "$out_file")
   fi
   sandbox_exec_bwrap --bind "$root" "$root" --ro-bind "$common" "$common" --bind "$tmp" "$tmp" \
+    --ro-bind "$root/.codex" "$root/.codex" --ro-bind "$root/.gemini" "$root/.gemini" \
     --chdir "$root" --setenv TMPDIR "$tmp" --setenv CODEX_CODER 1 \
     --dir "$home/.codex" --bind "$home/.codex/auth.json" "$home/.codex/auth.json" \
     --ro-bind "$config" "$home/.codex/implement.config.toml" "${binds[@]}" \
@@ -128,6 +144,7 @@ run_codex() {
 run_agy() {
   local gemini=$home/.gemini rel log='' policy=()
   check_agy_args "$@"
+  protect_project_dirs
   # What configures agy or runs code stays read-only; antigravity-cli/bin must stay writable.
   # A trailing slash marks a directory the sandbox creates empty when it is missing.
   local ro=(config/ hooks/ commands/ extensions/ agents/ antigravity/skills/ antigravity/bin/
@@ -140,6 +157,7 @@ run_agy() {
   for rel in config/mcp_config.json antigravity/mcp_config.json; do
     policy+=(--sub-mask "$gemini/$rel=$tmp/mcp-mask.json")
   done
+  policy+=(--sub-ro "$root/.codex" --sub-ro "$root/.gemini")
   policy+=(--sub-tmpfs "$gemini/antigravity-browser-profile" --sub-tmpfs "$gemini/antigravity-backup")
   policy+=(--env AGY_CODER=1 --env "AGY_WORKTREE=$root")
   if [[ -n ${AGY_GUARD_LOG:-} ]]; then
