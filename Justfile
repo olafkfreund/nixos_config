@@ -965,10 +965,12 @@ deploy-all-parallel:
     @echo "🚀 Deploying to ALL hosts in parallel..."
     @read -p "Are you sure? This will max out resources! (y/N): " confirm && [ "$confirm" = "y" ] || exit 1
     @echo "Starting parallel deployments..."
-    just p620 & \
-    just razer & \
-    just p510 & \
-    wait && echo "✅ All deployments completed!"
+    # p620 and razer ask for the password (#2759), so they run in turn; p510 stays in the background
+    just p510 & p510_pid=$!; rc=0; \
+    just p620 || rc=1; \
+    just razer || rc=1; \
+    wait "$p510_pid" || rc=1; \
+    if [ "$rc" = 0 ]; then echo "✅ All deployments completed!"; else echo "❌ A deployment failed"; exit 1; fi
 
 # Fast deployment with minimal builds
 deploy-fast HOST: _require-main

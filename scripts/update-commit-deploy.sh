@@ -182,7 +182,7 @@ splice_nixpkgs_node() {
     }
   nar=$(printf '%s' "$meta" | jq -r '.locked.narHash')
   lm=$(printf '%s' "$meta" | jq -r '.locked.lastModified')
-  log "splicing ${node} = github:nixos/nixpkgs/${sha:0:10} (lastModified $(date -u -d "@${lm}"+%Y-%m-%d))"
+  log "splicing ${node} = github:nixos/nixpkgs/${sha:0:10} (lastModified $(date -u -d "@${lm}" +%Y-%m-%d))"
   jq --arg n "$node" --arg sha "$sha" --arg nar "$nar" --argjson lm "$lm" '
     .nodes[$n].locked = {
       lastModified: $lm, narHash: $nar,

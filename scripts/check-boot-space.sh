@@ -59,7 +59,7 @@ fi
 echo "🧹 ${LABEL}: reclaiming space…"
 
 # 1. Partial copies left by a previous ENOSPC. Always orphans, never booted.
-run_root 'sudo find /boot -name "*.tmp" -type f -print -delete 2>/dev/null || true'
+run_root 'sudo find /boot -name "*.tmp" -type f -print -delete || true'
 
 # 2. Drop old system generations, then let the bootloader installer prune the
 #    ESP entries that no longer belong to a generation. Deleting files out of
@@ -67,8 +67,8 @@ run_root 'sudo find /boot -name "*.tmp" -type f -print -delete 2>/dev/null || tr
 #    kernel/initrd the remaining generations still reference, so let it decide.
 #    +2 keeps the current generation and one fallback.
 prune_to() {
-  run_root "sudo nix-env -p /nix/var/nix/profiles/system --delete-generations +$1 2>/dev/null || true"
-  run_root 'sudo /run/current-system/bin/switch-to-configuration boot 2>&1 | tail -3'
+  run_root "sudo nix-env -p /nix/var/nix/profiles/system --delete-generations +$1 || true"
+  run_root 'set -o pipefail; sudo /run/current-system/bin/switch-to-configuration boot 2>&1 | tail -3'
 }
 
 prune_to 2
