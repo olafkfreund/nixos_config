@@ -120,6 +120,12 @@ rm -f "$W/bin/ran"
 (cd "$plant" && PATH="$plant:$W/bin:$PATH" bash "$script" codex "$W" -- exec >/dev/null 2>&1 </dev/null)
 rc=$?
 if [ ! -e "$W/planted" ] && [ -e "$W/bin/ran" ]; then ok 'codex planted in the repo, absolute PATH entry'; else bad "codex planted in the repo, absolute PATH entry (rc=$rc)"; fi
+ln -sfn "$plant" "$W/plantlink"
+rm -f "$W/planted" "$W/bin/ran"
+(cd "$plant" && PATH="$W/plantlink:$w/./plant:$W/bin:$PATH" bash "$script" codex "$W" -- exec >/dev/null 2>&1 </dev/null)
+rc=$?
+if [ ! -e "$W/planted" ] && [ -e "$W/bin/ran" ]; then ok 'codex planted in the repo, symlinked or /./ PATH entry'; else bad "codex planted in the repo, symlinked or /./ PATH entry (rc=$rc)"; fi
+rm -f "$W/plantlink"
 refused 'work dir equals worktree' codex "$root" -- exec
 refused 'work dir inside worktree' codex "$root/home" -- exec
 refused 'work dir contains worktree' codex "$(dirname "$root")" -- exec

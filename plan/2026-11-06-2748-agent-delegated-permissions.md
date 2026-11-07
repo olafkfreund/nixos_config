@@ -65,8 +65,10 @@ and that command network is blocked by Codex's inner sandbox, not by the wrapper
 
 A second Opus review then reproduced a planted `codex`: with an empty or relative PATH entry, a
 `codex` file in the reviewed repo ran as the parent, with network and the login. The wrapper now
-passes only absolute PATH entries outside the repo and its git common dir into the sandbox. Two
-tests cover it (77 checks), and removing either filter fails one of them. `jq` and `gnugrep` left
+passes only absolute PATH entries outside the repo and its git common dir into the sandbox. Codex's PR
+review then showed `/./` and symlinked entries passing the text comparison, so each entry is
+resolved with `realpath -e` first. Three tests cover it (78 checks), and undoing either filter or
+the resolving fails one of them. `jq` and `gnugrep` left
 `runtimeInputs`, unused. Not fixed, as low risk: a process running as the same user could swap the
 work dir for a symlink between the checks and the mount. Abstract sockets are left to step 8.
 

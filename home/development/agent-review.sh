@@ -122,7 +122,9 @@ for entry in "${entries[@]}"; do
     /*) ;;
     *) continue ;;
   esac
-  case $entry/ in
+  # Compare the resolved path, so `/./`, `..` and symlinks cannot reach into the repo.
+  real=$(realpath -e -- "$entry" 2>/dev/null) || continue
+  case $real/ in
     "$root"/* | "$common"/*) continue ;;
   esac
   safe_path+=${safe_path:+:}$entry
