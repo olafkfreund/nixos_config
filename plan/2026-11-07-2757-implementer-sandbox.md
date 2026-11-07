@@ -413,3 +413,8 @@ are Claude's: the gate, builds, the deploy and the live probes.
   checked before any file is created, neither tool is `exec`ed (the cleanup trap must run), and
   `agent-implement.sh` carries `# shellcheck disable=SC2154` like `agent-review.sh`. `AGY_GUARD_LOG` must not
   exist beforehand; step 10 checks `agy-guard-probe` against that.
+- **Step 7 (coder):** found a real leak: `sandbox_exec_bwrap` passed inherited descriptors to the tool, so the codex
+  probe saw the test's fd 9. It now closes every descriptor above 2 before `bwrap`; `agent-review` gets the fix too
+  and still passes its 78 checks. The descriptor check ignores fd 3 (the probe's glob) and 255 (bash's script fd).
+  The daemon-socket mutant turns red only where the daemon socket exists. The test adds one tiny directory of
+  static fakes with `nix-store --add`, and SKIPs without user namespaces, `bwrap` or `nix-store --add`.

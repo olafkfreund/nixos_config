@@ -83,6 +83,12 @@ sandbox_exec_bwrap() {
   [[ ${1:-} == -- ]] || refuse 'sandbox_exec_bwrap: missing --'
   shift
   sandbox_ro_paths
+  # bwrap passes inherited descriptors on to the tool.
+  local fd n
+  for fd in /proc/self/fd/*; do
+    n=${fd##*/}
+    [[ $n =~ ^[0-9]+$ ]] && ((n > 2)) && eval "exec $n>&-" 2>/dev/null || true
+  done
   bwrap "${ro_paths[@]}" \
     --tmpfs /nix/var/nix/daemon-socket \
     --dev /dev --proc /proc --tmpfs /tmp --tmpfs /home \
