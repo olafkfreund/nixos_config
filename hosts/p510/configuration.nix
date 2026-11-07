@@ -953,5 +953,6 @@ in
   #   /mnt/img_pool    (SMR)              ~9.5 MB/s
   systemd.services.nix-daemon.environment.TMPDIR = "/home/nix-build";
   nix.settings.build-dir = "/home/nix-build";
+  nix.settings.trusted-users = [ "olafkfreund" ]; # #2758: p510 stays trusted until it is migrated
 
 }
