@@ -61,126 +61,147 @@ Spec: `spec/2026-11-07-2758-nix-trusted-users.md` (approved). Intent:
 
 ## Steps
 
-### Stage A: caches, keys, no flake config (still trusted)
+One numbered list across all stages: stage A is steps 1-7, stage B steps 8-9, stage C step 10.
 
-1. **New `checks/nix-untrusted-remote-build.nix`; wire it in `checks/default.nix` (last attribute,
-   before the closing `}` at the end of the file).**
+1. **Stage A. New `checks/nix-untrusted-remote-build.nix`; wire it in `checks/default.nix` as the
+   last attribute, before the file's closing `}`.**
    `pkgs.testers.runNixOSTest` with three nodes `builder`, `client`, `stranger`. Each node:
-   `nix.settings.trusted-users = [ "root" ]`, `require-sigs = true`, `experimental-features =
-   [ "nix-command" "flakes" ]`, its own signing key generated in the test script with
-   `nix key generate-secret` into a root-only file named in `secret-key-files` (set
-   `nix.extraOptions = "!include /etc/nix/test-signing.conf"` or write the file before the daemon
-   starts and restart `nix-daemon` in the script), user `alice` with SSH keys to the other nodes.
-   `builder` trusts `client`'s public key, `client` trusts `builder`'s, `stranger` trusts neither.
+   `nix.settings.trusted-users = [ "root" ]`, `require-sigs = true`, `substituters = [ ]` (so nothing
+   arrives by substitution), `experimental-features = [ "nix-command" "flakes" ]`, its own signing key
+   generated in the test script with `nix key generate-secret` into a root-only file named in
+   `secret-key-files` (write it, then restart `nix-daemon`), user `alice` with SSH keys to the other
+   nodes. `builder` trusts `client`'s public key, `client` trusts `builder`'s, `stranger` neither.
+   Every test derivation is input-addressed and carries a unique name, so no path pre-exists.
    Script, as `alice` on `client` unless stated:
    1. assert `nix store info` and `nix store info --store ssh-ng://<node>` report `Trusted: 0` on
       every node;
-   2. build a path on `client` with signing off (`--option secret-key-files ''` as root), use it via
-      `builtins.storePath` in a derivation's `inputSrcs`; `nix-copy-closure --to builder <drv>`
-      must fail; after `sudo nix store sign -r --key-file <client key> <drv>` it must succeed;
-   3. `ssh builder nix build '<drv>^*'` succeeds;
-   4. `nix-copy-closure --from builder <out>` succeeds and `nix path-info --sigs <out>` shows the
-      builder key;
-   5. `nix copy --to ssh-ng://builder` of a fresh client-built path succeeds;
+   2. as root on `client`, build a path with `--option secret-key-files ''` (unsigned); use it via
+      `builtins.storePath` in the `inputSrcs` of derivation D; assert neither is valid on `builder`;
+      `nix-copy-closure --to builder <D.drv>` must fail with `lacks a signature by a trusted key`;
+      after `sudo nix store sign -r --key-file <client key> <D.drv>` it must succeed;
+   3. assert D's output is absent on `client` and `builder`; `ssh builder nix build '<D.drv>^*'`
+      succeeds; `ssh builder nix path-info --sigs <out>` shows the builder key;
+   4. `nix-copy-closure --from builder <out>` succeeds;
+   5. `nix copy --to ssh-ng://builder` of a fresh client-built path (absent on `builder` first)
+      succeeds;
    6. a fresh output built on `builder`, asserted absent on `stranger`, copied to `stranger` fails
       with `lacks a signature by a trusted key`.
-   → verify: `nix build .#checks.x86_64-linux.nix-untrusted-remote-build -L </dev/null` on p620
-   (KVM) passes; `just check-syntax` passes.
-   Traps: same nixpkgs as the hosts (it is: `checks/default.nix` gets `nixpkgs.legacyPackages`), so
-   Nix 2.34.9. `nix flake check` (`just validate`) will now run a VM test and needs KVM; note it in
-   the PR. CI skips `nix flake check` (`.github/workflows/ci.yml:31`), so CI is unaffected.
+   → verify: `git add` the file, then `nix build .#checks.x86_64-linux.nix-untrusted-remote-build -L
+   </dev/null` on p620 (KVM) passes; `just check-syntax` and `just validate` pass.
+   Traps: same nixpkgs as the hosts (`checks/default.nix` gets `nixpkgs.legacyPackages`), so Nix
+   2.34.9. `nix flake check` (`just validate`) now runs a VM test and needs KVM; say so in the PR.
+   CI skips `nix flake check` (`.github/workflows/ci.yml:31`), so CI is unaffected.
    Gate: if any case fails, stop and report to the lead; the spec needs revising.
 
-2. **Signing keys (lead, not a coder: secret material).**
+2. **Stage A. Signing keys (lead, not a coder: secret material).**
    - `secrets.nix`: add
      `"secrets/nix-signing-key-p620.age".publicKeys = allUsers ++ [ p620 ];` and
      `"secrets/nix-signing-key-razer.age".publicKeys = allUsers ++ [ razer ];`, next to the
      per-host pair at `secrets.nix:116-117`.
-   - For each host H in p620, razer, generate and encrypt without printing:
-     `nix key generate-secret --key-name H-nix-1 | tee >(nix key convert-secret-to-public >H.pub) |
-     ./scripts/manage-secrets.sh create nix-signing-key-H` from a non-tty stdin (agenix then copies
-     stdin into the file). `H.pub` goes to a scratch dir and holds only the public key.
-   → verify: `test -s secrets/nix-signing-key-H.age`; `agenix -d` piped to `wc -c` is non-zero (never
-   to the terminal); `cat H.pub` matches `^H-nix-1:`.
+   - For each host H in p620, razer, generate and encrypt without printing, from a non-tty stdin
+     (agenix then copies stdin into the file; `scripts/manage-secrets.sh:238-240` calls `agenix -e`):
+     `set -o pipefail; nix key generate-secret --key-name H-nix-1 | tee >(nix key
+     convert-secret-to-public >"$S/H.pub") | ./scripts/manage-secrets.sh create nix-signing-key-H`,
+     where `$S` is a scratch dir. `H.pub` holds only the public key.
+   → verify: `test -s secrets/nix-signing-key-H.age`;
+   `agenix -d secrets/nix-signing-key-H.age | grep -q '^H-nix-1:'` exits 0 (output never shown);
+   `grep -q '^H-nix-1:' "$S/H.pub"`.
    Traps: agenix with a non-tty stdin overwrites the target with stdin, so never run `edit` on an
    existing key non-interactively. Commit the `.age` files and `secrets.nix` together.
 
-3. **`modules/nix/nix.nix:27-72`.**
+3. **Stage A. `modules/nix/nix.nix:64-78`: caches and public keys.**
    - `substituters` (`:64-67`): append `https://devenv.cachix.org`, `https://nixarchy.cachix.org`,
      `https://hyprland.cachix.org`.
    - `trusted-public-keys` (`:69-72`): append the devenv, nixarchy and hyprland keys from
      `flake.nix:32-34` verbatim, plus `p620-nix-1:<pub>` and `razer-nix-1:<pub>` from step 2.
-   - Add `secret-key-files = lib.mkIf (config.age.secrets ? nix-signing-key)
-     config.age.secrets.nix-signing-key.path;`.
-   - Leave `trusted-users` (`:29`) alone in this stage. Delete the stale Cachix comment `:74-78`.
-   → verify: `nix eval --json .#nixosConfigurations.{p620,razer,p510}.config.nix.settings.substituters`
-   lists all five plus nixarchy's; `...secret-key-files` is the agenix path on p620/razer and absent
-   on p510 (`nix eval` errors or returns the option default).
-   Traps: if `config.age.secrets ?` recurses, move the `secret-key-files` line into the step 4 host
-   declarations instead and record the deviation here.
+   - Delete the stale Cachix comment `:74-78`. Leave `trusted-users` (`:29`) alone in this stage.
+   → verify, per host: `for h in p620 razer p510; do nix eval --json
+   ".#nixosConfigurations.$h.config.nix.settings.substituters" </dev/null; done` lists all five plus
+   nixarchy's; the same loop on `trusted-public-keys` shows both host keys.
+   Traps: none beyond the shared rules.
 
-4. **`hosts/p620/configuration.nix` and `hosts/razer/configuration.nix`: declare the secret.**
-   Add `age.secrets.nix-signing-key = { file = ../../secrets/nix-signing-key-<host>.age;
-   owner = "root"; mode = "0400"; };`. On p620 the existing `age.secrets = lib.mkIf ...` block
-   (`:210-220`) is conditional: add a separate `age.secrets.nix-signing-key` attribute, do not put it
-   inside that `mkIf`.
-   → verify: `just test-host p620` and `just test-host razer` build;
-   `nix eval .#nixosConfigurations.razer.config.nix.settings.secret-key-files` returns
-   `/run/agenix/nix-signing-key`.
+4. **Stage A. `hosts/p620/configuration.nix` and `hosts/razer/configuration.nix`: secret and
+   `secret-key-files`.** Both live in the host file, not `nix.nix`, so no module reads
+   `config.age.secrets` from inside `nix.settings` and p510 is left out by construction.
+   - razer (no top-level `age.secrets` today; `age.identityPaths` is at `:631`): add
+     `age.secrets.nix-signing-key = { file = ../../secrets/nix-signing-key-razer.age;
+     owner = "root"; mode = "0400"; };` and
+     `nix.settings.secret-key-files = config.age.secrets.nix-signing-key.path;`.
+   - p620: `age.secrets = lib.mkIf (...) { api-huggingface = ...; };` at `:210-220` already binds
+     `age.secrets`, so a second `age.secrets.nix-signing-key` line is a duplicate-attribute error.
+     Change it to `age.secrets = lib.mkMerge [ (lib.mkIf (...) { api-huggingface = ...; })
+     { nix-signing-key = { file = ../../secrets/nix-signing-key-p620.age; owner = "root";
+     mode = "0400"; }; } ];`, keeping the huggingface body unchanged. Add the same
+     `nix.settings.secret-key-files` line.
+   → verify: `just test-host p620` and `just test-host razer` build; for p620 and razer,
+   `nix eval --raw .#nixosConfigurations.<h>.config.nix.settings.secret-key-files` prints
+   `/run/agenix/nix-signing-key`; for p510,
+   `nix eval .#nixosConfigurations.p510.config.nix.settings --apply 's: s ? secret-key-files'`
+   prints `false`; p620's `config.age.secrets` still contains
+   `api-huggingface`.
    Traps: no `builtins.readFile` of the key; no `pathExists` guard (the files exist after step 2).
 
-5. **Remove flake-level config.**
+5. **Stage A. Remove flake-level config.**
    - `modules/nix/flake-settings.nix:7-8`: delete the comment and `accept-flake-config = true;`.
    - `flake.nix:4-36`: delete the whole `nixConfig` block (and the blank line after it).
-   - `Justfile`: delete `--accept-flake-config` at `:493`, `:497`, `:502`, `:868`, `:978`, `:983`,
-     `:1007`, `:1016`, `:1018`, `:1021`, `:1027` (11 flags).
-   → verify: `grep -rn 'accept-flake-config\|nixConfig' Justfile flake.nix modules/` is empty;
-   `nix eval .#nixosConfigurations.razer.config.nix.settings.accept-flake-config` is not `true`;
-   `just check-syntax`; `just test-host razer` prints no `ignoring the client-specified setting`.
-   Traps: `docs/guides/deployment-guide.md` and `docs/guides/CACHE-STRATEGY.md` mention the flag; update them in this commit;
-   `scripts/` has none today (checked).
+   - `Justfile`: delete every `--accept-flake-config`. On `8f78b7d76` there are 11, at `:493`, `:497`,
+     `:502`, `:868`, `:978`, `:983`, `:1007`, `:1016`, `:1018`, `:1021`, `:1027`; after a rebase,
+     find them with `grep -n accept-flake-config Justfile`.
+   - `docs/guides/deployment-guide.md:82` (the flag's bullet: delete it) and
+     `docs/guides/CACHE-STRATEGY.md:17` (say the caches come from `nix.settings` in
+     `modules/nix/nix.nix`, not from the flake). No page is added or moved, so no nav change.
+   → verify: `grep -rn 'accept-flake-config\|nixConfig' Justfile flake.nix modules/ scripts/` is empty;
+   `nix eval .#nixosConfigurations.razer.config.nix.settings --apply 's: s.accept-flake-config or
+   false'` prints `false`; `just check-syntax`; `just test-host razer` prints no
+   `ignoring the client-specified setting`; markdownlint passes on both docs (whole-file lint).
+   Traps: pre-push lints the whole doc file, so fix any old MD013 failures it reports there.
 
-6. **`Justfile`: sign the `.drv` closure before a `--build-host` upload.**
-   Add one private recipe next to `deploy-via-p620` (`:1010`):
+6. **Stage A. `Justfile`: sign the `.drv` closure before a `--build-host` upload.**
+   Add one private recipe next to `deploy-via-p620` (`:1010`). Its argument is the host whose
+   configuration is being built:
 
    ```just
    _sign-drv HOST:
        #!/usr/bin/env bash
        set -euo pipefail
-       # shortcut: skips when the invoking host has no key (p510), the copy then needs a trusted receiver
+       # shortcut: skips when the invoking host has no key (p510); the copy then needs a trusted receiver
        [ -e /run/agenix/nix-signing-key ] || { echo "no signing key here, skipping"; exit 0; }
-       drv=$(nix eval --raw .#nixosConfigurations.{{HOST}}.config.system.build.toplevel.drvPath)
+       drv=$(nix eval --raw ".#nixosConfigurations.{{HOST}}.config.system.build.toplevel.drvPath")
        sudo nix store sign -r --key-file /run/agenix/nix-signing-key "$drv"
    ```
 
-   Call `just _sign-drv <host>` (or make it a recipe dependency) before the `nixos-rebuild` line in
-   the recipes that pass `--build-host`: `razer` (`:493`, host razer), `p510` (`:502`),
-   `emergency-deploy` (`:868`), `deploy-fast` (`:978`), `deploy-cached` (`:1007`),
-   `deploy-via-p620` (`:1018` branch only, host p620 builds; skip in the `hostname = p620` branch),
-   `build-on-p620` (`:1027`).
-   → verify: `just --evaluate` and `just --dry-run deploy-via-p620 razer </dev/null` show the sign
-   call before the build; `shellcheck` on the shebang body passes at info level.
+   Make it a dependency, so `just` runs it first and stops if it fails: `razer: _require-main
+   (_sign-drv "razer")`, `p510: ... (_sign-drv "p510")`, and `(_sign-drv HOST)` on
+   `emergency-deploy` (`:868`), `deploy-fast` (`:978`), `deploy-cached` (`:1007`), `deploy-via-p620`
+   (`:1010`) and `build-on-p620` (`:1025`). In `deploy-via-p620` on p620 itself the signing is
+   unneeded but harmless.
+   → verify: `just --dry-run deploy-via-p620 razer </dev/null` lists the `_sign-drv` body before
+   the `nixos-rebuild` lines (dry-run prints dependency bodies); the same for each recipe above;
+   `just --show _sign-drv` body passes `shellcheck -S info`; run `just _sign-drv razer` once on p620
+   after step 7 and check `nix path-info --sigs` on the `.drv` shows `p620-nix-1`.
    Traps: after #2759 `sudo` asks for a password on p620/razer, so this is one more prompt per
-   recipe (sudo caches the timestamp per tty); `-e` not `-r` because the file is root-only 0400;
-   the bus guard matches `deploy`/`switch` words in command text, so write the commit body to a file.
+   recipe (sudo caches the timestamp per tty). `-e`, not `-r`: the file is root-only 0400. The bus
+   guard matches `deploy`/`switch` words in command text, so write the commit body to a file.
 
-7. **Rollout of stage A (lead/owner, not a coder).** Merge stage A to `main` through its own PR, then
-   deploy p620, then razer. Then, still trusted, on each host:
-   - `sudo test -r /run/agenix/nix-signing-key`, after the deploy and again after a reboot;
+7. **Stage A. Rollout (lead/owner, not a coder).** Merge stage A to `main` through its own PR, then
+   deploy p620, then razer. Then, still trusted, on each host H:
+   - `sudo test -r /run/agenix/nix-signing-key` after the deploy;
+   - announce on the bus and reboot H, then `sudo test -r /run/agenix/nix-signing-key` again: this
+     proves agenix runs before nix-daemon at boot, which the VM test does not;
    - `nix config show | grep -E '^(secret-key-files|trusted-public-keys|substituters) '`;
-   - `nix build --impure --expr '(import <nixpkgs> {}).writeText "sig-$RANDOM" "x"'` and
-     `nix path-info --sigs` on it shows `H-nix-1`;
+   - a fresh build is signed: `n="sig-$(date +%s%N)"; p=$(nix build --no-link --print-out-paths
+     --impure --expr "derivation { name = \"$n\"; system = \"x86_64-linux\"; builder = \"/bin/sh\";
+     args = [ \"-c\" \"echo $n > \$out\" ]; }")`, then `nix path-info --sigs "$p"` shows `H-nix-1`;
    - `sudo nix store sign --all --key-file /run/agenix/nix-signing-key` (decision 5);
    - on razer: `nix store verify --sigs-needed 1 -r /run/current-system` passes for a p620-built
      closure (after `just deploy-via-p620 razer`);
-   - `nix config show | grep accept-flake-config` is not `true`.
+   - `nix config show | grep '^accept-flake-config'` is not `= true`.
+   Gate: stage B does not start until every check passes on both hosts, both reboots included.
    Traps: merge to `main` before deploying, because the nightly `system.autoUpgrade` (`nix.nix:7-18`)
    pulls `github:olafkfreund/nixos_config` main at 04:00 on p620 and razer and would undo a branch
    deploy. p510 picks up stage A only at its next owner-run deploy.
 
-### Stage B: trust removal, razer first
-
-1. **Trust removal, with p620 and p510 held back.**
+8. **Stage B. Trust removal, with p620 and p510 held back.**
    - `modules/nix/nix.nix:29`: `trusted-users = [ "root" ];`.
    - `hosts/p510/configuration.nix` (next to `nix.settings.build-dir` at `:941`):
      `nix.settings.trusted-users = [ "olafkfreund" ];` with a one-line comment naming #2758.
@@ -189,15 +210,13 @@ Spec: `spec/2026-11-07-2758-nix-trusted-users.md` (approved). Intent:
    `["root"]` on razer and contains `olafkfreund` on p620 and p510; `just test-host razer`.
    Traps: the list merges, so the overrides add to `[ "root" ]`; do not `mkForce`.
 
-2. **Rollout of step 8 (lead/owner).** Merge to `main`, deploy razer from p620
+9. **Stage B. Rollout of step 8 (lead/owner).** Merge to `main`, deploy razer from p620
    (`nhs razer` or `just deploy-via-p620 razer`, run from p620), then run the after-removal checks in
    Tests on razer. Do not start step 10 until they pass and one further deploy to razer succeeds.
 
-### Stage C: p620
-
- 1. **`hosts/p620/configuration.nix`: delete the temporary override from step 8.**
-    → verify: `nix eval ...p620.config.nix.settings.trusted-users` gives `["root"]`;
-    `just test-host p620`.
+10. **Stage C. `hosts/p620/configuration.nix`: delete the temporary override from step 8.**
+    → verify: `nix eval --json .#nixosConfigurations.p620.config.nix.settings.trusted-users` gives
+    `["root"]`; `just test-host p620`.
     Rollout: merge, deploy p620 locally, run the after-removal checks on p620.
 
 ## Tests
@@ -210,8 +229,9 @@ Spec: `spec/2026-11-07-2758-nix-trusted-users.md` (approved). Intent:
   - `nix store info --store daemon` reports `Trusted: 0`;
   - `just deploy-via-p620 razer` (from razer) and `nhs razer` (from p620) complete;
   - `nhs` locally completes;
-  - a nixarchy path substitutes rather than builds: pick one from
-    `nix path-info --store https://nixarchy.cachix.org <path>` and `nix build` it with `-L`;
+  - a nixarchy path substitutes rather than builds: pick a path P that
+    `nix path-info --store https://nixarchy.cachix.org P` finds and `nix path-info P` (local) does not,
+    then `nix build P -L` shows `copying path ... from 'https://nixarchy.cachix.org'` and no build;
   - `journalctl -u github-runner-nixarchy` shows the next job ran normally (p620).
 - Fallback if `deploy-via-p620` fails on the `.drv` upload: `nhs razer` from p620 (local build, copy
   by signature). Record which one worked in the PR.
