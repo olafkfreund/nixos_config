@@ -3186,11 +3186,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793981424,
-        "narHash": "sha256-yRiE9KV6MpFf98/mHKt8v5TH1nQEqIIWnuPRIiOxZgo=",
+        "lastModified": 1794061514,
+        "narHash": "sha256-X/4hvb8COCG37W/ClLy9NJHP5sOE44k9qxdDUkRZwNM=",
         "owner": "olafkfreund",
         "repo": "nixoarchy-snowflake",
-        "rev": "8f2275e06a5c4c4d75cd057f1a583a1bd8438920",
+        "rev": "b1bd7ed81f87cec863aea35ad5fed3bcefa2285a",
         "type": "github"
       },
       "original": {
@@ -3210,11 +3210,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793880219,
-        "narHash": "sha256-V/GjHX/ZfltZCGQBzjOFrX4NFHVlSI8Ali0TlQa4Ycw=",
+        "lastModified": 1794061517,
+        "narHash": "sha256-XfK7eo44rL0to/1tCY+vHdkHWZgBX8lcUgf9POFLKE8=",
         "owner": "olafkfreund",
         "repo": "nixi-nixarchy",
-        "rev": "354bf504ff1de62c01eb8c27bd71caa564e98e80",
+        "rev": "95c8b209eea42412f6f9027d73e2d3324ea72fda",
         "type": "github"
       },
       "original": {
