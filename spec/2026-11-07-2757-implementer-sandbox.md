@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2757
 intent: intent/2026-11-07-2757-implementer-sandbox.md
 ---
