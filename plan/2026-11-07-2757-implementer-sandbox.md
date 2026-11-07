@@ -90,7 +90,9 @@ are Claude's: the gate, builds, the deploy and the live probes.
    puts `"$log.msg"` straight in `/tmp`, which root owns, so every Codex handoff would be refused.
    The fix creates a private directory: `logdir=$(mktemp -d -t agent-run.XXXXXX)` and
    `log=$logdir/log`. The printed `log` path keeps working. The alternative, accepting a sticky
-   root-owned parent, weakens the check for every caller, so it is not chosen.
+   root-owned parent, weakens the check for every caller, so it is not chosen. Its retry loop
+   (`agent-run.sh:42-58`) reuses `"$log.msg"`, which the wrapper's no-clobber create would refuse
+   on attempt 2, so each attempt first runs `rm -f -- "$log.msg"`.
 
 ## Steps
 
@@ -112,7 +114,8 @@ are Claude's: the gate, builds, the deploy and the live probes.
      reads (mask the one it reads; mask both if unclear);
    - the final read-only list for `~/.gemini` (change 1 above), on p620. Only paths that exist get a
      bind; a listed directory that is missing is created empty by the wrapper first, because agy
-     could otherwise create it writable;
+     could otherwise create it writable. A listed **file** that is missing makes the wrapper refuse
+     to start (fail closed), so the final list holds only files present on p620 and razer;
    - whether agy runs with `/sys` as an empty tmpfs;
    - a forced OAuth refresh works, by waiting for expiry or moving the token's expiry back in a copy.
 
@@ -144,24 +147,27 @@ are Claude's: the gate, builds, the deploy and the live probes.
      - `sandbox_setup`, with `set -euo pipefail` so any failed mount aborts before agy starts:
        1. `mount --make-rprivate /`.
        2. Staging: `mount -t tmpfs tmpfs /mnt` (refuse if `/mnt` is missing), and bind into it the
-          worktree, the common dir, `$TMPDIR`, `~/.gemini`, the guard-log file and, for `/run`, the
-          `resolve` and `nscd` directories.
+          worktree, the common dir, `$TMPDIR`, `~/.gemini`, the guard-log file, `/dev` and, for
+          `/run`, the `resolve` and `nscd` directories. Save `cs=$(readlink /run/current-system)`
+          now, before `/run` is covered.
        3. `mount --bind X X` then `mount -o remount,bind,ro X` for `/nix`, `/etc`, `/usr`, `/lib*`.
           Never touch `/bin`.
        4. tmpfs over `/nix/var/nix/daemon-socket`, `/home`, `/root`, `/tmp`, `/var`, `/run`, `/sys`,
           `/boot`, `/srv`, `/opt`, `/media`, and every other top-level directory not in the list
-          (read `/` with a glob, compare against the keep list, hide the rest).
-       5. `/dev`: tmpfs, then bind `null zero full random urandom tty` from the host (taken before
-          step 5 from a staged bind of `/dev`), `devpts` with `newinstance,ptmxmode=0666` at
-          `/dev/pts`, `/dev/ptmx` as a symlink to `pts/ptmx`, tmpfs at `/dev/shm`.
-       6. In the new `/run`: `ln -s "$(readlink /run/current-system)" /run/current-system` (it is a
+          (read `/` with a glob, compare against the keep list, hide the rest). `/mnt` is exempt
+          here: it holds the staging until sub-step 9.
+       5. `/dev`: tmpfs, then bind `null zero full random urandom tty` from the host (taken from
+          the staged bind of `/dev`), then `umount` that staged bind; `devpts` with
+          `newinstance,ptmxmode=0666` at `/dev/pts`, `/dev/ptmx` as a symlink to `pts/ptmx`, tmpfs at `/dev/shm`.
+       6. In the new `/run`: `ln -s "$cs" /run/current-system` (it is a
           symlink, so a bind would resolve it), and move `resolve`/`nscd` back.
        7. `mkdir -p` each mount point in the new tmpfs, then `mount --move` the staged binds back,
           parents before children. Then `mount -o remount,bind,ro` the common dir. A worktree under
           `/tmp` (agy-guard-probe's) works because `/tmp` is covered before it is moved in.
        8. `~/.gemini`: read-only binds over each protected path from step 1, the MCP mask, tmpfs
           over `antigravity-browser-profile/` and `antigravity-backup/`.
-       9. Last, the guard-log file bind. Then `umount /mnt` and cover `/mnt` with a fresh tmpfs.
+       9. Last, the guard-log file bind. Then `umount /mnt`, which must find no staged mount left
+          (fail closed if busy), and cover `/mnt` with a fresh tmpfs.
        10. Close every descriptor above 2 (`for fd in /proc/self/fd/*`), `cd` to the worktree.
        11. `exec unshare --user --map-user="$uid" --map-group="$gid" -- env -i <allow-list> <command>`,
            with `uid`/`gid` from `id -u`/`id -g` on the host before the outer `unshare`.
@@ -224,14 +230,17 @@ are Claude's: the gate, builds, the deploy and the live probes.
      ```
 
    - `home/development/agent-run.sh:41`: `logdir=$(mktemp -d -t agent-run.XXXXXX)`, `log=$logdir/log`
-     (change 2 above).
+     (change 2 above), and `rm -f -- "$log.msg"` at the top of the retry loop at line 42.
 
    → verify: `shellcheck -S info` on the new file and on `cat agent-sandbox.sh agent-implement.sh`;
    `git add -A`; `just check-syntax`.
    Traps: `util-linux` from `pkgs`, not the profile: the wrapper runs before any mount exists. Codex
    may write `-o` by temp file and rename, which a single-file bind breaks with `EBUSY`/`EXDEV`; the
-   live probe in step 10 checks it, and if so bind a caller-owned private directory instead (the
-   parent made in `agent-run.sh`), recorded as a deviation. `$root` and `$common` coincide in
+   live probe in step 10 checks it. If so, stop and ask: the fallback, a dedicated empty
+   `$logdir/out/` bound read-write with `-o` inside it, is wider than the spec's one file and needs
+   the owner's approval. A process running as the same user could swap the checked file or its
+   parent between the check and the bind; this limit is inherited from `agent-review` (#2748) and
+   from spec section 6, and `docs/tooling/agy-coder-guard.md` records it (step 8). `$root` and `$common` coincide in
    `.git` only for a plain repo; mount order handles it.
 
 5. **`home/development/codex-cli.nix:27-29`**: `codexImplement` checks the guard, then hands over
@@ -241,8 +250,9 @@ are Claude's: the gate, builds, the deploy and the live probes.
    codexImplement = pkgs.writeShellScriptBin "codex-implement" ''
      req=/etc/codex/requirements.toml
      guard=/etc/codex/hooks/coder-guard
-     if [ ! -x "$guard" ] ||
-       ! ${pkgs.gnugrep}/bin/grep -qxF "command = \"$guard\"" "$req"; then
+     q='[.hooks.PreToolUse[].hooks[] | select(.command == "/etc/codex/hooks/coder-guard")] | length'
+     n=$(${pkgs.yq-go}/bin/yq -p toml -o json "$q" "$req" 2>/dev/null)
+     if [ ! -x "$guard" ] || ! [ "$n" -ge 1 ] 2>/dev/null; then
        echo "codex-implement: $req does not register $guard -- refusing to run (#2757)." >&2
        exit 1
      fi
@@ -250,13 +260,16 @@ are Claude's: the gate, builds, the deploy and the live probes.
    '';
    ```
 
-   The `grep` matches the line `claude-code-managed.nix:1039` writes; the test plants a
-   `requirements.toml` without it. Also confirm, and note in the commit body, that the managed
-   `SubagentStart`/`SubagentStop` hooks write nothing inside: `subagentScript` exits 0 without
-   `HERDR_ENV=1` (`claude-code-managed.nix:609`), which the allow-list never passes.
+   `yq` parses the TOML, so a `coder-guard` command under another table does not count (checked
+   on p620: the live file gives `1`). An empty or non-numeric `n` (an unparsable or missing file)
+   makes `[` fail, and the `!` turns that into a refusal. The test plants a `requirements.toml`
+   without the hook, one with it under `SubagentStop` only, and an unparsable one.
+   Also confirm, and note in the commit body, that the managed `SubagentStart`/`SubagentStop`
+   hooks write nothing inside: `subagentScript` exits 0 without `HERDR_ENV=1`
+   (`claude-code-managed.nix:609`), which the allow-list never passes.
    → verify: `git add -A`; `just check-syntax`.
-   Traps: the `requirements.toml` path is fixed; never make it an environment variable. The grep
-   matches `[[hooks.PreToolUse.hooks]]`'s line, which is the only `coder-guard` command there.
+   Traps: the `requirements.toml` path is fixed; never make it an environment variable. Inside a
+   Nix `''` string, a shell `${…}` would be written `''${…}`; the snippet avoids one.
 
 6. **`home/development/antigravity-config.nix:197`**: replace the `exec agy …` line with
    `exec ${config.home.profileDirectory}/bin/agent-implement agy -- --mode accept-edits --sandbox
