@@ -44,7 +44,7 @@
 # Remote host requirements:
 #   - SSH alias resolvable (~/.ssh/config) or fully-qualified name
 #   - ~/.config/nixos is a git clone of this repo with no local edits
-#   - sudo without password, or you'll be prompted interactively over SSH
+#   - your login password: sudo asks for it on every elevation (#2759); p510 keeps NOPASSWD
 #   - nixosConfigurations.<HOST> exists in flake.nix
 
 set -euo pipefail
@@ -182,7 +182,7 @@ splice_nixpkgs_node() {
     }
   nar=$(printf '%s' "$meta" | jq -r '.locked.narHash')
   lm=$(printf '%s' "$meta" | jq -r '.locked.lastModified')
-  log "splicing ${node} = github:nixos/nixpkgs/${sha:0:10} (lastModified $(date -u -d @${lm} +%Y-%m-%d))"
+  log "splicing ${node} = github:nixos/nixpkgs/${sha:0:10} (lastModified $(date -u -d "@${lm}"+%Y-%m-%d))"
   jq --arg n "$node" --arg sha "$sha" --arg nar "$nar" --argjson lm "$lm" '
     .nodes[$n].locked = {
       lastModified: $lm, narHash: $nar,
@@ -404,11 +404,11 @@ fi
 #
 # We pass "." as the flake path (current dir). --hostname selects which
 # nixosConfigurations.<name> to build.
-# All our hosts (p620, razer, p510) are configured with NOPASSWD: ALL for
-# olafkfreund. Pass --elevation-strategy passwordless so nh never tries to
-# prompt for a sudo password on the remote — otherwise nh's default 'auto'
-# strategy can still block on a TTY prompt even with NOPASSWD configured.
-ELEV=(--elevation-strategy passwordless)
+# p620 and razer need the login password: nh reads it once and feeds remote sudo.
+# p510 keeps NOPASSWD, so it stays passwordless and is not asked.
+if [ "$HOST" = p510 ]; then
+  ELEV=(--elevation-strategy passwordless)
+else ELEV=(--elevation-strategy /run/wrappers/bin/sudo); fi
 
 # Build-host policy: always build on the LOCAL machine (wherever the command
 # was invoked from). Intentionally NOT routing builds through p620, because
@@ -504,7 +504,7 @@ nh_switch_or_boot() {
     rm -f "$out"
     warn "============================================================"
     warn "REBOOT REQUIRED on ${HOST} to complete this deployment."
-    warn "Run:  ssh ${HOST} 'sudo systemctl reboot'   (or local reboot)"
+    warn "Run:  ssh -t ${HOST} 'sudo systemctl reboot'   (or local reboot)"
     if [ -n "$note" ]; then warn "$note"; fi
     warn "============================================================"
     return 0
@@ -535,6 +535,7 @@ show_pkg_diff() {
   fi
   log "package changes on ${HOST} (nvd — added / removed / upgraded):"
   printf '\033[2m%s\033[0m\n' "------------------------------------------------------------"
+  # shellcheck disable=SC2029  # paths expand locally on purpose
   case "$MODE" in
     local) nvd diff "$old" "$new" || warn "nvd diff failed (non-fatal)" ;;
     remote) ssh "$HOST" "nvd diff '$old' '$new'" || warn "remote nvd diff failed (non-fatal)" ;;
@@ -590,7 +591,7 @@ rollback_and_close_pr() {
     set +e
     case "$MODE" in
       local) sudo "${OLD_GEN_PATH}/bin/switch-to-configuration" switch ;;
-      remote) ssh "$HOST" "sudo ${OLD_GEN_PATH}/bin/switch-to-configuration switch" ;;
+      remote) ssh -t "$HOST" "sudo ${OLD_GEN_PATH}/bin/switch-to-configuration switch" ;;
     esac
     rc=$?
     set -e
