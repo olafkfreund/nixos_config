@@ -149,7 +149,7 @@ run_agy() {
   # A trailing slash marks a directory the sandbox creates empty when it is missing.
   local ro=(config/ hooks/ commands/ extensions/ agents/ antigravity/skills/ antigravity/bin/
     antigravity-cli/lib/ antigravity-cli/plugins/ antigravity-cli/mcp/ antigravity-cli/builtin/
-    settings.json settings.nix settings.json.orig GEMINI.md AGENTS.md antigravity/user_settings.pb
+    settings.json GEMINI.md AGENTS.md antigravity/user_settings.pb
     antigravity-cli/settings.json)
   for rel in "${ro[@]}"; do policy+=(--sub-ro "$gemini/$rel"); done
   # agy reads config/mcp_config.json; antigravity/mcp_config.json is a symlink to it.

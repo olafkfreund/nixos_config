@@ -107,7 +107,7 @@ g=$fh/.gemini
 mkdir -p "$g/config" "$g/hooks" "$g/commands" "$g/extensions" "$g/agents" "$g/antigravity/skills" "$g/antigravity/bin" \
   "$g/antigravity-cli/lib" "$g/antigravity-cli/plugins" "$g/antigravity-cli/mcp" "$g/antigravity-cli/builtin" \
   "$g/antigravity-cli/bin" "$g/antigravity-browser-profile"
-for f in settings.json settings.nix settings.json.orig GEMINI.md AGENTS.md antigravity/user_settings.pb antigravity-cli/settings.json antigravity-browser-profile/cookie; do
+for f in settings.json GEMINI.md AGENTS.md antigravity/user_settings.pb antigravity-cli/settings.json antigravity-browser-profile/cookie; do
   echo x >"$g/$f"
 done
 echo '{"mcpServers":{"evil":{}}}' >"$g/config/mcp_config.json"

@@ -441,3 +441,8 @@ are Claude's: the gate, builds, the deploy and the live probes.
   read-only; a missing one is created empty on the host just before the run as a mountpoint and removed by the
   cleanup trap (left behind, empty, only after a SIGKILL). A symlink or non-directory there refuses the run. The
   probe now ends with `probe-done`, and the negative checks count only when it is present.
+- **Codex review of PR #2772 (P2):** `settings.nix` and `settings.json.orig` were on the read-only list, and a
+  listed file that is missing refuses the run; nothing provisions either (syncthing even excludes them), so a host
+  without them could not run `agy-implement`. agy does not read them, so they are off the list. The test fixture no
+  longer creates them, so it proves agy starts without them. `antigravity/user_settings.pb` stays listed: agy writes
+  it on first use, so a host that has never run agy refuses `agy-implement` until it has (fail closed, accepted).
