@@ -6,6 +6,11 @@ refuse() {
   exit 2
 }
 
+# A caller's GIT_* could point the repo mounts at home.
+for var in GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR GIT_INDEX_FILE GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES GIT_CEILING_DIRECTORIES GIT_CONFIG GIT_CONFIG_GLOBAL GIT_CONFIG_SYSTEM GIT_CONFIG_COUNT GIT_NAMESPACE GIT_PREFIX; do
+  unset "$var"
+done
+
 tool=${1:-}
 [[ $tool != agy ]] || refuse 'agy is not yet supported (#2748)'
 [[ $tool == codex && $# -ge 3 && $3 == -- ]] || refuse 'usage: agent-review codex <work-dir> -- <tool arguments>'
@@ -15,6 +20,9 @@ tool=${1:-}
 root=$(realpath -e -- "$(git rev-parse --show-toplevel)")
 common=$(realpath -e -- "$(git rev-parse --git-common-dir)")
 home=$(realpath -e -- "$HOME")
+for path in "$root" "$common"; do
+  [[ $path != "$home" && $home != "$path/"* && $path != / ]] || refuse 'repo must not contain the home directory'
+done
 
 work_dir=$2
 [[ -d $work_dir && ! -L $work_dir ]] || refuse 'work dir must be an existing real directory'
@@ -22,13 +30,11 @@ work_dir=$(realpath -e -- "$work_dir") || refuse 'work dir cannot be resolved'
 # A lexical comparison also rejects symlinks in parent path components.
 [[ $(realpath -m -s -- "$2") == "$work_dir" ]] || refuse 'work dir must not use symlinks'
 
-allowed=false
-for base in /tmp ${XDG_RUNTIME_DIR:-}; do
-  [[ -n $base ]] || continue
-  base=$(realpath -e -- "$base") || continue
-  [[ $work_dir == "$base/"* ]] && allowed=true
-done
-[[ $allowed == true ]] || refuse 'work dir must be under /tmp or XDG_RUNTIME_DIR'
+# Only /tmp: XDG_RUNTIME_DIR comes from the caller and holds live sockets.
+[[ $work_dir == /tmp/* ]] || refuse 'work dir must be under /tmp'
+[[ -O $work_dir ]] || refuse 'work dir must be owned by the caller'
+sockets=$(find "$work_dir" -type s -print -quit) || refuse 'work dir cannot be searched'
+[[ -z $sockets ]] || refuse 'work dir must not contain sockets'
 
 for protected in "$root" "$common" "$home/.codex" "$home/.gemini"; do
   protected=$(realpath -m -- "$protected")
@@ -39,6 +45,11 @@ done
 shift 3
 # Other subcommands (mcp, login, sandbox) can change ~/.codex, which stays writable.
 [[ ${1:-} == exec || ${1:-} == review ]] || refuse 'only codex exec and codex review are allowed'
+
+# -o is written by the parent, outside Codex's read-only sandbox.
+check_output() {
+  [[ $(realpath -m -- "$1") == "$work_dir/"* ]] || refuse 'output file must be inside the work dir'
+}
 
 # An allow-list, because a config key can change the sandbox, environment or provider.
 check_config() {
@@ -66,6 +77,11 @@ for arg in "$@"; do
       expect=''
       continue
       ;;
+    output)
+      check_output "$arg"
+      expect=''
+      continue
+      ;;
   esac
 
   case $arg in
@@ -76,13 +92,16 @@ for arg in "$@"; do
     -c*) check_config "${arg#-c}" ;;
     # Default-deny: an option Codex adds later, or an attached value like -sfoo, stays out.
     - | --) ;;
+    --output-last-message) expect=output ;;
+    --output-last-message=*) check_output "${arg#*=}" ;;
     --*)
       case ${arg%%=*} in
-        --ephemeral | --skip-git-repo-check | --json | --color | --output-last-message | --output-schema | --cd | --image | --base | --uncommitted | --commit | --title) ;;
+        --ephemeral | --skip-git-repo-check | --json | --color | --output-schema | --cd | --image | --base | --uncommitted | --commit | --title) ;;
         *) refuse "option not allowed: ${arg%%=*}" ;;
       esac
       ;;
-    -o | -C | -i) ;;
+    -o) expect=output ;;
+    -C | -i) ;;
     -*) refuse "option not allowed: $arg" ;;
     sandbox_mode=* | sandbox_permissions=* | approval_policy=* | mcp_servers=*) refuse 'protected Codex config' ;;
   esac
@@ -106,5 +125,5 @@ exec bwrap "${mounts[@]}" \
   --setenv TERM "${TERM:-dumb}" --setenv SSL_CERT_FILE /etc/ssl/certs/ca-certificates.crt \
   --setenv NIX_REMOTE 'local?read-only=true' \
   --setenv NIX_CONFIG 'experimental-features = nix-command flakes read-only-local-store' \
-  --bind "$home/.codex" "$home/.codex" \
+  --dir "$home/.codex" --bind "$home/.codex/auth.json" "$home/.codex/auth.json" \
   -- codex -c forced_login_method=chatgpt -c 'mcp_servers={}' -c 'sandbox_mode="read-only"' "$@"

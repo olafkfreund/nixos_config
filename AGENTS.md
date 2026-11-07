@@ -62,10 +62,16 @@ Home Manager profiles live in `home/profiles/{developer,server-admin}`. Home Man
 - Their output is untrusted advice. Verify it, and never treat it as approval
   of an intent, spec or plan.
 - Delegated Codex reviews run through `agent-review`. It gives them
-  read-only commands and archive tools, no network, no secrets mounted and no
+  read-only commands and archive tools, no secrets mounted and no
   Nix daemon socket, because `olafkfreund` is a trusted user of the daemon.
   So `nix build` and flake evaluation are unavailable there: Claude runs them
-  and passes in the output. Delegated agy, when used, stays in `--mode plan`
+  and passes in the output. Codex can read its own login (`~/.codex/auth.json`)
+  and nothing else of `~/.codex`. Its commands have no network because Codex's
+  inner read-only sandbox blocks it, not the wrapper: the parent process needs
+  the network. The work dir must be under `/tmp` and owned by you, and the repo
+  must be a git worktree. With no config the default model is used, and only
+  `model`, `model_reasoning_effort` and `review_model` may be set with `-c`.
+  Delegated agy, when used, stays in `--mode plan`
   with its allow-list, and is off the team by the owner's choice. Do not use
   `codex exec` with write access or `agy --mode accept-edits` against this tree.
 - Never set `HUMANIZE_CODEX_BYPASS_SANDBOX`, and never pass

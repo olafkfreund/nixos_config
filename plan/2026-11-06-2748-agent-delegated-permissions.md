@@ -48,6 +48,21 @@ Work in the worktree `/home/olafkfreund/.config/nixos-2748` on branch
 `model`, `model_reasoning_effort` and `review_model`. Callers no longer pass `-c sandbox_mode` or
 `-c forced_login_method`, because the wrapper sets them.
 
+**Hardening after the PR review, 2026-11-07:** an Opus attack review and Codex (run through the
+wrapper) found bypasses, so `agent-review` now:
+
+- denies by default any option not on its allow-list, which closes attached short forms such as
+  `-sdanger-full-access` and `-pimplement`;
+- mounts only `~/.codex/auth.json` from `~/.codex`;
+- requires the work dir to be under `/tmp`, owned by the user and free of sockets, with no overlap
+  with the repo, the git common dir, `~/.codex` or `~/.gemini`;
+- requires `-o` to point inside the work dir;
+- unsets `GIT_*`, and refuses a repo root or common dir that equals or contains `$HOME`.
+
+The test grew from 54 to 75 checks, by the coder, with mutation checks for each new refusal.
+Ownership and the `-c` allow-list have no mutation check. The docs now say that Codex can read its
+own login, and that command network is blocked by Codex's inner sandbox, not by the wrapper.
+
 **Step 6 as done:** the "Reviewer mode" docs section and the agy-model note are skipped, because
 there is no reviewer branch. `agy-standards.md` no longer names a model, since `gemini-3.1-pro-high`
 is gone.

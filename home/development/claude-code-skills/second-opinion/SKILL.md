@@ -33,7 +33,7 @@ This skill routes **review and drafting only**. It is not a general
 dispatcher for arbitrary work.
 
 - **No path here edits a file or writes a commit.** Codex runs inside
-  `agent-review` (read-only worktree, no network, no secrets), agy stays in
+  `agent-review` (read-only worktree, no secrets), agy stays in
   `--mode plan`, and Ollama's MCP tool cannot reach
   the filesystem at all. `codex exec` with write access and
   `agy --mode accept-edits` both exist and stay unused for second opinions.
@@ -79,7 +79,7 @@ tokens, passwords or private keys. Encrypted `*.age` files are fine.
 ```bash
 work=$(mktemp -d /tmp/second-opinion.XXXXXX)   # agent-review wants a real dir in /tmp
 prompt=$work/prompt.md   # write the prompt here
-repo=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+repo=$(git rev-parse --show-toplevel)   # must be a git worktree
 ```
 
 ## Codex `review` — when there is a diff
@@ -123,11 +123,19 @@ refuses `--dangerously-*`, `--yolo`, `--full-auto`, `--add-dir`, `--model`,
 `-p`/`--profile`, `--enable`/`--disable`, `--oss`, any `--sandbox` other than
 `read-only`, and any `-c` key except `model`, `model_reasoning_effort` and
 `review_model`. It also refuses a work dir that is a symlink, is outside
-`/tmp` or `XDG_RUNTIME_DIR`, or overlaps the worktree, and refuses when
+`/tmp`, is not owned by you, or overlaps the worktree, and refuses when
 `HUMANIZE_CODEX_BYPASS_SANDBOX` is set. A refusal exits 2 and codex never
-starts. The sandbox has no network and no Nix daemon socket, so a reviewer
-cannot run `nix build` or evaluate a flake: run those yourself and put the
-output in the prompt.
+starts. The sandbox has no Nix daemon socket, so a reviewer cannot run
+`nix build` or evaluate a flake: run those yourself and put the output in the
+prompt.
+
+- Codex can read its own login (`~/.codex/auth.json`); the rest of `~/.codex`
+  (history, config, hooks) is not mounted.
+- Command network is blocked by Codex's inner read-only sandbox, not by the
+  wrapper, because the parent process needs the network.
+- With no config the default model is used. Only `model`,
+  `model_reasoning_effort` and `review_model` may be set.
+- The repo must be a git worktree, and the work dir under `/tmp` and owned by you.
 
 ## OpenAI (Codex, ChatGPT subscription) — the prose path
 
