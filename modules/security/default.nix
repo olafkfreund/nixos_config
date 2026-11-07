@@ -4,9 +4,10 @@ _: {
   # Consolidated security configuration
   security = {
     sudo = {
-      wheelNeedsPassword = false;
       # Fix for "no new privileges" flag error
       execWheelOnly = true;
+      # No cached approval: an agent sharing the owner's terminal could reuse it (#2759)
+      extraConfig = "Defaults timestamp_timeout=0";
     };
     # security.unprivilegedUsernsClone was removed from nixpkgs (2c423e03bb,
     # 2026-08-22) and its assertion now fails the build. Nothing replaces it
