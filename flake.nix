@@ -1,40 +1,6 @@
 {
   description = "Olaf's flake with Home Manager enabled";
 
-  nixConfig = {
-    # Primary caches
-    substituters = [
-      "https://cache.nixos.org/"
-      "https://nix-community.cachix.org/"
-    ];
-    trusted-public-keys = [
-      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-    ];
-
-    # Development and specific package caches. Only caches with an actual
-    # consumer belong here: every extra substituter costs a round-trip per
-    # uncached path. cosmic stays dropped (#1457) — desktop.cosmic.enable is
-    # false on every host. hyprland came back 2026-09-12: the #1457 note said
-    # there was no hyprland flake input, but nixarchy pulls one, so Hyprland
-    # and aquamarine are flake builds after all.
-    extra-substituters = [
-      "https://cuda-maintainers.cachix.org/"
-      "https://devenv.cachix.org/"
-      # nixarchy DOES bring a hyprland flake input (via its own inputs), so
-      # Hyprland/aquamarine are built from flake sources, not pkgs.hyprland.
-      # Both caches are the ones nixarchy's own nixConfig advertises.
-      "https://nixarchy.cachix.org"
-      "https://hyprland.cachix.org"
-    ];
-    extra-trusted-public-keys = [
-      "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
-      "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
-      "nixarchy.cachix.org-1:05JOuIlsQOWY2/5DQMq7JEA1hwlhgvmMWowMfka8mMM="
-      "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
-    ];
-  };
-
   inputs = {
     # Core
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";

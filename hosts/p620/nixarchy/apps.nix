@@ -36,7 +36,7 @@
     # kitty.enable = true;  #@ kitty
 
   # ── Browser ─────────────────────────────────────────────────────
-    brave.enable = true;  #@ brave
+    # brave.enable = true;  #@ brave
     # chrome.enable = true;  #@ chrome  # unfree
     # edge.enable = true;  #@ edge  # unfree
     # firefox.enable = true;  #@ firefox  # A NixOS module, so policies and extensions are declarative too.

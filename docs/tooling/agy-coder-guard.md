@@ -15,7 +15,8 @@ The launcher is defined in `home/development/antigravity-config.nix`. It fails c
 - the installed agy version has passed the guard probe on this host (see below).
 
 It then starts agy with `--mode accept-edits --sandbox --dangerously-skip-permissions`, a default model, and
-`AGY_CODER=1` and `AGY_WORKTREE` set to the current directory. It refuses arguments that could load another
+`AGY_CODER=1` and `AGY_WORKTREE` set to the current directory,
+all inside the sandbox below. It refuses arguments that could load another
 `hooks.json` (`--gemini-dir`, config-dir and config-override flags).
 
 ## What the guard allows and denies
@@ -95,6 +96,7 @@ agy --version > "${XDG_CACHE_HOME:-$HOME/.cache}/agy-implement/probed"
 - `modules/programs/agy-guard-adapter.sh`: the hook adapter, installed at `/etc/antigravity/hooks/coder-guard`.
 - `modules/programs/agy-guard-adapter.test.sh`: the guard's test cases.
 - `modules/programs/claude-code-managed.nix`: builds the adapter and the shared coder guard.
+- `home/development/agent-sandbox.sh`, `agent-implement.sh`, `agent-implement.test.sh`: the sandbox.
 - `home/development/claude-code-skills/handoff/SKILL.md`: how Claude hands a plan to agy.
 - `.claude/commands/update-antigravity.md`: the update procedure.
 
@@ -103,6 +105,44 @@ After an agy update, run the guard tests first:
 ```bash
 bash modules/programs/agy-guard-adapter.test.sh
 ```
+
+## Sandbox
+
+`agy-implement` ends in `agent-implement agy -- …` (#2757). The library `agent-sandbox.sh` and the launcher
+`agent-implement.sh` are in `home/development/`. Codex runs in `bwrap` through the same launcher. agy cannot,
+because `bwrap` forces `nosuid` and that breaks agy's own `--sandbox` (#2298). So agy runs in two nested user
+namespaces built with `unshare` and `mount`:
+
+- The first builds the mounts. `/nix`, `/etc`, `/usr` and `/lib*` are read-only. Every other top-level
+  directory, `/sys` and the Nix daemon socket directory are empty tmpfs. `/dev` holds only a few device nodes.
+- The worktree and a private `$TMPDIR` are writable. The git common directory is read-only, so the implementer
+  cannot stage or commit.
+- The second namespace drops the mount privileges, so a hidden tree cannot be unmounted. The environment is
+  `env -i` plus an allow-list.
+
+`~/.gemini` is bound read-write, with what configures agy or runs code read-only: `config`, `hooks`,
+`commands`, `extensions`, `agents`, `settings.json`, `settings.nix`, `settings.json.orig`, `GEMINI.md`,
+`AGENTS.md`, `antigravity/{user_settings.pb,skills,bin}` and
+`antigravity-cli/{settings.json,lib,plugins,mcp,builtin}`. agy reads `config/mcp_config.json`, so it and its
+symlink `antigravity/mcp_config.json` are masked with an empty server list. The browser profile and backup
+directories are empty tmpfs.
+
+Visible by design: each tool's own login, `~/.gemini`, the repo with its encrypted `.age` files, and the
+world-readable `/nix`, `/etc` and `/usr`.
+
+Open exposures, recorded from the step 1 gate:
+
+- agy's commands have outbound network.
+- `--sandbox`, not the wrapper, blocks abstract sockets. The wrapper's own shell can reach `@1PASSWORD_MCP`;
+  an agy command cannot. Never drop `--sandbox`.
+- `antigravity-cli/bin/` stays writable, because agy writes `agentapi` there before every command (owner
+  decision). agy could plant code there that later runs outside the sandbox.
+- An agy command can write the top level of `~/.gemini`; only the listed paths are read-only.
+- `awk` is not on `PATH` inside agy's command sandbox.
+- A process running as the same user could swap a checked `-o` or `AGY_GUARD_LOG` file or its parent between
+  the check and the bind. This is inherited from `agent-review` (#2748).
+
+Run `bash home/development/agent-implement.test.sh </dev/null` after any change to the wrapper.
 
 ## Known gaps
 

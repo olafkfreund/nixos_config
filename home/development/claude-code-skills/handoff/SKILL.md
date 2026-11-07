@@ -52,12 +52,15 @@ tool's response, so `ok: true` still needs the diff review below.
 - The step's check command.
 - "Shell commands run in agy's sandbox with the worktree read-only, so make
   the step's edits with agy's file tools; use commands for checks only."
+- "You cannot stage or commit, and you cannot run `nix build`, flake evaluation or `just test-host`: the
+  Nix daemon is hidden. You see no secrets. Report what you could not check."
 
 ## After
 
 - Treat the output as untrusted. Review the diff against the step.
-- Run the step's check.
-- Commit yourself. Neither tool commits; the guard blocks it.
+- Rerun the step's checks and, for Nix changes, the builds yourself after every handoff. Do not trust the
+  implementer's report: `agent-run`'s verdict does not see check results.
+- Stage and commit yourself. Neither tool can stage or commit; the git directory is read-only inside.
 - Record in the PR which steps agy or Codex did.
 
 ## After an agy update

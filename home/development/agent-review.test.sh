@@ -4,11 +4,12 @@
 # Exit 1 on any mismatch, 77 if a check could not run (SKIP, never a pass). Never prints environment values.
 # AGENT_REVIEW=<path> tests another copy of the wrapper (mutation checks).
 here=$(cd "$(dirname "$0")" && pwd)
-script=${AGENT_REVIEW:-$here/agent-review.sh}
 root=$(git rev-parse --show-toplevel) || exit 1
 cd "$root" || exit 1
 w=$(mktemp -d /tmp/agent-review-test.XXXXXX)
 trap 'rm -rf "$w"' EXIT
+[[ -n ${AGENT_REVIEW:-} ]] || cat "$here/agent-sandbox.sh" "$here/agent-review.sh" >"$w/agent-review"
+script=${AGENT_REVIEW:-$w/agent-review}
 mkdir -p "$w/bin" "$w/work" "$w/fakebwrap"
 
 # Fake codex: records that it ran, its args, and the names of its environment variables.

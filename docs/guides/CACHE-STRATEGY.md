@@ -13,16 +13,10 @@ System-wide, from [`modules/nix/nix.nix`](https://github.com/olafkfreund/nixos_c
 | `https://cache.nixos.org` | Official NixOS cache |
 | `https://nix-community.cachix.org` | Community packages |
 
-Flake-level, from `flake.nix` `nixConfig.extra-substituters`, applied when a
-command is run with `--accept-flake-config`:
+The other caches (devenv, nixarchy, hyprland) come from `nix.settings` in
+`modules/nix/nix.nix` too, not from the flake: the flake carries no `nixConfig`.
 
-| Substituter | Purpose |
-| ----------- | ------- |
-| `https://cuda-maintainers.cachix.org/` | Prebuilt CUDA-enabled packages |
-| `https://devenv.cachix.org/` | devenv |
-
-No personal Cachix cache is configured. `modules/nix/nix.nix` carries a
-commented example if one is ever wanted.
+No personal Cachix cache is configured.
 
 ## Making builds faster without a cache
 

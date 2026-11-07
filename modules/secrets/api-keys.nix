@@ -265,6 +265,15 @@ in
           # Export as GITHUB_API_TOKEN to avoid conflict with gh CLI credential management
           # gh CLI expects to manage its own credentials via 'gh auth login'
           echo "export GITHUB_API_TOKEN=\"$(cat /run/agenix/api-github-token)\""
+          # Also authenticate nix's own github: fetches (#2773). Anonymous is
+          # 60 req/hour per IP, which a bulk `nix flake update` over every
+          # input exhausts mid-run (HTTP 403 from api.github.com);
+          # authenticated is 5000. An env var, not nix.conf, so the token
+          # never enters the Nix store.
+          # shortcut: plain assignment, not an append -- it would clobber a
+          # NIX_CONFIG set by a devshell. Upgrade if one ever needs a setting
+          # /etc/nix/nix.conf does not already have.
+          echo "export NIX_CONFIG=\"access-tokens = github.com=$(cat /run/agenix/api-github-token)\""
         fi
 
         if [ -r "/run/agenix/cachix-auth-token" ]; then

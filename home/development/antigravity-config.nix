@@ -194,7 +194,7 @@ let
 
     unset CASCADE_GLOBAL_CONFIG_OVERRIDE
     # shellcheck disable=SC2086
-    HOME=${config.home.homeDirectory} AGY_CODER=1 AGY_WORKTREE="$PWD" exec agy --mode accept-edits --sandbox --dangerously-skip-permissions $model "$@"
+    exec ${config.home.profileDirectory}/bin/agent-implement agy -- --mode accept-edits --sandbox --dangerously-skip-permissions $model "$@"
   '';
 
   # Live check that the coder guard still denies what it should under the
