@@ -220,7 +220,13 @@ else
   grep -qx common-writable "$W/bin/probe" || grep -qx common-unknown "$W/bin/probe" || ok 'git common dir not writable'
   grep -q present "$W/bin/probe" || ok 'secret and daemon paths absent'
   grep -qx worktree-writable "$W/bin/probe" || ok 'worktree read-only'
-  extra=$(grep -vxE 'HOME|TMPDIR|PATH|LANG|TERM|SSL_CERT_FILE|NIX_REMOTE|NIX_CONFIG|PWD|OLDPWD|SHLVL|_' "$W/bin/envnames")
+  source "$here/agent-env.sh"
+  # shellcheck disable=SC2154  # set by the agent-env.sh sourced above
+  allowed=$(
+    IFS='|'
+    echo "${agent_env_base[*]}|PWD|OLDPWD|SHLVL|_"
+  )
+  extra=$(grep -vxE "$allowed" "$W/bin/envnames")
   if [ -z "$extra" ]; then ok 'environment only listed variables'; else bad "unexpected env names: $extra"; fi
   reset
   PATH="$W/bin:$PATH" bash "$script" codex "$W" -- exec -o "$W/out.md" >/dev/null 2>&1 </dev/null

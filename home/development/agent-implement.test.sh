@@ -305,7 +305,13 @@ else
     grep -qE '^(umount-worked|umount-nested-worked|home-uncovered)$' "$probe" || ok "$tool: umount cannot uncover a hidden tree"
     if grep -qx TESTSENTINEL "$repo/.out-$tool.env" || grep -qx TESTSENTINEL "$repo/.out-$tool.lenv"; then bad "$tool: caller variable leaked"; else ok "$tool: caller variables do not leak, also in a login shell"; fi
     local extra
-    extra=$(grep -vxE 'HOME|TMPDIR|PATH|LANG|TERM|SSL_CERT_FILE|NIX_REMOTE|NIX_CONFIG|PWD|OLDPWD|SHLVL|_|CODEX_CODER|AGY_CODER|AGY_WORKTREE|AGY_GUARD_LOG' "$repo/.out-$tool.env")
+    source "$here/agent-env.sh"
+    # shellcheck disable=SC2154  # set by the agent-env.sh sourced above
+    allowed=$(
+      IFS="|"
+      echo "${agent_env_base[*]}|${agent_env_markers[*]}|PWD|OLDPWD|SHLVL|_"
+    )
+    extra=$(grep -vxE "${allowed// /|}" "$repo/.out-$tool.env")
     if [ -z "$extra" ]; then ok "$tool: environment only listed variables"; else bad "$tool: unexpected env names: $extra"; fi
     if [ -s "$repo/.out-$tool.fds" ]; then bad "$tool: extra descriptors: $(tr '\n' ' ' <"$repo/.out-$tool.fds")"; else ok "$tool: only descriptors 0-2"; fi
   }
