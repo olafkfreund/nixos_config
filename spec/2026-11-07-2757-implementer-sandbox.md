@@ -19,6 +19,8 @@ involved and no secret value was printed.
 | The same, `nix store info` | Daemon `connect` refused, `Operation not permitted`. `nix eval --expr 1+1` works |
 | Inside `bwrap --ro-bind / /`, a nested `unshare -Urm` then `mount -o remount,bind,ro /bin` | **EPERM.** bwrap adds `nosuid,nodev` to every bind, and the nested user namespace locks them. This is the same failure as #2298 |
 | `unshare -Urm --pid --fork --mount-proc`, tmpfs over `/home` and `/mnt`, then the same nested remount | `~/.ssh` hidden, nested remount **succeeds**, 3 processes visible |
+| In that setup namespace, `umount /home` | **Succeeds and exposes `/home`.** The setup namespace holds `CAP_SYS_ADMIN` over its own mounts |
+| After a second `unshare --user --map-user=1000 --map-group=100`: `umount /home`, then a third `unshare -Urm` with `umount /home` | Refused ("must be superuser"), then refused again ("not mounted": the mount is locked). `~/.ssh` stays hidden, and the `/bin` remount in the third namespace still **succeeds** |
 
 Two consequences shape this design:
 
@@ -42,7 +44,10 @@ Two consequences shape this design:
     - `sandbox_exec_bwrap` is today's `bwrap` call.
     - `sandbox_exec_unshare` is the agy backend in section 4.
 - **`agent-review.sh`** keeps its argument allow-list and calls `sandbox_exec_bwrap`. Its
-  behaviour does not change, and `agent-review.test.sh` must pass unchanged.
+  behaviour does not change. `agent-review.test.sh` runs the raw source (`:6-7`), which will
+  lack the library, so its one change is to run `cat agent-sandbox.sh agent-review.sh` into
+  a temporary file. `AGENT_REVIEW=<path>` still names an assembled copy for mutation checks.
+  Every check stays as it is.
 - **`home/development/agent-implement.sh`** is a new file, packaged as `agent-implement`
   next to `agent-review` in `home/development/agent-run.nix:25-29`. It is used as
   `agent-implement <codex|agy> -- <tool arguments>`, and it has its own argument allow-list
@@ -68,18 +73,21 @@ The same for both tools unless noted.
 
 | Path | Inside |
 | ---- | ------ |
-| `/nix`, `/etc`, `/usr`, `/bin`, `/lib*`, `/run/current-system`, `/run/systemd/resolve`, `/run/nscd` | read-only, as in `agent-review` |
+| `/nix`, `/etc`, `/usr`, `/lib*`, `/run/current-system`, `/run/systemd/resolve`, `/run/nscd` | read-only, as in `agent-review`. The unshare backend uses a `remount,bind,ro` that adds `ro` only, so the user-writable `/nix/var/nix/profiles/per-user` and `gcroots` are read-only too |
+| `/bin` | read-only. bwrap binds it. The unshare backend leaves it as the host mount, already `ro` |
 | `/nix/var/nix/daemon-socket` | empty tmpfs, with `NIX_REMOTE=local?read-only=true` |
-| `/home`, `/root`, `/mnt`, `/media`, `/srv`, `/opt`, `/snap`, `/var`, `/boot`, `/run` (rest), `/tmp` | empty tmpfs, or absent with bwrap |
+| `/home`, `/root`, `/mnt`, `/media`, `/srv`, `/opt`, `/snap`, `/var`, `/boot`, `/run` (rest), `/tmp`, `/lost+found` | empty tmpfs, or absent with bwrap |
+| `/sys` | absent with bwrap. Empty tmpfs with unshare; the agy gate checks agy runs without it |
 | `/proc` | new, in a new PID namespace |
-| `/dev` | minimal: `null zero full random urandom tty pts ptmx shm` |
+| `/dev` | minimal: `null zero full random urandom tty`, a new `pts` and `shm`. bwrap's `--dev` makes this; unshare uses a tmpfs with those nodes bound in |
+| Any other top-level directory present on the host | tmpfs (unshare) or absent (bwrap). The wrapper hides by default what it does not list |
 | The task worktree (`git rev-parse --show-toplevel`) | **read-write** |
 | The git common dir, which includes `worktrees/<name>/index` and refs | **read-only** |
 | `$TMPDIR`, a new `mktemp -d` under `/tmp` that the wrapper removes on exit | read-write |
 | Codex: `~/.codex/auth.json` | read-write bind, for token refresh, as in `agent-review` |
 | Codex: `~/.codex/implement.config.toml` | read-only bind of the resolved file |
-| agy: `~/.gemini` | read-write bind, as today (section 4) |
-| `AGY_GUARD_LOG`'s file, only when set | read-write bind of that one file |
+| agy: `~/.gemini` | read-write bind for its state; read-only or hidden for its configuration (section 4) |
+| `AGY_GUARD_LOG`'s file, and Codex's `-o` file | read-write bind of that one file, under the rules in section 6 |
 
 Git:
 
@@ -87,15 +95,20 @@ Git:
   implementer and the history. A script the implementer writes and runs cannot commit,
   update a ref or rewrite an object either, and that covers the guard's own admitted gap
   (`modules/programs/claude-coder-guard.sh:9`).
-- Staging is not possible. That is already true for Codex, and agy's terminal sandbox
-  remounts the workspace and `.git` read-only for commands (#2298 spec, section 2). Claude
-  stages and commits after the step, as it does now.
+- Staging is not possible. **This changes an approved intent constraint** ("stage new
+  files"), and it needs the owner's sign-off with this spec. Staging is already impossible
+  for Codex, and agy's terminal sandbox remounts the workspace and `.git` read-only for
+  commands (#2298 spec, section 2), so neither implementer stages today. Claude stages and
+  commits after the step, as it does now. The `handoff` skill says so.
 - Read commands still work: `git diff`, `git status`, `git log`. `git status` tries to
   refresh the index and skips quietly when it cannot write it.
 
 Files that must stay writable for a plan step's checks to run:
 
-- The worktree: formatters and `nix-format` write there.
+- The worktree: formatters write there. Codex's `codex-nix-format` PostToolUse hook lives in
+  `~/.codex/hooks.json` (`codex-cli.nix:65-66,90-99`), and its trust state lives in the
+  hidden `config.toml`, so it does not run inside. That is accepted: the repo's pre-commit
+  hook formats `.nix` files on Claude's commit.
 - `$TMPDIR` and `/tmp`: shellcheck, `bash *.test.sh` and `mktemp` write there.
 - `$HOME/.cache` inside the tmpfs home: `statix`, `deadnix`, `nix eval` and markdownlint
   write caches there, and they are thrown away.
@@ -113,21 +126,42 @@ step that changes Nix (#2758 tracks `trusted-users`).
 
 ### 4. agy
 
-- **Backend.** agy runs under `unshare --user --map-current-user --mount --pid --fork
-  --mount-proc --kill-child`, followed by a short setup script that uses `mount(8)`:
-  - It makes `/` private.
-  - It binds what section 2 keeps into a staging tmpfs.
-  - It mounts tmpfs over each hidden tree, then moves the staged binds back.
-  - It never touches `/bin`, `/usr` or `/nix`, so they keep their host flags, and agy's own
-    nested `--sandbox` can remount `/bin` (tested above, row 4).
-  - It runs `exec env -i <allow-list> agy …`.
-- **`~/.gemini`.** It stays a full read-write bind, as today:
-  - #2748 found that agy in a home with only its OAuth token and `config/` has "no usable
-    model".
-  - A read-only bind is unproven, because agy writes conversation state there.
-  - This is no regression: `agy-implement` has full `~/.gemini` access now, and the adapter
-    already denies any tool call that names `.gemini` (`agy-guard-adapter.sh:52`).
-  - What changes is that nothing else in the home is visible.
+- **Backend.** Two user namespaces. The first one sets up, and the second one runs agy:
+  - The first runs `unshare --user --map-current-user --mount --pid --fork --mount-proc
+    --kill-child` with a short setup script that uses `mount(8)`:
+    - It makes `/` private.
+    - It binds what section 2 keeps into a staging tmpfs.
+    - It mounts tmpfs over each hidden tree, then moves the staged binds back.
+    - It adds `ro` to `/nix`, `/etc` and `/usr` without `nosuid`.
+    - It never touches `/bin`'s flags, so agy's own nested `--sandbox` can remount it
+      (tested above, rows 4 and 6).
+  - The second is entered with `unshare --user --map-user=<uid> --map-group=<gid>`. It
+    has no capabilities, and every mount the first one made is now locked. So
+    agy and anything it runs cannot unmount a tmpfs to uncover what lies beneath, even
+    from a new namespace of its own (tested above, rows 5 and 6). It then runs
+    `exec env -i <allow-list> agy …`.
+  - Inherited file descriptors are closed before the second step, apart from 0, 1 and 2:
+    `agent-run` and herdr hold sockets that an open descriptor could reach.
+  - The setup script runs from the store and fails closed: any mount that fails aborts it
+    before agy starts.
+- **`~/.gemini`.** #2748 found that agy in a home with only its OAuth token and `config/`
+  has "no usable model", so `~/.gemini` is bound read-write. Its configuration is then
+  covered:
+  - **Read-only binds over it:** everything that configures agy or runs code.
+    - Files: `settings.json`, `trustedFolders.json`, `AGENTS.md`, `GEMINI.md`,
+      `.stignore` and `antigravity/mcp_config.json`.
+    - Directories: `config/` (which holds `hooks.json`, the guard registration),
+      `hooks/`, `extensions/`, `commands/`, `agents/`, `antigravity/skills/` and
+      `antigravity/bin/`.
+  - **Tmpfs over:** `antigravity-browser-profile/`, which holds browser cookies, and
+    `antigravity-backup/`.
+  - **Writable:** the rest, which is agy's state: `oauth_creds.json`, `state.json`,
+    `antigravity/conversations`, `brain` and `tmp`.
+  - The adapter's `.gemini` string match (`agy-guard-adapter.sh:52`) is a payload filter
+    only. These mounts are what actually protect the files, against a command that reaches
+    them indirectly too.
+  - The gate checks agy starts in this layout. If it needs to write a protected path, stop
+    and come back. Do not widen it silently.
 - **MCP servers.** Owner decision 5: they run inside the sandbox, so they see what agy sees,
   with no credentials in the environment. In addition, the wrapper binds a store file
   `{"mcpServers":{}}` read-only over agy's MCP config, so none start.
@@ -146,8 +180,10 @@ step that changes Nix (#2758 tracks `trusted-users`).
 | ------------ | ------------ |
 | Login, model, file edits and a sandboxed `git status` work, and secrets are hidden | Ship |
 | agy's `--sandbox` fails inside the namespace | Stop and come back. Do not drop `--sandbox` |
-| agy's commands have outbound network, or reach `@1PASSWORD_MCP` | Ship, but record it in `AGENTS.md` and `docs/tooling/agy-coder-guard.md`: the hiding still holds, and no secret is in reach to send |
-| An MCP server process runs despite the mask | Ship with the mask dropped, record it |
+| agy's commands have outbound network | Ship. Record it in `AGENTS.md` and `docs/tooling/agy-coder-guard.md` as an open exposure: the repo and the worktree can be sent out |
+| A command reaches `@1PASSWORD_MCP` or another abstract socket | Stop and come back. This is an **unresolved exposure**, because the service behind it may hand out credentials whatever the mounts hide. #2748 found the same (`spec/2026-11-06-2748-agent-delegated-permissions.md:163-164`). It cannot be closed without a network namespace that agy's model access rules out |
+| agy needs to write a protected `~/.gemini` path | Stop and come back |
+| An MCP server process runs despite the mask | Ship with the mask dropped, and record it. The probe then checks that it runs inside the namespace and that the adapter denies its calls |
 
 ### 5. Codex
 
@@ -179,10 +215,22 @@ the flags each implementer needs.
 | codex | `exec`, `-p implement` (added by the launcher), `-o <file>` (bound, see below), `-`, `--ephemeral`, `--json`, `--color`, `-c` with `model`, `model_reasoning_effort` only | `--dangerously-*`, `--yolo`, `--full-auto`, `--add-dir`, `-s`/`--sandbox`, any other `-p`, `--enable`/`--disable`, `--oss`, `-c` with any other key, and any subcommand other than `exec` |
 | agy | `--mode accept-edits --sandbox --dangerously-skip-permissions`, which only `agy-implement` adds, plus `--model`, `--effort`, `-p`, `--output-format`, `--print-timeout` | the config-dir and `gemini_dir` family, which `agy-implement` already refuses, `--mode` other than `accept-edits`, and `--add-dir` |
 
-`agent-run` passes `-o "$log.msg"`, with `log` from `mktemp -t` on the host
-(`agent-run.sh:41`), so it lies outside the sandbox. Codex writes that file from inside, so
-the wrapper creates it and binds that one file read-write, as for `AGY_GUARD_LOG`. Any other
-`-o` path is refused.
+`agent-run` passes `-o "$log.msg"` (`agent-run.sh:49`). `log` comes from `mktemp -t` on the
+host (`agent-run.sh:41`), so it lies outside the sandbox, and Codex writes that file from
+inside. The same applies to `AGY_GUARD_LOG`, which agy-guard-probe sets to a path that does
+not exist yet (`antigravity-config.nix:222`).
+
+For either path, the wrapper first checks:
+
+- it is absolute;
+- its parent is a real directory owned by the caller, and no part of the path is a symlink;
+- it does not lie inside the worktree, the common `.git`, `~/.codex`, `~/.gemini`, `/etc` or
+  `/nix`.
+
+It then creates the file with `set -o noclobber`, so an existing file is refused, and
+`umask 077`. It checks the result is a regular file with link count 1, and binds that one
+file read-write, after every other mount. Anything else is refused before the tool starts.
+The caller, not the implementer, picks these paths, so provenance is not checked further.
 
 ### 7. Environment
 
@@ -221,8 +269,11 @@ present inside.
 
 - **Handoffs break.** Anything a plan step's checks write outside section 2's list fails,
   most likely a tool cache outside `$HOME/.cache`, or `nix build`. Steps that need a build fail
-  where they used to pass. The `handoff` skill must say that Claude builds, and `agent-run`'s
-  verdict stays on changed files, so a failed check shows in the log, not as a silent pass.
+  where they used to pass. `agent-run`'s verdict (`agent-run.sh:67-80`) checks the exit
+  status, the response, `HEAD` and the diff, not the checks. So a model can report success
+  after a check failed inside. The `handoff` skill must say that Claude reruns the step's
+  checks and builds after every handoff, and that it does not trust the implementer's
+  report.
 - **agy-guard-probe** (`antigravity-config.nix:203`) runs on the first `agy-implement` of a new
   agy version:
   - Its repo is a `mktemp -d` under `/tmp`, which is a tmpfs inside. The worktree bind
@@ -256,10 +307,20 @@ present inside.
 3. New `home/development/agent-implement.test.sh`, in the shape of `agent-review.test.sh`:
    - It plants a fake `codex` and a fake `agy` that record their argument list, the names
      of their environment variables and a probe.
-   - The probe checks: the hidden paths are absent; the worktree and `$TMPDIR` are
-     writable; the common dir is read-only; only the tool's own login is visible; the
-     daemon socket is absent; the `*_CODER` and `AGY_WORKTREE` variables are present; no
-     other caller variable is present.
+   - The probe checks:
+     - the hidden paths, `/sys` and host `/dev` nodes are absent;
+     - the worktree and `$TMPDIR` are writable, and the common dir is read-only;
+     - only the tool's own login is visible, and agy's protected `~/.gemini` paths are
+       read-only;
+     - the daemon socket is absent;
+     - the `*_CODER` and `AGY_WORKTREE` variables are present, and no other caller variable
+       is present. The probe checks this from a `bash -lc` child as well, since `/etc`
+       profiles re-add variables (#2748);
+     - only descriptors 0-2 are open;
+     - `umount` of a hidden tree fails, and from a new `unshare -Urm` inside as well, with
+       the tree still hidden.
+   - Rejected `-o` and `AGY_GUARD_LOG` paths: a symlink, a hard-linked file, an existing
+     file, and a path inside the worktree, `~/.gemini` and `/etc`.
    - A worktree under `/tmp` works, as agy-guard-probe uses one.
    - A refused argument from each column of section 6 exits non-zero and does not run the
      tool.
@@ -273,7 +334,10 @@ present inside.
      - with the common dir bound read-write;
      - with the daemon tmpfs removed;
      - with `AGY_CODER` dropped from the allow-list;
-     - with the agy backend switched to `bwrap`, where the nested remount must fail.
+     - with the agy backend switched to `bwrap`, where the nested remount must fail;
+     - with the second, capability-free namespace removed, where `umount` must uncover
+       `/home`;
+     - with the `~/.gemini/config` read-only bind removed.
 4. `just check-syntax`, and `just test-host p620` and `just test-host razer` (built on p620).
 5. **Live probe after the p620 deploy.** Announce on the bus first, and use `test -r` only.
    Run it for both implementers against #2748 plan step 8's list:
@@ -286,7 +350,9 @@ present inside.
    - Forbidden: `git commit`, `git push`, `git update-ref` and `ssh p510` fail.
    - Network and `@1PASSWORD_MCP` from a command: blocked for Codex. For agy, whatever the
      result, it is recorded per section 4.
-   - No MCP server process runs for either tool.
+   - No MCP server process runs for Codex. For agy, either none runs, or, if the mask was
+     dropped at the gate, each runs inside the namespace and its calls are denied.
+   - After the run, agy's protected `~/.gemini` files are byte-identical to before.
    - Writable: one file edit in the worktree lands. Nothing lands in the common `.git`.
    - Working: login, including a forced refresh, and a real `agent-run codex` and
      `agent-run agy` on a one-line throwaway plan step, which return `ok: true`.
