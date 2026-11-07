@@ -109,7 +109,7 @@ let
 
     echo ""
     echo "Building new configuration..."
-    ${pkgs.nixos-rebuild}/bin/nixos-rebuild test --flake "${cfg.flakeDir}" --use-remote-sudo
+    ${pkgs.nixos-rebuild}/bin/nixos-rebuild test --flake "${cfg.flakeDir}" --sudo
 
     echo ""
     echo "✅ Configuration tested successfully!"
@@ -148,7 +148,7 @@ let
 
     echo ""
     echo "Building and switching to new configuration..."
-    ${pkgs.nixos-rebuild}/bin/nixos-rebuild switch --flake "${cfg.flakeDir}" --use-remote-sudo
+    ${pkgs.nixos-rebuild}/bin/nixos-rebuild switch --flake "${cfg.flakeDir}" --sudo
 
     echo ""
     echo "✅ System upgraded successfully!"
