@@ -26,7 +26,7 @@
 
   nix.settings = {
     experimental-features = [ "nix-command" "flakes" ];
-    trusted-users = [ "root" "olafkfreund" ];
+    trusted-users = [ "root" ];
     http-connections = 50;
     warn-dirty = false;
     log-lines = 50;
