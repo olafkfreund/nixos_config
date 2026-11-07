@@ -60,8 +60,9 @@ set -euo pipefail
 # Appends rather than assigns, so a NIX_CONFIG from a devshell survives.
 if [ -r /run/agenix/api-github-token ] \
   && ! printf '%s' "${NIX_CONFIG:-}" | grep -q access-tokens; then
-  export NIX_CONFIG="${NIX_CONFIG:+${NIX_CONFIG}
+  NIX_CONFIG="${NIX_CONFIG:+${NIX_CONFIG}
 }access-tokens = github.com=$(cat /run/agenix/api-github-token)"
+  export NIX_CONFIG
 fi
 
 # --- Argument parsing -------------------------------------------------------
