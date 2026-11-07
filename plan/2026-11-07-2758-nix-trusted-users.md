@@ -278,3 +278,8 @@ One numbered list across all stages: stage A is steps 1-7, stage B steps 8-9, st
   `razer-nix-1:5C9bEvpGznTuMVhzQ0yzZR6HKMwdWEjfjh+pC2lW0aw=`.
 - **Step 4 (coder):** on razer the new secret block sits above `age.identityPaths`, with the "Agenix identity
   configuration" comment moved back next to that line.
+- **Opus review of PR #2769:** the `p510` recipe no longer depends on `_sign-drv`. p510 keeps `olafkfreund` in
+  `trusted-users` (decision 1), so its uploads need no signature, and `deploy-all-parallel` runs p510 in the
+  background, where a `sudo` prompt from `_sign-drv` on p620 could not be answered. `nix flake check` now boots the
+  VM test and needs KVM (`just validate`, `just check`, `scripts/ci-test.sh`, `scripts/validate-config.sh`); CI
+  skips flake check, and p620 and razer have KVM.

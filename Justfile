@@ -497,7 +497,7 @@ p620: _require-main
     sudo nixos-rebuild switch --flake .#p620
 
 # Deploy to p510 workstation (Intel Xeon/NVIDIA) - OPTIMIZED
-p510: _require-main (_sign-drv "p510")
+p510: _require-main
     just p510-clear-sessions
     nixos-rebuild switch --flake .#p510 --target-host p510 --build-host p510 --sudo --no-reexec --keep-going
 
