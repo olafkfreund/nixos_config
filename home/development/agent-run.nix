@@ -24,7 +24,7 @@ in
     })
     (pkgs.writeShellApplication {
       name = "agent-review";
-      runtimeInputs = with pkgs; [ bubblewrap git jq coreutils gnugrep ];
+      runtimeInputs = with pkgs; [ bubblewrap git coreutils ];
       text = builtins.readFile ./agent-review.sh;
     })
   ];

@@ -104,6 +104,22 @@ if [ $? -eq 2 ] && [ ! -e "$W/bin/ran" ]; then ok 'HUMANIZE_CODEX_BYPASS_SANDBOX
 ln -s "$W" "$w/link"
 refused 'work dir symlink' codex "$w/link" -- exec
 refused 'work dir outside /tmp' codex /etc -- exec
+
+# A codex planted in the reviewed repo, found through a relative or in-repo PATH entry, must never run.
+plant=$w/plant
+git init -q "$plant"
+printf '#!/bin/sh\ntouch %s/planted\n' "$W" >"$plant/codex"
+chmod +x "$plant/codex"
+rm -f "$W/planted"
+rm -f "$W/bin/ran"
+(cd "$plant" && PATH="/nonexistent::.:$W/bin:$PATH" bash "$script" codex "$W" -- exec >/dev/null 2>&1 </dev/null)
+rc=$?
+if [ ! -e "$W/planted" ] && [ -e "$W/bin/ran" ]; then ok 'codex planted in the repo, empty PATH entry'; else bad "codex planted in the repo, empty PATH entry (rc=$rc)"; fi
+rm -f "$W/planted"
+rm -f "$W/bin/ran"
+(cd "$plant" && PATH="$plant:$W/bin:$PATH" bash "$script" codex "$W" -- exec >/dev/null 2>&1 </dev/null)
+rc=$?
+if [ ! -e "$W/planted" ] && [ -e "$W/bin/ran" ]; then ok 'codex planted in the repo, absolute PATH entry'; else bad "codex planted in the repo, absolute PATH entry (rc=$rc)"; fi
 refused 'work dir equals worktree' codex "$root" -- exec
 refused 'work dir inside worktree' codex "$root/home" -- exec
 refused 'work dir contains worktree' codex "$(dirname "$root")" -- exec

@@ -59,8 +59,15 @@ wrapper) found bypasses, so `agent-review` now:
 - requires `-o` to point inside the work dir;
 - unsets `GIT_*`, and refuses a repo root or common dir that equals or contains `$HOME`.
 
-The test grew from 54 to 75 checks, by the coder, with mutation checks for each new refusal.
-Ownership and the `-c` allow-list have no mutation check. The docs now say that Codex can read its
+The test grew from 54 to 75 checks, by the coder, with mutation checks for each new refusal. Only
+the work dir ownership check has no test.
+
+A second Opus review then reproduced a planted `codex`: with an empty or relative PATH entry, a
+`codex` file in the reviewed repo ran as the parent, with network and the login. The wrapper now
+passes only absolute PATH entries outside the repo and its git common dir into the sandbox. Two
+tests cover it (77 checks), and removing either filter fails one of them. `jq` and `gnugrep` left
+`runtimeInputs`, unused. Not fixed, as low risk: a process running as the same user could swap the
+work dir for a symlink between the checks and the mount. Abstract sockets are left to step 8. The docs now say that Codex can read its
 own login, and that command network is blocked by Codex's inner sandbox, not by the wrapper.
 
 **Step 6 as done:** the "Reviewer mode" docs section and the agy-model note are skipped, because
@@ -259,6 +266,10 @@ commands until the owner decides.
    - repeat the review that failed: a prompt needing `tar` on a `.tar.xz` completes with a non-empty
      response and no `denied_actions`
    - a refused command is named, or reported as unnamed
+   - local sockets: a command connecting to the abstract sockets `@1PASSWORD_MCP` and
+     `@1PASSWORD_SDK_INTERGATIONS` must fail. The wrapper cannot hide abstract sockets, because the
+     parent needs the host network, so only Codex's inner sandbox can block them. If a connect
+     succeeds, say so in `AGENTS.md` and the second-opinion skill, and open an issue
 
 9. razer: post on the bus, `AGENT_BUS_ANNOUNCED=1 just deploy-via-p620 razer`, and repeat steps 5 and 8's
    checks there. p510 only when you agree.

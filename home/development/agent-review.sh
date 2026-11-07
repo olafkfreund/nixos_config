@@ -113,6 +113,21 @@ for path in /nix /etc /usr /bin /lib /lib64 /run/current-system /run/systemd/res
   [[ ! -e $path ]] || mounts+=(--ro-bind "$path" "$path")
 done
 
+# A relative PATH entry, or one inside the reviewed repo, would find a codex planted there,
+# and it would run as the parent, outside Codex's own sandbox.
+safe_path=
+IFS=: read -ra entries <<<"${PATH:-}"
+for entry in "${entries[@]}"; do
+  case $entry in
+    /*) ;;
+    *) continue ;;
+  esac
+  case $entry/ in
+    "$root"/* | "$common"/*) continue ;;
+  esac
+  safe_path+=${safe_path:+:}$entry
+done
+
 exec bwrap "${mounts[@]}" \
   --tmpfs /nix/var/nix/daemon-socket \
   --dev /dev --proc /proc --tmpfs /tmp --tmpfs /home \
@@ -121,7 +136,7 @@ exec bwrap "${mounts[@]}" \
   --bind "$work_dir" "$work_dir" --chdir "$root" \
   --clearenv \
   --setenv HOME "$home" --setenv TMPDIR "$work_dir" \
-  --setenv PATH "${PATH:-}" --setenv LANG "${LANG:-}" \
+  --setenv PATH "$safe_path" --setenv LANG "${LANG:-}" \
   --setenv TERM "${TERM:-dumb}" --setenv SSL_CERT_FILE /etc/ssl/certs/ca-certificates.crt \
   --setenv NIX_REMOTE 'local?read-only=true' \
   --setenv NIX_CONFIG 'experimental-features = nix-command flakes read-only-local-store' \
