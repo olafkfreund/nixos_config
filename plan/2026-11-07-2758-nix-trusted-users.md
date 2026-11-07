@@ -257,3 +257,11 @@ One numbered list across all stages: stage A is steps 1-7, stage B steps 8-9, st
 - Ship as three PRs: stage A (steps 1-7), step 8-9, step 10. Each merges before it rolls out, because
   the 04:00 nightly upgrade pulls `main` and would roll a branch-deployed host back.
 - The owner is at the keyboard for each rollout, since #2759 makes sudo ask for the password.
+
+## Deviations during implementation
+
+- **Step 1 (coder):** the VM test sets `nix.settings.sandbox = false` and uses `builder = "/bin/sh"`, so its
+  derivations need no store-path builder. Peer keys go through `!include /etc/nix/test-keys.conf` with
+  `extra-trusted-public-keys`, with `nix.checkConfig = false`. `alice` uses the nixpkgs snakeoil ed25519 key with
+  host-key checking off. Case 6 copies from the client with `--from ssh-ng://builder --to ssh-ng://stranger`.
+  All six subtests pass; the check needs KVM, which p620 has, and `nix flake check` now runs it.
