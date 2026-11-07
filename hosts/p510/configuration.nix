@@ -528,6 +528,20 @@ in
   # Services: Plex, Sonarr, Radarr, NZBGet, Tautulli, etc. need unrestricted access
   networking.firewall.enable = false;
 
+  # Today's power rule, kept on p510 until the owner schedules it (#2761). Runs before the
+  # AUTH_ADMIN rule from modules/security/default.nix, so it wins.
+  security.polkit.extraConfig = lib.mkBefore ''
+    polkit.addRule(function(action, subject) {
+      if (subject.isInGroup("users") && (
+          action.id == "org.freedesktop.login1.reboot" ||
+          action.id == "org.freedesktop.login1.reboot-multiple-sessions" ||
+          action.id == "org.freedesktop.login1.power-off" ||
+          action.id == "org.freedesktop.login1.power-off-multiple-sessions")) {
+        return polkit.Result.YES;
+      }
+    });
+  '';
+
   nixpkgs.config = {
     allowUnfree = true; # Required for NVIDIA drivers
     allowBroken = true;
