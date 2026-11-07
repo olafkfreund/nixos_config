@@ -112,3 +112,16 @@ Out of scope: the microVM guests that trust their own user (`hosts/p510/nixos/mi
 6. **Agents only, or the user too?** An alternative is a separate low-privilege Unix user for
    agents and the owner keeps trust. Recommendation: out of scope here; note it as a follow-up
    if the owner prefers it.
+
+## Owner decisions, 2026-11-07
+
+The owner accepted every recommendation above:
+
+1. Passwordless sudo is out of scope here. It is tracked as #2759.
+2. Drop `olafkfreund` from `trusted-users`.
+3. Move every cache the flake names into `nix.settings` in `modules/nix/nix.nix`.
+4. Remote copies use signing keys held in agenix, on every host that builds. The spec settles the
+   details against a test of the whole `--build-host p620` run as an untrusted user.
+5. p510 follows only after p620 and razer have run untrusted for a while, and only with the
+   owner's go-ahead.
+6. A separate user for agents is a follow-up, tracked as #2760.
