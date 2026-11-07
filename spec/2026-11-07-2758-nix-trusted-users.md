@@ -221,3 +221,11 @@ the separate issue #2759, and a separate agent user is #2760.
    signing keys and cache list can stay; they are harmless on their own.
 6. **p510 later:** with the owner's go-ahead, after p620 and razer have run untrusted for a
    while, give p510 a key and drop its override. That is a separate change.
+
+## Owner decisions, 2026-11-07
+
+The owner accepted every recommendation:
+
+1. The `sudo nix store sign -r` step before a `.drv` upload is accepted while #2759 is open.
+2. Paths built on p510 cannot be copied to p620 or razer until p510 gets its own change. This is
+   accepted, because no current flow does it.
