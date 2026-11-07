@@ -406,3 +406,10 @@ are Claude's: the gate, builds, the deploy and the live probes.
 - **Step 3 (coder):** `agent-review.sh` carries `# shellcheck disable=SC2154` on line 2, because pre-push lints the
   file alone and `root`, `common` and `home` are assigned in the library. The test builds `$w/agent-review` from
   `agent-sandbox.sh` plus `agent-review.sh` when `AGENT_REVIEW` is unset. 78 checks pass, the same as `origin/main`.
+- **Step 4 (coder):** the read-only `~/.gemini` list is hardcoded in `run_agy`; directories carry a trailing `/`
+  (created empty if missing), files do not (a missing one refuses to start). Codex takes no positional argument
+  except `-` and `--`. agy's `-p` value is free text and is not pattern-checked; `--model`, `--effort`,
+  `--output-format` and `--print-timeout` are. A second `-o`/`--output-last-message` is refused. Every argument is
+  checked before any file is created, neither tool is `exec`ed (the cleanup trap must run), and
+  `agent-implement.sh` carries `# shellcheck disable=SC2154` like `agent-review.sh`. `AGY_GUARD_LOG` must not
+  exist beforehand; step 10 checks `agy-guard-probe` against that.
