@@ -36,10 +36,13 @@ stdenv.mkDerivation rec {
       --replace-fail 'readonly property string hostBinary: (Quickshell.env("XDG_DATA_HOME") || (home + "/.local/share")) + "/omateams/bin/omateams"' 'readonly property string hostBinary: "@out@/bin/omateams"' \
       --replace-fail 'Component.onCompleted: ensureHost()' 'Component.onCompleted: checkInstalled()' \
       --replace-fail 'if (!installed) { ensureHost(); return }' 'if (!installed) { checkInstalled(); return }'
-    # Color.bar is not constructed yet when the plugin's binding first runs, so
-    # the unguarded read throws and leaves the marker's ring colourless (#2778).
+    # Everything read off the Color singleton is undefined when a plugin's
+    # binding first runs, so neither Color.bar.background nor Color.background
+    # can be relied on there: fall back to a literal, or QML warns "Unable to
+    # assign [undefined] to QColor". The binding re-runs once Color is ready
+    # and the ring gets its real colour (#2778).
     substituteInPlace ui/BarWidget.qml \
-      --replace-fail 'border.color: Color.bar.background' 'border.color: Color.bar ? Color.bar.background : Color.background'
+      --replace-fail 'border.color: Color.bar.background' 'border.color: (Color.bar && Color.bar.background) || "transparent"'
   '';
 
   installPhase = ''
