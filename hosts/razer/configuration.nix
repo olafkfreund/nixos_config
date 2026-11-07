@@ -677,4 +677,6 @@ in
     summary.backend = "claude";
     voice.elevenLabsKeyFile = config.age.secrets."api-elevenlabs".path;
   };
+  # Temporary marker for the plan step 15 password-path tests; removed in step 16 (#2759)
+  environment.etc."sudo-2759-test".text = "1";
 }
