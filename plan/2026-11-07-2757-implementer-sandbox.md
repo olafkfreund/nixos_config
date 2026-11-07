@@ -394,3 +394,12 @@ are Claude's: the gate, builds, the deploy and the live probes.
   an empty tmpfs works, and a forced OAuth refresh works on a copied token.
 - **Step 8 also records:** an agy command can write the top level of `~/.gemini` (listed paths stay read-only), and
   `awk` is not on PATH inside agy's command sandbox.
+- **Step 2 (coder):** `sandbox_exec_bwrap` puts `--clearenv` and the shared `--setenv`s before the caller's extra
+  arguments, because `--clearenv` wipes any earlier `--setenv`; callers pass their own `--setenv`s in the extras.
+  `sandbox_exec_unshare` takes `--rw`, `--ro`, `--file`, `--sub-ro` (a trailing `/` creates a missing directory, a
+  missing file fails), `--sub-mask PATH=SRC`, `--sub-tmpfs`, `--chdir`, `--env NAME=VALUE`, then `--` and the
+  command, and reads `home` and `safe_path` as globals. It finds `mount` and `umount` with `command -v` and refuses
+  any that is not absolute or lies under `/run/wrappers`, so it needs util-linux first in `PATH`, as the
+  `writeShellApplication` wrapper gives it. A file-level `shellcheck disable=SC2034,SC2329` covers the globals and
+  the launcher-only helpers. A plain-repo worktree must list `--rw "$root"` before `--ro "$common"`; the wrong
+  order fails closed.
