@@ -25,20 +25,17 @@ _: {
     polkit = {
       enable = true;
       extraConfig = ''
-        polkit.addRule(function(action, subject) {
-          if (
-            subject.isInGroup("users")
-              && (
-                action.id == "org.freedesktop.login1.reboot" ||
-                action.id == "org.freedesktop.login1.reboot-multiple-sessions" ||
-                action.id == "org.freedesktop.login1.power-off" ||
-                action.id == "org.freedesktop.login1.power-off-multiple-sessions"
-              )
-            )
-          {
-            return polkit.Result.YES;
+        // Power actions need the administrator's password from every caller, the active session included (#2761).
+        polkit.addRule(function (action, subject) {
+          if (action.id == "org.freedesktop.login1.reboot" ||
+              action.id == "org.freedesktop.login1.reboot-multiple-sessions" ||
+              action.id == "org.freedesktop.login1.power-off" ||
+              action.id == "org.freedesktop.login1.power-off-multiple-sessions" ||
+              // These imply reboot and default to allowed, so polkit would grant reboot through them.
+              action.id.indexOf("org.freedesktop.login1.set-reboot-") == 0) {
+            return polkit.Result.AUTH_ADMIN;
           }
-        })
+        });
       '';
     };
   };
