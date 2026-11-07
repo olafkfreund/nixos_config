@@ -1,0 +1,14 @@
+--- a/daemon/dbus/gkd-secret-service.c
++++ b/daemon/dbus/gkd-secret-service.c
+@@ -433,6 +433,11 @@
+ 					&error);
+ 	g_variant_unref (input_payload);
+ 
++	if (error == NULL && output == NULL) {
++		g_set_error_literal (&error, G_DBUS_ERROR, G_DBUS_ERROR_FAILED,
++		                     "Couldn't negotiate session");
++	}
++
+ 	if (error != NULL) {
+ 		g_dbus_method_invocation_take_error (invocation, error);
+ 	} else {
