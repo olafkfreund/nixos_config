@@ -364,3 +364,33 @@ are Claude's: the gate, builds, the deploy and the live probes.
 
 - agy's config under `~/.gemini/antigravity-cli/` is bound read-only, beyond the spec's list: accepted.
 - The about three-line `agent-run.sh` change (private log dir, old `-o` file removed before a retry): accepted.
+
+## Deviations during implementation
+
+- **Step 1 gate (lead, 2026-11-07, p620), script `gate-2757/gate.sh` in the session scratchpad.** Every row passed
+  on the rerun. agy-implement's exact line ran: login, model and edit work, and the protected `~/.gemini` hashes did
+  not change. A sandboxed `git status` works, and `git add` fails because the common dir is read-only. agy's own
+  `--sandbox` comes up inside the namespace. A command has outbound network (`net=yes`), which step 8 records as an
+  open exposure. A test abstract socket and `@1PASSWORD_MCP` are both reachable from the wrapper's own shell, and
+  neither is reachable from an agy command. So **agy's `--sandbox`, not the wrapper, blocks abstract sockets**, and
+  step 8 must say so: if `--sandbox` is ever dropped, the 1Password socket is reachable. Secrets are hidden and
+  `/sys` is empty.
+- **Owner decision after the first gate run:** agy writes `~/.gemini/antigravity-cli/bin/agentapi` before every
+  command, so `antigravity-cli/bin/` comes off the read-only list and stays writable. The owner accepts that agy
+  could plant code there that later runs outside the sandbox. Step 8 records it.
+- **`sandbox_exec_unshare` (step 2) needs six changes the gate found:**
+  1. `unshare --map-root-user`, because with `--map-current-user` mount(8) refuses ("must be superuser").
+  2. `--rbind` for `/nix` and `/usr`, because `/usr/bin` (envfs) and `/nix/store` are submounts.
+  3. `/dev`: bind each device node separately, on a tmpfs with `mode=0755`, or opening `/dev/null` fails.
+  4. Call `mount` and `umount` by store path, because `/run/wrappers` is hidden.
+  5. Copy the MCP mask and the read-only list into the staging tmpfs before `/tmp` is covered.
+  6. Add `/dev/fd` and the `/dev/std{in,out,err}` symlinks.
+- **Settled by the gate:** agy reads `~/.gemini/config/mcp_config.json` (the mask works), and
+  `antigravity/mcp_config.json` is a symlink to it. It also reads `antigravity-cli/plugins/{gitlab,google-workspace,
+  nanobanana}/mcp_config.json`, which stay read-only under `plugins/`. Final read-only list: `config`, `hooks`,
+  `settings.json`, `settings.nix`, `settings.json.orig`, `GEMINI.md`, `AGENTS.md`, `commands`, `extensions`,
+  `agents`, `antigravity/{user_settings.pb,skills,bin}`, `antigravity-cli/{settings.json,lib,plugins,mcp,builtin}`.
+  All exist on p620; on razer only the directory `antigravity/bin` is missing, so the wrapper creates it. `/sys` as
+  an empty tmpfs works, and a forced OAuth refresh works on a copied token.
+- **Step 8 also records:** an agy command can write the top level of `~/.gemini` (listed paths stay read-only), and
+  `awk` is not on PATH inside agy's command sandbox.
