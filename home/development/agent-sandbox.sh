@@ -58,6 +58,14 @@ sandbox_check_out_file() {
   [[ $path == /* ]] || refuse 'output file must be an absolute path'
   parent=$(dirname -- "$path")
   [[ -d $parent && ! -L $parent && -O $parent ]] || refuse 'output file parent must be a real directory owned by the caller'
+  # The content is model-controlled, so a file in ~/.config/autostart would run later outside the sandbox.
+  local rp xr allowed=''
+  rp=$(realpath -e -- "$parent")
+  [[ $rp == /tmp/* ]] && allowed=1
+  if [[ -n ${XDG_RUNTIME_DIR:-} ]] && xr=$(realpath -e -- "$XDG_RUNTIME_DIR" 2>/dev/null) && [[ $xr != / && -O $xr && $rp == "$xr"/* ]]; then
+    allowed=1
+  fi
+  [[ -n $allowed ]] || refuse 'output file parent must be under /tmp or XDG_RUNTIME_DIR'
   lexical=$(realpath -m -s -- "$path")
   [[ $lexical == "$(realpath -m -- "$path")" ]] || refuse 'output file must not use symlinks'
   for protected in "$root" "$common" "$home/.codex" "$home/.gemini" /etc /nix; do
@@ -89,7 +97,8 @@ sandbox_exec_bwrap() {
     n=${fd##*/}
     [[ $n =~ ^[0-9]+$ ]] && ((n > 2)) && eval "exec $n>&-" 2>/dev/null || true
   done
-  bwrap "${ro_paths[@]}" \
+  # env -i: an exported function or LD_* in the caller's environment would run inside bwrap itself.
+  "$(type -P env)" -i "$(type -P bwrap)" "${ro_paths[@]}" \
     --tmpfs /nix/var/nix/daemon-socket \
     --dev /dev --proc /proc --tmpfs /tmp --tmpfs /home \
     --unshare-pid --unshare-ipc --die-with-parent \
@@ -291,12 +300,14 @@ sandbox_exec_unshare() {
   uid=$(id -u)
   gid=$(id -g)
   for name in unshare mount umount bash env mkdir ln cp readlink id; do
-    bin=$(command -v "$name") || refuse "sandbox: missing tool: $name"
+    bin=$(type -P "$name") || refuse "sandbox: missing tool: $name"
     [[ $bin == /* && $bin != /run/wrappers/* ]] || refuse "sandbox: $name is not a plain absolute path: $bin"
     dir=$(dirname -- "$bin")
     [[ :$tool_path: == *":$dir:"* ]] || tool_path+=${tool_path:+:}$dir
   done
-  "$(command -v unshare)" --user --map-root-user --mount --pid --fork --mount-proc --kill-child -- \
-    "$(command -v bash)" -c "$(declare -f sandbox_setup); sandbox_setup \"\$@\"" sandbox \
+  # env -i: a caller's BASH_FUNC_mount%% or LD_PRELOAD would otherwise act inside the namespace.
+  "$(type -P env)" -i PATH="$tool_path" LANG="${LANG:-}" TERM="${TERM:-dumb}" \
+    "$(type -P unshare)" --user --map-root-user --mount --pid --fork --mount-proc --kill-child -- \
+    "$(type -P bash)" -c "$(declare -f sandbox_setup); sandbox_setup \"\$@\"" sandbox \
     "$tool_path" "$safe_path" "$home" "$uid" "$gid" "$@"
 }

@@ -14,6 +14,8 @@ tool=${1:-}
   || refuse 'usage: agent-implement <codex|agy> -- <tool arguments>'
 shift 2
 [[ ! ${HUMANIZE_CODEX_BYPASS_SANDBOX+x} ]] || refuse 'HUMANIZE_CODEX_BYPASS_SANDBOX is set'
+# An exported function or LD_* would run inside the tools the sandbox is built from.
+[[ -z $(declare -Fx) && -z $(compgen -v LD_) && -z $(compgen -v BASH_FUNC_) ]] || refuse 'exported function, LD_* or BASH_FUNC_* in the environment'
 
 sandbox_repo_checks
 sandbox_safe_path
@@ -90,6 +92,7 @@ check_agy_args() {
         ;;
     esac
     if [[ -n $expect ]]; then
+      [[ $arg != -* ]] || refuse "option value must not start with '-': $arg"
       expect=''
       continue
     fi

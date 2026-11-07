@@ -422,3 +422,14 @@ are Claude's: the gate, builds, the deploy and the live probes.
   `sandbox_setup`, which is shipped into the namespace with `declare -f` and so never called in the script. The
   library's file-level `disable` stops being file-level once `writeShellApplication` puts its preamble first, so
   the directive now sits on the function. p620 and razer then build, and both tests still pass.
+- **Opus security review of PR #2772, fixed:** (1) an exported bash function such as `BASH_FUNC_mount%%` or an
+  `LD_*` variable in the caller's environment could neuter the mounts; both backends now start the outer tool
+  through `env -i` with absolute paths from `type -P`, and `agent-implement` refuses any exported function, `LD_*`
+  or `BASH_FUNC_*` variable. (2) `-o` and `AGY_GUARD_LOG` accepted any caller-owned parent such as
+  `~/.config/autostart`, while the model writes the content; the parent must now be under `/tmp/` or the caller's
+  `$XDG_RUNTIME_DIR`. (3) agy option values may not start with `-`. `agent-review` gets the `env -i` change but
+  not the refusal.
+- **Same review, accepted and documented:** calling `agent-implement` directly skips the guard and version checks
+  of the two wrappers, but still runs sandboxed, and plain `agy` is on PATH anyway. The codex guard query checks
+  that the hook is registered, not its `matcher`. Codex's commands share the host network namespace, so whether
+  `@1PASSWORD_MCP` is reachable from a codex command depends on codex's own sandbox: step 10 probes it.

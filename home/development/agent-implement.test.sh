@@ -166,7 +166,14 @@ refused 'agy: unknown option' "${AG[@]}" --some-future-flag
 refused 'agy: model value that looks like --add-dir' "${AG[@]}" --model --add-dir
 XENV=(HUMANIZE_CODEX_BYPASS_SANDBOX=1)
 refused 'HUMANIZE_CODEX_BYPASS_SANDBOX' "${CX[@]}" -
+XENV=('BASH_FUNC_mount%%=() { :; }')
+refused 'BASH_FUNC_mount%% in the environment' "${CX[@]}" -
+refused 'BASH_FUNC_mount%% in the environment (agy)' "${AG[@]}" -p hi
+XENV=(LD_PRELOAD=/nonexistent.so)
+refused 'LD_PRELOAD in the environment' "${CX[@]}" -
 XENV=()
+refused 'agy: --model value starting with -' "${AG[@]}" --model --no-sandbox
+refused 'agy: --effort value starting with -' "${AG[@]}" --effort -x
 
 # Rejected -o and AGY_GUARD_LOG paths.
 ln -s "$w/outdir/real" "$w/outdir/sl"
@@ -174,9 +181,11 @@ ln -s "$w/outdir" "$w/plink"
 : >"$w/outdir/exists"
 ln "$w/outdir/exists" "$w/outdir/hard"
 echo x >"$repo/inrepo"
+edir=$(mktemp -d "$HOME/.agent-impl-test.XXXXXX")
 bad_paths=("$w/outdir/sl" "$w/plink/x" "$w/outdir/hard" "$w/outdir/exists" "/tmp/agent-impl-test-$$"
-  "$repo/out" "$fh/.gemini/out" "$fh/.codex/out" "/etc/agent-impl-test" "relative/out")
-labels=(symlink 'symlinked parent' 'hard link' 'existing file' 'root-owned parent' 'inside the worktree' 'inside ~/.gemini' 'inside ~/.codex' 'inside /etc' 'relative path')
+  "$repo/out" "$fh/.gemini/out" "$fh/.codex/out" "/etc/agent-impl-test" "relative/out"
+  "$HOME/agent-impl-test-$$" "$edir/out")
+labels=(symlink 'symlinked parent' 'hard link' 'existing file' 'root-owned parent' 'inside the worktree' 'inside ~/.gemini' 'inside ~/.codex' 'inside /etc' 'relative path' 'real HOME itself' 'own dir outside /tmp, as ~/.config/autostart')
 for i in "${!bad_paths[@]}"; do
   refused "-o rejected: ${labels[i]}" "${CX[@]}" -o "${bad_paths[i]}" -
   refused "--output-last-message= rejected: ${labels[i]}" "${CX[@]}" "--output-last-message=${bad_paths[i]}" -
@@ -186,6 +195,7 @@ for i in "${!bad_paths[@]}"; do
 done
 XENV=()
 refused '-o given twice' "${CX[@]}" -o "$w/outdir/a" -o "$w/outdir/b" -
+rmdir "$edir"
 [ ! -e "$w/outdir/a" ] && ok 'a refused call creates no -o file' || bad 'a refused call created a -o file'
 
 # A failing tool backend: the tool must not run, the exit must be non-zero.
@@ -236,6 +246,28 @@ else
   rc=$?
   if [ $rc -ne 0 ] && ! ls "$repo"/.out-*.ran >/dev/null 2>&1; then ok 'failing unshare'; else bad "failing unshare (rc=$rc)"; fi
   FAKEDIR=$FAKEDIR_SAVE
+
+  # env -i: with the refusal removed, a planted function must not reach the namespace.
+  sed '/declare -Fx/d' "$script" >"$w/noref"
+  sed 's/env)" -i /env)" /' "$w/noref" >"$w/mutant"
+  grep -q 'env)" -i ' "$w/noref" && ! grep -q 'env)" -i ' "$w/mutant" || bad 'mutant not built'
+  planted() { # <script> <tool args…>: run with a planted mount function
+    local s=$1
+    shift
+    script=$s
+    XENV=('BASH_FUNC_mount%%=() { :; }' 'BASH_FUNC_bwrap%%=() { :; }')
+    runi "$@"
+    prc=$?
+    XENV=()
+    script=$real_script
+  }
+  real_script=$script
+  planted "$w/noref" "${AG[@]}" -p hi
+  if [ $prc -eq 0 ] && [ -e "$repo/.out-agy.ran" ] && ! grep -q '^present' "$repo/.out-agy.probe"; then ok 'env -i: planted mount function has no effect (agy)'; else bad "env -i: planted mount function acted (agy, rc=$prc)"; fi
+  planted "$w/noref" "${CX[@]}" -
+  if [ $prc -eq 0 ] && [ -e "$repo/.out-codex.ran" ]; then ok 'env -i: planted bwrap function has no effect (codex)'; else bad "env -i: planted bwrap function acted (codex, rc=$prc)"; fi
+  planted "$w/mutant" "${AG[@]}" -p hi
+  if [ $prc -ne 0 ] || [ ! -e "$repo/.out-agy.ran" ] || grep -q '^present' "$repo/.out-agy.probe"; then ok 'mutant without env -i fails (agy)'; else bad 'mutant without env -i passes (agy)'; fi
 
   # Shared checks on one run of a tool. <tool> <ext…>
   common_checks() {
