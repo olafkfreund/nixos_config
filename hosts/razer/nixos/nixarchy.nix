@@ -180,6 +180,16 @@
       # [ opencode codex opencode codex claude ]. Naming only what upstream
       # does not give us keeps it to [ opencode codex claude ].
       agents = [ "claude" ];
+
+      # Companion plugins (nixi-nixarchy#149): the same three examples as p620,
+      # so plugins can be tested here too. Installed means listed in
+      # Settings → Plugins, and each stays off until switched on there.
+      companion.plugins =
+        with inputs.nixi-companion.legacyPackages.${pkgs.stdenv.hostPlatform.system}.examples; [
+          pirate-quips
+          element-chat
+          party-hat-plus
+        ];
     };
 
     # Oma's whisper.cpp takes Vulkan device 0, the Intel iGPU here: 1100 ms
