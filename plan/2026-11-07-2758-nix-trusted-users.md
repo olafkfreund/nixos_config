@@ -276,3 +276,5 @@ One numbered list across all stages: stage A is steps 1-7, stage B steps 8-9, st
   instead of `tee >(…)`, whose process substitution can still be writing when the next command reads the file.
   Public keys: `p620-nix-1:hqZIIrJ1DQAb3yBFhxW5ww6DV0XG9NBxQY7E0yyPoH8=` and
   `razer-nix-1:5C9bEvpGznTuMVhzQ0yzZR6HKMwdWEjfjh+pC2lW0aw=`.
+- **Step 4 (coder):** on razer the new secret block sits above `age.identityPaths`, with the "Agenix identity
+  configuration" comment moved back next to that line.
