@@ -28,9 +28,11 @@ MIN_FREE_MIB=200
 
 if [ "$HOST" = "$(hostname)" ] || [ "$HOST" = "local" ] || [ "$HOST" = "localhost" ]; then
   run() { bash -c "$1"; }
+  run_root() { run "$1"; }
   LABEL="$(hostname) (local)"
 else
   run() { ssh -o ConnectTimeout=10 -o BatchMode=yes "$HOST" "$1"; }
+  run_root() { ssh -t -o ConnectTimeout=10 -o BatchMode=yes "$HOST" "$1"; }
   LABEL="$HOST"
 fi
 
@@ -57,7 +59,7 @@ fi
 echo "🧹 ${LABEL}: reclaiming space…"
 
 # 1. Partial copies left by a previous ENOSPC. Always orphans, never booted.
-run 'sudo find /boot -name "*.tmp" -type f -print -delete 2>/dev/null || true'
+run_root 'sudo find /boot -name "*.tmp" -type f -print -delete 2>/dev/null || true'
 
 # 2. Drop old system generations, then let the bootloader installer prune the
 #    ESP entries that no longer belong to a generation. Deleting files out of
@@ -65,8 +67,8 @@ run 'sudo find /boot -name "*.tmp" -type f -print -delete 2>/dev/null || true'
 #    kernel/initrd the remaining generations still reference, so let it decide.
 #    +2 keeps the current generation and one fallback.
 prune_to() {
-  run "sudo nix-env -p /nix/var/nix/profiles/system --delete-generations +$1 2>/dev/null || true"
-  run 'sudo /run/current-system/bin/switch-to-configuration boot 2>&1 | tail -3'
+  run_root "sudo nix-env -p /nix/var/nix/profiles/system --delete-generations +$1 2>/dev/null || true"
+  run_root 'sudo /run/current-system/bin/switch-to-configuration boot 2>&1 | tail -3'
 }
 
 prune_to 2
@@ -104,5 +106,5 @@ echo "❌ ${LABEL}: still only ${FREE}MiB free after cleanup."
 echo "   The ESP is too small for this host's initrd size, not just untidy."
 echo "   Lower boot.loader.systemd-boot.configurationLimit for ${LABEL}, or"
 echo "   grow the partition. Current ESP contents:"
-run 'sudo ls -1sh /boot/EFI/nixos/ 2>/dev/null | head -20 || true'
+run_root 'sudo ls -1sh /boot/EFI/nixos/ 2>/dev/null | head -20 || true'
 exit 1
