@@ -359,3 +359,8 @@ are Claude's: the gate, builds, the deploy and the live probes.
 - Fast stop without a rebuild: the handoff skill's fallback already applies; give steps to `coder`
   and do not run `codex-implement` or `agy-implement` until fixed.
 - Nothing migrates state: `~/.gemini`, `~/.codex` and the repo are only bound, never rewritten.
+
+## Owner decisions (2026-11-07)
+
+- agy's config under `~/.gemini/antigravity-cli/` is bound read-only, beyond the spec's list: accepted.
+- The about three-line `agent-run.sh` change (private log dir, old `-o` file removed before a retry): accepted.
