@@ -79,7 +79,6 @@ DEX5550 is offline; Samsung and HP are decommissioned.
 
 - `--fast`: Skip unnecessary rebuild steps
 - `--keep-going`: Continue on non-critical failures
-- `--accept-flake-config`: Accept flake configuration automatically
 - Removed `--impure`: No longer needed with pure flakes
 
 ### 2. Parallel Operations

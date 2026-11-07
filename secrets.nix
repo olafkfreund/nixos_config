@@ -116,6 +116,10 @@ in
   "secrets/api-router-p620.age".publicKeys = allUsers ++ [ p620 ];
   "secrets/api-router-razer.age".publicKeys = allUsers ++ [ razer ];
 
+  # Nix store signing keys, so an untrusted user's remote builds and copies are accepted (#2758).
+  "secrets/nix-signing-key-p620.age".publicKeys = allUsers ++ [ p620 ];
+  "secrets/nix-signing-key-razer.age".publicKeys = allUsers ++ [ razer ];
+
   # HuggingFace read token for the meeting-transcribe pipeline (p620 only —
   # only the processor needs it; whisperX uses it to download the
   # pyannote/speaker-diarization-3.1 weights on first run). Setup:
