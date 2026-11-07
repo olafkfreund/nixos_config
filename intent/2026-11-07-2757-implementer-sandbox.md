@@ -161,3 +161,15 @@ code alone establishes the file-tool exposure.
    place.
 6. **Environment.** Recommendation: `--clearenv` with the same short list as `agent-review`,
    plus whatever each tool's login needs.
+
+## Owner decisions, 2026-11-07
+
+The owner accepted every recommendation above:
+
+1. Sandbox both `codex-implement` and `agy-implement`, rather than only documenting the risk.
+2. Share the mount and environment logic with `agent-review`, and keep each tool's argument
+   allow-list separate.
+3. Hide the Nix daemon socket from both. Claude runs `nix build` after each step. Related: #2758.
+4. Start `codex-implement` with `mcp_servers={}`.
+5. Run agy, its MCP servers included, inside the sandbox.
+6. Clear the environment and pass through an allow-list only.
