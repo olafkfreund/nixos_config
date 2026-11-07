@@ -53,6 +53,17 @@ unexplained stops of the real daemon, and the lead stopped running aborting labs
 bus, home or keyring to reach, and runs as a `nixbld` user, which is stronger isolation than a private bus with
 throwaway directories.
 
+**Step 1 as done, 2026-11-07.** Codex wrote the lab. `hang` gives B and C separate locked collections,
+because with one collection B's unlock also satisfies C and C's dialog never appears; 50.0 still
+hangs. The lead fixed four faults found in step 2: `dbus-run-session` needs `--config-file` in the
+sandbox, the dbus-next flag is `NO_AUTOSTART`, secret byte arrays must be `bytes`, and the stub
+ignores a failed `PromptDone`, as gcr's prompter does. The lab is committed before step 3, because
+`agent-run` needs a clean worktree.
+
+**Step 2 gate, 2026-11-07 09:31 to 09:32 GMT, passed.** On 50.0 with #2746's patch
+(`cfi2q33b`): `abort` and `dismiss` give `ABORT` on `gkd-secret-unlock.c:243`, `hang` gives
+`HANG`, and `normal` and `many` give `OK`. The reading of the cause holds.
+
 ## Steps
 
 Work only in the worktree `~/.config/nixos-2750` on `fix/2750-gnome-keyring-unlock-queue-abort`. Never check out a
