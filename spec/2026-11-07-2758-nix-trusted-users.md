@@ -27,7 +27,14 @@ the separate issue #2759, and a separate agent user is #2760.
   - Our `modules/nix/nix.nix:62-72` adds cache.nixos.org and nix-community.
 - **cuda-maintainers.cachix.org is set only in `flake.nix:22,31`, and it is stale.** On
   2026-10-23 a razer `llama-cpp` cudaSupport build was a hit on `cache.nixos-cuda.org` and a miss
-  on cuda-maintainers.
+  on cuda-maintainers. On 2026-11-07 the same held for p510's CUDA `sunshine`, `cuda_cudart` and
+  `cudnn` (with cudaSupport): all three are hits on `cache.nixos-cuda.org` and misses on
+  cuda-maintainers.
+- **A `.drv` closure is not all content-addressed.** razer's toplevel `.drv` closure has 29,438
+  paths. Two of them are evaluator-fetched theme sources
+  (`/nix/store/17mzvim2…-source` and `/nix/store/6qi52wwq…-source`) with no `ca` field and no
+  signature. p620's closure has the same two. The daemon signs only paths it builds, so
+  `secret-key-files` will never sign such paths.
 - `--build-host` in nixos-rebuild-ng 26.11 (`nixos_rebuild/nix.py:153-187`, `services.py:211`)
   runs in four steps:
   1. evaluate `drvPath` locally;
@@ -81,6 +88,14 @@ the separate issue #2759, and a separate agent user is #2760.
    - Without this step, copying an old locally built path (a toplevel closure that p620 built
      before signing existed, for example) to an untrusted host fails with "lacks a signature
      by a trusted key".
+6. **Sign the `.drv` closure before uploading it.** `sign --all` covers today's unsigned
+   sources, but a flake update can fetch new ones that no key signs. `deploy-via-p620`,
+   `build-on-p620` and the `--build-host` recipes therefore run
+   `sudo nix store sign -r --key-file /run/agenix/nix-signing-key <drv>` on the invoking host
+   before nixos-rebuild uploads. `<drv>` comes from
+   `nix eval --raw .#nixosConfigurations.HOST.config.system.build.toplevel.drvPath`; the second
+   evaluation is cached. Paths the build host already has are skipped by the copy, so this
+   matters only when the invoking host's lock is newer than the build host's store.
 
 ### Flows after the change (p620 and razer untrusted, p510 still trusted)
 
@@ -88,10 +103,11 @@ the separate issue #2759, and a separate agent user is #2760.
 | ---- | --------------------------------------------- | ------------------ |
 | Local `nhs`, `just test-host`, `nix build`, devenv | nothing | the local daemon builds and substitutes for untrusted users from the system list |
 | `nhs razer` from p620 (`nh os switch --target-host razer`) | p620 outputs → razer store | p620 signature, trusted on razer |
-| `just deploy-via-p620 razer` from razer | `.drv` closure → p620; outputs p620 → razer | `.drv`s and sources are content-addressed and need no signature (to be proved); outputs carry p620's signature |
-| `--build-host X --target-host X` recipes (`Justfile:493,868,978,1007`) | `.drv` closure → X | content-addressed (to be proved) |
+| `just deploy-via-p620 razer` from razer | `.drv` closure → p620; outputs p620 → razer | `.drv`s and sources are content-addressed or signed by razer's key (item 6); outputs carry p620's signature |
+| `--build-host X --target-host X` recipes (`Justfile:493,868,978,1007`) | `.drv` closure → X | content-addressed or signed by the invoking host's key (item 6) |
 | `nhs p620` from razer | razer outputs → p620 | razer signature, trusted on p620 |
 | any deploy to p510 | → p510 | p510 is still trusted |
+| anything built on p510 → p620 or razer | p510 outputs → p620/razer | **not accepted**: p510 has no key yet. Not a current flow; until p510's own change, build on the receiving host |
 
 ## Alternatives rejected
 
@@ -114,7 +130,11 @@ the separate issue #2759, and a separate agent user is #2760.
 
 - **A deploy that breaks halfway.**
   - If the agenix secret fails to decrypt, `secret-key-files` names a missing file. Every
-    build on that host then fails with an open error, including the build that would fix it.
+    build that produces a new path on that host then fails when it tries to sign, including the
+    build that would fix it. Paths that are already valid or substituted are not affected.
+  - Ordering: agenix installs secrets in an activation script, which runs before systemd starts
+    nix-daemon at boot and before units restart on a switch. The VM test uses a plain root-only
+    file, so it does not prove this. The real-host checks after rollout step 1 include a reboot.
   - Recovery is root-only: `sudo nixos-rebuild switch --rollback`, or rebuild with
     `--option secret-key-files ''` (root is trusted).
   - Mitigation: ship the key in its own deploy (rollout step 1), still trusted, and check
@@ -140,8 +160,12 @@ the separate issue #2759, and a separate agent user is #2760.
   warning. devenv.cachix.org itself stays, at system level.
 - **p510.** Unchanged in trust. Its next owner-run deploy adds the cache entries and two
   public keys; nothing in this task builds or deploys it.
-- **#2759 interplay.** If passwordless sudo is removed first, the rollbacks above need the
-  owner's password. Nothing breaks.
+- **p510 outbound.** Paths built on p510 are unsigned and would be refused by an untrusted p620
+  or razer. No current flow does this (see the table); it is closed by p510's own change later.
+- **#2759 interplay.** `nhs` selects `--elevation-strategy passwordless`
+  (`update-commit-deploy.sh:411`), and design item 6 adds a `sudo` call. If #2759 removes
+  passwordless sudo, both need a prompt or another route, and so do the rollbacks above. #2759's
+  spec must account for this; this task does not depend on it.
 
 ## Verification
 
@@ -149,25 +173,31 @@ the separate issue #2759, and a separate agent user is #2760.
    - New file `checks/nix-untrusted-remote-build.nix`, a `pkgs.testers.runNixOSTest`, exposed
      as `checks.x86_64-linux.nix-untrusted-remote-build` and run with
      `nix build .#checks.x86_64-linux.nix-untrusted-remote-build` on p620 (KVM).
-   - Two nodes: `builder` (as p620: a signing key at a root-only path, `secret-key-files`) and
-     `client` (as razer). Both have `trusted-users = [ "root" ]`, an ordinary user `alice` with
-     SSH keys between the nodes, and the builder's public key in the client's
-     `trusted-public-keys`.
+   - Three nodes, each with `trusted-users = [ "root" ]`, `require-sigs = true`, its own
+     signing key at a root-only path set in `secret-key-files`, and an ordinary user `alice` with
+     SSH keys between the nodes:
+     - `builder` (as p620) trusts `client`'s public key;
+     - `client` (as razer) trusts `builder`'s public key;
+     - `stranger` trusts neither.
+   - The test first asserts, as `alice`, that `nix store info` reports `Trusted: 0` on every
+     node's daemon, locally and over `ssh-ng://`.
    - It uses the same nixpkgs, so the same Nix (2.34.9) as the hosts.
    - The test runs, as `alice` on `client`, exactly what nixos-rebuild-ng does:
-     1. `nix-copy-closure --to builder <drv>`: must succeed;
+     1. `nix-copy-closure --to builder <drv>`, where the derivation's `inputSrcs` include an
+        unsigned input-addressed path made on `client` (`builtins.storePath` of a path built
+        there with signing off): it must fail first. After
+        `sudo nix store sign -r --key-file <client key> <drv>` it must succeed;
      2. `ssh builder nix build '<drv>^*'`: must succeed;
      3. `nix-copy-closure --from builder <out>`: must succeed, and
         `nix path-info --sigs <out>` shows the builder key;
-     4. `nix copy --to ssh-ng://builder` of a client-built path: succeeds once the client
-        signs too;
-     5. negative case: the same `--from` copy with the builder key removed from the client's
-        trusted keys must fail with "lacks a signature by a trusted key".
+     4. `nix copy --to ssh-ng://builder` of a fresh client-built path must succeed;
+     5. negative case: a fresh output built on `builder`, asserted absent on `stranger` first,
+        copied to `stranger` must fail with "lacks a signature by a trusted key".
    - Why a VM test rather than a throwaway local user: a local user on p620 changes a live
      shared host and exercises one daemon. The question is about two daemons, neither
      trusting the user, and a VM test answers it without touching the real `trusted-users`.
 2. **Before the trust removal, on the real hosts (rollout step 1 deployed, still trusted):**
-   - `test -r /run/agenix/nix-signing-key` as root;
+   - `test -r /run/agenix/nix-signing-key` as root, after a switch and again after a reboot;
    - `nix config show | grep -E '^(secret-key-files|trusted-public-keys|substituters) '`;
    - build a trivial derivation and check `nix path-info --sigs` shows the host key;
    - after `sign --all`, check `nix store verify --sigs-needed 1 -r /run/current-system` on
