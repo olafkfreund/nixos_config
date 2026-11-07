@@ -251,3 +251,9 @@ One numbered list across all stages: stage A is steps 1-7, stage B steps 8-9, st
    PR with stage-gated merges? The plan assumes three.
 2. With #2759 merged, deploys and `_sign-drv` prompt for your password, so stage rollouts need you at
    the terminal. Agreed?
+
+## Owner decisions (2026-11-07)
+
+- Ship as three PRs: stage A (steps 1-7), step 8-9, step 10. Each merges before it rolls out, because
+  the 04:00 nightly upgrade pulls `main` and would roll a branch-deployed host back.
+- The owner is at the keyboard for each rollout, since #2759 makes sudo ask for the password.
