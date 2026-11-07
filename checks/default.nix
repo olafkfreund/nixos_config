@@ -174,4 +174,7 @@ in
 
       touch $out
     '';
+
+  # #2758 gate: remote build and copy with untrusted users and required signatures. Needs KVM.
+  nix-untrusted-remote-build = import ./nix-untrusted-remote-build.nix { inherit pkgs; };
 }

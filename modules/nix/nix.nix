@@ -64,18 +64,21 @@
     substituters = [
       "https://cache.nixos.org" # Official NixOS cache (always available)
       "https://nix-community.cachix.org" # Community cache
+      "https://devenv.cachix.org"
+      "https://nixarchy.cachix.org"
+      "https://hyprland.cachix.org"
     ];
 
     trusted-public-keys = [
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=" # Official NixOS
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=" # Nix community
+      "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
+      "nixarchy.cachix.org-1:05JOuIlsQOWY2/5DQMq7JEA1hwlhgvmMWowMfka8mMM="
+      "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
+      # Per-host signing keys (#2758); the private halves are agenix secrets on p620 and razer.
+      "p620-nix-1:hqZIIrJ1DQAb3yBFhxW5ww6DV0XG9NBxQY7E0yyPoH8="
+      "razer-nix-1:5C9bEvpGznTuMVhzQ0yzZR6HKMwdWEjfjh+pC2lW0aw="
     ];
-
-    # Optional: Add Cachix personal cache (free tier: 5GB storage, unlimited downloads)
-    # Sign up at https://cachix.org for free
-    # Example: "your-username.cachix.org"
-    # To use: uncomment and add your cachix auth token via:
-    # $ cachix authtoken YOUR_TOKEN
   };
 
   # Store deduplication on a timer instead of after every build.

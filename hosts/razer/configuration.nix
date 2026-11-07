@@ -614,6 +614,13 @@ in
   # Windows app integration
   # programs.winboat.enable = true; # DISABLED: npm dependency error in nixpkgs (@electron/windows-sign)
 
+  age.secrets.nix-signing-key = {
+    file = ../../secrets/nix-signing-key-razer.age;
+    owner = "root";
+    mode = "0400";
+  };
+  nix.settings.secret-key-files = config.age.secrets.nix-signing-key.path;
+
   # Agenix identity configuration - specify where to find decryption keys
   age.identityPaths = [
     "/home/olafkfreund/.ssh/id_ed25519" # User key
