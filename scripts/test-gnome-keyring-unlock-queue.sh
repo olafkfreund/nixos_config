@@ -17,7 +17,8 @@ while read -r scenario expected extra; do
   fi
   if out=$(nix-build scripts/test-gnome-keyring-unlock-queue.nix \
     --arg nixpkgs "$nixpkgs" --argstr keyring "$keyring" \
-    --argstr scenario "$scenario" --argstr nonce "$(date +%s%N)" </dev/null) \
+    --argstr scenario "$scenario" --argstr nonce "$(date +%s%N)" \
+    --argstr gDebug "${G_DEBUG:-}" </dev/null) \
     && result=$(cat "$out") && [[ $result =~ ^result=(ABORT|HANG|OK|INCONCLUSIVE)$ ]]; then
     :
   else

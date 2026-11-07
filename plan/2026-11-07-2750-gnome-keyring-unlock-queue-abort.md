@@ -64,6 +64,21 @@ ignores a failed `PromptDone`, as gcr's prompter does. The lab is committed befo
 (`cfi2q33b`): `abort` and `dismiss` give `ABORT` on `gkd-secret-unlock.c:243`, `hang` gives
 `HANG`, and `normal` and `many` give `OK`. The reading of the cause holds.
 
+**Step 3 as done.** Codex wrote the patch to the rules above. The lead added one guard while
+tracing references: `on_unlock_complete`'s success branch does nothing if the prompt is already
+completed, because a Dismiss that raced the call has freed `current`, and upstream `main` would
+pass NULL on. The cost is a possibly missed collection-changed signal in that race. Step 4 was
+done by the coder.
+
+**Step 5, 2026-11-07 09:38 GMT, passed.** The patched build (`gpvbirwm`) compiled, and with
+`G_DEBUG=fatal-criticals` all five scenarios give `OK`; 50.0 still gives `ABORT`, `ABORT`, `HANG`,
+`OK`, `OK`. Two lab changes: an optional `gDebug` argument carries `G_DEBUG` to the daemon, and
+`dismiss` answers A's dialog after the Dismiss, because a Dismiss cannot close a dialog already
+shown, so A keeps the slot until it is answered; B gets its own collection. A's late result then
+arrives as a GLib cancel, logged as "couldn't create credential for collection: Operation was
+cancelled", and completes nothing more. So the success-after-Dismiss guard is not exercised by the
+lab.
+
 ## Steps
 
 Work only in the worktree `~/.config/nixos-2750` on `fix/2750-gnome-keyring-unlock-queue-abort`. Never check out a

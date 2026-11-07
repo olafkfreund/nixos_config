@@ -1,0 +1,193 @@
+--- a/daemon/dbus/gkd-secret-unlock.c
++++ b/daemon/dbus/gkd-secret-unlock.c
+@@ -49,7 +49,7 @@
+  * We try to serialize unlock requests, so the user doesn't get prompted
+  * multiple times for the same thing. There are two queues:
+  *  - self->queued: A queue of object paths per unlock requests.
+- *  - unlock_prompt_queue: A queue of unlock requests ready to prompt.
++ *  - unlock_prompt_queue: A queue of unlock requests waiting to prompt.
+  */
+ 
+ enum {
+@@ -77,12 +77,14 @@
+ /* Forward declarations */
+ static void gkd_secret_dispatch_iface (GkdSecretDispatchIface *iface);
+ static void perform_next_unlock (GkdSecretUnlock *self);
++static void start_next_waiting (void);
+ 
+ G_DEFINE_TYPE_WITH_CODE (GkdSecretUnlock, gkd_secret_unlock, G_TYPE_OBJECT,
+ 			 G_IMPLEMENT_INTERFACE (GKD_SECRET_TYPE_DISPATCH, gkd_secret_dispatch_iface));
+ 
+ static guint unique_prompt_number = 0;
+ static GQueue unlock_prompt_queue = G_QUEUE_INIT;
++static GkdSecretUnlock *unlock_in_flight = NULL;
+ 
+ EGG_SECURE_DECLARE (secret_unlock);
+ 
+@@ -145,7 +147,6 @@
+ static gboolean
+ mark_as_complete (GkdSecretUnlock *self, gboolean dismissed)
+ {
+-	GkdSecretUnlock *other;
+ 	const char *value;
+ 	gint i;
+ 	GVariantBuilder builder;
+@@ -153,7 +154,10 @@
+ 
+ 	if (self->completed)
+ 		return FALSE;
++	g_object_ref (self);
+ 	self->completed = TRUE;
++	g_free (self->current);
++	self->current = NULL;
+ 
+ 	g_variant_builder_init (&builder, G_VARIANT_TYPE ("ao"));
+ 	for (i = 0; i < self->results->len; ++i) {
+@@ -170,12 +174,10 @@
+ 				       g_variant_new ("(b@v)", dismissed, variant),
+ 				       NULL);
+ 
+-	/* Fire off the next item in the unlock prompt queue */
+-	other = g_queue_pop_head (&unlock_prompt_queue);
+-	if (other != NULL) {
+-		perform_next_unlock (other);
+-		g_object_unref (other);
+-	}
++	if (g_queue_remove (&unlock_prompt_queue, self))
++		g_object_unref (self);
++	start_next_waiting ();
++	g_object_unref (self);
+ 
+ 	return TRUE;
+ }
+@@ -184,16 +186,13 @@
+ on_unlock_complete (GObject *object, GAsyncResult *res, gpointer user_data)
+ {
+ 	GkdSecretUnlock *self = GKD_SECRET_UNLOCK (user_data);
+-	GkdSecretUnlock *other;
+ 	GckObject *cred;
+ 	GError *error = NULL;
+ 
+-	/* We should be at the front of the unlock queue, pop ourselves */
+-	other = g_queue_pop_head (&unlock_prompt_queue);
+-	if (other == self)
+-		g_object_unref (other);
++	if (unlock_in_flight == self)
++		g_clear_object (&unlock_in_flight);
+ 	else
+-		g_warning ("unlock prompt queue is out of sync with prompts");
++		g_warning ("unlock in flight is out of sync with prompts");
+ 
+ 	/* Now process the results */
+ 	cred = gck_session_create_object_finish (GCK_SESSION (object), res, &error);
+@@ -201,10 +200,13 @@
+ 	/* Successfully authentication */
+ 	if (cred) {
+ 		g_object_unref (cred);
+-		emit_collection_unlocked (self, self->current);
+-		g_array_append_val (self->results, self->current);
+-		self->current = NULL;
+-		perform_next_unlock (self);
++		/* A Dismiss that raced this call already completed us and freed current */
++		if (!self->completed) {
++			emit_collection_unlocked (self, self->current);
++			g_array_append_val (self->results, self->current);
++			self->current = NULL;
++			perform_next_unlock (self);
++		}
+ 
+ 	/* The user cancelled the protected auth prompt */
+ 	} else if (g_error_matches (error, GCK_ERROR, CKR_PIN_INCORRECT)) {
+@@ -214,31 +216,52 @@
+ 
+ 	/* The operation was cancelled via Dismiss call */
+ 	} else if (g_error_matches (error, GCK_ERROR, CKR_CANCEL)) {
+-		/* Should have been the result of a dismiss */
+-		g_return_if_fail (self->completed);
++		if (!self->completed)
++			mark_as_complete (self, TRUE);
+ 
+ 	/* Another error, something's broken */
+ 	} else {
+ 		g_warning ("couldn't create credential for collection: %s",
+ 			   egg_error_message (error));
++		mark_as_complete (self, TRUE);
+ 	}
+ 
+ 	g_clear_error (&error);
++	start_next_waiting ();
+ 
+ 	/* refed for async call */
+ 	g_object_unref (self);
+ }
+ 
+ static void
++start_next_waiting (void)
++{
++	static gboolean draining = FALSE;
++	GkdSecretUnlock *self;
++
++	if (draining)
++		return;
++	draining = TRUE;
++	while (unlock_in_flight == NULL &&
++	       (self = g_queue_pop_head (&unlock_prompt_queue)) != NULL) {
++		perform_next_unlock (self);
++		g_object_unref (self);
++	}
++	draining = FALSE;
++}
++
++static void
+ perform_next_unlock (GkdSecretUnlock *self)
+ {
+ 	GckBuilder builder = GCK_BUILDER_INIT;
+ 	GckObject *collection;
+ 	GckSession *session;
+ 	gboolean locked;
+-	gboolean proceed;
+ 	gchar *objpath;
+ 
++	if (self->completed)
++		return;
++
+ 	for (;;) {
+ 		g_assert (!self->current);
+ 		objpath = g_queue_pop_head (self->queued);
+@@ -267,15 +290,8 @@
+ 			continue;
+ 		}
+ 
+-		/* Add ourselves to the unlock prompt queue */
+-		proceed = g_queue_is_empty (&unlock_prompt_queue);
+-		g_queue_push_tail (&unlock_prompt_queue, g_object_ref (self));
+-
+-		/*
+-		 * Proceed with this unlock request. The on_unlock_complete callback
+-		 * pops us back off the unlock prompt queue
+-		 */
+-		if (proceed) {
++		if (unlock_in_flight == NULL) {
++			unlock_in_flight = g_object_ref (self);
+ 			common_unlock_attributes (&builder, collection);
+ 			gck_builder_add_boolean (&builder, CKA_GNOME_TRANSIENT, TRUE);
+ 			gck_builder_add_data (&builder, CKA_VALUE, NULL, 0);
+@@ -290,14 +306,10 @@
+ 
+ 		g_object_unref (collection);
+ 
+-		/*
+-		 * Already have one unlock request going on. Just wait around
+-		 * and this function will be called again later.
+-		 */
+-		if (!proceed) {
+-			g_queue_push_head (self->queued, objpath);
+-			break;
+-		}
++		g_queue_push_head (self->queued, objpath);
++		if (g_queue_find (&unlock_prompt_queue, self) == NULL)
++			g_queue_push_tail (&unlock_prompt_queue, g_object_ref (self));
++		break;
+ 	}
+ }
+ 

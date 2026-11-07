@@ -374,12 +374,17 @@ class Lab:
                 await self.answer(dialog)
                 await self.wait_completed(self.prompts[label], False)
         elif name == "dismiss":
+            # B needs its own collection, or A's late unlock would satisfy it without a dialog.
+            self.collections["B"] = await self.create_collection("B")
             await self.new_prompt("B")
             await self.start_prompt("B")
             await self.secret_call(
                 self.prompts["A"], "org.freedesktop.Secret.Prompt", "Dismiss"
             )
             await self.wait_completed(self.prompts["A"], True)
+            # Dismiss cannot close a dialog already shown; answering it now is a late success.
+            if self.active == first[:2]:
+                await self.answer(first)
             await self.answer(await self.dialog())
             await self.wait_completed(self.prompts["B"], False)
         elif name == "many":
