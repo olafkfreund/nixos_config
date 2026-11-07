@@ -131,8 +131,8 @@ and finalizes the merge anyway — but you lose the rollback safety net.
 - `~/.config/nixos` on the remote is a git clone of this repo with no local edits (the script's freshness check only
   reads `/run/current-system`; the actual deploy is handled by `nh os switch --target-host`, which ships the closure
   over SSH from your local machine)
-- Passwordless sudo for your user OR `nh`'s elevation strategy kicks in (we already have `NOPASSWD: ALL` on
-  p620/razer/p510)
+- p620 and razer ask for your login password on every elevation (no cache, #2759); p510 keeps `NOPASSWD` for now.
+  Prompts per run: TBD (filled in after the razer password-path tests).
 - SSH key loaded in `ssh-agent` (no password prompts)
 
 ## The `nhs` shortcut
