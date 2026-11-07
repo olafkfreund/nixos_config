@@ -187,8 +187,10 @@ sandbox_setup() {
   done
   # The mask sources are copied now: they may live in a tree that is covered below.
   for i in "${!masks[@]}"; do cp -- "${masks[i]#*=}" "/mnt/mask/$i"; done
-  [[ ! -d /run/systemd/resolve ]] || mount --bind /run/systemd/resolve /mnt/resolve
-  [[ ! -d /run/nscd ]] || mount --bind /run/nscd /mnt/nscd
+  # Optional: razer has no systemd-resolved, so only move what was staged (#2757 review).
+  local have_resolve=0 have_nscd=0
+  [[ ! -d /run/systemd/resolve ]] || { mount --bind /run/systemd/resolve /mnt/resolve && have_resolve=1; }
+  [[ ! -d /run/nscd ]] || { mount --bind /run/nscd /mnt/nscd && have_nscd=1; }
   local cs
   cs=$(readlink /run/current-system)
 
@@ -228,9 +230,14 @@ sandbox_setup() {
 
   # A symlink, so a bind would resolve it.
   ln -s "$cs" /run/current-system
-  mkdir -p /run/systemd/resolve /run/nscd
-  mount --move /mnt/resolve /run/systemd/resolve
-  mount --move /mnt/nscd /run/nscd
+  if ((have_resolve)); then
+    mkdir -p /run/systemd/resolve
+    mount --move /mnt/resolve /run/systemd/resolve
+  fi
+  if ((have_nscd)); then
+    mkdir -p /run/nscd
+    mount --move /mnt/nscd /run/nscd
+  fi
 
   for i in "${!paths[@]}"; do
     if [[ ${kinds[i]} == file ]]; then

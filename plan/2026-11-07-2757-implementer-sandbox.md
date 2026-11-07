@@ -433,3 +433,6 @@ are Claude's: the gate, builds, the deploy and the live probes.
   of the two wrappers, but still runs sandboxed, and plain `agy` is on PATH anyway. The codex guard query checks
   that the hook is registered, not its `matcher`. Codex's commands share the host network namespace, so whether
   `@1PASSWORD_MCP` is reachable from a codex command depends on codex's own sandbox: step 10 probes it.
+- **Codex review of PR #2772:** razer runs no systemd-resolved, so `/run/systemd/resolve` is absent and its staging
+  bind is skipped, but the later `mount --move` ran anyway, failed, and aborted setup before agy started. Both
+  optional resolver directories are now moved only if they were staged. Step 11 (the razer probe) proves it.
