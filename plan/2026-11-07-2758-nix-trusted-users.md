@@ -220,6 +220,7 @@ One numbered list across all stages: stage A is steps 1-7, stage B steps 8-9, st
     → verify: `nix eval --json .#nixosConfigurations.p620.config.nix.settings.trusted-users` gives
     `["root"]`; `just test-host p620`.
     Rollout: merge, deploy p620 locally, run the after-removal checks on p620.
+    Deviation: `AGENTS.md:71` said `olafkfreund` is a trusted user everywhere; now it names p510 only.
 
 ## Tests
 

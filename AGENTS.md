@@ -68,7 +68,8 @@ Home Manager profiles live in `home/profiles/{developer,server-admin}`. Home Man
   of an intent, spec or plan.
 - Delegated Codex reviews run through `agent-review`. It gives them
   read-only commands and archive tools, no secrets mounted and no
-  Nix daemon socket, because `olafkfreund` is a trusted user of the daemon.
+  Nix daemon socket, because `olafkfreund` is a trusted user of the daemon on p510
+  and can still start daemon builds on p620 and razer (#2758).
   So `nix build` and flake evaluation are unavailable there: Claude runs them
   and passes in the output. Codex can read its own login (`~/.codex/auth.json`)
   and nothing else of `~/.codex`. Its commands have no network because Codex's

@@ -229,7 +229,6 @@ in
     }
   ];
   nix.settings.secret-key-files = config.age.secrets.nix-signing-key.path;
-  nix.settings.trusted-users = [ "olafkfreund" ]; # #2758: temporary, removed in plan step 10
   features.meetingTranscribe = {
     enable = true;
     processHost = "local";
