@@ -197,6 +197,8 @@ One numbered list across all stages: stage A is steps 1-7, stage B steps 8-9, st
      closure (after `just deploy-via-p620 razer`);
    - `nix config show | grep '^accept-flake-config'` is not `= true`.
    Gate: stage B does not start until every check passes on both hosts, both reboots included.
+   Deviation (owner, 2026-11-08): p620's reboot check is waived. razer passed it on the same module,
+   and p620 passed every other check without a reboot; p620's reboot check runs at its next boot.
    Traps: merge to `main` before deploying, because the nightly `system.autoUpgrade` (`nix.nix:7-18`)
    pulls `github:olafkfreund/nixos_config` main at 04:00 on p620 and razer and would undo a branch
    deploy. p510 picks up stage A only at its next owner-run deploy.
