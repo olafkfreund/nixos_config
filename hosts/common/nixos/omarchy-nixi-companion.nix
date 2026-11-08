@@ -6,6 +6,9 @@
 # generation that stops providing the file. SUPER+ALT+S is Omarchy's scratchpad (#2714).
 { ... }:
 {
+  imports = [ ../../../modules/programs/nixi-agent-hooks.nix ];
+  features.nixiAgentHooks.enable = true;
+
   home-manager.users.olafkfreund = {
     services.nixi.companion.enable = true;
     # A "done" note when a shell command of 30 s or more ends in a terminal you are not looking at (nixi#133).
