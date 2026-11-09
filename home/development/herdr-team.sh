@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2016,SC2154  # jq filters are single-quoted on purpose; agy_member and sink_path come from the Nix prefix
 # Usage: herdr-team up <task> review|implement|agy-implement [--step k]
 #        herdr-team ask <task> <member> <prompt-file> [--resume n] [--timeout s]
 #        herdr-team converse <task> <member> <prompt-file> [--max-hops N] [--deadline s]
