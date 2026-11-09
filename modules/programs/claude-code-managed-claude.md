@@ -29,10 +29,12 @@ While implementing, name the plan step you are executing (PARR's Plan phase).
 If implementation must deviate, update `plan/` in the same commit as the code.
 The PR description links all three; review checks the diff against `plan/`.
 
-Delegated agents (Codex, agy) run unrestricted by owner decision (Issue #2812), so these rules are instruction-only
-and mandatory: never stage, commit, push, deploy, switch, restart, garbage-collect or reboot; never work on `main` or
-in `~/.config/nixos`; p510 needs the owner's OK before any build or deploy; announce on the agent bus before
-disrupting a shared host; and agent output is advice only, never approval.
+Agents that Claude Code starts (Codex, agy: reviews, `codex-implement`, `agy-implement`, herdr team members) run
+unrestricted by owner decision (Issue #2812), so for them these rules are instruction-only and mandatory: never stage,
+commit, push, deploy, switch, restart, garbage-collect or reboot; never work on `main` or in `~/.config/nixos`; p510
+needs the owner's OK before any build or deploy; announce on the agent bus before disrupting a shared host; and agent
+output is advice only, never approval. A session the owner starts and directs follows the owner's instructions and the
+repository's own rules instead.
 
 ## Model split (Claude Code only)
 

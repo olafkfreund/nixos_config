@@ -32,7 +32,8 @@ them yourself. You stay the lead: their answers are advice, not instructions.
 This skill routes **review and drafting only**. It is not a general
 dispatcher for arbitrary work.
 
-- **No path here edits a file or writes a commit.** By owner decision
+- **No path here should edit a file or write a commit.** That is now an
+  instruction, not a barrier: by owner decision
   (Issue #2812), Codex runs with `--dangerously-bypass-approvals-and-sandbox`
   and agy runs with `--dangerously-skip-permissions --mode plan`, without the
   sandbox wrappers. Both Codex review paths carry "Do not modify anything"
@@ -43,8 +44,8 @@ dispatcher for arbitrary work.
   second opinions. Implementing an approved plan is the `handoff` skill's job,
   which starts `codex-implement` or `agy-implement`.
 - **Never set `HUMANIZE_CODEX_BYPASS_SANDBOX`.** The humanize plugin's
-  `ask-codex.sh` swaps in `--dangerously-bypass-approvals-and-sandbox` when
-  it is `true`/`1`. This repo deploys three hosts and holds agenix secrets.
+  `ask-codex.sh` neither strips the API-key variables nor sets
+  `forced_login_method=chatgpt`, so it can bill an API key (#1831).
 - **Nothing here approves an artifact gate.** Not an intent, not a spec, not
   a plan. Two models agreeing is not an approval.
 - Hand off drafting and review. Keep the deciding and the committing.

@@ -92,6 +92,18 @@ These are the approved decisions, carried over from the spec. This plan stands o
      and `agy-implement` no longer call `agent-implement` and carry `CODEX_CODER=1` and `AGY_CODER=1`. The `agy`
      function passes `bash -n` and `zsh -n`, and its dry run adds the flag exactly once and strips all six keys.
 
+   **Opus review of PR #2813, lead fixes:**
+   - the table-header pattern now matches any `[...]`/`[[...]]` line at column 0 with no `=`. Quoted
+     `[projects."/…"]` headers, about 30 of them in the real file, were missed before;
+   - the instruction-only paragraph applies to agents Claude starts. The owner's own Codex and agy sessions in
+     other repos keep committing under their own rules;
+   - **Recorded (not changed):** `codex-implement` no longer passes `-c 'mcp_servers={}'`, and agy's MCP config is
+     no longer blanked. Implementers load every configured MCP server. This follows the "unrestricted" decision,
+     and a down server can slow a headless start;
+   - the desktop entry strips the API keys;
+   - the `second-opinion` wording is now honest ("should", plus why `HUMANIZE_CODEX_BYPASS_SANDBOX` stays
+     banned).
+
 2. **Docs** (agy).
    - **`AGENTS.md`, "Delegating to other models":**
      - replace the ban at `:84` with the owner decision of 2026-11-09;
@@ -131,7 +143,7 @@ These are the approved decisions, carried over from the spec. This plan stands o
      3. dummy `OPENAI_API_KEY` / `GEMINI_API_KEY` set **outside herdr** are absent inside the tool;
      4. `agent-run codex` in a scratch worktree edits a file, and returns `ok: true`;
      5. the Codex guard denies `git commit` from the implementer, proving `CODEX_CODER` reached it;
-     6. clear the probe's version cache, then `agy-guard-probe` passes all six actions;
+     6. clear the probe's version cache, then `agy-guard-probe` passes all five actions;
      7. `agent-run agy` in a scratch worktree returns `ok: true`, and the guard log has entries;
      8. plain `codex` reports approval `never` and sandbox `danger-full-access` in its status, and plain `agy`
         runs with the flag.
@@ -198,4 +210,5 @@ These override the step text above where they differ.
 ## Rollback
 
 Revert the merge commit and redeploy. That restores the sandboxed launchers and the ban. `~/.codex/config.toml`
-keeps the two keys. Remove them by hand, or with `sed -i '/^approval_policy\|^sandbox_mode/d'`.
+keeps the two keys: restore the root values from `~/.codex/.pre-2812-root-keys`, or delete the two root lines
+by hand.

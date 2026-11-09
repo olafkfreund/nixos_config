@@ -123,7 +123,7 @@ in
       if [ -f "$config" ]; then
         tmp="$(mktemp)"
         awk '
-          /^\[\[?[A-Za-z0-9_." -]+\]\]?[[:space:]]*(#.*)?$/ { table = 1 }
+          /^\[\[?[^]=]+\]\]?[[:space:]]*(#.*)?$/ { table = 1 }
           !table && /^[[:space:]]*approval_policy[[:space:]]*=/ {
             approval = 1; $0 = "approval_policy = \"never\""
           }
@@ -142,7 +142,7 @@ in
           if [ ! -e "$backup" ]; then
             old="$(mktemp)"
             awk '
-              /^\[\[?[A-Za-z0-9_." -]+\]\]?[[:space:]]*(#.*)?$/ { table = 1 }
+              /^\[\[?[^]=]+\]\]?[[:space:]]*(#.*)?$/ { table = 1 }
               !table && /^[[:space:]]*(approval_policy|sandbox_mode)[[:space:]]*=/ { print }
             ' "$config" > "$old"
             $DRY_RUN_CMD install -m 0600 "$old" "$backup"
