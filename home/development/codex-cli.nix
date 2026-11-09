@@ -122,7 +122,7 @@ in
       config="$HOME/.codex/config.toml"
       if [ -f "$config" ]; then
         tmp="$(mktemp)"
-        awk '
+        ${pkgs.gawk}/bin/awk '
           /^\[\[?[^]=]+\]\]?[[:space:]]*(#.*)?$/ { table = 1 }
           !table && /^[[:space:]]*approval_policy[[:space:]]*=/ {
             approval = 1; $0 = "approval_policy = \"never\""
@@ -141,7 +141,7 @@ in
           backup="$HOME/.codex/.pre-2812-root-keys"
           if [ ! -e "$backup" ]; then
             old="$(mktemp)"
-            awk '
+            ${pkgs.gawk}/bin/awk '
               /^\[\[?[^]=]+\]\]?[[:space:]]*(#.*)?$/ { table = 1 }
               !table && /^[[:space:]]*(approval_policy|sandbox_mode)[[:space:]]*=/ { print }
             ' "$config" > "$old"
