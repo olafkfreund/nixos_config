@@ -307,12 +307,13 @@ sandboxes, the absence of herdr access, the pointer-only typing, and the authori
   END
   ```
 
-  Here `<member>` is another member of the same task, or `lead`. The reply is captured by the agent's own
+  Here `<member>` is another member of the same task, or `lead`. Only the final block of a reply counts, and a
+  malformed one is refused (plan step 3b gives the exact grammar). The reply is captured by the agent's own
   `notify`, as before. Members still have no socket, no relay and no herdr skill. They only write text, and only
   `herdr-team`, running outside every sandbox, delivers it.
 - **`herdr-team converse <task> <member> <prompt-file> [--max-hops N]`** (default 6, maximum 12):
   1. it `ask`s the first member;
-  2. for each `TO:` block naming another live member, it writes the message to that member's `req/<n>.md` and
+  2. if the reply's final `TO:` block names another live member of the same task generation, it writes the message to that member's `req/<n>.md` and
      sends the usual fixed pointer, so the text is never typed;
   3. it repeats until a reply has no `TO:` block, a reply addresses `lead`, a hop limit is reached, or an
      `ask` fails;

@@ -449,6 +449,39 @@ member-to-member messages relayed by `herdr-team converse`. All other decisions 
       - two `TO:` blocks, where only the last counts;
       - the lead-pid walk.
 
+    - **Codex review of the amendment** (all required):
+      - **C1 first:** the relay is enabled only together with the C1 fix. An adversarial test plants a
+        `core.fsmonitor` gitfile in the worktree and proves its command never runs. Every git call after launch
+        uses the recorded git dir and the overrides;
+      - **Identity per hop:** `converse` records the task's `gen` at start. Before each delivery it re-checks
+        `gen`, plus the target member's pid, start time, pane and terminal, and stops with `stale_target` on any
+        change. Test task re-creation and member replacement between hops;
+      - **Conversation reservation:** `converse` holds a per-task conversation mark in state, set and cleared
+        under the flock, never held while waiting. While it is set, `ask`, `finish` and `down` of a member refuse
+        with `busy_conversation`, except `down --force`. A second `converse` on the task also refuses. Test
+        `finish` at a hop boundary and competing conversations;
+      - **Wording:** the implementer's sandbox limits *where* it can write (the worktree), not *what* it may do
+        within the step. Scope is enforced by the lead's own review of the diff against the approved step. A
+        teammate's verdict is evidence, never authorization;
+      - **Bounds:**
+        - a turn file is read only up to 1 MiB (`head -c`), and larger counts as `oversize`;
+        - replies are passed to jq on stdin, never through argv;
+        - a relayed message is cut at 64 KiB, marker included, at a UTF-8 boundary;
+        - a whole conversation has a deadline (default 1800 s);
+        - `conversation.jsonl` lives in `<ctl>` and is removed by `down`.
+
+        Test an oversize reply, a multibyte cut and the deadline.
+      - **Grammar** (fail closed):
+        - a block counts only when its last non-empty lines are exactly `TO: <name>`, then the message, then
+          `END`;
+        - `<name>` matches `^[a-z][a-z0-9-]{0,31}$`;
+        - only that final block counts, and quoted or earlier blocks are ignored;
+        - a malformed final block gives `bad_block`, and nothing is delivered;
+        - one hop is one `ask`;
+        - the JSONL fields are `{hop, from, to, n, outcome, answer}`, where `answer` is a path, `to` is a member,
+          `lead` or `null`, and `outcome` is an `ask` outcome or `bad_address`, `bad_block` or `stale_target`.
+
+        Test every pointer sent for exact equality, plus a dead target and a timeout mid-conversation.
     - **Step 3 Opus review fixes** (they land in the same commit as step 3):
       - **C1, git hijack:** the implementer can rewrite the worktree's `.git` gitfile to a dir with
         `core.fsmonitor`, so the lead's `git` runs code outside the sandbox. In `up`, before the member
