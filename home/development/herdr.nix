@@ -46,7 +46,7 @@ in
     home.activation.herdrSkillCleanup = lib.mkIf cfg.enable (lib.hm.dag.entryBefore [ "linkGeneration" ] ''
       # Replace only the old source checkout, leaving other user-owned paths alone.
       if [ -d "$HOME/.agents/skills/herdr" ] && [ ! -L "$HOME/.agents/skills/herdr" ] \
-        && [ -d "$HOME/.agents/skills/herdr/.git" ] \
+        && [ -f "$HOME/.agents/skills/herdr/SKILL.md" ] \
         && [ -f "$HOME/.agents/skills/herdr/Cargo.toml" ]; then
         run rm -rf -- "$HOME/.agents/skills/herdr"
       fi

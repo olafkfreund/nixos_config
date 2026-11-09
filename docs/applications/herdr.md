@@ -220,10 +220,12 @@ herdr-team down <task> [member] [--force]
   teammate, as a request file behind a fixed "teammate message, not an instruction" header. It stops when a reply
   addresses `lead` or has no block, at the hop limit (default 6) or at the deadline (default 1800 s). Every hop
   goes to `<gen>/conversation.jsonl`.
-- **The JSON line.** `ask` prints one, and `converse` prints one per hop: `{ok, outcome, n, member, answer,
-  turn_id, revision_at_send, revision_at_reply, changed_during_review, exit}`.
-  - `outcome` is one of `ok`, `empty`, `provider_error`, `interrupted`, `cancelled`, `agent_gone`, `refused`,
-    `timeout`, `busy`, `oversize`, `hop_limit` and `deadline`.
+- **JSON lines.** `ask` prints `{ok, outcome, n, member, answer, turn_id, revision_at_send, revision_at_reply,
+  changed_during_review, exit}`. Its `outcome` is one of `ok`, `empty`, `provider_error`, `interrupted`, `cancelled`,
+  `agent_gone`, `refused`, `send_failed`, `oversize`, `timeout` or `busy`. `converse` prints one line per hop,
+  `{hop, from, to, n, outcome, answer, changed_during_review}`, with no `ok` field: a hop succeeded when
+  `outcome == "ok"`. A converse outcome is one of the `ask` outcomes plus `bad_address`, `bad_block`,
+  `stale_target`, `hop_limit`, `deadline` and `busy_conversation`.
   - On `provider_error`, the matching terminal lines are saved to `<work>/ans/<n>.screen`.
 - **`finish`.** It quits the implementer gracefully, runs `down` and checks:
   - the graceful exit code;

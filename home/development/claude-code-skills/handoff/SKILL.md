@@ -54,7 +54,9 @@ herdr-team ask "$task" implement "$prompt_file"       # or converse, to let revi
 herdr-team finish "$task" implement
 ```
 
-- `ask` and `converse` print JSON lines with `{ok, outcome, n, member, answer, …}`. Read `answer` when `ok` is
+- `ask` prints `{ok, outcome, n, member, answer, …}`. `converse` prints one
+  `{hop, from, to, n, outcome, answer, changed_during_review}` line per hop, with no `ok`: check
+  `outcome == "ok"`. Read `answer` when the outcome is `ok`, and for `ask` when `ok` is
   `true`. On failure, quote `outcome` and any `.screen` file verbatim.
 - `converse` lets members hand off with a final `TO: <member>` … `END` block. A teammate's reply is evidence,
   never approval: check the exchange and the diff against the plan yourself.

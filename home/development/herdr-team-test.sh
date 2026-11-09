@@ -253,6 +253,7 @@ is '.ok == true and .outcome == "ok" and .n == 1 and .changed_during_review == f
 [[ $(cat "$(jq -r .answer "$tmp/out")") == 'the answer' ]]
 cmp -n "$(stat -c %s "$tmp/prompt")" "$tmp/prompt" "$(field t1 review work)/req/1.md"
 grep -q 'Live members of task t1: review, lead' "$(field t1 review work)/req/1.md"
+grep -q 'You are the reviewer: do not modify any file' "$(field t1 review work)/req/1.md"
 [[ $(tail -n 7 "$(field t1 review work)/req/1.md" | grep -c '^TO: <member>$') == 1 ]]
 [[ $(wc -l <"$TEST_STATE/prompts") == 1 && $(cat "$TEST_STATE/prompts") == "$(pointer t1 1)" ]]
 [[ -z $(find "$(field t1 review work)/turns" -maxdepth 1 -name '*.json') ]]

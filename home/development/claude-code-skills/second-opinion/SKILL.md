@@ -36,7 +36,7 @@ dispatcher for arbitrary work.
   instruction, not a barrier: by owner decision
   (Issue #2812), Codex runs with `--dangerously-bypass-approvals-and-sandbox`
   and agy runs with `--dangerously-skip-permissions --mode plan`, without the
-  sandbox wrappers. Both Codex review paths carry "Do not modify anything"
+  sandbox wrappers. Every Codex review path carries "Do not modify anything" (the herdr `review` member gets it in its protocol)
   (`exec` in its prompt file, and `review` through its base instruction), and
   you must check `git status --porcelain` before and after every review and
   report any change. Ollama's MCP tool cannot reach the filesystem at all.
@@ -110,7 +110,9 @@ herdr-team down "$task"
 revision_at_send, revision_at_reply, changed_during_review, exit}`. `outcome`
 is `ok`, `empty`, `provider_error`, `interrupted`, `cancelled`, `agent_gone`,
 `refused`, `timeout`, `busy`, `oversize`, `hop_limit` or `deadline`.
-`converse` prints one such line per hop, with `from` and `to`.
+`converse` prints one `{hop, from, to, n, outcome, answer, changed_during_review}` line per hop, with no
+`ok`: check `outcome == "ok"`. Its outcomes add `bad_address`, `bad_block`, `stale_target`, `hop_limit`,
+`deadline` and `busy_conversation`.
 
 - When `ok` is `true`, read the file at `answer`. Check
   `changed_during_review`.

@@ -1,5 +1,4 @@
-# The sandbox wrappers and the notify sink. A separate file because codex-cli.nix and
-# antigravity-config.nix call agent-implement by its store path, so an undeployed build tests its own chain.
+# The sandbox wrappers (unused by default since #2812, kept for a revert) and the notify sink.
 { pkgs, lib }:
 let
   herdr-team-sink = pkgs.writeShellApplication {

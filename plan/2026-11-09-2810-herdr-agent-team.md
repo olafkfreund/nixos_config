@@ -574,3 +574,19 @@ Status: approved by the owner, 2026-11-09. Spec "Amendment 2" carries the decisi
       unrestricted, and list what is instruction-only.
 
     → verify by `herdr-team-test.sh`, the sink `checkPhase` and the `home.path` build.
+
+**Steps 3c and 6b done (2026-11-09).**
+
+- **3c (coder):** members launch through `agent-env`, so `NIX_CONFIG` and tokens are stripped, and are tested
+  with decoys. The implementer goes through main's `codex-implement`, which is stronger than the inline launch
+  the plan named because it adds the guard preflight. Work dirs are 0700. The trust key is emitted once in a
+  plain repo. The sink takes an optional turns dir.
+- **Merge with main:** `codex-cli.nix` and `antigravity-config.nix` are taken from main (#2812). Step 1's
+  `--work`/`--tui` passthrough is dropped.
+- **6b (lead):** the docs match both amendments. Lead fixes from the Opus review of PR #2815:
+  - the `review` member's protocol says "do not modify any file", with a test;
+  - the docs give `converse`'s real per-hop line and the full outcome lists;
+  - the stale-clone check tests `Cargo.toml` + `SKILL.md`, since the clones have no `.git`;
+  - a stale comment is corrected.
+- **Test fixes found while pushing:** six bare `! cmd` assertions could never fail under `set -e`. They now
+  `die`, and all groups pass.
