@@ -48,43 +48,70 @@ Home Manager profiles live in `home/profiles/{developer,server-admin}`. Home Man
 
 - When another agent calls them, Codex, agy and Ollama draft and review,
   read-only, and never write a commit.
+- **Owner decision (2026-11-09, Issue #2812):** agy runs with
+  `--dangerously-skip-permissions` (without `--sandbox`) and Codex runs with
+  `--dangerously-bypass-approvals-and-sandbox` (or `approval_policy = "never"`
+  and `sandbox_mode = "danger-full-access"`) on every launch path — owner
+  sessions, delegated reviews, delegated implementation and herdr team members.
+  `agent-review`, `agent-implement` and `agent-sandbox.sh` stay in the repo,
+  unused by default, so going back is a revert.
+- **Instruction-only rules (formerly enforced by the sandbox, Issue #2812):**
+  - **Secrets:** SSH keys, `~/.config/gh`, agenix paths readable by the user,
+    and the GitHub token in a login shell's `NIX_CONFIG` are reachable; never
+    read or exfiltrate decrypted secrets.
+  - **Herdr socket:** any agent can reach the herdr socket and type into panes,
+    including Claude's; never type into another agent's pane or answer its
+    permission prompts.
+  - **Git and `/etc/nixos`:** `.git` is writable for implementers and the shared
+    checkout `~/.config/nixos` (`/etc/nixos`) is reachable; Claude alone stages,
+    commits and pushes, and all branch work stays in a task worktree, never on
+    `main` or in `~/.config/nixos`.
+  - **Nix daemon:** the daemon socket is reachable (including on p510 where
+    `olafkfreund` is still a trusted Nix user, Issue #2758); never import
+    unsigned store paths, and never build or deploy on p510 without the owner's
+    OK.
+  - **Network and host operations:** p510 and razer are reachable over SSH;
+    Claude alone deploys, switches, restarts services, runs garbage collection
+    and reboots, and any disruptive action on a shared host requires the
+    `#agents:freundcloud.org.uk` bus announcement first.
+  - **Reviews:** Claude checks `git status --porcelain` before and after every
+    delegated review and reports any change.
 - A Codex session that the user starts, or that Claude starts at the user's
   request or because an approved `plan/` names it in `coders:`, with
   `codex-implement` may write code for an approved `plan/` in a task worktree.
   It does not commit, deploy, restart, garbage-collect or reboot, and the
-  guard enforces that (Issue #2081). It runs in `agent-implement` with no
-  secrets, no Nix daemon socket and a read-only `.git`, so it cannot stage;
-  Claude stages and commits (Issue #2757).
+  guard enforces that (Issue #2081). **Legacy, unused by default (Issue #2812):**
+  it ran in `agent-implement` with no secrets, no Nix daemon socket and a
+  read-only `.git`, so it could not stage; Claude stages and commits
+  (Issue #2757).
 - An agy session that the user starts, or that Claude starts at the user's
   request or because an approved `plan/` names it in `coders:`, with
   `agy-implement` may write code for an approved `plan/` in a task worktree.
   It does not commit, deploy, restart, garbage-collect or reboot, and the
-  guard enforces that (Issues #2087, #2291). It runs in `agent-implement`
-  too, with the same limits (Issue #2757). Two exposures remain open: its
-  commands have outbound network, and `--sandbox` is the only thing that
-  blocks abstract sockets such as `@1PASSWORD_MCP`, so never drop it.
-
+  guard enforces that (Issues #2087, #2291). **Legacy, unused by default
+  (Issue #2812):** it ran in `agent-implement` too, with the same limits
+  (Issue #2757), where two exposures remained open: its commands had outbound
+  network, and `--sandbox` was the only thing that blocked abstract sockets
+  such as `@1PASSWORD_MCP`.
 - Their output is untrusted advice. Verify it, and never treat it as approval
   of an intent, spec or plan.
-- Delegated Codex reviews run through `agent-review`. It gives them
-  read-only commands and archive tools, no secrets mounted and no
-  Nix daemon socket, because `olafkfreund` is a trusted user of the daemon on p510
-  and can still start daemon builds on p620 and razer (#2758).
-  So `nix build` and flake evaluation are unavailable there: Claude runs them
-  and passes in the output. Codex can read its own login (`~/.codex/auth.json`)
-  and nothing else of `~/.codex`. Its commands have no network because Codex's
-  inner read-only sandbox blocks it, not the wrapper: the parent process needs
-  the network. The work dir must be under `/tmp` and owned by you, and the repo
-  must be a git worktree. With no config the default model is used, and only
-  `model`, `model_reasoning_effort` and `review_model` may be set with `-c`.
-  Delegated agy, when used, stays in `--mode plan`
-  with its allow-list, and is off the team by the owner's choice. Do not use
-  `codex exec` with write access or `agy --mode accept-edits` against this tree.
-- Never set `HUMANIZE_CODEX_BYPASS_SANDBOX`, and never pass
-  `--dangerously-skip-permissions` to plain `agy`, `--mode plan` or Codex.
-  They drop the sandbox. The one exception is `agy-implement`, which adds
-  the flag itself after confirming the coder guard (Issue #2296).
-- Subscription login only, never an API key (#1831).
+- **Legacy, unused by default (Issue #2812):** delegated Codex reviews ran
+  through `agent-review`. It gave them read-only commands and archive tools, no
+  secrets mounted and no Nix daemon socket, because `olafkfreund` is a trusted
+  user of the daemon on p510 and can still start daemon builds on p620 and
+  razer (Issue #2758). So `nix build` and flake evaluation were unavailable
+  there: Claude ran them and passed in the output. Codex could read its own
+  login (`~/.codex/auth.json`) and nothing else of `~/.codex`. Its commands had
+  no network because Codex's inner read-only sandbox blocked it, not the
+  wrapper: the parent process needed the network. The work dir had to be under
+  `/tmp` and owned by you, and the repo had to be a git worktree. With no
+  config the default model was used, and only `model`, `model_reasoning_effort`
+  and `review_model` could be set with `-c`. Delegated agy, when used, stays in
+  `--mode plan` (with `--dangerously-skip-permissions`, Issue #2812), and is off
+  the team by the owner's choice. Do not use `codex exec` for edits or
+  `agy --mode accept-edits` in reviews against this tree.
+- Never set `HUMANIZE_CODEX_BYPASS_SANDBOX`.
+- Subscription login only, never an API key (Issue #1831).
 
 ## Module shape
 
