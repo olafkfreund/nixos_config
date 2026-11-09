@@ -24,6 +24,7 @@
 }:
 let
   cfg = config.programs.antigravityConfig;
+  agentImplement = (import ./agent-sandbox-pkgs.nix { inherit pkgs lib; }).agent-implement;
 
   geminiDir = "${config.home.homeDirectory}/.gemini";
 
@@ -181,6 +182,15 @@ let
       fi
     fi
 
+    pre=()
+    while [ $# -gt 0 ]; do
+      case "$1" in
+        --work) [ $# -ge 2 ] || { echo "agy-implement: --work needs a directory" >&2; exit 2; }; pre+=(--work "$2"); shift 2 ;;
+        --tui) pre+=(--tui); shift ;;
+        *) break ;;
+      esac
+    done
+
     model="--model gemini-4-argon-medium"
     for a in "$@"; do
       case "$a" in
@@ -194,7 +204,7 @@ let
 
     unset CASCADE_GLOBAL_CONFIG_OVERRIDE
     # shellcheck disable=SC2086
-    exec ${config.home.profileDirectory}/bin/agent-implement agy -- --mode accept-edits --sandbox --dangerously-skip-permissions $model "$@"
+    exec ${agentImplement}/bin/agent-implement agy "''${pre[@]}" -- --mode accept-edits --sandbox --dangerously-skip-permissions $model "$@"
   '';
 
   # Live check that the coder guard still denies what it should under the

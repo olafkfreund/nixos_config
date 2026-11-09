@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC2154 # root, common, home, safe_path and ro_paths are set by agent-sandbox.sh
+# shellcheck disable=SC2154 # root, common, home, safe_path, ro_paths and sink_path are set by agent-sandbox.sh and the Nix prefix
 # Runs codex-implement and agy-implement inside the sandbox (#2757). Concatenated after
 # agent-sandbox.sh by Nix. Neither tool is exec'd: the cleanup trap must run.
 set -euo pipefail
@@ -10,9 +10,28 @@ refuse() {
 }
 
 tool=${1:-}
-[[ $# -ge 2 && $2 == -- && ($tool == codex || $tool == agy) ]] \
-  || refuse 'usage: agent-implement <codex|agy> -- <tool arguments>'
-shift 2
+usage='usage: agent-implement <codex|agy> [--work <dir>] [--tui] -- <tool arguments>'
+[[ $# -ge 2 && ($tool == codex || $tool == agy) ]] || refuse "$usage"
+shift
+# --work and --tui are the wrapper's own; the tool never sees them.
+work='' tui=''
+while (($#)) && [[ $1 != -- ]]; do
+  case $1 in
+    --work)
+      [[ $# -ge 2 && -z $work ]] || refuse "$usage"
+      work=$2
+      shift
+      ;;
+    --tui)
+      [[ -z $tui ]] || refuse "$usage"
+      tui=1
+      ;;
+    *) refuse "$usage" ;;
+  esac
+  shift
+done
+[[ ${1:-} == -- ]] || refuse "$usage"
+shift
 [[ ! ${HUMANIZE_CODEX_BYPASS_SANDBOX+x} ]] || refuse 'HUMANIZE_CODEX_BYPASS_SANDBOX is set'
 # An exported function or LD_* would run inside the tools the sandbox is built from.
 # env -0: writeShellApplication's bash lacks the completion builtins, which made the old check a no-op (#2757).
@@ -34,6 +53,13 @@ check_config() {
   esac
 }
 
+# --work holds the pointer dirs; an output file inside it would be writable by the model.
+not_in_work() {
+  local p
+  p=$(realpath -m -- "$1")
+  [[ -z $work || ($p != "$work" && $p != "$work/"*) ]] || refuse "output file must not be inside the work dir: $1"
+}
+
 # Checks every argument before anything is created; the -o file is made afterwards.
 out_file=''
 set_out() {
@@ -42,9 +68,14 @@ set_out() {
 }
 
 check_codex_args() {
-  [[ ${1:-} == -p && ${2:-} == implement && ${3:-} == exec ]] \
-    || refuse 'codex arguments must start with: -p implement exec'
-  shift 3
+  if [[ -n $tui ]]; then
+    [[ ${1:-} == -p && ${2:-} == implement ]] || refuse 'codex arguments must start with: -p implement'
+    shift 2
+  else
+    [[ ${1:-} == -p && ${2:-} == implement && ${3:-} == exec ]] \
+      || refuse 'codex arguments must start with: -p implement exec'
+    shift 3
+  fi
   local arg expect=''
   for arg in "$@"; do
     case $expect in
@@ -130,8 +161,10 @@ protect_project_dirs() {
 }
 
 run_codex() {
-  local config
+  local config cfg=()
   check_codex_args "$@"
+  [[ -z $work ]] || sandbox_team_dirs "$work"
+  [[ -z $out_file ]] || not_in_work "$out_file"
   protect_project_dirs
   config=$(realpath -e -- "$home/.codex/implement.config.toml") || refuse 'missing ~/.codex/implement.config.toml'
   local binds=()
@@ -139,17 +172,21 @@ run_codex() {
     sandbox_check_out_file "$out_file"
     binds=(--bind "$out_file" "$out_file")
   fi
+  [[ -z $work ]] || binds+=(--ro-bind "$work/req" /run/herdr-team/req --bind "$work/turns" /run/herdr-team/turns)
+  [[ -z $tui ]] || cfg=(-c 'approval_policy="never"' -c "notify=[\"$sink_path\"]")
   sandbox_exec_bwrap --bind "$root" "$root" --ro-bind "$common" "$common" --bind "$tmp" "$tmp" \
     --ro-bind "$root/.codex" "$root/.codex" --ro-bind "$root/.gemini" "$root/.gemini" \
     --chdir "$root" --setenv TMPDIR "$tmp" --setenv CODEX_CODER 1 \
     --dir "$home/.codex" --bind "$home/.codex/auth.json" "$home/.codex/auth.json" \
     --ro-bind "$config" "$home/.codex/implement.config.toml" "${binds[@]}" \
-    -- codex -c forced_login_method=chatgpt -c 'mcp_servers={}' "$@"
+    -- codex -c forced_login_method=chatgpt -c 'mcp_servers={}' "${cfg[@]}" "$@"
 }
 
 run_agy() {
   local gemini=$home/.gemini rel log='' policy=()
   check_agy_args "$@"
+  [[ -z $work ]] || sandbox_team_dirs "$work"
+  [[ -z ${AGY_GUARD_LOG:-} ]] || not_in_work "$AGY_GUARD_LOG"
   protect_project_dirs
   # What configures agy or runs code stays read-only; antigravity-cli/bin must stay writable.
   # A trailing slash marks a directory the sandbox creates empty when it is missing.
@@ -165,6 +202,7 @@ run_agy() {
   done
   policy+=(--sub-ro "$root/.codex" --sub-ro "$root/.gemini")
   policy+=(--sub-tmpfs "$gemini/antigravity-browser-profile" --sub-tmpfs "$gemini/antigravity-backup")
+  [[ -z $work ]] || policy+=(--ro-to "$work/req" /run/herdr-team/req --rw-to "$work/turns" /run/herdr-team/turns)
   policy+=(--env AGY_CODER=1 --env "AGY_WORKTREE=$root")
   if [[ -n ${AGY_GUARD_LOG:-} ]]; then
     log=$AGY_GUARD_LOG

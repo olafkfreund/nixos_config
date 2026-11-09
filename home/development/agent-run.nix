@@ -1,5 +1,6 @@
 { pkgs, lib, ... }:
 let
+  sandbox = import ./agent-sandbox-pkgs.nix { inherit pkgs lib; };
   testPath = lib.makeBinPath (with pkgs; [ bash coreutils util-linux procps jq socat gnugrep gnused gawk findutils diffutils ]);
   herdr-run = pkgs.writeShellApplication {
     name = "herdr-run";
@@ -22,11 +23,8 @@ in
       runtimeInputs = with pkgs; [ git jq coreutils gnugrep herdr-run ];
       text = builtins.readFile ./agent-run.sh;
     })
-    (pkgs.writeShellApplication {
-      name = "agent-review";
-      runtimeInputs = with pkgs; [ bubblewrap git coreutils ];
-      text = builtins.readFile ./agent-sandbox.sh + builtins.readFile ./agent-review.sh;
-    })
+    sandbox.agent-review
+    sandbox.herdr-team-sink
     (pkgs.writeShellApplication {
       name = "agent-env";
       text = builtins.readFile ./agent-env.sh + ''
@@ -49,10 +47,6 @@ in
         runHook postCheck
       '';
     })
-    (pkgs.writeShellApplication {
-      name = "agent-implement";
-      runtimeInputs = with pkgs; [ bubblewrap git coreutils util-linux bash ];
-      text = builtins.readFile ./agent-sandbox.sh + builtins.readFile ./agent-implement.sh;
-    })
+    sandbox.agent-implement
   ];
 }

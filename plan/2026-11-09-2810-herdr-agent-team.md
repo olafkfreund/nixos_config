@@ -142,6 +142,20 @@ approves them.
      `agy-implement`'s own path;
    - Claude's Bash stdin is a socket, so the sink never reads stdin.
 
+   **Done (2026-11-09, coder; reviewed by a fresh Opus).** Deviations:
+   - the sink, `agent-review` and `agent-implement` are defined in a new `home/development/agent-sandbox-pkgs.nix`.
+     `agent-run.nix`, `codex-cli.nix` and `antigravity-config.nix` import it, so all three get the same store
+     paths;
+   - the wrappers get the sink's path from a `sink_path=` line that Nix prepends;
+   - agy `--tui` adds only the binds, since `check_agy_args` already allowed the interactive form;
+   - `--work` and `--tui` are independent options;
+   - the team-dir check is stricter than planned:
+     - the path must be under `/tmp` and lexically normalized, with no `.`, `..` or `//`;
+     - it must not overlap the repo, `.codex` or `.gemini`;
+     - it must not contain sockets;
+     - `req` and `turns` must not be writable by group or other;
+   - with `--work`, a Codex `-o` or an `AGY_GUARD_LOG` inside `<work>` is refused. The review found that hole.
+
 2. **Gate: live probes through the step 1 build** (lead, with no repo edits except recording the results in this
    plan).
    - Put `/tmp/hp-2810/bin` first on `PATH`, and check with `command -v` that every wrapper resolves there.

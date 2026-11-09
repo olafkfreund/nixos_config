@@ -80,6 +80,34 @@ sandbox_check_out_file() {
   [[ -f $lexical && ! -L $lexical && $(stat -c %h -- "$lexical") == 1 ]] || refuse 'output file is not a plain single-link file'
 }
 
+# <src> [<dst>]: src must be a real directory owned by the caller under /tmp, neither inside nor
+# around the repo or the login dirs; dst, when given, must lie under /run/herdr-team/.
+# Needs root, common and home.
+sandbox_check_team_bind() {
+  local src=$1 dst=${2:-} protected
+  [[ $(realpath -m -s -- "$src") == "$src" ]] || refuse "team dir must be a normalized absolute path: $src"
+  [[ $src == /tmp/* && -d $src && ! -L $src && -O $src ]] || refuse "team dir must be a real directory under /tmp owned by the caller: $src"
+  [[ $(realpath -m -s -- "$src") == "$(realpath -e -- "$src")" ]] || refuse 'team dir must not use symlinks'
+  [[ -z $dst || ($dst == /run/herdr-team/* && $(realpath -m -s -- "$dst") == "$dst") ]] || refuse 'team dir destination must be under /run/herdr-team/'
+  for protected in "$root" "$common" "$home/.codex" "$home/.gemini"; do
+    protected=$(realpath -m -- "$protected")
+    [[ $src != "$protected" && $src != "$protected/"* && $protected != "$src/"* ]] || refuse 'team dir overlaps a protected path'
+  done
+}
+
+# <work>: makes <work>/req and <work>/turns when missing and checks them. The caller binds them
+# at /run/herdr-team/req (read-only) and /run/herdr-team/turns; <work> itself is never bound.
+sandbox_team_dirs() {
+  local d
+  sandbox_check_team_bind "$1"
+  for d in req turns; do
+    [[ -e $1/$d || -L $1/$d ]] || mkdir -m 0700 -- "$1/$d" 2>/dev/null || refuse "cannot create $1/$d"
+    sandbox_check_team_bind "$1/$d" "/run/herdr-team/$d"
+    [[ -z $(find "$1/$d" -maxdepth 0 -perm /022) ]] || refuse "team dir must not be group or world writable: $1/$d"
+  done
+  [[ -z $(find "$1" -type s -print -quit) ]] || refuse 'team work dir must not contain sockets'
+}
+
 # sandbox_exec_bwrap <extra bwrap args…> -- <command…>. Needs root, home, safe_path.
 # The extra args come after the fixed mounts, so they can bind into /tmp and /home.
 sandbox_exec_bwrap() {
@@ -115,6 +143,7 @@ sandbox_exec_bwrap() {
 # Runs inside the new namespaces; sandbox_exec_unshare ships it with `declare -f`.
 # Arguments: tool_path run_path home uid gid, then the policy, `--`, the command.
 #   --rw DIR / --ro DIR   bind a host directory (--ro read-only), parents before children
+#   --rw-to SRC DST / --ro-to SRC DST   the same, bound at DST, which must be under /run/herdr-team/
 #   --file FILE           bind one host file read-write, last
 #   --sub-ro PATH         read-only bind in place; a trailing / makes a missing directory first
 #   --sub-mask PATH=SRC   bind the file SRC over PATH if PATH exists, read-only
@@ -127,10 +156,18 @@ sandbox_setup() {
   local tool_path=$1 run_path=$2 home=$3 uid=$4 gid=$5
   shift 5
   PATH=$tool_path
-  local kinds=() paths=() subs=() masks=() tmpfss=() chdir='' envs=()
+  local kinds=() paths=() dsts=() subs=() masks=() tmpfss=() chdir='' envs=()
   while (($#)); do
     case $1 in
-      --rw | --ro | --file) kinds+=("${1#--}") paths+=("$2") ;;
+      --rw | --ro | --file) kinds+=("${1#--}") paths+=("$2") dsts+=('') ;;
+      --rw-to | --ro-to)
+        [[ ${3:-} == /run/herdr-team/* && $3 != *..* ]] || {
+          echo 'sandbox: destination must be under /run/herdr-team/' >&2
+          exit 2
+        }
+        kinds+=("${1:2:2}") paths+=("$2") dsts+=("$3")
+        shift
+        ;;
       --sub-ro) subs+=("$2") ;;
       --sub-mask) masks+=("$2") ;;
       --sub-tmpfs) tmpfss+=("$2") ;;
@@ -164,7 +201,7 @@ sandbox_setup() {
 
   # Staging: whatever must survive the tmpfs covers goes through /mnt.
   mkdir /mnt/dev /mnt/resolve /mnt/nscd /mnt/mask
-  local i n
+  local i n dest
   for i in "${!paths[@]}"; do
     if [[ ${kinds[i]} == file ]]; then
       [[ -f ${paths[i]} && ! -L ${paths[i]} ]] || {
@@ -240,18 +277,20 @@ sandbox_setup() {
   fi
 
   for i in "${!paths[@]}"; do
+    dest=${dsts[i]:-${paths[i]}}
     if [[ ${kinds[i]} == file ]]; then
-      mkdir -p -- "$(dirname -- "${paths[i]}")"
-      [[ -e ${paths[i]} ]] || : >"${paths[i]}"
+      mkdir -p -- "$(dirname -- "$dest")"
+      [[ -e $dest ]] || : >"$dest"
     else
-      mkdir -p -- "${paths[i]}"
+      mkdir -p -- "$dest"
     fi
   done
   # File binds go last, after every directory bind, so none is hidden by a later one.
   for i in "${!paths[@]}"; do
     [[ ${kinds[i]} != file ]] || continue
-    mount --move "/mnt/s$i" "${paths[i]}"
-    [[ ${kinds[i]} != ro ]] || mount -o remount,bind,ro "${paths[i]}"
+    dest=${dsts[i]:-${paths[i]}}
+    mount --move "/mnt/s$i" "$dest"
+    [[ ${kinds[i]} != ro ]] || mount -o remount,bind,ro "$dest"
   done
 
   for p in "${subs[@]}"; do

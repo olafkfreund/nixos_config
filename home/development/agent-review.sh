@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC2154 # root, common, home and safe_path are set by agent-sandbox.sh
+# shellcheck disable=SC2154 # root, common, home, safe_path and sink_path are set by agent-sandbox.sh and the Nix prefix
 set -euo pipefail
 
 refuse() {
@@ -9,7 +9,9 @@ refuse() {
 
 tool=${1:-}
 [[ $tool != agy ]] || refuse 'agy is not yet supported (#2748)'
-[[ $tool == codex && $# -ge 3 && $3 == -- ]] || refuse 'usage: agent-review codex <work-dir> -- <tool arguments>'
+[[ $tool == codex && $# -ge 3 && ($3 == -- || $3 == --tui) ]] || refuse 'usage: agent-review codex <work-dir> (--tui [-c model=…] | -- <tool arguments>)'
+tui=''
+[[ $3 != --tui ]] || tui=1
 [[ ! ${HUMANIZE_CODEX_BYPASS_SANDBOX+x} ]] || refuse 'HUMANIZE_CODEX_BYPASS_SANDBOX is set'
 
 sandbox_repo_checks
@@ -33,6 +35,27 @@ for protected in "$root" "$common" "$home/.codex" "$home/.gemini"; do
 done
 
 shift 3
+# Interactive Codex for a herdr pane: only the pointer dirs are bound, never the work dir itself.
+if [[ -n $tui ]]; then
+  tui_cfg=()
+  while (($#)); do
+    [[ $1 == -c && $# -ge 2 ]] || refuse 'with --tui only -c model=… and -c model_reasoning_effort=… are allowed'
+    case $2 in
+      model=* | model_reasoning_effort=*) tui_cfg+=(-c "$2") ;;
+      *) refuse "config key not allowed: ${2%%=*}" ;;
+    esac
+    shift 2
+  done
+  sandbox_team_dirs "$work_dir"
+  sandbox_safe_path
+  rc=0
+  sandbox_exec_bwrap --ro-bind "$root" "$root" --ro-bind "$common" "$common" \
+    --ro-bind "$work_dir/req" /run/herdr-team/req --bind "$work_dir/turns" /run/herdr-team/turns \
+    --chdir "$root" --dir "$home/.codex" --bind "$home/.codex/auth.json" "$home/.codex/auth.json" \
+    -- codex -c forced_login_method=chatgpt -c 'mcp_servers={}' -c 'sandbox_mode="read-only"' \
+    -c 'approval_policy="never"' -c "notify=[\"$sink_path\"]" "${tui_cfg[@]}" || rc=$?
+  exit "$rc"
+fi
 # Other subcommands (mcp, login, sandbox) can change ~/.codex, which stays writable.
 [[ ${1:-} == exec || ${1:-} == review ]] || refuse 'only codex exec and codex review are allowed'
 

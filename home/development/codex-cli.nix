@@ -1,6 +1,7 @@
 { config, lib, pkgs, ... }:
 let
   bin = "${config.home.profileDirectory}/bin";
+  agentImplement = (import ./agent-sandbox-pkgs.nix { inherit pkgs lib; }).agent-implement;
   hookCmd = "${config.home.homeDirectory}/.local/bin/codex-nix-format";
 
   # Codex PostToolUse hook: format every .nix file an edit touched with
@@ -33,7 +34,15 @@ let
       echo "codex-implement: $req does not register $guard -- refusing to run (#2757)." >&2
       exit 1
     fi
-    exec "${bin}/agent-implement" codex -- -p implement "$@"
+    pre=()
+    while [ $# -gt 0 ]; do
+      case "$1" in
+        --work) [ $# -ge 2 ] || { echo "codex-implement: --work needs a directory" >&2; exit 2; }; pre+=(--work "$2"); shift 2 ;;
+        --tui) pre+=(--tui); shift ;;
+        *) break ;;
+      esac
+    done
+    exec "${agentImplement}/bin/agent-implement" codex "''${pre[@]}" -- -p implement "$@"
   '';
 in
 {
