@@ -359,7 +359,7 @@ sandboxes, the absence of herdr access, the pointer-only typing, and the authori
 
 Status: draft.
 
-#2812's approved intent extends "unrestricted" to the herdr team members: "Everything Claude starts". This
+Issue #2812's approved intent extends "unrestricted" to the herdr team members: "Everything Claude starts". This
 replaces the member sandboxes in Design §2 and step 1's `--tui` wrapper modes.
 
 ### Amendment 2 design
