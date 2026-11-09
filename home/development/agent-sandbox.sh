@@ -111,7 +111,11 @@ sandbox_team_dirs() {
 # Interactive Codex asks "Trust this folder?" for the main checkout, and its saved answer lives in the
 # unmounted ~/.codex/config.toml. Safe to pre-trust: the wrappers mask the repo's own .codex. Needs root, common.
 sandbox_trust_cfg() {
-  printf 'projects={"%s"={trust_level="trusted"},"%s"={trust_level="trusted"}}' "$root" "$(dirname -- "$common")"
+  if [[ $(dirname -- "$common") == "$root" ]]; then # a duplicate key makes Codex exit 1
+    printf 'projects={"%s"={trust_level="trusted"}}' "$root"
+  else
+    printf 'projects={"%s"={trust_level="trusted"},"%s"={trust_level="trusted"}}' "$root" "$(dirname -- "$common")"
+  fi
 }
 
 # sandbox_exec_bwrap <extra bwrap args…> -- <command…>. Needs root, home, safe_path.

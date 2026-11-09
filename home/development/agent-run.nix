@@ -19,7 +19,7 @@ let
   herdr-team = pkgs.writeShellApplication {
     name = "herdr-team";
     runtimeInputs = with pkgs; [ jq coreutils util-linux procps git gnugrep gnused gawk findutils ];
-    text = "agy_member=${lib.boolToString agyMember}\n" + builtins.readFile ./herdr-team.sh;
+    text = "agy_member=${lib.boolToString agyMember}\nsink_path=${sandbox.herdr-team-sink}/bin/herdr-team-sink\n" + builtins.readFile ./herdr-team.sh;
     checkPhase = ''
       runHook preCheck
       ${pkgs.stdenv.shellDryRun} "$target"

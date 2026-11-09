@@ -36,6 +36,18 @@ let
       [ ! -e "$t/turns/55555555-2222-3333-4444-555555555555.json" ]
       [ "$(ls -A "$t/turns" | wc -l)" = 3 ]
 
+      # an explicit turns dir: only a real 0700 directory owned by the caller
+      mkdir -m 700 "$t/own" "$t/loose"
+      chmod 755 "$t/loose"
+      ln -s "$t/own" "$t/link"
+      sink2() { ${pkgs.bash}/bin/bash "$t/sink" "$1" "$2" </dev/null; }
+      sink2 "$t/own" "$(payload agent-turn-complete $id hi)"
+      ${pkgs.jq}/bin/jq -e '.reply == "hi"' "$t/own/$id.json"
+      sink2 "$t/loose" "$(payload agent-turn-complete $id hi)"
+      sink2 "$t/link" "$(payload agent-turn-complete 66666666-2222-3333-4444-555555555555 hi)"
+      [ -z "$(ls -A "$t/loose")" ]
+      [ "$(ls -A "$t/own" | wc -l)" = 1 ]
+
       rm -rf "$t/turns"
       code=0; sink "$(payload agent-turn-complete $id hi)" || code=$?
       [ "$code" = 0 ]

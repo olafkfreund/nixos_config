@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
-# Codex notify hook for the herdr team (#2810). argv[1] is the turn payload; stdin is never read.
-# Writes the normalized turn file, refuses anything odd, and always exits 0 so it never disturbs the agent.
+# Codex notify hook for the herdr team (#2810). Usage: sink <turns-dir> <payload>, or the sandboxed form sink <payload>
+# with the turns dir /run/herdr-team/turns. An explicit dir must be a real 0700 directory owned by the caller.
+# stdin is never read. Writes the normalized turn file, refuses anything odd, and always exits 0.
 turns=/run/herdr-team/turns
+payload=${1:-}
+if [[ -d ${1:-} ]]; then
+  turns=$1
+  payload=${2:-}
+  [[ ! -L $turns && -O $turns && $(stat -c %a -- "$turns") == 700 ]] || exit 0
+fi
 set -C # the tmp file is created exclusively, never through an existing path
 
 emit() {
@@ -18,5 +25,5 @@ emit() {
   rm -f -- "$tmp"
 }
 
-emit "${1:-}" 2>/dev/null || true
+emit "$payload" 2>/dev/null || true
 exit 0
