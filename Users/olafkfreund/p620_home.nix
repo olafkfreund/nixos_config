@@ -35,6 +35,7 @@
   programs.gogDashboard = {
     enable = true;
     account = "olaf@freundcloud.com";
+    mailNotify = false; # Omamail notifies for new mail here; both showed every mail twice
   };
 
   # Claude Code statusline, themed from the base16 scheme.
