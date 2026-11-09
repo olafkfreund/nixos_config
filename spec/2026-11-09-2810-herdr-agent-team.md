@@ -357,7 +357,7 @@ sandboxes, the absence of herdr access, the pointer-only typing, and the authori
 
 ## Amendment 2 (2026-11-09, follows #2812): members run unrestricted
 
-Status: draft.
+Status: approved by the owner, 2026-11-09.
 
 Issue #2812's approved intent extends "unrestricted" to the herdr team members: "Everything Claude starts". This
 replaces the member sandboxes in Design §2 and step 1's `--tui` wrapper modes.

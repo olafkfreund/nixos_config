@@ -537,7 +537,7 @@ member-to-member messages relayed by `herdr-team converse`. All other decisions 
 
 ## Amendment 2 (2026-11-09, follows #2812): members run unrestricted
 
-Status: draft. Spec "Amendment 2" carries the decisions.
+Status: approved by the owner, 2026-11-09. Spec "Amendment 2" carries the decisions.
 
 3c. **Unrestricted members** (coder: the same step 3b agent, after 3b passes its tests).
     - **`home/development/herdr-team.sh`, the launcher's member commands:**
