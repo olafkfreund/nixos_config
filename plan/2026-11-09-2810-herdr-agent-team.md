@@ -418,6 +418,8 @@ approves them.
 
 ## Amendment 1 (owner, 2026-11-09): members talk to each other
 
+Status: approved by the owner, 2026-11-09.
+
 Spec "Amendment 1" replaces the decision "Lead is the hub", and the line "There is no `forward`", with
 member-to-member messages relayed by `herdr-team converse`. All other decisions stand.
 

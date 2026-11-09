@@ -292,6 +292,8 @@ Untrusted text never reaches a PTY either: only the fixed pointer line is typed,
 
 ## Amendment 1 (owner, 2026-11-09): members talk to each other
 
+Status: approved by the owner, 2026-11-09.
+
 **Owner's decision:** "I want the agents to open a new tab and panes in the new tab so I can see what is happening and
 then each of the subagent can talk to eachother. I want this to be the default way we create mixed teams from
 now." It replaces decision 4, "the lead is the hub", and the rejection of `forward`. Everything else stays: the
