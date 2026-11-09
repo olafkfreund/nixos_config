@@ -44,8 +44,7 @@ Conclusions:
   `#2794` already uses its `PreInvocation` event.
   - Plan step 1 finds the turn-end event: the one that fires once per turn and carries the reply or the transcript
     path. It probes in an isolated session without editing the synced `hooks.json`.
-  - If that event exists, a shell-gated entry calls the notify sink only when `HERDR_TEAM_WORK` is set. It is a
-    no-op in every other agy run, on every host, since the file syncs to p510 too. The member starts through
+  - If that event exists, the member is defined in Design §2 (`agy-implement`). It starts through
     `agy-implement`, which keeps its guard preflight and probe.
   - If no such event exists, agy stays on its headless paths (`agent-run`, the `second-opinion` blocks), as
     today.
@@ -71,27 +70,49 @@ Conclusions:
 
 ### 2. Members
 
-Each member is one process, with one role, bound at start.
+Each member is one process, with one role, bound at start. Inside its sandbox, a member sees three paths of its
+own:
+
+| Path inside the sandbox | Host path | Mode | Who writes it |
+| ----------------------- | --------- | ---- | ------------- |
+| `/run/herdr-team/req` | `<work>/req` | read-only | the lead |
+| `/run/herdr-team/turns` | `<work>/turns` | writable by the outer sandbox | the turn-end hook, run by the agent's own process |
+| the worktree | the worktree | read-only (`review`), or writable (`implement`) | the model (`implement` only) |
+
+`/run/herdr-team` is outside `/tmp` and outside the worktree, so a model's tool commands cannot write there:
+
+- `review`'s inner sandbox is read-only;
+- Codex's `workspace-write` allows only the cwd and temp directories;
+- agy's `--sandbox` is checked in plan step 1.
+
+So a forged turn file needs a sandbox escape, not just a shell command. `<work>` itself is never bound.
 
 - **`review`**: interactive Codex, read-only, lasting for the task.
-  - Started by a new `agent-review codex <work> -- tui` mode. It runs `codex` with no subcommand, and the
+  - Started by a new `agent-review codex <work> --tui` mode. It runs `codex` with no subcommand, and the
     wrapper itself, not the caller, sets:
-    - `sandbox_mode="read-only"` and `approval_policy="never"`, so no approval dialog can ever appear;
+    - `sandbox_mode="read-only"` and `approval_policy="never"`, so no approval dialog can appear;
     - `mcp_servers={}`;
-    - `notify=["<notify-sink>", "<work>/turns"]`.
-  - Today's refusals, mounts and env allow-list are unchanged: the worktree is read-only, and `<work>` is the
-    only writable bind.
-  - The caller may add only today's `-c` keys (`model`, `model_reasoning_effort`).
+    - `notify=["<notify-sink>"]`.
+  - The caller may add only today's keys (`model`, `model_reasoning_effort`). Today's refusals, mounts and env
+    allow-list are unchanged.
 - **`implement`**: interactive Codex for one plan step.
-  - Started through **`codex-implement`**, so its guard preflight runs, which execs `agent-implement`.
-    `agent-implement` gets an interactive form `-p implement` without `exec`, and a `--work <dir>` bind used only
-    by the notify sink. The wrapper sets `approval_policy="never"` and `notify`.
+  - Started through **`codex-implement --work <work> --tui`**, so the guard preflight runs. `codex-implement`
+    passes `--work` and `--tui` to `agent-implement` **before** its `--`, so neither reaches `codex`.
+    `agent-implement` binds the two `/run/herdr-team` paths and starts `codex -p implement` with no `exec`. The
+    profile file is mounted as today. The wrapper adds `approval_policy="never"` and `notify`.
   - The coder guard, no secrets, no Nix daemon socket and a read-only `.git` are unchanged.
-- **`agy-implement`** (conditional, see Scope): `agy-implement` with the work dir bound and
-  `HERDR_TEAM_WORK=<work>`, so the hook sink knows where to write. Its guard still denies model writes outside the
-  worktree. The sink is a hook process, not a model tool.
-- **`notify-sink`** is a tiny packaged script. It writes its JSON argument atomically to
-  `<work>/turns/<turn-id>.json`, and nothing else.
+- **`agy-implement`** (conditional, see Scope): `agy-implement --work <work> --tui`, with the same two binds.
+  - The synced `hooks.json` gets one turn-end entry, gated on `[ -d /run/herdr-team/turns ]`. It is a no-op in
+    every other agy run on every host, and it needs no env var. agy blocks every call when a hook fails, and the
+    file syncs to p510 too. So the entry always prints `{}` and exits 0, even when the sink is missing on that
+    host, as `nixi-working` does in #2794. Its normalized output is the same file shape as
+    Codex's: `{turn_id, input, reply, source: "agy"}`.
+  - Its guard still fences the model's writes to the worktree.
+- **`notify-sink`**: a tiny packaged script run by the agent process.
+  - It checks `type == "agent-turn-complete"`, and that `turn-id` matches `^[0-9a-f-]{36}$`.
+  - It writes `{turn_id, input: input-messages[-1], reply: last-assistant-message, source: "codex"}`
+    atomically (temp file plus rename) to `/run/herdr-team/turns/<turn-id>.json`.
+  - It does nothing else and exits 0.
 
 ### 3. `herdr-team`, a new command (`home/development/herdr-team.sh`, packaged in `agent-run.nix`)
 
@@ -100,59 +121,90 @@ It is separate from `agent-team on|off|status`. It runs only with `HERDR_ENV=1`;
 
 #### State and isolation
 
-- **One lock** for all state changes: `flock $XDG_RUNTIME_DIR/herdr-team/lock`.
+- **One lock** for state changes: `flock $XDG_RUNTIME_DIR/herdr-team/lock`. It is held only while state changes,
+  never while waiting for a turn, so a stalled `ask` cannot block `down`.
 - **State file:** `$XDG_RUNTIME_DIR/herdr-team/<task>.json`. It holds:
-  - a random generation id, plus the tab;
-  - per member: role, pane id, terminal id, pid, step, the `HEAD` and dirty state at start, and the pending
-    request;
+  - a random generation id `gen`, and the tab;
+  - per member: role, pane id, terminal id, the launcher's pid **and start time** (from `/proc/<pid>/stat`) and
+    pgid, the step, the start fingerprint (below), and the pending request;
   - the canonical worktree path;
-  - the lead's pid.
-- **Work dir:** `/tmp/herdr-team.<gen>.<member>.XXXXXX`, created by `mktemp -d`, mode 0700, one per member.
-  - It is the only writable bind for that member.
-  - It is checked with the rules `agent-review` already applies: owned by the caller, no symlinks, no sockets.
-  - Members never share one.
+  - the lead's pid and start time.
+- **Two dirs per member:**
+  - `<work>`: `/tmp/herdr-team.<gen>.<member>.XXXXXX` (`mktemp -d`, mode 0700), with `req/`, `turns/`,
+    `turns/done/` and `ans/`. It is checked as `agent-review` checks today: owned by the caller, no symlinks, no
+    sockets.
+  - `<ctl>`: `$XDG_RUNTIME_DIR/herdr-team/<gen>/<member>/`. It holds `launch`, `claim`, `status` and
+    `exit`, and is never bound into a sandbox.
 - **Refusals at `up`**, as `agent-run.sh:23-38` refuses them today: `~/.config/nixos`, branch `main`, and a path
   that is not a git worktree.
 - **Implementer checks at `up`:**
   - a dirty tree;
-  - a second implementer for the same canonical worktree, in any task's state file;
-  - a task name whose state file exists with live members.
+  - an existing implementer or finish reservation for the same canonical worktree, in any task's state file;
+  - a task name whose state file has live members.
+
+  A member counts as live only when its pid **and** start time still match.
+
+#### Launch
+
+`up` writes `<ctl>/launch` (mode 0700), then retries `pane run "exec bash <ctl>/launch || exit"` until
+`<ctl>/claim` appears, as `herdr-run.sh:260-270` does. The launcher runs in the pane, in the host PID namespace:
+
+1. It creates `<ctl>/claim`, and records its pid, start time and pgid.
+2. It starts a **watchdog** in the background. Every 30 s it checks the lead's pid and start time and the role's
+   maximum (8 h `review`, 3 h `implement`). When either fails, it sends TERM to the member's process group, then
+   KILL after 5 s.
+3. It runs the sandbox wrapper **in the foreground**, so the TUI keeps the pane's terminal:
+   `agent-env agent-review …`, `agent-env codex-implement …` or `agent-env agy-implement …`.
+4. When the wrapper exits, the launcher writes its exit code to `<ctl>/exit` (2 means refused), stops the
+   watchdog and exits. The pane ends with it, and no shell is left. `|| exit` also covers `exec` failing.
+
+`agent rename … <task>-<member>` runs only once herdr reports the expected kind on the recorded terminal.
 
 #### Subcommands
 
 | Subcommand | What it does |
 | ---------- | ------------ |
-| `herdr-team up <task> review` | Creates the tab `team <task>` if the task has none (`tab create --no-focus`). The member runs in the tab's own root pane, so no spare login shell is left. Later members `pane split --no-focus`. The pane gets `pane run "exec agent-env agent-review codex <work> -- tui"`, so the shell is replaced and the pane ends when the agent ends. Then `agent rename … <task>-review`, once herdr reports kind `codex` on that terminal |
-| `herdr-team up <task> implement --step <k>` | Same, with `exec agent-env codex-implement --work <work> …`, as `<task>-implement` |
-| `herdr-team ask <task> <member> <prompt-file>` | Refuses while that member has a request pending. Gives the request number `n` and copies the prompt to `<work>/req/<n>.md`, which the member can read. Sends **only** a fixed one-line pointer with `agent prompt`: `Request <gen>-<n>: read <work>/req/<n>.md and answer it in your reply.` Before sending, it checks the pane still has the recorded terminal id, kind `codex` and a live pid. Waits for a `turns/*.json` whose `input-messages` contain that exact pointer. Writes the reply to `<work>/ans/<n>.md` |
-| `herdr-team status <task>` | Members, pending requests and liveness, as JSON |
-| `herdr-team down <task> [member]` | Ends one member, or all. Closes the pane only if its terminal id matches (the `same_pane` check from `herdr-run.sh`). Waits for the pid to exit and kills it if needed, as `herdr-run.sh:28-42` does, then updates the state file |
-| `herdr-team finish <task> implement` | Ends the implementer **first** (`down`). Then runs `agent-run`'s checks against the start state: `HEAD` unchanged, a non-empty diff, nothing staged. Prints today's verdict JSON (`ok`, `reason`, `changed`, `head_moved`) |
+| `herdr-team up <task> review` | Creates the tab `team <task>` if the task has none. The first member takes the tab's root pane; later ones `pane split --no-focus`. Launches the member as above |
+| `herdr-team up <task> implement --step <k>` / `agy-implement --step <k>` | Same, after the implementer checks. Records the start fingerprint |
+| `herdr-team ask <task> <member> <prompt-file>` | Refuses with `busy` while that member has a request pending. Gives the request number `n`, copies the prompt to `<work>/req/<n>.md`, and checks the pane, terminal, kind and pid. Then types **only** the pointer `Request <gen>-<n>: read /run/herdr-team/req/<n>.md and answer it in your reply.` with `agent prompt`. Waits for a turn file whose `input` equals that pointer **exactly**. Moves every turn file it reads to `turns/done/`, so no file matches twice. Writes the reply to `<work>/ans/<n>.md` |
+| `herdr-team ask … --resume <n>` | Waits again for request `n` without typing anything |
+| `herdr-team status <task>` | Members, liveness, pending requests and exit codes, as JSON |
+| `herdr-team down <task> [member]` | Ends one member, or all. Marks a pending request `cancelled`. Sends TERM, then KILL, to the member's **process group**, checking pid and start time first so a reused pid is never signalled. Waits until the group is gone, then closes the pane if its terminal id still matches (`same_pane`, `herdr-run.sh`) |
+| `herdr-team finish <task> implement\|agy-implement` | Takes a **finish reservation** on the worktree, held until the verdict is written. Then `down`s the implementer and waits until it has exited. Then runs `agent-run`'s checks against the start state: the launcher's exit code is 0, `HEAD` is unchanged, the diff is non-empty, nothing is staged, and the last request's outcome was `ok`. Prints today's verdict JSON (`ok`, `reason`, `changed`, `head_moved`, plus `exit`) |
 
 #### Result of an `ask`
 
-Each `ask` prints one JSON line: `ok`, `reason`, `n`, `member`, `answer` (the path), `turn_id` and `revision`.
-`revision` is `HEAD` plus a hash of `git diff HEAD`, taken at send and again at reply;
-`changed_during_review: true` when they differ.
+Each `ask` prints one JSON line: `ok`, `outcome`, `n`, `member`, `answer` (the path), `turn_id`, `revision_at_send`
+and `revision_at_reply`. A revision is a fingerprint of:
 
-When `ok` is `false`, `reason` is one of:
+- `HEAD`;
+- `git diff HEAD --binary`;
+- each untracked, unignored file's path and content (`git ls-files -o --exclude-standard`).
 
-- `timeout`: the default is 900 s;
-- `agent_gone`: the pane, terminal or pid changed, or the agent exited;
-- `provider_error`: the turn completed with no assistant message, and the visible screen
-  (`pane read --source visible`) holds an auth, quota or capacity string, quoted verbatim;
-- `empty`: an empty reply;
-- `busy`: a request is already pending.
+`changed_during_review` is set when the two revisions differ. That catches a change between send and reply, not
+one that was reverted before the reply. A guaranteed snapshot is out of scope.
 
-A timed-out request stays pending until its turn file arrives or the member is downed. A late answer is filed
-under its own `n` and never under a later one. `ask --resume <n>` waits again without sending anything.
+| `outcome` | Meaning |
+| --------- | ------- |
+| `ok` | a turn file matched, with a non-empty reply |
+| `empty` | a turn matched with an empty reply |
+| `provider_error` | the visible screen (`pane read --source visible`, polled while waiting and checked at the end) shows an auth, quota, rate-limit or capacity string. It is quoted verbatim, whether or not a turn completed |
+| `interrupted` | the screen shows Codex's interrupted marker and no turn file arrived |
+| `cancelled` | the member was downed while the request was pending |
+| `agent_gone` | the pane, terminal, pid or start time changed, or `<ctl>/exit` exists. The exit code is included |
+| `refused` | the wrapper exited 2 at launch; its stderr line is in `<ctl>/status` |
+| `timeout` | none of these within the limit (default 900 s). The request stays pending for `--resume` |
+| `busy` | another request is already pending |
+
+A refusal or a provider error written as ordinary reply text is still `ok`. Telling that apart is the lead's
+reading of the answer, as it is today with `exec -o`.
 
 #### Lifetimes and crashes
 
-- Each member's launcher also runs a watchdog, as `herdr-run.sh:165-202` does. It ends the member when the lead's
-  pid is gone, or when the role's maximum is reached: 8 h for `review`, 3 h for `implement`.
-- A lead crash therefore ends the implementer's writable sandbox within a minute.
-- A failed `up`, at any point, downs whatever it started.
+- The watchdog ends a member within about 35 s of the lead dying, whether or not its pid was reused, because the
+  start time is checked.
+- A failed `up`, at any point, `down`s whatever it started.
+- `up` reports stale state files, whose members are no longer live, and removes them.
 
 ### 4. Who talks to whom (intent question 1)
 
@@ -192,6 +244,8 @@ Untrusted text never reaches a PTY either: only the fixed pointer line is typed,
   pointer line is typed.
 - **Giving members the socket or the herdr skill.** The socket controls every pane, including the lead's.
 - **`forward`.** It moves text without the lead checking it.
+- **Running the watchdog inside the sandbox.** The sandbox has its own PID namespace, so it cannot see the
+  lead's pid. The launcher runs the watchdog in the host namespace instead.
 - **Removing the headless path.** It is still needed outside herdr, and for agy.
 
 ## Risks
@@ -209,14 +263,21 @@ Untrusted text never reaches a PTY either: only the fixed pointer line is typed,
 - **Plan step 1, through the production wrappers in an isolated herdr session.** The rest of the plan waits on
   it:
   - herdr detects the agent;
-  - `notify` fires with the pointer and the reply;
+  - in the **interactive** TUI, not only `exec`, `notify` fires once per turn;
+  - `input-messages[-1]` is the pointer;
+  - an auth or quota error and an Esc-interrupted turn each show their own screen marker;
+  - a model shell command cannot write `/run/herdr-team/turns` (`implement`), or anything at all (`review`);
+  - for agy: the turn-end event, its payload, and that `--sandbox` blocks the same write;
   - inside the member, these all fail: connecting to every `~/.config/herdr/**/herdr.sock`, `herdr status`, and
     a write to the worktree (review), or `git add` (implement);
   - no fd above 2 points to a socket;
   - the caller's token-bearing `NIX_CONFIG` is absent and the sandbox's own value is exact;
   - when the agent exits, the pane ends, with no shell prompt.
 - **Package tests** (`checkPhase`, fake herdr in the style of `herdr-run-test.sh`):
-  - locking, generation ids, `busy`, a late answer filed under its own `n`, `--resume`;
+  - locking, generation ids, `busy`, a late answer filed under its own `n`, `--resume`, consumed turn files;
+  - a forged turn file (bad `turn-id`, symlink, wrong `type`), which the sink refuses;
+  - pid reuse, where the start time differs, which is never signalled;
+  - the finish reservation blocking a second implementer;
   - each failure reason;
   - `down` closes only matching panes;
   - `finish` downs before checking;
