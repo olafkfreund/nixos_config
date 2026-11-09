@@ -729,6 +729,7 @@ let
       # on Stop/Notification — all survive instead of clobbering each other.
       hooks = lib.zipAttrsWith (_event: lib.concatLists) [
         (cfg.settings.hooks or { })
+        cfg.extraHooks
         parrHooks
         agentTeamHooks
         notifyHooks
@@ -773,6 +774,13 @@ in
         Claude Code reads this with highest precedence and never writes back.
         Anything here is effectively unmodifiable from the CLI/UI.
       '';
+    };
+
+    # settings.hooks is a freeform value, so two modules defining one event conflict; these lists concatenate.
+    extraHooks = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.listOf lib.types.anything);
+      default = { };
+      description = "Hooks added per event to settings.hooks by modules that share an event.";
     };
 
     agentTeam.enable = lib.mkOption {
