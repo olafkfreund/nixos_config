@@ -19,6 +19,10 @@
       -- are overwritten on the next deploy.
       o.bind("SUPER + ALT + H", "Nixi companion: show or hide", "nixi-companion")
       o.bind("SUPER + ALT + SHIFT + S", "Nixi companion: listen", "nixi-companion listen")
+      -- size: SUPER+ALT+-/= are Omarchy's window nudges, so CTRL joins (keycodes, as Omarchy binds them: any layout)
+      o.bind("SUPER + CTRL + ALT + code:21", "Nixi companion: bigger", "nixi-companion size up")
+      o.bind("SUPER + CTRL + ALT + code:20", "Nixi companion: smaller", "nixi-companion size down")
+      o.bind("SUPER + CTRL + ALT + code:19", "Nixi companion: normal size", "nixi-companion size reset")
       -- Start him with the session: activation only restarts a running one, so a fresh host never got him.
       o.exec_on_start("nixi-companion show")
     '';
