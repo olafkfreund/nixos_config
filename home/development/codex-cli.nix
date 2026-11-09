@@ -1,7 +1,6 @@
 { config, lib, pkgs, ... }:
 let
   bin = "${config.home.profileDirectory}/bin";
-  agentImplement = (import ./agent-sandbox-pkgs.nix { inherit pkgs lib; }).agent-implement;
   hookCmd = "${config.home.homeDirectory}/.local/bin/codex-nix-format";
 
   # Codex PostToolUse hook: format every .nix file an edit touched with
@@ -34,15 +33,9 @@ let
       echo "codex-implement: $req does not register $guard -- refusing to run (#2757)." >&2
       exit 1
     fi
-    pre=()
-    while [ $# -gt 0 ]; do
-      case "$1" in
-        --work) [ $# -ge 2 ] || { echo "codex-implement: --work needs a directory" >&2; exit 2; }; pre+=(--work "$2"); shift 2 ;;
-        --tui) pre+=(--tui); shift ;;
-        *) break ;;
-      esac
-    done
-    exec "${agentImplement}/bin/agent-implement" codex "''${pre[@]}" -- -p implement "$@"
+    exec env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE \
+      -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY CODEX_CODER=1 "${bin}/codex" \
+      --dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt -p implement "$@"
   '';
 in
 {
@@ -66,10 +59,7 @@ in
   };
 
   # Complementary dev tooling that pairs well with AI-assisted coding.
-  # codex self-manages ~/.codex/config.toml, so Nix owns only whole files next
-  # to it (implement.config.toml). The activation entries below only ADD what
-  # is missing -- the nixd MCP server, the format and guard hooks, and
-  # review_model -- and never rewrite what is there.
+  # Codex owns ~/.codex/config.toml; activation edits its root keys in place.
   home.packages = with pkgs; [
     prettier
     eslint
@@ -82,17 +72,14 @@ in
   # Stable path, so the hooks.json entry and Codex's trust hash survive rebuilds.
   home.file.".local/bin/codex-nix-format".source = codexNixFormat;
 
-  # Implementation profile for `codex-implement` (#2081): write access, medium
-  # reasoning, no network in the sandbox.
+  # Implementation profile for `codex-implement` (#2081): Sol, medium reasoning.
   home.file.".codex/implement.config.toml".text = ''
-    # codex-implement profile (#2081): Sol, write access, guarded, no network.
+    # codex-implement profile (#2081): the launcher overrides sandbox and approval.
     model = "gpt-6-sol"
     model_reasoning_effort = "medium"
-    sandbox_mode = "workspace-write"
-    approval_policy = "on-request"
+    sandbox_mode = "danger-full-access"
+    approval_policy = "never"
 
-    [sandbox_workspace_write]
-    network_access = false
   '';
 
   # Never `exit` in an activation entry: they are concatenated into one script.
@@ -127,6 +114,42 @@ in
         tmp="$(mktemp)"
         { echo 'review_model = "gpt-6-astra"'; cat "$config"; } > "$tmp"
         $DRY_RUN_CMD install -m 0600 "$tmp" "$config"
+        rm -f "$tmp"
+      fi
+    '';
+
+    codexUnrestricted = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      config="$HOME/.codex/config.toml"
+      if [ -f "$config" ]; then
+        tmp="$(mktemp)"
+        ${pkgs.gawk}/bin/awk '
+          /^\[\[?[^]=]+\]\]?[[:space:]]*(#.*)?$/ { table = 1 }
+          !table && /^[[:space:]]*approval_policy[[:space:]]*=/ {
+            approval = 1; $0 = "approval_policy = \"never\""
+          }
+          !table && /^[[:space:]]*sandbox_mode[[:space:]]*=/ {
+            sandbox = 1; $0 = "sandbox_mode = \"danger-full-access\""
+          }
+          { lines[NR] = $0 }
+          END {
+            if (!approval) print "approval_policy = \"never\""
+            if (!sandbox) print "sandbox_mode = \"danger-full-access\""
+            for (i = 1; i <= NR; i++) print lines[i]
+          }
+        ' "$config" > "$tmp"
+        if ! ${pkgs.diffutils}/bin/cmp -s "$tmp" "$config"; then
+          backup="$HOME/.codex/.pre-2812-root-keys"
+          if [ ! -e "$backup" ]; then
+            old="$(mktemp)"
+            ${pkgs.gawk}/bin/awk '
+              /^\[\[?[^]=]+\]\]?[[:space:]]*(#.*)?$/ { table = 1 }
+              !table && /^[[:space:]]*(approval_policy|sandbox_mode)[[:space:]]*=/ { print }
+            ' "$config" > "$old"
+            $DRY_RUN_CMD install -m 0600 "$old" "$backup"
+            rm -f "$old"
+          fi
+          $DRY_RUN_CMD install -m 0600 "$tmp" "$config"
+        fi
         rm -f "$tmp"
       fi
     '';

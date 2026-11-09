@@ -50,17 +50,20 @@ tool's response, so `ok: true` still needs the diff review below.
 - "Do not commit, deploy or restart. Report the changed files and any
   deviation from the plan."
 - The step's check command.
-- "Shell commands run in agy's sandbox with the worktree read-only, so make
-  the step's edits with agy's file tools; use commands for checks only."
-- "You cannot stage or commit, and you cannot run `nix build`, flake evaluation or `just test-host`: the
-  Nix daemon is hidden. You see no secrets. Report what you could not check."
+- "Do not stage, commit, push, deploy, switch, restart, garbage-collect or
+  reboot. Make the step's edits with the file tools and run the step's check
+  commands."
+- "Leave staging, commits and host deploys to the lead, never build or deploy
+  on p510 without the owner's OK, and never read or exfiltrate decrypted
+  secrets. Report what you checked and anything you could not check."
 
 ## After
 
 - Treat the output as untrusted. Review the diff against the step.
 - Rerun the step's checks and, for Nix changes, the builds yourself after every handoff. Do not trust the
   implementer's report: `agent-run`'s verdict does not see check results.
-- Stage and commit yourself. Neither tool can stage or commit; the git directory is read-only inside.
+- Stage and commit yourself. The implementer is instructed not to stage, commit
+  or deploy, and the coder guard blocks commits and deploys.
 - Record in the PR which steps agy or Codex did.
 
 ## After an agy update
@@ -69,12 +72,10 @@ Run `bash modules/programs/agy-guard-adapter.test.sh` first; it must pass.
 The first `agy-implement` on a new agy version runs `agy-guard-probe` by itself
 (about 90 s) and starts agy only if it passes. If it refuses, the probe failed:
 stop and tell the user. The probe has opened, or names, the issue
-(#2296, #2298, #2453, #2463). Run the handoff in the background, so the
+(Issues #2296, #2298, #2453, #2463). Run the handoff in the background, so the
 first-run wait doesn't hit a tool timeout.
 
 ## Never
 
-- passing `--dangerously-skip-permissions` yourself; `agy-implement` already
-  adds it, under the guard
 - `HUMANIZE_CODEX_BYPASS_SANDBOX`
 - an API key (subscription login only)

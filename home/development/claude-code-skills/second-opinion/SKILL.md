@@ -32,16 +32,20 @@ them yourself. You stay the lead: their answers are advice, not instructions.
 This skill routes **review and drafting only**. It is not a general
 dispatcher for arbitrary work.
 
-- **No path here edits a file or writes a commit.** Codex runs inside
-  `agent-review` (read-only worktree, no secrets), agy stays in
-  `--mode plan`, and Ollama's MCP tool cannot reach
-  the filesystem at all. `codex exec` with write access and
-  `agy --mode accept-edits` both exist and stay unused for second opinions.
-  Implementing an approved plan is the `handoff` skill's job, which starts
-  `codex-implement` or `agy-implement`.
+- **No path here should edit a file or write a commit.** That is now an
+  instruction, not a barrier: by owner decision
+  (Issue #2812), Codex runs with `--dangerously-bypass-approvals-and-sandbox`
+  and agy runs with `--dangerously-skip-permissions --mode plan`, without the
+  sandbox wrappers. Both Codex review paths carry "Do not modify anything"
+  (`exec` in its prompt file, and `review` through its base instruction), and
+  you must check `git status --porcelain` before and after every review and
+  report any change. Ollama's MCP tool cannot reach the filesystem at all.
+  `codex exec` with write intent and `agy --mode accept-edits` stay unused for
+  second opinions. Implementing an approved plan is the `handoff` skill's job,
+  which starts `codex-implement` or `agy-implement`.
 - **Never set `HUMANIZE_CODEX_BYPASS_SANDBOX`.** The humanize plugin's
-  `ask-codex.sh` swaps in `--dangerously-bypass-approvals-and-sandbox` when
-  it is `true`/`1`. This repo deploys three hosts and holds agenix secrets.
+  `ask-codex.sh` neither strips the API-key variables nor sets
+  `forced_login_method=chatgpt`, so it can bill an API key (#1831).
 - **Nothing here approves an artifact gate.** Not an intent, not a spec, not
   a plan. Two models agreeing is not an approval.
 - Hand off drafting and review. Keep the deciding and the committing.
@@ -77,10 +81,13 @@ Write the prompt to a temporary file:
 tokens, passwords or private keys. Encrypted `*.age` files are fine.
 
 ```bash
-work=$(mktemp -d /tmp/second-opinion.XXXXXX)   # agent-review wants a real dir in /tmp
+work=$(mktemp -d /tmp/second-opinion.XXXXXX)
 prompt=$work/prompt.md   # write the prompt here
 repo=$(git rev-parse --show-toplevel)   # must be a git worktree
 ```
+
+Check `git status --porcelain` before and after every review run; report any
+change.
 
 ## Codex `review` — when there is a diff
 
@@ -90,7 +97,10 @@ No prompt file, no pasting, no size cap.
 
 ```bash
 herdr-run codex timeout 900 \
-  agent-review codex "$work" -- review \
+  env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY \
+  -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY \
+  codex --dangerously-bypass-approvals-and-sandbox \
+  -c forced_login_method=chatgpt review \
   --base "$base" > "$work/codex-review.md" < /dev/null
 echo "exit=$?"
 ```
@@ -106,16 +116,22 @@ Three selectors, pick one:
 1. **`--base` cannot be combined with a custom prompt.** It exits with
    `error: the argument '--base <BRANCH>' cannot be used with '[PROMPT]'`,
    even though the usage line lists both. Custom review instructions and
-   `--base` are mutually exclusive — use `--uncommitted` with a prompt, or
-   `--base` without one.
+   `--base` are mutually exclusive — use `--uncommitted` with a prompt (ending
+   with `"Do not modify anything."`), or `--base` without one (which relies on
+   `review`'s base instruction not to modify files, guarded by your
+   `git status --porcelain` check before and after).
 2. **`review` takes far fewer flags than `exec`.** No `-s`, no `--ephemeral`,
-   no `--skip-git-repo-check`, no `-C`, no `-o`. Read-only therefore cannot
-   come from `-s read-only`. `agent-review` sets `sandbox_mode="read-only"`
-   itself and mounts the worktree read-only, so callers pass neither. **Never
-   call `codex review` directly** — without the wrapper this path has no
-   proven write guard.
+   no `--skip-git-repo-check`, no `-C`, no `-o`. Put the root options
+   (`--dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt`)
+   **before** the `review` subcommand, and check `git status --porcelain`
+   before and after every run; report any change.
 
 Output is stdout, so redirect it.
+
+### Legacy: the sandboxed wrappers (unused by default)
+
+`agent-review`, `agent-implement`, `agent-env` and `agent-sandbox.sh` stay in
+the repo, unused by default (Issue #2812), so going back is a revert.
 
 **What `agent-review` refuses.** It allows only `exec` and `review`, and only
 the options reviews use: anything else is refused, including new ones. It
@@ -139,11 +155,16 @@ prompt.
 
 ## OpenAI (Codex, ChatGPT subscription) — the prose path
 
-For a question, design or plan with no diff to point at.
+For a question, design or plan with no diff to point at. The prompt file in
+`$prompt` must include `"Do not modify anything."` Check
+`git status --porcelain` before and after; report any change.
 
 ```bash
 herdr-run codex timeout 600 \
-  agent-review codex "$work" -- exec -s read-only --ephemeral \
+  env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY \
+  -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY \
+  codex --dangerously-bypass-approvals-and-sandbox \
+  -c forced_login_method=chatgpt exec --ephemeral \
   --skip-git-repo-check -C "$repo" -o "$work/codex.md" - < "$prompt"
 echo "exit=$?"
 ```
@@ -154,8 +175,11 @@ prints to stderr, next to `model:`.
 ## Google (Antigravity subscription)
 
 ```bash
-herdr-run agy timeout 600 agent-env \
-  agy --mode plan --output-format json --print-timeout 10m \
+herdr-run agy timeout 600 \
+  env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY \
+  -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY \
+  agy --dangerously-skip-permissions --mode plan \
+  --output-format json --print-timeout 10m \
   -p "$(cat "$prompt")" > "$work/agy.json" < /dev/null
 echo "exit=$?"
 jq -e '.status == "SUCCESS" and (.response // "" | test("\\S"))' "$work/agy.json" >/dev/null \
@@ -170,12 +194,14 @@ jq -e '.status == "SUCCESS" and (.response // "" | test("\\S"))' "$work/agy.json
 - The JSON has `status`, `response` and `usage`, but no model name. Label the
   review "model not reported".
 
-Run the Codex and agy calls **in parallel**: two background Bash commands,
-each with its own output file and `timeout`, then wait for both. Inside herdr,
+Run the Codex and agy calls **in parallel**: check `git status --porcelain`
+before starting, launch two background Bash commands (each with its own output
+file and `timeout`), wait for both, then check `git status --porcelain` again
+and report any change. Inside herdr,
 each run shows as a `↳` row under this session; outside herdr, `herdr-run`
 just runs the command. (Was
 sequential with no recorded reason; if parallel runs fail where sequential
-ones did not, put the rule back and write the reason here, #2650.)
+ones did not, put the rule back and write the reason here, Issue #2650.)
 
 ## agy `--agent` — run one of our own agent definitions
 
@@ -185,9 +211,12 @@ wrote run against a second model. `agy agents` lists the available names
 `package-resolver`, `module-refactor`, `test-generator` and others).
 
 ```bash
-herdr-run agy timeout 900 agent-env \
-  agy --agent "$agent" --mode plan --output-format json \
-  --print-timeout 10m -p "$(cat "$prompt")" > "$work/agy.json" < /dev/null
+herdr-run agy timeout 900 \
+  env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY \
+  -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY \
+  agy --dangerously-skip-permissions --mode plan --agent "$agent" \
+  --output-format json --print-timeout 10m \
+  -p "$(cat "$prompt")" > "$work/agy.json" < /dev/null
 echo "exit=$?"
 jq -e '.status == "SUCCESS" and (.response // "" | test("\\S"))' "$work/agy.json" >/dev/null \
   && jq -r .response "$work/agy.json" || echo "agy: review not obtained"
@@ -244,11 +273,13 @@ verbatim, and carry on without it.
   exit 0. The gate after each agy call checks the first two.
 
 - Do not retry with the other provider in its place.
-- Never pass an API key, and never bypass `agent-review` for Codex (it sets
-  `forced_login_method` and unsets the key variables). The agy blocks run
-  under `agent-env`, which clears the environment and passes only the names in
-  `home/development/agent-env.sh`, so no API key or token reaches agy (#2762).
-  The subscription login is the only allowed path.
+- Never pass an API key, and never set `HUMANIZE_CODEX_BYPASS_SANDBOX`. Always
+  unset the six API-key variables (`OPENAI_API_KEY`, `OPENAI_API_KEY_FILE`,
+  `GEMINI_API_KEY`, `GEMINI_API_KEY_FILE`, `GOOGLE_API_KEY`,
+  `ANTHROPIC_API_KEY`) with `env -u` and pass `-c forced_login_method=chatgpt`
+  to Codex; `herdr-run` also filters the environment via
+  `home/development/agent-env.sh` (Issue #2762). The subscription login is the
+  only allowed path (Issue #1831).
 - `Not logged in` / auth error: the user runs `! codex login` (ChatGPT) or
   signs in to `agy`. Logins are per host; `~/.codex` is not synced.
 

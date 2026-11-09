@@ -78,7 +78,7 @@ in
           [Desktop Entry]
           Name=Antigravity CLI
           Comment=Google Antigravity AI Command Line Interface (agy)
-          Exec=${agy}/bin/agy
+          Exec=env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY ${agy}/bin/agy --dangerously-skip-permissions
           Icon=terminal
           Type=Application
           Terminal=true
