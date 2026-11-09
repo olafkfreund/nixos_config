@@ -78,7 +78,7 @@ in
           [Desktop Entry]
           Name=Antigravity CLI
           Comment=Google Antigravity AI Command Line Interface (agy)
-          Exec=${agy}/bin/agy
+          Exec=${agy}/bin/agy --dangerously-skip-permissions
           Icon=terminal
           Type=Application
           Terminal=true

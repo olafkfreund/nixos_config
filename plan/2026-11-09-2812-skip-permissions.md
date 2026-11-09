@@ -75,6 +75,23 @@ These are the approved decisions, carried over from the spec. This plan stands o
    - `~/.codex/config.toml` is owned by Codex, so edit it, never replace it;
    - `$model` in `agy-implement` is intentionally unquoted (SC2086 disable already present).
 
+   **Done (2026-11-09, codex via agent-run, with lead fixes).** Deviations, from agy's spec and plan reviews and
+   the lead's review:
+   - `agy-guard-probe` drops action 5 (`BypassSandbox`) and its denied check. Without `--sandbox`, agy's
+     `run_command` has no `BypassSandbox` parameter, so the probe would fail and `agy-implement` would refuse on
+     the next agy update. The adapter's own check and its unit test stay, for a revert;
+   - `implement.config.toml` now says `sandbox_mode = "danger-full-access"` and `approval_policy = "never"`, so a
+     plain `codex -p implement` matches the launcher. The `[sandbox_workspace_write]` table is gone;
+   - `codex-project` (`codex-cli/module.nix`) wraps both Codex calls in the same `env -u` list;
+   - `codexUnrestricted` treats a line as a table header only when it is a real `[table]` or `[[array]]` header
+     at column 0. Codex's version also stopped at array-element lines, which could duplicate a root key.
+     Sample-file results: a missing file is left alone; profile-only keys are left alone and root keys are added;
+     different root values are rewritten and backed up; a root key after an array is found; a second run is a
+     no-op;
+   - checks: the p620 and razer `home.path` builds pass, and the p510 eval passes. The built `codex-implement`
+     and `agy-implement` no longer call `agent-implement` and carry `CODEX_CODER=1` and `AGY_CODER=1`. The `agy`
+     function passes `bash -n` and `zsh -n`, and its dry run adds the flag exactly once and strips all six keys.
+
 2. **Docs** (agy).
    - **`AGENTS.md`, "Delegating to other models":**
      - replace the ban at `:84` with the owner decision of 2026-11-09;

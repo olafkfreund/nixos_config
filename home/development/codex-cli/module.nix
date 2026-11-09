@@ -94,7 +94,7 @@ in
 
             # Rust codex has no --context-file; it appends piped stdin to the
             # prompt as a <stdin> block. Feed the gathered context that way.
-            "$CODEX_BIN" exec "$query" < "$context_file"
+            env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY "$CODEX_BIN" exec "$query" < "$context_file"
             rm "$context_file"
           }
 
@@ -114,7 +114,7 @@ in
               echo "  help     - Show this help"
               ;;
             *)
-              "$CODEX_BIN" "$@"
+              env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY "$CODEX_BIN" "$@"
               ;;
           esac
         '';
