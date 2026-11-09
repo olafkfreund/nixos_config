@@ -3,7 +3,7 @@ with lib; let
   cfg = config.features.nixiAgentHooks;
 
   # Agents whose approve and result hooks are installed.
-  approveAgents = [ ]; # set from probe P6/P9 (#211 step 1): "claude" and/or "codex" that passed P1-P7; agy is never in it
+  approveAgents = [ "codex" ]; # probes P1-P7 (#211, 2026-11-09): Codex passed; Claude failed P7 (first hook answer wins), agy has no hook
   has = a: elem a approveAgents;
 
   # One shell line for every hook: a no-op on hosts without nixi-companion.
