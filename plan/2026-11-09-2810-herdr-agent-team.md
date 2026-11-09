@@ -491,3 +491,11 @@ member-to-member messages relayed by `herdr-team converse`. All other decisions 
       - the hops land in `conversation.jsonl`;
       - `finish` gives `ok: true`;
       - `down` cleans up.
+    - **razer, after `just deploy-via-p620 razer`:** run the same scenario in razer's default herdr session. From
+      p620 the lead opens one pane over SSH (`herdr pane split --no-focus`, then `pane run` of a script). The
+      script does `up review`, `up implement --step 1` in a scratch worktree on razer, `converse`, `finish` and
+      `down`, and writes its JSON lines to a result file that the lead reads back. Check that the installed
+      `herdr-team`, `herdr-team-sink`, the wrappers and the skill are the deployed store paths.
+    - **Nix-deployable:** nothing is installed by hand. Every piece is a Home Manager package or file, and its
+      tests run in the package `checkPhase`. A host gets it by deploying main, and the nightly `system.autoUpgrade`
+      keeps p620 and razer on it.
