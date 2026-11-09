@@ -354,3 +354,42 @@ sandboxes, the absence of herdr access, the pointer-only typing, and the authori
   `finish` and diff review before any commit.
 - **Prompt injection between members.** The fixed untrusted header, plus the limits above. No relayed text ever
   reaches a terminal, a shell, a permission prompt or a command line.
+
+## Amendment 2 (2026-11-09, follows #2812): members run unrestricted
+
+Status: draft.
+
+#2812's approved intent extends "unrestricted" to the herdr team members: "Everything Claude starts". This
+replaces the member sandboxes in Design §2 and step 1's `--tui` wrapper modes.
+
+### Amendment 2 design
+
+- **Launch.** A member's launcher runs the tool directly, with the API-key `env -u` list. Every member gets
+  `-c notify=["<sink>","<work>/turns"]`, which gives the sink an explicit target dir, since `/run/herdr-team` no
+  longer exists outside a sandbox:
+  - `review`: `codex --dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt -c notify=[…]`,
+    plus the trust key;
+  - `implement`: `CODEX_CODER=1 codex --dangerously-bypass-approvals-and-sandbox … -p implement`. The coder guard
+    stays.
+- **The sink.** `herdr-team-sink` takes the turns dir as its first argument and refuses a dir that is not a real
+  0700 directory owned by the caller. The rest is unchanged: validation, never overwrite, always exit 0.
+- **Prompts.** A request file lives at `<work>/req/<n>.md`, an absolute path the member can read. The pointer
+  names that path instead of `/run/herdr-team/req/<n>.md`.
+- **Kept as before:** the team tab and panes, the pointer-only typing, exact turn matching, `converse` with its
+  grammar, bounds, per-hop identity checks and reservation, the watchdog, `finish`'s checks (C1's pinned
+  git dir included), and `down`.
+- **What becomes instruction-only for members**, accepted by the owner in #2812:
+  - a member can write its own or another member's turn files, so a forged answer is possible;
+  - a member can reach the herdr socket and type into any pane, including the lead's;
+  - the `review` role's read-only status is an instruction;
+  - a member can stage. The guard still blocks commits.
+
+  The lead's mechanical checks of the *outcome* remain: `finish`, the diff review, and the fact that only the
+  lead commits.
+
+### Amendment 2 risks
+
+- **A forged turn file or a pane takeover by a member.** Accepted (#2812). The JSONL log and the visible panes
+  make it observable, not preventable.
+- **The step 1 sandbox modes** (`agent-review --tui`, `agent-implement --work/--tui`) and the `/run/herdr-team`
+  binds become unused. They stay, with their tests, for a revert, as #2812 keeps the other wrappers.

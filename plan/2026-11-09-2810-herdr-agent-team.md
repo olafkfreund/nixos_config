@@ -534,3 +534,21 @@ member-to-member messages relayed by `herdr-team converse`. All other decisions 
     - **Nix-deployable:** nothing is installed by hand. Every piece is a Home Manager package or file, and its
       tests run in the package `checkPhase`. A host gets it by deploying main, and the nightly `system.autoUpgrade`
       keeps p620 and razer on it.
+
+## Amendment 2 (2026-11-09, follows #2812): members run unrestricted
+
+Status: draft. Spec "Amendment 2" carries the decisions.
+
+3c. **Unrestricted members** (coder: the same step 3b agent, after 3b passes its tests).
+    - **`home/development/herdr-team.sh`, the launcher's member commands:**
+      - `review`: `env -u <6 keys> codex --dangerously-bypass-approvals-and-sandbox
+        -c forced_login_method=chatgpt -c "notify=[\"<sink>\",\"<work>/turns\"]" -c "<trust key>"`;
+      - `implement`: the same, plus `CODEX_CODER=1` and `-p implement`, with cwd = the worktree.
+    - **The pointer** names `<work>/req/<n>.md`.
+    - **`home/development/notify-sink.sh`:** argv is `<turns-dir> <payload>`. Refuse unless the dir is a real
+      0700 directory owned by the caller.
+    - **Tests:** update the fake launch expectations; add a sink test for a bad turns dir.
+    - **Docs:** `second-opinion`, `handoff`, `AGENTS.md` and `docs/applications/herdr.md` say members run
+      unrestricted, and list what is instruction-only.
+
+    → verify by `herdr-team-test.sh`, the sink `checkPhase` and the `home.path` build.
