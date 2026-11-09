@@ -415,3 +415,79 @@ approves them.
   35 s of the lead dying anyway.
 - **Skill:** reverting removes the Home Manager links. The deleted July clone is not restored; `herdr --skill`
   regenerates it if wanted.
+
+## Amendment 1 (owner, 2026-11-09): members talk to each other
+
+Spec "Amendment 1" replaces the decision "Lead is the hub", and the line "There is no `forward`", with
+member-to-member messages relayed by `herdr-team converse`. All other decisions stand.
+
+3b. **`herdr-team converse`** (coder; a fresh agent).
+    - **`home/development/herdr-team.sh`:**
+      - add `converse <task> <member> <prompt-file> [--max-hops N]` (default 6, maximum 12), built on the
+        existing `ask`;
+      - parse the **last** `TO: <member>` … `END` block of each reply, delivering only to another live member
+        of the same task;
+      - `lead`, or no block, ends the exchange;
+      - an unknown member or itself gives `bad_address`, and nothing is delivered;
+      - write the relayed message to the target's `req/<n>.md`, behind the fixed untrusted header in spec
+        Amendment 1, followed by the protocol reminder. Never type it: only the existing pointer is typed;
+      - cap a message at 64 KiB, cutting and marking anything longer;
+      - every request file `ask` or `converse` writes gets the protocol reminder, naming the task's live members;
+      - print one JSON line per hop (`from`, `to`, `n`, `outcome`, `answer`), and append each to
+        `<gen>/conversation.jsonl`.
+    - **Lead fix**, from the live check: the lead is the parent of the caller's session leader when that parent
+      is a shell or `claude`, and otherwise the session leader. Claude's Bash tool starts each command in its own
+      session. Add a test that drives this with a fake process tree.
+    - **`home/development/herdr-team-test.sh`:**
+      - review → implement → review relayed over two hops;
+      - `lead` ends the exchange;
+      - the hop limit;
+      - `bad_address` (unknown and self);
+      - a 64 KiB cut;
+      - a relayed message containing a shell metacharacter line and a `/` line is never typed, and appears only
+        in `req/`;
+      - two `TO:` blocks, where only the last counts;
+      - the lead-pid walk.
+
+    - **Step 3 Opus review fixes** (they land in the same commit as step 3):
+      - **C1, git hijack:** the implementer can rewrite the worktree's `.git` gitfile to a dir with
+        `core.fsmonitor`, so the lead's `git` runs code outside the sandbox. In `up`, before the member
+        starts, record `git rev-parse --absolute-git-dir`. Run every later git call as
+        `git --git-dir=<recorded> --work-tree=<root> -c core.fsmonitor=false -c core.hooksPath=/dev/null …`;
+      - **H1, screen markers:** count provider-error and interrupted matches against a baseline taken at
+        send. A turn whose `input` matches the pointer beats a screen string;
+      - **H2:** `finish` refuses while a request is pending;
+      - **M1:** the fingerprint hashes only regular non-symlink files, and a symlink's target text, so a FIFO or
+        `/dev/zero` cannot hang it;
+      - **M2:** the `pane run` retry types again only when the pane's foreground is still the login shell (no
+        claim and no agent), so the launch line can never reach Codex's composer;
+      - **M3:** test `lead_pid`, including `claude` as its own session leader;
+      - **L1–L7:**
+        - the pgid gets its own start-time check;
+        - `refused` is reachable;
+        - late answers are filed under their own `n`;
+        - `finish` checks the agent kind;
+        - task names are validated in every subcommand;
+        - herdr calls are made outside the flock;
+        - add the missing tests.
+    → verify by `herdr-team-test.sh` and the `home.path` build.
+
+    Traps:
+    - message text never reaches `pane run`, `agent prompt` or a command line;
+    - jq builds every JSON;
+    - the flock is never held while waiting.
+
+6b. **Docs** (lead): in `second-opinion`, `handoff`, `AGENTS.md`, `docs/applications/herdr.md` and the managed
+    agent-team rules:
+    - inside herdr, mixed teams are a team tab plus `converse` by default;
+    - members can address each other, and the lead checks the outcome, not each message;
+    - the untrusted header and the hop limit.
+
+7b. **Live test from the lead's session** (lead), in the real default herdr session:
+    - `up review` and `up implement --step 1` in a scratch worktree;
+    - `converse` asks the implementer to write a file and the reviewer to review it, ending at `lead`;
+    - check:
+      - the tab and both panes are visible;
+      - the hops land in `conversation.jsonl`;
+      - `finish` gives `ok: true`;
+      - `down` cleans up.
