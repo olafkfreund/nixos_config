@@ -43,8 +43,9 @@ The session model (Opus) writes intent, spec and plan, and reviews. The
   `git diff`, so it does not share the coder's blind spots.
 - An approved `plan/` may name other implementers per step (`coders:`)
   and extra read-only reviewers (`reviewers:`). Follow it with the
-  `handoff` and `second-opinion` skills. Steps and reviews it does not name
-  follow the rules above.
+  `handoff` and `second-opinion` skills (inside herdr, they route through
+  `herdr-team`; agy steps stay on `agent-run` while `agyMember` is false).
+  Steps and reviews it does not name follow the rules above.
 - When the prompt hook says `agent-team: on`, Codex and agy are on the
   team for every task under the artifact workflow (not exempt ones):
   - Before stopping on an intent, spec or plan draft, review it with

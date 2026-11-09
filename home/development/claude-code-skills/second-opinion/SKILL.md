@@ -82,6 +82,39 @@ prompt=$work/prompt.md   # write the prompt here
 repo=$(git rev-parse --show-toplevel)   # must be a git worktree
 ```
 
+## Inside herdr: the team tab
+
+Inside herdr (`test "$HERDR_ENV" = 1`), route Codex reviews through `herdr-team`
+instead of one-shot headless runs. It keeps one interactive, read-only Codex
+`review` member warm across questions in the task's team tab. The headless
+blocks below stay as the fallback outside herdr (where every `herdr-team`
+command exits 2) and for agy.
+
+Start the reviewer once per task, ask each question from a prompt file, and tear
+the team down at the end:
+
+```bash
+herdr-team up "$task" review
+herdr-team ask "$task" review "$prompt"            # optional: --resume <n> --timeout <s>
+herdr-team status "$task"
+herdr-team down "$task"
+```
+
+`ask` prints one JSON line:
+`{ok, outcome, n, member, answer, turn_id, revision_at_send, revision_at_reply, changed_during_review, exit}`,
+where `outcome` is one of
+`ok|empty|provider_error|interrupted|cancelled|agent_gone|refused|timeout|busy`.
+
+- When `ok` is `true` (`outcome == "ok"`), read the file at `answer`. Check
+  `changed_during_review` to see whether the worktree changed while the review
+  was in flight.
+- When `ok` is `false`, the review was not obtained: quote `outcome` and, on
+  `provider_error`, the `.screen` file (`${answer%.md}.screen` in the member's
+  `ans/` directory) verbatim to the user, and carry on without it. On `timeout`,
+  `herdr-team ask "$task" review "$prompt" --resume "$n"` waits further without
+  re-typing the request.
+- Run `herdr-team down "$task"` when the task's reviews are done.
+
 ## Codex `review` — when there is a diff
 
 Preferred for anything already in git. Codex reads the diff itself, runs its

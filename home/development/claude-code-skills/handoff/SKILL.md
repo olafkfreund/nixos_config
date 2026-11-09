@@ -44,6 +44,32 @@ tool's response, so `ok: true` still needs the diff review below.
 `agent-run` uses agy's default model; for another one, run
 `herdr-run agy agy-implement --model <name>` directly and do the six checks by hand.
 
+### Inside herdr: `herdr-team`
+
+Inside herdr (`test "$HERDR_ENV" = 1`), run a Codex step in the task's team tab
+with `herdr-team`:
+
+```bash
+herdr-team up "$task" implement --step "$k"
+herdr-team ask "$task" implement "$prompt_file"
+herdr-team finish "$task" implement
+```
+
+- `ask` prints one JSON line
+  `{ok, outcome, n, member, answer, turn_id, revision_at_send, revision_at_reply, changed_during_review, exit}`
+  (`outcome` in
+  `ok|empty|provider_error|interrupted|cancelled|agent_gone|refused|timeout|busy`).
+  Read `answer` when `ok` is `true`; on failure, quote `outcome` and any
+  `.screen` file verbatim.
+- `finish` quits the implementer gracefully, runs `down`, checks the graceful
+  exit code, `HEAD`, non-empty diff against the start fingerprint, nothing
+  staged, and last `outcome == "ok"`, and prints
+  `{ok, reason, changed, head_moved, exit}`. Its verdict replaces `agent-run`'s.
+- An agy step goes through `herdr-team` only if step 4 of issue 2810 landed
+  (`agyMember = true`). Because step 4 was skipped, `herdr-team` refuses
+  `agy-implement` and agy steps stay on `agent-run agy "$prompt_file"`.
+- Outside herdr (`herdr-team` exits 2), nothing changes.
+
 ## Prompt template
 
 - The plan path, and the step number and text.

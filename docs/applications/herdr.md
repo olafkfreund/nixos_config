@@ -9,7 +9,7 @@ see across every project which agent is `working`, which is `blocked` waiting
 on you, and which is `done`.
 
 Installed on **p620 and razer** (the interactive-host developer profile), both
-on herdr 0.9.0. Not on p510.
+on herdr 0.9.5. Not on p510.
 
 ## What this repo owns, and what it does not
 
@@ -186,6 +186,44 @@ commands. Outside herdr it just runs the command.
   `home/development/agent-env.sh` (no tokens, no `HERDR_*`, no `SSH_AUTH_SOCK`),
   not the caller's whole environment. Outside herdr it gets the caller's
   (#2762).
+
+## Team tab
+
+`herdr-team` runs interactive, sandboxed Codex members in a per-task background
+tab (`<task>-review` and `<task>-implement`). The `review` member stays warm
+across questions for the whole task; `implement` runs one member per plan step.
+(`agy-implement` is refused while `agyMember` is false, so agy steps stay on
+`agent-run`.) Outside herdr, every `herdr-team` command exits 2.
+
+```bash
+herdr-team up <task> review
+herdr-team up <task> implement --step <k>
+herdr-team ask <task> <member> <prompt-file> [--resume n] [--timeout s]
+herdr-team finish <task> implement
+herdr-team status <task>
+herdr-team down <task> [member]
+```
+
+- `ask` copies `<prompt-file>` into the member's read-only `/run/herdr-team/req`
+  mount and types only a fixed pointer (`Request <gen>-<n>: read
+  /run/herdr-team/req/<n>.md and answer it in your reply.`). Completion comes
+  from the agent process's `notify` sink (`herdr-team-sink`) in
+  `/run/herdr-team/turns/<turn-id>.json`, which model shell commands cannot
+  write.
+- `ask` prints one JSON line:
+  `{ok, outcome, n, member, answer, turn_id, revision_at_send, revision_at_reply, changed_during_review, exit}`
+  with `outcome` in
+  `ok|empty|provider_error|interrupted|cancelled|agent_gone|refused|timeout|busy`.
+  On `provider_error`, the matching terminal lines are saved to
+  `<work>/ans/<n>.screen`.
+- `finish` quits the implementer gracefully, runs `down`, verifies the graceful
+  exit code, `HEAD`, a non-empty diff against the start fingerprint, nothing
+  staged, and last `outcome == "ok"`, and prints
+  `{ok, reason, changed, head_moved, exit}`.
+- Members run under `agent-env` inside `agent-review` or `codex-implement` with
+  no herdr socket or environment variables, and a per-member watchdog ends the
+  process group if the lead dies or the role timeout (8 h `review`, 3 h
+  `implement`) expires.
 
 ## Claude agent teams
 
