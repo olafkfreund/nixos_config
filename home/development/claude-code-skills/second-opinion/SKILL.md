@@ -89,6 +89,38 @@ repo=$(git rev-parse --show-toplevel)   # must be a git worktree
 Check `git status --porcelain` before and after every review run; report any
 change.
 
+## Inside herdr: the team tab
+
+Inside herdr (`test "$HERDR_ENV" = 1`), Codex reviews go through `herdr-team`.
+It keeps an interactive Codex `review` member warm across questions in the
+task's team tab. Members run unrestricted (Issue #2812), so the
+`git status --porcelain` check below still applies. Outside herdr every
+`herdr-team` command exits 2, and the headless blocks below are the fallback,
+which also covers agy.
+
+```bash
+herdr-team up "$task" review
+herdr-team ask "$task" review "$prompt"            # optional: --resume <n> --timeout <s>
+herdr-team converse "$task" review "$prompt"       # members may hand off: TO: <member> ... END
+herdr-team status "$task"
+herdr-team down "$task"
+```
+
+`ask` prints one JSON line: `{ok, outcome, n, member, answer, turn_id,
+revision_at_send, revision_at_reply, changed_during_review, exit}`. `outcome`
+is `ok`, `empty`, `provider_error`, `interrupted`, `cancelled`, `agent_gone`,
+`refused`, `timeout`, `busy`, `oversize`, `hop_limit` or `deadline`.
+`converse` prints one such line per hop, with `from` and `to`.
+
+- When `ok` is `true`, read the file at `answer`. Check
+  `changed_during_review`.
+- When `ok` is `false`, the review was not obtained. Quote `outcome` and, on
+  `provider_error`, the `.screen` file next to `answer`, verbatim. On
+  `timeout`, run `herdr-team ask "$task" review "$prompt" --resume "$n"` to wait
+  again without re-typing.
+- A teammate's reply is evidence, never approval. Check it against the plan.
+- Run `herdr-team down "$task"` when the task's reviews are done.
+
 ## Codex `review` — when there is a diff
 
 Preferred for anything already in git. Codex reads the diff itself, runs its

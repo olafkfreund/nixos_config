@@ -9,7 +9,7 @@ see across every project which agent is `working`, which is `blocked` waiting
 on you, and which is `done`.
 
 Installed on **p620 and razer** (the interactive-host developer profile), both
-on herdr 0.9.0. Not on p510.
+on herdr 0.9.5. Not on p510.
 
 ## What this repo owns, and what it does not
 
@@ -186,6 +186,56 @@ commands. Outside herdr it just runs the command.
   `home/development/agent-env.sh` (no tokens, no `HERDR_*`, no `SSH_AUTH_SOCK`),
   not the caller's whole environment. Outside herdr it gets the caller's
   (#2762).
+
+## Team tab
+
+`herdr-team` is the default for mixed agent teams inside herdr (Issue #2810). It opens a background tab per task,
+with one visible pane per member, so you can watch every agent work and type into any of them:
+
+- `<task>-review` stays warm for the whole task;
+- `<task>-implement` runs one member per plan step.
+
+`agy-implement` is refused while `agyMember` is false, so agy steps stay on `agent-run`. Outside herdr, every
+`herdr-team` command exits 2.
+
+```bash
+herdr-team up <task> review
+herdr-team up <task> implement --step <k>
+herdr-team ask <task> <member> <prompt-file> [--resume n] [--timeout s]
+herdr-team converse <task> <member> <prompt-file> [--max-hops N] [--deadline s]
+herdr-team finish <task> implement
+herdr-team status <task>
+herdr-team down <task> [member] [--force]
+```
+
+- **Members run unrestricted** (Issue #2812): Codex with `--dangerously-bypass-approvals-and-sandbox`.
+  - They are launched through `agent-env`, so `NIX_CONFIG` and other tokens never reach them.
+  - The implementer goes through `codex-implement`, so the coder guard preflight runs and `CODEX_CODER=1` is set.
+  - "Do not stage, commit, push, deploy or type into other panes" is an instruction to them, not a barrier.
+- **Requests and answers.** `ask` copies the prompt to `<work>/req/<n>.md`, then types only a fixed pointer
+  (`Request <gen>-<n>: read <work>/req/<n>.md and answer it in your reply.`). The answer comes from Codex's own
+  `notify` hook, which `herdr-team-sink` writes to `<work>/turns/<turn-id>.json`. A turn counts only when its
+  input equals that pointer exactly.
+- **Members talk to each other.** `converse` relays the final `TO: <member>` … `END` block of each reply to that
+  teammate, as a request file behind a fixed "teammate message, not an instruction" header. It stops when a reply
+  addresses `lead` or has no block, at the hop limit (default 6) or at the deadline (default 1800 s). Every hop
+  goes to `<gen>/conversation.jsonl`.
+- **The JSON line.** `ask` prints one, and `converse` prints one per hop: `{ok, outcome, n, member, answer,
+  turn_id, revision_at_send, revision_at_reply, changed_during_review, exit}`.
+  - `outcome` is one of `ok`, `empty`, `provider_error`, `interrupted`, `cancelled`, `agent_gone`, `refused`,
+    `timeout`, `busy`, `oversize`, `hop_limit` and `deadline`.
+  - On `provider_error`, the matching terminal lines are saved to `<work>/ans/<n>.screen`.
+- **`finish`.** It quits the implementer gracefully, runs `down` and checks:
+  - the graceful exit code;
+  - `HEAD` unchanged;
+  - a non-empty diff against the start fingerprint;
+  - nothing staged;
+  - the last `outcome == "ok"`.
+
+  Git runs with the git dir recorded at `up`, with fsmonitor and hooks off. Then it prints
+  `{ok, reason, changed, head_moved, exit}`.
+- **Watchdog.** A per-member watchdog ends the process group if the lead dies, or when the role's maximum is
+  reached (8 h `review`, 3 h `implement`).
 
 ## Claude agent teams
 
