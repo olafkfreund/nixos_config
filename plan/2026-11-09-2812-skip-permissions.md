@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2812
 spec: spec/2026-11-09-2812-skip-permissions.md
 coders:
