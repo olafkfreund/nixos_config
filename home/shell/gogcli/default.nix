@@ -114,6 +114,12 @@ in
       description = "How often to poll Gmail for new unread mail (systemd time span).";
     };
 
+    mailNotify = mkOption {
+      type = types.bool;
+      default = true;
+      description = "Pop up a notification for new unread Gmail. Turn off where a mail client (Omamail) already notifies, or every mail shows twice.";
+    };
+
     maxItems = mkOption {
       type = types.ints.positive;
       default = 6;
@@ -185,7 +191,7 @@ in
       };
     };
 
-    systemd.user.timers.gog-mail-watch = {
+    systemd.user.timers.gog-mail-watch = mkIf cfg.mailNotify {
       Unit.Description = "Poll Gmail for new unread mail";
       Timer = {
         OnBootSec = "2m";
