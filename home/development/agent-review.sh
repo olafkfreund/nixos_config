@@ -53,7 +53,7 @@ if [[ -n $tui ]]; then
     --ro-bind "$work_dir/req" /run/herdr-team/req --bind "$work_dir/turns" /run/herdr-team/turns \
     --chdir "$root" --dir "$home/.codex" --bind "$home/.codex/auth.json" "$home/.codex/auth.json" \
     -- codex -c forced_login_method=chatgpt -c 'mcp_servers={}' -c 'sandbox_mode="read-only"' \
-    -c 'approval_policy="never"' -c "notify=[\"$sink_path\"]" "${tui_cfg[@]}" || rc=$?
+    -c 'approval_policy="never"' -c "notify=[\"$sink_path\"]" -c "$(sandbox_trust_cfg)" "${tui_cfg[@]}" || rc=$?
   exit "$rc"
 fi
 # Other subcommands (mcp, login, sandbox) can change ~/.codex, which stays writable.

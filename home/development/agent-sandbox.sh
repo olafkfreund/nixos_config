@@ -108,6 +108,12 @@ sandbox_team_dirs() {
   [[ -z $(find "$1" -type s -print -quit) ]] || refuse 'team work dir must not contain sockets'
 }
 
+# Interactive Codex asks "Trust this folder?" for the main checkout, and its saved answer lives in the
+# unmounted ~/.codex/config.toml. Safe to pre-trust: the wrappers mask the repo's own .codex. Needs root, common.
+sandbox_trust_cfg() {
+  printf 'projects={"%s"={trust_level="trusted"},"%s"={trust_level="trusted"}}' "$root" "$(dirname -- "$common")"
+}
+
 # sandbox_exec_bwrap <extra bwrap args…> -- <command…>. Needs root, home, safe_path.
 # The extra args come after the fixed mounts, so they can bind into /tmp and /home.
 sandbox_exec_bwrap() {

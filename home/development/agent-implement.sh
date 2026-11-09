@@ -173,7 +173,7 @@ run_codex() {
     binds=(--bind "$out_file" "$out_file")
   fi
   [[ -z $work ]] || binds+=(--ro-bind "$work/req" /run/herdr-team/req --bind "$work/turns" /run/herdr-team/turns)
-  [[ -z $tui ]] || cfg=(-c 'approval_policy="never"' -c "notify=[\"$sink_path\"]")
+  [[ -z $tui ]] || cfg=(-c 'approval_policy="never"' -c "notify=[\"$sink_path\"]" -c "$(sandbox_trust_cfg)")
   sandbox_exec_bwrap --bind "$root" "$root" --ro-bind "$common" "$common" --bind "$tmp" "$tmp" \
     --ro-bind "$root/.codex" "$root/.codex" --ro-bind "$root/.gemini" "$root/.gemini" \
     --chdir "$root" --setenv TMPDIR "$tmp" --setenv CODEX_CODER 1 \

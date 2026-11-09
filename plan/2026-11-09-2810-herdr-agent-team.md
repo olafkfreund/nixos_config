@@ -187,6 +187,51 @@ approves them.
    - **Gate:** if any Codex check fails, stop and report to the owner. If only agy fails, step 4 is skipped and
      agy support stays off.
 
+   **Results (2026-11-09, lead, isolated session `t2810`, binaries from `/tmp/hp-2810`): Codex passed and agy did
+   not.**
+
+   | Check | `review` | `implement` |
+   | ----- | -------- | ----------- |
+   | 1. herdr reports kind `codex` | pass | pass |
+   | 2. one turn file per pointer turn, with `input` equal to the pointer | pass | pass |
+   | 3. a second turn keeps context | pass (recalled `ALPHA2810`) | not run |
+   | 4. Esc gives a stable marker and no turn file | pass: `■ Conversation interrupted` | not run |
+   | 5. a model write to `/run/herdr-team/{turns,req}` fails | pass (`Read-only file system`); worktree and `/tmp` also read-only | pass; the worktree write works |
+   | 6. no member socket attached to `herdr.sock` | pass (0 of 16 socket fds) | pass (0) |
+   | 7. `NIX_CONFIG` is exactly the sandbox value, with no `HERDR_*` and no `~/.config/herdr` | pass | pass |
+   | 8. graceful quit | pass: **one** `ctrl+c` while idle quits; a second one finds the agent gone | pass, exit **0** |
+   | 9. the pane ends with no shell | pass | pass |
+   | 10. `git add` fails | n/a | pass: `index.lock: Read-only file system` |
+
+   Findings:
+   - **Trust dialog (fixed here).** Interactive Codex stops at "Trust this folder?" for the **main checkout**
+     (`dirname $common`), because its saved trust lives in the unmounted `~/.codex/config.toml`. Both wrappers
+     now add `-c projects={"<root>"={trust_level="trusted"},"<main checkout>"={…}}` (`sandbox_trust_cfg` in
+     `agent-sandbox.sh`). This is safe because the wrappers mask the repo's own `.codex`. Verified: no dialog
+     after the fix.
+   - **Extra `notify` turns.** Interactive Codex also fires `notify` for its own title-generation turn
+     (`input` starts with "Generate a concise, single-line task title"). Exact pointer matching ignores it, and
+     step 3 must keep it ignored and move it to `turns/done/`.
+   - **Graceful quit:** `finish` sends one `ctrl+c`, and a second only if the agent is still live after 3 s.
+     Success means exit code 0.
+   - **Auth failure:** Codex exits at startup with exit 1 and
+     `Error: account/read failed during TUI bootstrap: …`, which surfaces as `agent_gone`. `<ctl>/status` keeps
+     the launcher's last stderr lines.
+   - **Provider-error strings,** taken from the codex-cli 0.167.0 binary, not reproduced:
+     - `Usage limit reached`, `You've reached your usage limit`, `You've reached your workspace credit limit`;
+     - `Selected model is at capacity`, `service unavailable`;
+     - `rate limit exceeded`, `rate limit reached`, `exceeded retry limit`;
+     - `Quota exceeded`, `stream disconnected before completion`.
+   - **agy: not established, so step 4 is skipped and `agyMember` stays false.**
+     - agy 1.5.3's turn-end event is `Stop`, documented in its binary. Its stdin carries `terminationReason`
+       (`NO_TOOL_CALL`, `ERROR`, `USER_CANCELED`, …) and the common fields (`conversationId`, `transcriptPath`,
+       …), but **no reply**.
+     - Mapping the reply means reading `transcriptPath`. That needs a live run with a registered hook, which
+       either edits the synced `hooks.json` (forbidden) or needs a throwaway login copy.
+     - Whether `agy --sandbox` blocks writes to `/run/herdr-team/turns` is also unverified.
+
+     A follow-up issue can finish it.
+
 3. **`herdr-team`** (coder): a new `home/development/herdr-team.sh` and `home/development/herdr-team-test.sh`,
    packaged in `home/development/agent-run.nix` like `herdr-run`, with `checkPhase` running the test. A Nix
    argument `agyMember ? false` is baked in as a constant.
