@@ -1,7 +1,9 @@
 { pkgs, lib, ... }:
 let
+  # The module system ignores argument defaults, so this is a binding; step 4 of the plan turns it on.
+  agyMember = false;
   sandbox = import ./agent-sandbox-pkgs.nix { inherit pkgs lib; };
-  testPath = lib.makeBinPath (with pkgs; [ bash coreutils util-linux procps jq socat gnugrep gnused gawk findutils diffutils ]);
+  testPath = lib.makeBinPath (with pkgs; [ bash coreutils util-linux procps jq socat gnugrep gnused gawk findutils diffutils git ]);
   herdr-run = pkgs.writeShellApplication {
     name = "herdr-run";
     runtimeInputs = with pkgs; [ jq socat coreutils util-linux procps gawk gnused ];
@@ -14,10 +16,23 @@ let
       runHook postCheck
     '';
   };
+  herdr-team = pkgs.writeShellApplication {
+    name = "herdr-team";
+    runtimeInputs = with pkgs; [ jq coreutils util-linux procps git gnugrep gnused gawk findutils ];
+    text = "agy_member=${lib.boolToString agyMember}\n" + builtins.readFile ./herdr-team.sh;
+    checkPhase = ''
+      runHook preCheck
+      ${pkgs.stdenv.shellDryRun} "$target"
+      ${lib.getExe pkgs.shellcheck-minimal} --exclude=SC2016 "$target" # jq filters are single-quoted on purpose
+      PATH=${testPath}:$PATH bash ${./herdr-team-test.sh} "$target" < /dev/null
+      runHook postCheck
+    '';
+  };
 in
 {
   home.packages = [
     herdr-run
+    herdr-team
     (pkgs.writeShellApplication {
       name = "agent-run";
       runtimeInputs = with pkgs; [ git jq coreutils gnugrep herdr-run ];

@@ -512,6 +512,28 @@ member-to-member messages relayed by `herdr-team converse`. All other decisions 
     - jq builds every JSON;
     - the flock is never held while waiting.
 
+    **Done (2026-11-09, coder; the first step 3 coder was stopped after an unknown party prompted it).** Every
+    test group passes in the `home.path` `checkPhase`. Each fix was mutation-checked (fix removed, test fails):
+    C1, H1, H2, per-hop identity, the reservation, the grammar, the 64 KiB cut, the UTF-8 boundary, the
+    FIFO/symlink guard and exact pointer match. `bad_address`, `bad_block`, the deadline, late-answer filing and
+    the lead walk were not mutation-tested.
+
+    Deviations:
+    - a turn matching the pointer now beats a screen string (H1), replacing the earlier `provider_error`-first
+      rule;
+    - `up` runs in phases, so herdr calls are outside the flock (L6);
+    - the pgid file holds `pgid start`;
+    - new outcomes: `hop_limit`, `deadline` and `oversize`;
+    - `converse --deadline` defaults to 1800 s;
+    - `conversation.jsonl` is in `<gen>/` and is removed with the generation;
+    - `down --force` added;
+    - a hidden `lead-pid` subcommand exists only for the self-test.
+
+    Known limits:
+    - C1 trusts `.git` at a new task's first `up`, so an earlier hijack would be recorded. Under Amendment 2,
+      members are unrestricted anyway;
+    - two concurrent `up`s of different roles in one task can fail with "tab still being created".
+
 6b. **Docs** (lead): in `second-opinion`, `handoff`, `AGENTS.md`, `docs/applications/herdr.md` and the managed
     agent-team rules:
     - inside herdr, mixed teams are a team tab plus `converse` by default;
