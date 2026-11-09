@@ -155,6 +155,7 @@ in
   };
 
   # Packages common to all interactive (non-headless) hosts
+  programs.herdrSkill.enable = true;
   home.packages = [
     # Antigravity IDE 2.0.1 — Google's rebranded Antigravity Desktop.
     # Local derivation in pkgs/antigravity-ide/. See pkgs/default.nix

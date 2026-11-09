@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC2015,SC2016
+# shellcheck disable=SC2015,SC2016,SC2034
 # Run by hand from a worktree: bash home/development/agent-implement.test.sh < /dev/null
 # Not part of checkPhase: the sandbox cases need user namespaces and a nix-store write (two tiny
 # fake tools). No login, no real codex or agy, and ~/.codex and ~/.gemini are fakes under a test HOME.
@@ -10,7 +10,10 @@ root=$(git rev-parse --show-toplevel) || exit 1
 cd "$root" || exit 1
 w=$(mktemp -d /tmp/agent-implement-test.XXXXXX)
 trap 'rm -rf "$w"' EXIT
-[[ -n ${AGENT_IMPLEMENT:-} ]] || cat "$here/agent-sandbox.sh" "$here/agent-implement.sh" >"$w/agent-implement"
+[[ -n ${AGENT_IMPLEMENT:-} ]] || {
+  echo 'sink_path=/nix/store/fake-herdr-team-sink'
+  cat "$here/agent-sandbox.sh" "$here/agent-implement.sh"
+} >"$w/agent-implement"
 script=${AGENT_IMPLEMENT:-$w/agent-implement}
 
 fail=0
@@ -86,6 +89,10 @@ done
     [ -d "$PWD/$pd" ] && ( : >"$PWD/$pd/x" ) 2>/dev/null && echo "project-dir-writable $pd"
   done
   [ -r "$PWD/.gemini/GEMINI.md" ] && echo gemini-tracked-readable
+  [ -d /run/herdr-team/req ] && echo team-req-visible
+  ( : >/run/herdr-team/req/.t ) 2>/dev/null && echo team-req-writable
+  ( : >/run/herdr-team/turns/probe-file ) 2>/dev/null && echo team-turns-writable
+  [ -e "$PWD/../team" ] && echo team-work-visible
   umount /home 2>/dev/null && echo umount-worked
   unshare -Urm umount /home 2>/dev/null && echo umount-nested-worked
   [ -n "$(ls -A /home 2>/dev/null)" ] && echo home-uncovered
@@ -161,6 +168,62 @@ for k in sandbox_mode mcp_servers model_provider approval_policy review_model; d
   refused "codex: -c$k" "${CX[@]}" "-c$k=v" -
   refused "codex: --config=$k" "${CX[@]}" "--config=$k=v" -
 done
+refused 'usage: --work without a value' codex --work
+refused 'usage: --work given twice' codex --work /tmp/a --work /tmp/b -- -p implement -
+refused 'usage: --tui given twice' codex --tui --tui -- -p implement -
+refused 'usage: unknown option before --' codex --foo -- -p implement exec -
+refused 'codex: --work after --' "${CX[@]}" --work /tmp/x -
+refused 'codex: --tui after --' "${CX[@]}" --tui
+refused 'agy: --work after --' "${AG[@]}" --work /tmp/x
+refused 'agy: --tui after --' "${AG[@]}" --tui
+refused 'codex --tui: exec still refused' codex --tui -- -p implement exec -
+refused 'codex --tui: other profile' codex --tui -- -p other
+for k in notify approval_policy sandbox_mode; do refused "codex --tui: -c $k" codex --tui -- -p implement -c "$k=v"; done
+refused 'codex: -c notify without --tui' "${CX[@]}" -c notify=v -
+refused 'codex: -c approval_policy without --tui' "${CX[@]}" -c approval_policy=v -
+mkdir -p "$w/team/req" "$w/team/turns" "$w/team2/req"
+ln -s "$w/team" "$w/teamlink"
+ln -s "$w/team/req" "$w/team2/req-link"
+ln -s "$w/team/turns" "$w/team2/turns"
+refused '--work: symlinked work dir' codex --work "$w/teamlink" --tui -- -p implement
+refused '--work: req is a symlink' codex --work "$w/team2" --tui -- -p implement
+mkdir -p "$w/team/sub" "$w/team3/req" "$w/team3/turns" "$w/team4/req" "$w/team4/turns"
+chmod 777 "$w/team3/req"
+refused '--work: parent is a symlink' codex --work "$w/teamlink/sub" --tui -- -p implement
+refused '--work: .. in the path' codex --work "/tmp/..$w/team" --tui -- -p implement
+refused '--work: .. into the worktree' codex --work "/tmp/..$repo" --tui -- -p implement
+refused '--work: .. into HOME' codex --work "/tmp/..$HOME/x" --tui -- -p implement
+refused '--work: trailing slash' codex --work "$w/team/" --tui -- -p implement
+refused '--work: req writable by others' codex --work "$w/team3" --tui -- -p implement
+if command -v python3 >/dev/null && python3 -c 'import socket,sys; socket.socket(socket.AF_UNIX).bind(sys.argv[1])' "$w/team4/s"; then
+  refused '--work: contains a socket' codex --work "$w/team4" --tui -- -p implement
+else skip '--work socket check: cannot create a unix socket'; fi
+if [ -d /tmp/.XIM-unix ] && [ ! -O /tmp/.XIM-unix ]; then
+  refused '--work: not owned by the caller' codex --work /tmp/.XIM-unix --tui -- -p implement
+else skip '--work not-owned check: no foreign dir under /tmp'; fi
+refused '--work: codex -o inside turns' codex --work "$w/team" --tui -- -p implement -o "$w/team/turns/x.json"
+refused '--work: codex -o inside req' codex --work "$w/team" --tui -- -p implement -o "$w/team/req/7.md"
+XENV=("AGY_GUARD_LOG=$w/team/turns/log")
+refused '--work: AGY_GUARD_LOG inside turns' agy --work "$w/team" --tui -- "${AG[@]:2}"
+XENV=()
+refused '--work: relative path' codex --work team --tui -- -p implement
+refused '--work: inside the worktree' codex --work "$repo" --tui -- -p implement
+refused '--work: around the worktree' codex --work "$w" --tui -- -p implement
+refused '--work: agy, symlinked work dir' agy --work "$w/teamlink" --tui -- "${AG[@]:2}"
+(
+  root=$repo common=$repo/.git home=$fh
+  source "$here/agent-sandbox.sh"
+  refuse() { exit 2; }
+  sandbox_check_team_bind "$w/team/req" /tmp/evil
+)
+[ $? -eq 2 ] && ok 'team bind destination /tmp/evil refused' || bad 'team bind destination /tmp/evil accepted'
+(
+  root=$repo common=$repo/.git home=$fh
+  source "$here/agent-sandbox.sh"
+  refuse() { exit 2; }
+  sandbox_check_team_bind "$w/team/req" /run/herdr-team/../x
+)
+[ $? -eq 2 ] && ok 'team bind destination with .. refused' || bad 'team bind destination with .. accepted'
 refused 'agy: no preamble' agy -- --model x
 refused 'agy: preamble out of order' agy -- --sandbox --mode accept-edits --dangerously-skip-permissions
 refused 'agy: second --mode' "${AG[@]}" --mode plan
@@ -320,6 +383,44 @@ else
     if [ -z "$extra" ]; then ok "$tool: environment only listed variables"; else bad "$tool: unexpected env names: $extra"; fi
     if [ -s "$repo/.out-$tool.fds" ]; then bad "$tool: extra descriptors: $(tr '\n' ' ' <"$repo/.out-$tool.fds")"; else ok "$tool: only descriptors 0-2"; fi
   }
+
+  # The unshare helper refuses a destination outside /run/herdr-team itself.
+  for dst in /tmp/evil /run/herdr-team/../x; do
+    (
+      source "$here/agent-sandbox.sh"
+      refuse() { exit 2; }
+      home=$fh safe_path=$tooldirs PATH=$tooldirs
+      sandbox_exec_unshare --rw-to "$w/team/req" "$dst" --chdir / -- true
+    ) >/dev/null 2>&1 && bad "unshare: --rw-to $dst accepted" || ok "unshare: --rw-to $dst refused"
+  done
+
+  # --work --tui: the two pointer dirs appear at /run/herdr-team, the work dir itself does not.
+  team_checks() { # <tool> <label>
+    local p=$repo/.out-$1.probe
+    [ -e "$repo/.out-$1.ran" ] && ok "$2: runs" || {
+      bad "$2: did not run: $(head -c 300 "$w/last.out")"
+      return
+    }
+    grep -qx team-req-visible "$p" && ok "$2: req visible" || bad "$2: req not visible"
+    grep -qx team-req-writable "$p" && bad "$2: req writable" || ok "$2: req read-only"
+    grep -qx team-turns-writable "$p" && ok "$2: turns writable" || bad "$2: turns not writable"
+    grep -qx team-work-visible "$p" && bad "$2: work dir visible" || ok "$2: work dir not bound"
+    [ -e "$w/team/turns/probe-file" ] && ok "$2: turns write lands in the work dir" || bad "$2: turns write lost"
+    rm -f "$w/team/turns/probe-file"
+  }
+  runi codex --work "$w/team" --tui -- -p implement -c model=x
+  rc=$?
+  [ $rc -eq 0 ] && ok 'codex --tui: exits 0' || bad "codex --tui: exits $rc"
+  team_checks codex 'codex --tui'
+  for opt in forced_login_method=chatgpt 'mcp_servers={}' 'approval_policy="never"' 'notify=["/nix/store/fake-herdr-team-sink"]' implement model=x; do
+    grep -qxF -- "$opt" "$repo/.out-codex.args" && ok "codex --tui: arg $opt" || bad "codex --tui: arg $opt"
+  done
+  grep -qxE 'exec|--tui|--work' "$repo/.out-codex.args" && bad 'codex --tui: wrapper option reached codex' || ok 'codex --tui: no exec, --tui or --work'
+  runi agy --work "$w/team" --tui -- "${AG[@]:2}"
+  rc=$?
+  [ $rc -eq 0 ] && ok 'agy --tui: exits 0' || bad "agy --tui: exits $rc"
+  team_checks agy 'agy --tui'
+  grep -qxE -- '--tui|--work' "$repo/.out-agy.args" && bad 'agy --tui: wrapper option reached agy' || ok 'agy --tui: no --tui or --work'
 
   # codex
   runi "${CX[@]}" -c model=x -o "$w/outdir/msg" -

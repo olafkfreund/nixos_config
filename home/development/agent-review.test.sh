@@ -8,7 +8,10 @@ root=$(git rev-parse --show-toplevel) || exit 1
 cd "$root" || exit 1
 w=$(mktemp -d /tmp/agent-review-test.XXXXXX)
 trap 'rm -rf "$w"' EXIT
-[[ -n ${AGENT_REVIEW:-} ]] || cat "$here/agent-sandbox.sh" "$here/agent-review.sh" >"$w/agent-review"
+[[ -n ${AGENT_REVIEW:-} ]] || {
+  echo 'sink_path=/nix/store/fake-herdr-team-sink'
+  cat "$here/agent-sandbox.sh" "$here/agent-review.sh"
+} >"$w/agent-review"
 script=${AGENT_REVIEW:-$w/agent-review}
 mkdir -p "$w/bin" "$w/work" "$w/fakebwrap"
 
@@ -42,6 +45,23 @@ mv "$w/work/bin-codex" "$w/work/bin/codex"
 chmod +x "$w/work/bin/codex"
 printf '#!/bin/sh\nexit 1\n' >"$w/fakebwrap/bwrap"
 chmod +x "$w/fakebwrap/bwrap"
+
+mkdir -p "$w/tui"
+cat >"$w/tui/codex" <<'FAKE'
+#!/usr/bin/env bash
+t=/run/herdr-team/turns
+: >"$t/ran"
+printf '%s\n' "$@" >"$t/args"
+{
+  [ -d /run/herdr-team/req ] && echo req-visible
+  ( : >/run/herdr-team/req/.t ) 2>/dev/null && echo req-writable
+  ls /tmp | grep -q agent-review-test && echo work-visible
+  ( : >"$PWD/.wtest" ) 2>/dev/null && echo worktree-writable
+  rm -f "$PWD/.wtest"
+} >"$t/probe"
+exit 0
+FAKE
+chmod +x "$w/tui/codex"
 
 fail=0
 skipped=0
@@ -91,6 +111,16 @@ refused '-a never' codex "$W" -- exec -a never
 refused '--ask-for-approval=never' codex "$W" -- exec --ask-for-approval=never
 refused '--search' codex "$W" -- exec --search
 refused 'unknown long option' codex "$W" -- review --some-future-flag
+refused '--tui: extra argument' codex "$W" --tui extra
+refused '--tui: --add-dir' codex "$W" --tui --add-dir x
+refused '--tui: --yolo' codex "$W" --tui --yolo
+refused '--tui: exec' codex "$W" --tui exec
+refused '--tui: -c with no value' codex "$W" --tui -c
+refused '--tui: attached -cmodel' codex "$W" --tui -cmodel=x
+for k in sandbox_mode mcp_servers notify approval_policy review_model; do
+  refused "--tui: -c $k" codex "$W" --tui -c "$k=v"
+done
+refused '--tui: after --' codex "$W" -- --tui
 for k in sandbox_mode mcp_servers model_provider; do
   refused "-c $k" codex "$W" -- exec -c "$k=v"
   refused "-c$k" codex "$W" -- exec "-c$k=v"
@@ -247,6 +277,42 @@ else
   else
     skip 'XDG_RUNTIME_DIR check: no ~/.ssh on this host'
   fi
+fi
+
+# --tui: Codex is reachable only from the store, because the work dir itself is not bound.
+if ! command -v bwrap >/dev/null || ! bwrap --ro-bind / / true >/dev/null 2>&1 || [ ! -f "$HOME/.codex/auth.json" ]; then
+  skip '--tui sandbox checks: real bwrap, user namespaces or auth.json unavailable'
+elif ! tuibin=$(nix-store --add "$w/tui" 2>/dev/null); then
+  skip '--tui sandbox checks: cannot add the fake codex to the nix store'
+else
+  rm -rf "$W/req" "$W/turns"
+  PATH="$tuibin:$PATH" bash "$script" codex "$W" --tui -c model=x >/dev/null 2>&1 </dev/null
+  rc=$?
+  if [ $rc -eq 0 ] && [ -e "$W/turns/ran" ]; then ok '--tui call runs'; else bad "--tui call runs (rc=$rc)"; fi
+  for opt in forced_login_method=chatgpt 'mcp_servers={}' 'sandbox_mode="read-only"' 'approval_policy="never"' 'notify=["/nix/store/fake-herdr-team-sink"]' model=x; do
+    if grep -qxF -- "$opt" "$W/turns/args"; then ok "--tui arg $opt"; else bad "--tui arg $opt"; fi
+  done
+  if grep -qxE 'exec|review' "$W/turns/args"; then bad '--tui passes a subcommand'; else ok '--tui passes no subcommand'; fi
+  if grep -qx req-visible "$W/turns/probe"; then ok '--tui: req visible'; else bad '--tui: req not visible'; fi
+  if grep -qx req-writable "$W/turns/probe"; then bad '--tui: req writable'; else ok '--tui: req read-only'; fi
+  if grep -qx work-visible "$W/turns/probe"; then bad '--tui: work dir visible'; else ok '--tui: work dir not bound'; fi
+  if grep -qx worktree-writable "$W/turns/probe"; then bad '--tui: worktree writable'; else ok '--tui: worktree read-only'; fi
+  # Both dirs must be real and owned by the caller.
+  rm -rf "$W/req"
+  ln -s "$W/turns" "$W/req"
+  refused '--tui: req is a symlink' codex "$W" --tui
+  rm -f "$W/req"
+  # The destination check, called directly: no launcher passes a bad one.
+  # shellcheck disable=SC2034 # read by the sourced functions
+  (
+    common=$root/.git home=$HOME
+    # shellcheck disable=SC1091
+    source "$here/agent-sandbox.sh"
+    refuse() { exit 2; }
+    sandbox_check_team_bind "$W/turns" /tmp/evil
+  )
+  rc=$?
+  if [ "$rc" -eq 2 ]; then ok 'team bind destination outside /run/herdr-team refused'; else bad 'team bind destination outside /run/herdr-team accepted'; fi
 fi
 
 if [ $fail -ne 0 ]; then
