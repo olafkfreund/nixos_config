@@ -293,10 +293,10 @@ else
     if grep -qxF -- "$opt" "$W/turns/args"; then ok "--tui arg $opt"; else bad "--tui arg $opt"; fi
   done
   if grep -qxE 'exec|review' "$W/turns/args"; then bad '--tui passes a subcommand'; else ok '--tui passes no subcommand'; fi
-  grep -qx req-visible "$W/turns/probe" && ok '--tui: req visible' || bad '--tui: req not visible'
-  grep -qx req-writable "$W/turns/probe" && bad '--tui: req writable' || ok '--tui: req read-only'
-  grep -qx work-visible "$W/turns/probe" && bad '--tui: work dir visible' || ok '--tui: work dir not bound'
-  grep -qx worktree-writable "$W/turns/probe" && bad '--tui: worktree writable' || ok '--tui: worktree read-only'
+  if grep -qx req-visible "$W/turns/probe"; then ok '--tui: req visible'; else bad '--tui: req not visible'; fi
+  if grep -qx req-writable "$W/turns/probe"; then bad '--tui: req writable'; else ok '--tui: req read-only'; fi
+  if grep -qx work-visible "$W/turns/probe"; then bad '--tui: work dir visible'; else ok '--tui: work dir not bound'; fi
+  if grep -qx worktree-writable "$W/turns/probe"; then bad '--tui: worktree writable'; else ok '--tui: worktree read-only'; fi
   # Both dirs must be real and owned by the caller.
   rm -rf "$W/req"
   ln -s "$W/turns" "$W/req"
@@ -305,13 +305,14 @@ else
   # The destination check, called directly: no launcher passes a bad one.
   # shellcheck disable=SC2034 # read by the sourced functions
   (
-    root=$root common=$root/.git home=$HOME
+    common=$root/.git home=$HOME
     # shellcheck disable=SC1091
     source "$here/agent-sandbox.sh"
     refuse() { exit 2; }
     sandbox_check_team_bind "$W/turns" /tmp/evil
   )
-  [ $? -eq 2 ] && ok 'team bind destination outside /run/herdr-team refused' || bad 'team bind destination outside /run/herdr-team accepted'
+  rc=$?
+  if [ "$rc" -eq 2 ]; then ok 'team bind destination outside /run/herdr-team refused'; else bad 'team bind destination outside /run/herdr-team accepted'; fi
 fi
 
 if [ $fail -ne 0 ]; then

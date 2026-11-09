@@ -391,8 +391,7 @@ else
       refuse() { exit 2; }
       home=$fh safe_path=$tooldirs PATH=$tooldirs
       sandbox_exec_unshare --rw-to "$w/team/req" "$dst" --chdir / -- true
-    ) >/dev/null 2>&1
-    [ $? -ne 0 ] && ok "unshare: --rw-to $dst refused" || bad "unshare: --rw-to $dst accepted"
+    ) >/dev/null 2>&1 && bad "unshare: --rw-to $dst accepted" || ok "unshare: --rw-to $dst refused"
   done
 
   # --work --tui: the two pointer dirs appear at /run/herdr-team, the work dir itself does not.
