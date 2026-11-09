@@ -59,7 +59,7 @@ These are the approved decisions, carried over from the spec. This plan stands o
    - **The `agy` shell function**, for bash `initExtra` and zsh `initContent`, in the file that installs agy for
      the user (`modules/ai/antigravity-cli.nix`, or `antigravity-config.nix` if that is where `home.packages` has
      agy). It runs `command agy` with `env -u` of the keys, and adds `--dangerously-skip-permissions` unless that
-     flag is already in `"$@"`. Copy the pattern of `claudeLauncher` in `home/development/herdr.nix:27-35`.
+     flag is already in `"$@"`. Copy the pattern of `claudeLauncher` in `home/development/herdr.nix:22` and `:36-37`.
    - **`modules/ai/antigravity-cli.nix:81`:** `Exec=${agy}/bin/agy --dangerously-skip-permissions`.
 
    → verify:
@@ -120,6 +120,57 @@ These are the approved decisions, carried over from the spec. This plan stands o
         runs with the flag.
    - razer: check 1 over SSH.
    - Tell #2810 (step 3b, Amendment 2) to rebase onto main.
+
+## Corrections from Codex's plan review
+
+These override the step text above where they differ.
+
+- **Step 1, `codex-implement`:** one command, `exec env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY
+  -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY CODEX_CODER=1 "${bin}/codex"
+  --dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt -p implement "$@"`. `agy-implement`
+  follows the same pattern: `exec env -u … AGY_CODER=1 AGY_WORKTREE=… agy …`.
+- **Step 1, the profile:** confirm that `codex -p implement` loads `~/.codex/implement.config.toml` without the
+  wrapper. Codex 0.167 reads `<profile>.config.toml` from `CODEX_HOME`, which is what `agent-implement` relied on
+  when it bound that file. Check it in step 3 (check 9): the implementer's status line shows model `gpt-6-sol`.
+- **Step 1, the agy shell function:** it goes in a Home Manager module, `home/development/antigravity-config.nix`,
+  next to `agy-implement`. `modules/ai/antigravity-cli.nix` is NixOS and installs agy via
+  `environment.systemPackages` (`:67`). Body: `agy() { case " $* " in *" --dangerously-skip-permissions "*) ;; *)
+  set -- --dangerously-skip-permissions "$@" ;; esac; command env -u … agy "$@"; }`, assigned to both
+  `programs.bash.initExtra` and `programs.zsh.initContent`. That is the pattern at `home/development/herdr.nix:22`
+  (function) and `:36-37` (assignments).
+- **Step 1, `codexUnrestricted` activation, root keys only:**
+  - if the file is missing, do nothing (Codex creates it);
+  - edit only the part **before the first `[table]` header**:
+    - a root `approval_policy` or `sandbox_mode` line with another value is rewritten in place;
+    - a missing one is prepended;
+    - keys inside `[profiles.*]` or other tables are never touched;
+  - use `awk` that tracks "seen a table header", writing to a temp file and installing it with mode 0600 only
+    when the result differs;
+  - before the first change, save the old root values to `~/.codex/.pre-2812-root-keys` for rollback;
+  - make sure a repeat run is a no-op, honour `$DRY_RUN_CMD`, and never `exit`.
+
+  Verify by running the activation snippet on test fixtures: a missing file, root keys absent, root keys
+  different, the same keys only inside `[profiles.x]`, and a second run.
+- **Step 2, docs:** also rewrite:
+  - `second-opinion/SKILL.md:111`, which says the wrapper is required and direct review forbidden;
+  - `handoff/SKILL.md:55`, which says staging and builds are impossible, the daemon hidden and no secrets.
+
+  Both Codex review paths must carry "Do not modify anything": `exec` in its prompt file, and `review` through its
+  base instruction. The skill says `review --base` cannot take a prompt, so the lead's `git status` check before
+  and after is the guard there.
+- **Step 3, extra checks:**
+  - **9:** `codex -p implement` shows model `gpt-6-sol`;
+  - **10:** with `/etc/codex/hooks/coder-guard` temporarily unreadable to the preflight's check (simulated with
+    `PATH`/`yq` stubs, not by touching `/etc`), `codex-implement` refuses. The same goes for `agy-implement`
+    with a missing `hooks.json` entry, simulated with a temp `HOME`;
+  - **11:** a Codex `exec` review completes and leaves the tree unchanged;
+  - **12:** all six key variables, set outside herdr, are absent inside each of `codex-implement`,
+    `agy-implement`, the `agy` function and the `second-opinion` commands;
+  - **13:** `zsh -n` on the generated zsh init, plus a live `zsh -ic 'type agy'`;
+  - builds: `nix build` of both the p620 **and** razer `home.path`, and for p510
+    `nix eval .#nixosConfigurations.p510.config.system.build.toplevel.drvPath`.
+- **Rollback:** restore the root values from `~/.codex/.pre-2812-root-keys`. Delete a key only when no earlier
+  value was recorded, and only at root.
 
 ## Tests
 
