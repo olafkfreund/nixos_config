@@ -104,6 +104,12 @@ These are the approved decisions, carried over from the spec. This plan stands o
    - the `second-opinion` wording is now honest ("should", plus why `HUMANIZE_CODEX_BYPASS_SANDBOX` stays
      banned).
 
+   **Post-merge fix (2026-11-09):** Home Manager runs activation with a minimal `PATH` that has no `awk`, so
+   `codexUnrestricted` failed with `awk: command not found` on p620 and razer, after #2813 merged. `set -e`
+   stopped it before any write, so `config.toml` was untouched, but later activation entries were skipped. Both
+   `awk` calls now use `${pkgs.gawk}/bin/awk`. Tested under the generation's own activation `PATH`: the fixtures
+   pass, and a real-config copy stays valid TOML with 43 project tables kept.
+
 2. **Docs** (agy).
    - **`AGENTS.md`, "Delegating to other models":**
      - replace the ban at `:84` with the owner decision of 2026-11-09;
