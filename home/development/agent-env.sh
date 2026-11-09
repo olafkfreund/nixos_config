@@ -2,6 +2,8 @@
 # #2757's sandbox: what both tools get. agent-sandbox.sh gives each name its own value.
 # shellcheck disable=SC2034  # read by agent-review.test.sh and agent-implement.test.sh
 agent_env_base=(PATH HOME LANG TERM TMPDIR SSL_CERT_FILE NIX_REMOTE NIX_CONFIG)
+# shellcheck disable=SC2034  # read by agent launchers
+agent_api_keys=(OPENAI_API_KEY OPENAI_API_KEY_FILE GEMINI_API_KEY GEMINI_API_KEY_FILE GOOGLE_API_KEY ANTHROPIC_API_KEY)
 # #2757's per-tool markers: CODEX_CODER for codex; AGY_CODER, AGY_WORKTREE, AGY_GUARD_LOG for agy.
 agent_env_markers=(CODEX_CODER AGY_CODER AGY_WORKTREE AGY_GUARD_LOG)
 # What a herdr pane or agent-env passes on from its caller (#2762). Not NIX_CONFIG or NIX_REMOTE: the
