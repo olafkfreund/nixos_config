@@ -46,6 +46,38 @@ Docs:
 - **`modules/programs/claude-code-managed-claude.md`:** one line saying that delegated agents run unrestricted
   by owner decision, and that the commit/deploy/p510 rules are instructions.
 
+### Corrections from Codex's spec review
+
+- **Codex guard marker (H1).** `codex-implement` exports `CODEX_CODER=1` before it execs `codex`. The managed
+  guard allows everything without it (`modules/programs/claude-code-managed.nix:332`). `agent-implement.sh:144`
+  set it before. Verify with a live implementer asked to run `git commit`, which must be denied.
+- **`codex review` flags (H2).** Root options go before the subcommand:
+  `codex --dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt review --base "$base"`, and
+  likewise for `exec`. `review` is not claimed to be read-only. The prompt says so, and Claude checks
+  `git status --porcelain` before and after each review and reports any change. Verify with a live `review` of a
+  diff.
+- **The owner's own sessions (M3).** "Everything" includes them:
+  - **Codex:** `~/.codex/config.toml` (Home Manager, `codex-cli.nix`) sets `approval_policy = "never"` and
+    `sandbox_mode = "danger-full-access"`, so plain `codex`, the aliases at `codex-cli.nix:48` and
+    `codex-project` (`codex-cli/module.nix:97`) all run unrestricted. The `implement` profile keeps its own model
+    settings.
+  - **agy:** a shell function `agy` (bash and zsh, as `herdr.nix` does for `claude`) adds
+    `--dangerously-skip-permissions` unless the caller already passed it. The desktop entry at
+    `modules/ai/antigravity-cli.nix:81` does the same.
+- **Subscription-only env (M4).** One list, `agent_api_keys=(OPENAI_API_KEY OPENAI_API_KEY_FILE GEMINI_API_KEY
+  GEMINI_API_KEY_FILE GOOGLE_API_KEY ANTHROPIC_API_KEY)`, defined in `agent-env.sh` and applied with `env -u` by:
+  - `codex-implement` and `agy-implement`;
+  - the `agy` shell function;
+  - every `second-opinion` command.
+
+  Verify outside herdr with dummy values: the variables are absent inside the tool.
+- **Skill text (M5).** These are rewritten as instructions to the agent, not sandbox guarantees:
+  - `handoff/SKILL.md:53` and `:63`;
+  - `second-opinion/SKILL.md:120-138`, under a heading "Legacy: the sandboxed wrappers (unused by default)".
+- **agy implementer (M6).** Clear the probe's version cache and run `agy-guard-probe`, which must pass all six
+  actions. Then run one `agent-run agy` handoff through the direct launcher. Confirm that `AGY_CODER`,
+  `AGY_WORKTREE` and `AGY_GUARD_LOG` reach the guard (its log has the entries).
+
 ## Alternatives rejected
 
 - **A narrow `permissions.allow` rule for agy's reviews.** It would fix the failures with less exposure, but the
