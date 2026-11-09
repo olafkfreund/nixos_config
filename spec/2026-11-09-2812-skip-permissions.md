@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2812
 intent: intent/2026-11-09-2812-skip-permissions.md
 ---
