@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2810
 spec: spec/2026-11-09-2810-herdr-agent-team.md
 coders:
