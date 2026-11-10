@@ -38,13 +38,28 @@ Where a value lives in a file Claude Code writes itself, an activation step reco
 
 ### 2. Skills: `skillOverrides` and shorter descriptions
 
-`baselineSkillOverrides` (`claude-code-managed.nix:197`) gains:
+`baselineSkillOverrides` (`claude-code-managed.nix:197`) gains these exact entries.
 
-- **`name-only`:** the repo's 32 `.claude/commands` (`nix-*`, `update-*`, `check-*`, `gemini-review`, `parr`).
-  They stay invocable with `/`, and only their names reach the prompt.
-- **`off`:** the user commands that duplicate a skill or a built-in: `code-reviewer`, `security-audit`,
-  `nixos-expert`, `system-doctor`, `devops-architect`, `crew`, `demo`. Each one is checked against its
-  duplicate in the plan before it is turned off.
+**`name-only`:** invocable with `/`, but only the name reaches the prompt.
+
+| Source | Names |
+| ------ | ----- |
+| repo `.claude/commands` | `check-nixos-issues`, `check-updates`, `nix-check-tasks`, `nix-clean`, `nix-deploy`, `nix-fix`, `nix-help`, `nix-info`, `nix-manix-search`, `nix-module`, `nix-network`, `nix-new-task`, `nix-optimize`, `nix-precommit`, `nix-review`, `nix-secrets`, `nix-security`, `nix-test`, `nix-validate`, `nix-workflow-bugfix`, `nix-workflow-feature`, `nix-workflow-security`, `parr`, `update-antigravity`, `update-claude-code`, `update-codex`, `update-warp`, `update-waveterm` |
+| user `~/.claude/commands` | `agent-team`, `analyze-product`, `blog`, `create-spec`, `crew`, `demo`, `dns`, `execute-tasks`, `plan-product`, `team` |
+
+**`off`:** each one duplicates something that stays, or cannot work.
+
+| Name | Why |
+| ---- | --- |
+| `gemini-review` | it calls a `gemini` binary that does not exist since #560, the same reason as `ask-gemini`; the `second-opinion` skill replaces it |
+| `code-reviewer` | it duplicates the `code-reviewer` subagent and the built-in `/code-review` |
+| `security-audit` | it duplicates the built-in `/security-review` and the `security-patrol` agent |
+| `nixos-expert` | it duplicates the `nixos` skill |
+| `system-doctor` | it duplicates the `nixos-doctor` skill |
+| `devops-architect` | it duplicates the `deployment-coordinator` and `cloud-architect` agents |
+
+The plan checks each `off` against its duplicate's description before it is applied. The expected `/skills`
+result is this table plus everything else unchanged.
 
 Our own skills' descriptions over 300 characters are cut to about 250. Those are skills whose source is in this
 repo or in `home/development/claude-code-skills` (`localSkills`), such as `craftapps`, `obsidian`, `ripsaw`,
@@ -60,21 +75,33 @@ This is the owner's decision. Removed on both hosts:
 - the entries in `home/development/claude-code-mcp.nix` (:22, :211–) and
   `home/development/claude-desktop/mcp-config.nix`;
 - `pkgs/atlassian-mcp/` and its line in `pkgs/default.nix`;
-- the `api-jira-*` and `api-confluence-*` entries in `secrets.nix`, and the files
-  `secrets/api-jira-token.age`, `secrets/api-confluence-token.age` and the four `.placeholder` files.
+- the four secret declarations in `secrets.nix` (`api-jira-token`, `api-confluence-token`, `api-jira-pat`,
+  `api-confluence-pat`; :96 and its neighbours), and their uses in `mcp-servers.nix` (:335–357);
+- the files `secrets/api-jira-token.age`, `secrets/api-confluence-token.age`, `secrets/api-confluence-pat.age` (if
+  present) and the four `.placeholder` files;
+- live documentation of Atlassian, `docs/MCP-GUIDE.md` (:57 and its section).
 
 Old intents, specs and plans that mention Atlassian are history and stay.
 
-The MCP reconciler in `claude-code-mcp.nix` (:370–393) only adds or replaces entries. It gains a declared
-`retiredMcpServers = [ "atlassian" ]` list. On every activation it deletes those keys from `~/.claude.json`'s
-`mcpServers`, and from Claude Desktop's config. So a synced or stale entry cannot come back.
+The MCP reconciler in `claude-code-mcp.nix` (:370–393) only adds or replaces entries, and it skips writing
+when the declared servers already match. It gains a declared `retiredMcpServers = [ "atlassian" ]` list.
+
+- **Removal.** On every activation it deletes those keys from every writable file Claude Code or Claude
+  Desktop reads servers from:
+  - `~/.claude.json` `mcpServers`;
+  - the once-seeded `~/.claude/settings.local.json` (:268–284);
+  - Claude Desktop's config.
+- **Write test.** The "already matches" check also counts a present retired key as a difference, so a file
+  holding only a stale `atlassian` entry is rewritten.
+
+So a synced or stale entry cannot come back.
 
 ### 4. `AGENTS.md` under 200 lines, with nothing lost
 
 | Section (current lines) | Goes to | Why it is safe |
 | ----------------------- | ------- | -------------- |
 | Read first, Hosts, Non-negotiable, Module shape, Commands, Build/test/deploy, Layout, Adding a user, Git (1–209) | stays, tightened | Codex and agy read `AGENTS.md`; these are cross-agent rules |
-| Delegating to other models (47–131) | the owner decision, the instruction-only rules list (#2812) and the herdr-team paragraph stay. The three "Legacy, unused by default" paragraphs (agent-review, agent-implement, the old sandbox) move to `docs/architecture/agent-delegation.md`, with a one-line pointer | the rules agents must follow stay in the file every agent reads; only history moves |
+| Delegating to other models (47–131) | stays: the owner decision, the instruction-only rules list (#2812), the herdr-team paragraph, the live first sentences of the `codex-implement` and `agy-implement` paragraphs (who may start them, what they may do, that the guard enforces it), the "untrusted advice, never approval" rule, and the `HUMANIZE_CODEX_BYPASS_SANDBOX` and subscription-login rules (:129–130). Moves to `docs/architecture/agent-delegation.md` with a one-line pointer: only the sentences and paragraphs marked "Legacy, unused by default" (agent-review, agent-implement, the old sandbox details) | every live rule stays in the file every agent reads; only history moves |
 | Infrastructure notes (210–296) | `docs/architecture/infrastructure-notes.md`, with a two-line pointer. The desktop and Hyprland items also go to `.claude/rules/desktop.md` with `paths: ["hosts/common/nixos/omarchy-*.nix", "modules/desktop/**", "hosts/*/nixos/*hypr*"]` | facts about the tree, not behaviour rules. Codex and agy reach them through the pointer |
 | Claude Code (297–306) | stays | short |
 
@@ -95,10 +122,15 @@ The lead (Claude) does this directly. The memory dir is outside git.
 
 ### 6. Models
 
-- **`~/.claude/agents/Explore.md`** is declared through `home.file`, so the Syncthing ignore list picks it up,
-  as with the skills (`home/syncthing-stignore.nix`). The file has `name: Explore`, `model: haiku`, tools
-  `Read, Grep, Glob, Bash`, and a short read-only search prompt. A user agent with a built-in's name replaces
-  the built-in. The verification checks that `/agents` shows Explore on Haiku.
+- **`~/.claude/agents/Explore.md`** is written as a real file by an activation step: `install -D -m 0644` from
+  a store copy, overwritten on every activation. It is not a `home.file` symlink, because `agents/**` is
+  Syncthing-synced (`home/syncthing-stignore.nix:106`), and a host-specific store symlink would dangle on the
+  other host.
+  - Both hosts write the same content, so the sync is harmless.
+  - The file has `name: Explore`, `model: haiku`, tools `Read, Grep, Glob, Bash`, and a short read-only search
+    prompt.
+  - A user agent with a built-in's name replaces the built-in (Claude Code sub-agents docs). The verification
+    checks that `/agents` shows Explore on Haiku.
 - **Managed `env`** (`claude-code-managed.nix:722`) gains `CLAUDE_CODE_SUBAGENT_MODEL = "sonnet"`, the default
   for subagents that have no `model:` frontmatter.
 - `coder` (`model: sonnet`), the named agents with their own `model:`, and the Opus reviewer are unchanged.
@@ -141,10 +173,11 @@ The lead (Claude) does this directly. The memory dir is outside git.
 ## Verification
 
 - **Eval and build:** `just check-syntax`, `just test-host p620`, `just test-host razer`.
-- **`grep`:** no `atlassian`, `api-jira` or `api-confluence` outside `intent/`, `spec/` and `plan/`.
+- **`grep`:** no `atlassian`, `api-jira` or `api-confluence` outside `intent/`, `spec/` and `plan/`, which are
+  deliberately exempt as history.
 - **After deploying to p620 and razer**, in a fresh session on each host:
   - `jq .enabledPlugins /etc/claude-code/managed-settings.json` shows the six as `false`, and `/plugin` lists
-    them disabled;
+    them disabled, while `humanize`, `ponytail`, `prismantis`, `nix-lsp` and `fleet-guard` are still enabled;
   - the skill list shows the `name-only` and `off` states from section 2;
   - `claude mcp list` has no `atlassian`;
   - `/agents` shows Explore on Haiku;
@@ -158,6 +191,10 @@ The lead (Claude) does this directly. The memory dir is outside git.
 - **Safety:**
   - `AGENTS.md` keeps every non-negotiable and the #2812 rules, per the plan's checklist;
   - the bus guard still blocks a deploy-word command without `AGENT_BUS_ANNOUNCED`;
-  - the branch guard still blocks a checkout in `~/.config/nixos`.
+  - the branch guard still blocks a checkout in `~/.config/nixos`;
+  - the p510 rule is still in `AGENTS.md`'s Hosts table and the managed `CLAUDE.md`;
+  - after the deploy, the generated Codex and agy instructions (`~/.codex/AGENTS.md` and agy's rules from
+    `agent-rules.nix`) still contain the #2812 instruction-only rules, the subscription-login rule and the PARR
+    text, checked with `grep`.
 - **Owner:** Microsoft 365 and Spotify are disconnected at claude.ai, and their `mcp__claude_ai_*` tools are
   gone from a fresh session.
