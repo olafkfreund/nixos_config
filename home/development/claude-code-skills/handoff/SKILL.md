@@ -46,10 +46,11 @@ tool's response, so `ok: true` still needs the diff review below.
 
 ### Inside herdr: `herdr-team` (the default)
 
-Inside herdr (`test "$HERDR_ENV" = 1`), a Codex step runs in the task's team tab, where you can watch it:
+Inside herdr (`test "$HERDR_ENV" = 1`), a step runs in the task's team tab (`implement` for Codex,
+`agy-implement` for agy), where you can watch it:
 
 ```bash
-herdr-team up "$task" implement --step "$k"
+herdr-team up "$task" implement --step "$k"           # or agy-implement
 herdr-team ask "$task" implement "$prompt_file"       # or converse, to let review and implement talk
 herdr-team finish "$task" implement
 ```
@@ -67,8 +68,7 @@ herdr-team finish "$task" implement
   `--verify-timeout S`, default 900). Run it with the Bash tool's `run_in_background`, because a check plus a
   retry can outlast a foreground Bash call. Read `ok`, `reason`, `failures` and `verify` in the result.
 - Members run unrestricted (Issue #2812). Only the lead stages, commits and deploys.
-- agy steps stay on `agent-run agy "$prompt_file"` while `agyMember` is false. Outside herdr, `herdr-team`
-  exits 2 and `agent-run` is the route.
+- Outside herdr, `herdr-team` exits 2 and `agent-run` is the route.
 
 ## Prompt template
 

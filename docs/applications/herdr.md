@@ -195,8 +195,10 @@ with one visible pane per member, so you can watch every agent work and type int
 - `<task>-review` stays warm for the whole task;
 - `<task>-implement` runs one member per plan step.
 
-`agy-implement` is refused while `agyMember` is false, so agy steps stay on `agent-run`. Outside herdr, every
-`herdr-team` command exits 2.
+`herdr-team up <task> agy-implement` runs agy through `agy-implement --acp`, which execs `agy-acp-member` (an
+Agent Client Protocol client for `agy acp`); it is ready when the pane shows `agy session <id>`, pointers reach
+it through `herdr pane send-text`, and its replies arrive as turn files like Codex's, so `ask`, `converse` and
+`finish` work the same (`agyMember` is `true`). Outside herdr, every `herdr-team` command exits 2.
 
 ```bash
 herdr-team up <task> review
