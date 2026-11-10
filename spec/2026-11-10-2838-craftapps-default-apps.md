@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2838
 intent: intent/2026-11-10-2838-craftapps-default-apps.md
 ---
