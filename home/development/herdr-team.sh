@@ -122,7 +122,33 @@ conv_held() { # state file: succeeds while another live converse holds the task
   { read -r pid start; } < <(jq -r '.conversation // {} | "\(.pid // "-") \(.start // "-")"' "$1")
   [[ $pid != "$$" ]] && alive "$pid" "$start"
 }
-rm_gen() { if [[ $1 =~ ^[A-Za-z0-9]+$ ]]; then rm_retry "${rt:?}/$1"; fi; }
+# Rewrites a log line's answer path from a member's work dir to its archive copy (the paths map).
+archive_jq='($paths | split("\n") | map(select(length > 0) | split("\t") | {(.[0]): .[1]}) | add // {}) as $map
+  | if .answer == null then . else
+      .answer |= reduce ($map | to_entries[]) as $entry (.;
+        if startswith($entry.key) then $entry.value + .[($entry.key | length):] else . end)
+    end'
+rm_gen() {
+  [[ $1 =~ ^[A-Za-z0-9]+$ ]] || return 0
+  if [[ -f $rt/$1/conversation.jsonl ]]; then
+    # shellcheck disable=SC2174 # $rt exists; create each child with mode 700.
+    if mkdir -m 700 -p "$rt/archive" \
+      && mkdir -m 700 -p "$rt/archive/$1" \
+      && {
+        if [[ -f $rt/archive/$1/paths ]]; then
+          jq -c --rawfile paths "$rt/archive/$1/paths" "$archive_jq" \
+            "$rt/$1/conversation.jsonl" >"$rt/archive/$1/conversation.jsonl.tmp"
+        else
+          cp -- "$rt/$1/conversation.jsonl" "$rt/archive/$1/conversation.jsonl.tmp"
+        fi
+      } && mv -- "$rt/archive/$1/conversation.jsonl.tmp" "$rt/archive/$1/conversation.jsonl"; then
+      :
+    else
+      echo "herdr-team: archive failed for $1" >&2
+    fi
+  fi
+  rm_retry "${rt:?}/$1"
+}
 drop_if_empty() {
   local g
   if jq -e '(.members | length) == 0 and .reservation == null' "$1" >/dev/null 2>&1; then
@@ -143,16 +169,40 @@ rm_dirs() { # ctl work: only paths this tool makes
   case $2 in "$wroot"/herdr-team.*) rm_retry "$2" ;; esac
   case $1 in "$rt"/*/*) rm_retry "$1" && rmdir -- "$(dirname "$1")" 2>/dev/null || : ;; esac
 }
+keep_answers() { # gen member work; hold the lock
+  local dest i=2
+  [[ -n $3 && -d $3/ans && $1 =~ ^[A-Za-z0-9]+$ ]] || return 0
+  if ! (
+    # shellcheck disable=SC2174 # $rt exists; create each child with mode 700.
+    mkdir -m 700 -p "$rt/archive" && mkdir -m 700 -p "$rt/archive/$1" || exit 1
+    dest=$rt/archive/$1/$2
+    while [[ -e $dest || -L $dest ]]; do
+      dest=$rt/archive/$1/$2.$i
+      ((i++))
+    done
+    mkdir -m 700 "$dest" && cp -r -- "$3/ans/." "$dest/" \
+      && printf '%s\t%s\n' "$3/ans/" "$dest/" >>"$rt/archive/$1/paths"
+  ); then
+    echo "herdr-team: archive failed for $2" >&2
+  fi
+  return 0
+}
 sweep() { # remove state files with no live member; hold the lock
-  local f m
+  local f m g ctl work
   for f in "$rt"/*.json; do
     [[ -f $f ]] || continue
     if [[ -n $(live_members "$f") ]] || reserved "$f"; then continue; fi
     echo "herdr-team: removed stale task $(basename "$f" .json)" >&2
-    for m in $(jq -r '.members | keys[]' "$f"); do rm_dirs "$(mget "$f" "$m" ctl)" "$(mget "$f" "$m" work)"; done
-    m=$(jq -r .gen "$f")
+    g=$(jq -r .gen "$f")
+    for m in $(jq -r '.members | keys[]' "$f"); do
+      ctl=$(mget "$f" "$m" ctl)
+      work=$(mget "$f" "$m" work)
+      stop_member "$ctl"
+      keep_answers "$g" "$m" "$work"
+      rm_dirs "$ctl" "$work"
+    done
     rm -f -- "$f"
-    rm_gen "$m"
+    rm_gen "$g"
   done
 }
 
@@ -161,39 +211,76 @@ same_pane() { # pane terminal [kind]
   reply=$(h pane get "$1" 2>/dev/null) || return 1
   jq -e --arg t "$2" --arg k "${3:-}" '.result.pane.terminal_id == $t and ($k == "" or .result.pane.agent == $k)' >/dev/null 2>&1 <<<"$reply"
 }
-# TERM the member's group, KILL what is left after 5 s, and wait until none remains.
-# Only when the recorded launcher pid and start time still match, so a reused pid is never signalled.
-stop_member() { # ctl pid start
-  local pgid pstart i
-  alive "$2" "$3" || return 0
+# The process carries this member's marker as a whole environment entry.
+marked() { grep -zqxF "HERDR_TEAM_MEMBER=$2" "/proc/$1/environ" 2>/dev/null; }
+member_pids() { # pgid ctl: verified pid/start pairs
+  local pid stat fields=()
+  while IFS= read -r pid; do
+    [[ $pid =~ ^[0-9]+$ ]] || continue
+    IFS= read -r stat <"/proc/$pid/stat" 2>/dev/null || continue
+    read -r -a fields <<<"${stat##*) }"
+    [[ ${fields[2]:-} == "$1" ]] || continue
+    if marked "$pid" "$2"; then
+      printf '%s %s\n' "$pid" "${fields[19]:-}"
+    fi
+  done < <(pgrep -g "$1" 2>/dev/null)
+}
+# TERM the member's group when its leader is still ours; otherwise signal only verified pid/start pairs.
+stop_member() { # ctl
+  local pgid pstart i pair pid start remaining signal pairs=()
   read -r pgid pstart <"$1/pgid" 2>/dev/null || return 0
   [[ $pgid =~ ^[0-9]+$ ]] && ((pgid > 1)) || return 0
-  alive "$pgid" "$pstart" || return 0
-  kill -TERM -- "-$pgid" 2>/dev/null || :
-  for ((i = 0; i < 10; i++)); do
-    pgrep -g "$pgid" >/dev/null 2>&1 || return 0
-    sleep_for 0.5
-  done
-  kill -KILL -- "-$pgid" 2>/dev/null || :
-  for ((i = 0; i < 10; i++)); do
-    pgrep -g "$pgid" >/dev/null 2>&1 || return 0
-    sleep_for 0.5
+  if alive "$pgid" "$pstart" && marked "$pgid" "$1"; then
+    kill -TERM -- "-$pgid" 2>/dev/null || :
+    for ((i = 0; i < 10; i++)); do
+      pgrep -g "$pgid" >/dev/null 2>&1 || return 0
+      sleep_for 0.5
+    done
+    if alive "$pgid" "$pstart" && marked "$pgid" "$1"; then
+      kill -KILL -- "-$pgid" 2>/dev/null || :
+      for ((i = 0; i < 10; i++)); do
+        pgrep -g "$pgid" >/dev/null 2>&1 || return 0
+        sleep_for 0.5
+      done
+      return 0
+    fi
+  fi
+  mapfile -t pairs < <(member_pids "$pgid" "$1")
+  for signal in TERM KILL; do
+    for pair in "${pairs[@]}"; do
+      read -r pid start <<<"$pair"
+      if alive "$pid" "$start"; then kill -"$signal" "$pid" 2>/dev/null || :; fi
+    done
+    for ((i = 0; i < 10; i++)); do
+      remaining=0
+      for pair in "${pairs[@]}"; do
+        read -r pid start <<<"$pair"
+        if alive "$pid" "$start"; then
+          remaining=1
+          break
+        fi
+      done
+      ((remaining)) || return 0
+      sleep_for 0.5
+    done
   done
 }
 teardown() { # state file, member: stop it, close its pane, remove its dirs and record
-  local f=$1 m=$2 pane terminal pid start ctl work
+  local f=$1 m=$2 pane terminal ctl work gen
   pane=$(mget "$f" "$m" pane)
   terminal=$(mget "$f" "$m" terminal)
-  pid=$(mget "$f" "$m" pid)
-  start=$(mget "$f" "$m" start)
   ctl=$(mget "$f" "$m" ctl)
   work=$(mget "$f" "$m" work)
   lock
   update "$f" '.members[$m].cancelled = true' --arg m "$m" || :
   unlock
   if [[ -d $ctl ]]; then : >"$ctl/stop"; fi
-  stop_member "$ctl" "$pid" "$start"
+  stop_member "$ctl"
   if [[ -n $pane ]] && same_pane "$pane" "$terminal"; then h pane close "$pane" >/dev/null 2>&1 || :; fi
+  lock
+  gen=$(jq -r .gen "$f" 2>/dev/null) || gen=''
+  keep_answers "$gen" "$m" "$work"
+  unlock
   rm_dirs "$ctl" "$work"
   lock
   update "$f" 'del(.members[$m])' --arg m "$m" || :
@@ -278,7 +365,7 @@ up() {
   case $role in
     review)
       argv=(agent-env env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY
-        -u ANTHROPIC_API_KEY codex --dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt -c "$notify" -c "$trust")
+        -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE codex --dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt -c "$notify" -c "$trust")
       ;;
     implement) argv=(agent-env codex-implement -c "$notify" -c "$trust") ;;
     agy-implement) argv=(agent-env agy-implement) ;;
@@ -354,7 +441,7 @@ wd=$!
 code=0
 # Job control gives the member its own process group and the terminal.
 set -m
-bash -c '[ ! -e "$0/stop" ] && echo "$$ $(sed "s/.*) //" /proc/$$/stat | awk "{ print \$20 }")" >"$0/pgid.tmp" && mv "$0/pgid.tmp" "$0/pgid" && exec "$@"; exit 127' "$ctl" "${argv[@]}" 2>"$ctl/stderr" || code=$?
+bash -c '[ ! -e "$0/stop" ] && echo "$$ $(sed "s/.*) //" /proc/$$/stat | awk "{ print \$20 }")" >"$0/pgid.tmp" && mv "$0/pgid.tmp" "$0/pgid" && export HERDR_TEAM_MEMBER="$0" && exec "$@"; exit 127' "$ctl" "${argv[@]}" 2>"$ctl/stderr" || code=$?
 kill "$wd" 2>/dev/null
 tail -n 5 "$ctl/stderr" >"$ctl/status.tmp" 2>/dev/null && mv "$ctl/status.tmp" "$ctl/status"
 printf '%s\n' "$code" >"$ctl/exit.tmp" && mv "$ctl/exit.tmp" "$ctl/exit"
@@ -665,9 +752,22 @@ converse() {
   : >>"$jl"
   end=$(($(date +%s) + limit))
   emit() { # from to n outcome answer changed
-    jq -cn --argjson hop "$hop" --arg from "$1" --arg to "$2" --arg n "$3" --arg outcome "$4" --arg answer "$5" --argjson changed "${6:-null}" \
+    local line rewritten
+    line=$(jq -cn --argjson hop "$hop" --arg from "$1" --arg to "$2" --arg n "$3" --arg outcome "$4" --arg answer "$5" --argjson changed "${6:-null}" \
       '{hop: $hop, from: $from, to: (if $to == "" then null else $to end), n: (if $n == "" then null else ($n | tonumber) end),
-        outcome: $outcome, answer: (if $answer == "" then null else $answer end), changed_during_review: $changed}' | tee -a "$jl"
+        outcome: $outcome, answer: (if $answer == "" then null else $answer end), changed_during_review: $changed}')
+    lock
+    if [[ -d $rt/$gen ]]; then
+      printf '%s\n' "$line" >>"$rt/$gen/conversation.jsonl"
+    elif [[ -d $rt/archive/$gen ]]; then
+      if [[ -f $rt/archive/$gen/paths ]]; then
+        rewritten=$(jq -c --rawfile paths "$rt/archive/$gen/paths" "$archive_jq" <<<"$line" 2>/dev/null) || rewritten=''
+        [[ -z $rewritten ]] || line=$rewritten
+      fi
+      printf '%s\n' "$line" >>"$rt/archive/$gen/conversation.jsonl"
+    fi
+    unlock
+    printf '%s\n' "$line"
   }
   while true; do
     hop=$((hop + 1))

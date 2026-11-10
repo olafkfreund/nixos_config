@@ -2,6 +2,8 @@
 # shellcheck disable=SC2016 # The quoted strings are passed to child shells.
 # Clear the live pane's connection before creating any test state or subprocess.
 while IFS= read -r name; do unset "$name"; done < <(compgen -A variable HERDR_)
+# The key checks below plant their own decoys; the caller's real ones would read as leaks.
+unset OPENAI_API_KEY OPENAI_API_KEY_FILE GEMINI_API_KEY GEMINI_API_KEY_FILE GOOGLE_API_KEY ANTHROPIC_API_KEY ANTHROPIC_API_KEY_FILE
 set -euo pipefail
 tool=${1:?usage: herdr-team-test.sh <herdr-team>}
 tmp=$(mktemp -d)
@@ -10,6 +12,8 @@ cleanup() {
   kill "${sleepers[@]}" 2>/dev/null || :
   pkill -f "$tmp/bin/" 2>/dev/null || :
   pkill -f 'sleep 61.7' 2>/dev/null || :
+  pkill -f 'sleep 62.3' 2>/dev/null || :
+  pkill -f 'sleep 63.1' 2>/dev/null || :
   drop_work
   rm -rf "$tmp"
 }
@@ -90,13 +94,17 @@ FAKE
 cat >"$tmp/bin/codex" <<'FAKE'
 #!/usr/bin/env bash
 printf '%s %s\n' "$(basename "$0")" "$*" >> "$TEST_STATE/launched"
-env | grep -E '^(NIX_CONFIG|GITHUB_API_TOKEN|OPENAI_API_KEY|ANTHROPIC_API_KEY)=' >> "$TEST_STATE/env-dump" || :
+env | grep -E '^(NIX_CONFIG|GITHUB_API_TOKEN|OPENAI_API_KEY|ANTHROPIC_API_KEY|ANTHROPIC_API_KEY_FILE)=' >> "$TEST_STATE/env-dump" || :
 if [[ -e $TEST_STATE/refuse ]]; then echo 'agent: refused: test reason' >&2; exit 2; fi
 if [[ -e $TEST_STATE/refuse1 ]]; then echo 'codex-implement: guard not registered' >&2; exit 1; fi
+printenv HERDR_TEAM_MEMBER > "$TEST_STATE/marker" || :
 : > "$TEST_STATE/agent-up"
 if [[ -e $TEST_STATE/grandchild ]]; then bash -c 'trap "" TERM; sleep 61.7' & fi
 trap 'exit 143' TERM
-while [[ ! -e $TEST_STATE/quit ]]; do sleep 0.05; done
+while [[ ! -e $TEST_STATE/quit ]]; do
+  if [[ -e $TEST_STATE/orphan ]]; then sleep 62.3 & exit 0; fi
+  sleep 0.05
+done
 code=$(cat "$TEST_STATE/quit")
 if [[ $code == 2 ]]; then echo 'agent: refused: test reason' >&2; fi
 exit "$code"
@@ -142,6 +150,8 @@ drop_work() {
 reset() {
   pkill -f "$tmp/bin/" 2>/dev/null || :
   pkill -f 'sleep 61.7' 2>/dev/null || :
+  pkill -f 'sleep 62.3' 2>/dev/null || :
+  pkill -f 'sleep 63.1' 2>/dev/null || :
   drop_work
   rm -rf "$rt"
   find "$TEST_STATE" -mindepth 1 -delete
@@ -184,6 +194,14 @@ printf 'prompt text\n' >"$tmp/prompt"
 wait_for() {
   for _ in {1..100}; do
     [[ -e $1 ]] && return 0
+    sleep 0.05
+  done
+  return 1
+}
+
+wait_until() {
+  for _ in {1..100}; do
+    "$@" && return 0
     sleep 0.05
   done
   return 1
@@ -243,6 +261,7 @@ up t1 review
 is '.member == "review"'
 w=$(field t1 review work)
 [[ $(cat "$TEST_STATE/launched") == "codex --dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt -c notify=[\"$sink\",\"$w/turns\"] -c projects={\"$repo\"={trust_level=\"trusted\"}}" ]] || die "review launch line: $(cat "$TEST_STATE/launched")"
+[[ $(cat "$TEST_STATE/marker") == "$(field t1 review ctl)" ]] || die "member marker"
 [[ -e $TEST_STATE/agent-env-used && $(stat -c %a "$w/turns") == 700 && $(stat -c %a "$w") == 700 ]]
 "$tool" status t1 | jq -e '.live.review == true and .members.review.pid != null and .reservation == null' >/dev/null
 arm t1 review
@@ -274,7 +293,7 @@ ok flow
 # --- unrestricted launch: agent-env, no tokens, the guard preflight ---
 reset
 export DECOY_NIX='access-tokens = github.com=DECOY'
-NIX_CONFIG=$DECOY_NIX GITHUB_API_TOKEN=decoy OPENAI_API_KEY=decoy ANTHROPIC_API_KEY=decoy up t1 review
+NIX_CONFIG=$DECOY_NIX GITHUB_API_TOKEN=decoy OPENAI_API_KEY=decoy ANTHROPIC_API_KEY=decoy ANTHROPIC_API_KEY_FILE=decoy up t1 review
 [[ ! -s $TEST_STATE/env-dump ]] || die "a token reached the review agent: $(cat "$TEST_STATE/env-dump")"
 # the real codex-implement strips the API keys itself, so only agent-env's job is checked here
 NIX_CONFIG=$DECOY_NIX GITHUB_API_TOKEN=decoy up t1 implement --step 1
@@ -342,7 +361,6 @@ reset
 up t1 review
 echo 2 >"$TEST_STATE/quit"
 wait_for "$(field t1 review ctl)/exit"
-sleep 0.2
 team ask t1 review "$tmp/prompt" --timeout 5
 is '.outcome == "refused" and .exit == 2 and (.reason | test("test reason"))'
 team down t1
@@ -351,7 +369,7 @@ reset
 up t1 review
 { "$tool" ask t1 review "$tmp/prompt" --timeout 20 >"$tmp/out2" 2>&1 & }
 bg=$!
-sleep 0.5
+wait_until grep -qxsF "$(pointer t1 1)" "$TEST_STATE/prompts"
 echo 2 >"$TEST_STATE/quit"
 wait "$bg" || :
 jq -e '.outcome == "refused" and .exit == 2' "$tmp/out2" >/dev/null || die "refused mid-ask"
@@ -409,10 +427,8 @@ up t1 review
 arm t1 review
 { "$tool" ask t1 review "$tmp/prompt" --timeout 20 >"$tmp/out2" 2>&1 & }
 bg=$!
-sleep 0.4
+wait_for "$(field t1 review work)/req/1.md"
 printf 'new\n' >"$repo/untracked"
-printf 'x' >"$TEST_STATE/reply"
-echo '' >"$tmp/pokes"
 id=88888888-2222-3333-4444-555555555555
 jq -nc --arg id "$id" --arg in "$(pointer t1 1)" '{turn_id:$id,input:$in,reply:"r",source:"codex"}' >"$(field t1 review work)/turns/$id.json"
 wait "$bg" || :
@@ -482,7 +498,7 @@ team up t2 implement
 assert_code 2
 is '.reason | test("implementer or a finish")'
 kill "$owner"
-sleep 0.2
+wait "$owner" 2>/dev/null || :
 up t2 implement
 [[ ! -e $rt/rsv.json ]]
 team down t2
@@ -606,8 +622,7 @@ up t1 review
 ctl=$(field t1 review ctl)
 wait_for "$ctl/pgid"
 read -r pgid _ <"$ctl/pgid"
-sleep 0.3
-pgrep -g "$pgid" -f 'sleep 61.7' >/dev/null
+wait_until pgrep -g "$pgid" -fx 'sleep 61.7'
 : >"$TEST_STATE/change-id"
 team down t1
 assert_code 0
@@ -934,6 +949,92 @@ jq -e '.outcome == "cancelled"' "$tmp/out2" >/dev/null || die "forced down ends 
 jq -e '.conversation == null' "$rt/t1.json" >/dev/null
 team down t1
 ok converse-reservation
+
+# --- stopping by marker: a process that outlives the member ---
+reset
+up t1 review
+ctl=$(field t1 review ctl)
+: >"$TEST_STATE/orphan"
+wait_for "$ctl/exit"
+wait_until pgrep -f 'sleep 62.3' >/dev/null || die "no orphan to stop"
+team down t1
+assert_code 0
+! pgrep -f 'sleep 62.3' >/dev/null || die "orphan survived down"
+reset
+up t1 implement --step 1
+arm t1 implement
+printf 'done' >"$TEST_STATE/reply"
+team ask t1 implement "$tmp/prompt" --timeout 5
+printf 'edit\n' >>"$repo/f"
+: >"$TEST_STATE/orphan"
+wait_for "$(field t1 implement ctl)/exit"
+team finish t1 implement
+assert_code 0
+! pgrep -f 'sleep 62.3' >/dev/null || die "orphan survived finish"
+team down t1
+ok orphan-after-exit
+# sweep stops the orphan of a task with no live member
+reset
+up t1 review
+ctl=$(field t1 review ctl)
+: >"$TEST_STATE/orphan"
+wait_for "$ctl/exit"
+wait_until pgrep -f 'sleep 62.3' >/dev/null || die "no orphan to sweep"
+rm "$TEST_STATE/orphan"
+up t2 review
+grep -q 'removed stale task t1' "$tmp/err"
+[[ ! -e $rt/t1.json ]]
+! pgrep -f 'sleep 62.3' >/dev/null || die "orphan survived sweep"
+team down t2
+ok sweep-orphan
+# a process in a reused group id without the marker is never signalled
+reset
+up t1 review
+setsid sleep 63.1 &
+decoy=$!
+sleepers+=("$decoy")
+echo "$decoy 1" >"$(field t1 review ctl)/pgid"
+team down t1
+assert_code 0
+kill -0 "$decoy"
+kill "$decoy"
+reset
+ok marker-guard
+
+# --- the archive ---
+conv_setup
+script 1 $'TO: implement\nplease edit\nEND\n'
+script 2 $'TO: review\nplease look\nEND\n'
+script 3 $'approved\n'
+conv
+assert_code 0
+# not finish: its quit would end the review member too and the next up would start a new generation
+team down t1 implement
+assert_code 0
+up t1 implement --step 2
+arm t1 implement
+printf 'second' >"$TEST_STATE/reply"
+team ask t1 implement "$tmp/prompt" --timeout 5
+is '.outcome == "ok"'
+team down t1
+arc=$rt/archive/$gen
+[[ -f $arc/review/1.md && -f $arc/implement/1.md && -f $arc/implement.2/1.md ]] || die "archived answers: $(find "$arc")"
+[[ $(cat "$arc/implement.2/1.md") == second ]]
+[[ -s $arc/conversation.jsonl ]] || die "archived log"
+while IFS= read -r a; do [[ -f $a ]] || die "log points at a missing answer: $a"; done < <(jq -r '.answer // empty' "$arc/conversation.jsonl")
+for d in "$rt/archive" "$arc" "$arc/review"; do [[ $(stat -c %a "$d") == 700 ]] || die "mode of $d"; done
+ok archive
+# a forced down while a converse is in flight
+conv_setup
+script 1 $'TO: implement\nx\nEND\n'
+{ "$tool" converse t1 review "$tmp/prompt" --deadline 30 >"$tmp/out2" 2>&1 & }
+bg=$!
+wait_until bash -c '[[ $(cat "$1" 2>/dev/null | wc -l) -ge 2 ]]' _ "$TEST_STATE/prompts"
+team down t1 --force
+assert_code 0
+wait "$bg" || :
+tail -n1 "$rt/archive/$gen/conversation.jsonl" | jq -e '.outcome == "cancelled"' >/dev/null || die "archived log lacks the cancelled hop"
+ok archive-forced-down
 
 # --- status and unknown tasks ---
 reset

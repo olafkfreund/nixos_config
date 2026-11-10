@@ -195,7 +195,7 @@ let
     unset CASCADE_GLOBAL_CONFIG_OVERRIDE
     # shellcheck disable=SC2086
     exec env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE \
-      -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY AGY_CODER=1 AGY_WORKTREE="$(git rev-parse --show-toplevel)" \
+      -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE AGY_CODER=1 AGY_WORKTREE="$(git rev-parse --show-toplevel)" \
       agy --mode accept-edits --dangerously-skip-permissions $model "$@"
   '';
 
@@ -206,7 +206,7 @@ let
         *) set -- --dangerously-skip-permissions "$@" ;;
       esac
       command env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE \
-        -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY agy "$@"
+        -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE agy "$@"
     }
   '';
 

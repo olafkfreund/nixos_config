@@ -34,7 +34,7 @@ let
       exit 1
     fi
     exec env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE \
-      -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY CODEX_CODER=1 "${bin}/codex" \
+      -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE CODEX_CODER=1 "${bin}/codex" \
       --dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt -p implement "$@"
   '';
 in

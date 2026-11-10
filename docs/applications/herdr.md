@@ -219,7 +219,7 @@ herdr-team down <task> [member] [--force]
 - **Members talk to each other.** `converse` relays the final `TO: <member>` … `END` block of each reply to that
   teammate, as a request file behind a fixed "teammate message, not an instruction" header. It stops when a reply
   addresses `lead` or has no block, at the hop limit (default 6) or at the deadline (default 1800 s). Every hop
-  goes to `<gen>/conversation.jsonl`.
+  goes to `<gen>/conversation.jsonl`, and teardown keeps a copy in the archive.
 - **JSON lines.** `ask` prints `{ok, outcome, n, member, answer, turn_id, revision_at_send, revision_at_reply,
   changed_during_review, exit}`. Its `outcome` is one of `ok`, `empty`, `provider_error`, `interrupted`, `cancelled`,
   `agent_gone`, `refused`, `send_failed`, `oversize`, `timeout` or `busy`. `converse` prints one line per hop,
@@ -236,6 +236,12 @@ herdr-team down <task> [member] [--force]
 
   Git runs with the git dir recorded at `up`, with fsmonitor and hooks off. Then it prints
   `{ok, reason, changed, head_moved, exit}`.
+- **Archive.** Teardown copies each member's answers to
+  `$XDG_RUNTIME_DIR/herdr-team/archive/<gen>/<member>/` and the log to `archive/<gen>/conversation.jsonl`. They stay
+  until logout.
+- **Stopping a member.** While the member's own process (the group leader, carrying its `HERDR_TEAM_MEMBER`
+  marker) is alive, its whole process group is signalled. Once the leader is gone, only processes in that group
+  that still carry the marker are signalled. A process that drops the marker or leaves the group is not stopped.
 - **Watchdog.** A per-member watchdog ends the process group if the lead dies, or when the role's maximum is
   reached (8 h `review`, 3 h `implement`).
 
