@@ -272,3 +272,59 @@ when the managed `false` entries are gone. The `MEMORY.md` archive can be moved 
   `codex-implement`/`agy-implement` limit and every non-negotiable is marked KEEP, with its new line number.
 - **Step 6:** the `second-opinion` agy flag was already applied during implementation, which is what Codex saw.
   The step is complete when the diff shows it on both agy commands.
+
+## Step 5 checklist: old AGENTS.md to its new place
+
+# AGENTS.md split checklist (old line ranges from commit 7aa8fedc2)
+
+K = kept in AGENTS.md, D = moved to doc, R = also in .claude/rules/desktop.md
+
+| Old section / bullet | Old lines | Where now |
+| --- | --- | --- |
+| Read first | 3-12 | K |
+| Hosts table + HM note | 14-26 | K |
+| Non-negotiable 1-6 | 28-45 | K |
+| Delegating: Codex/agy/Ollama read-only | 49-50 | K |
+| Owner decision #2812 (incl. agent-review stays, unused) | 51-57 | K |
+| Instruction-only rules (6 sub-bullets) | 58-78 | K |
+| codex-implement paragraph, live sentences | 79-83 | K |
+| codex-implement "Legacy ... #2812" tail | 83-86 | D agent-delegation.md |
+| agy-implement paragraph, live sentences | 87-91 | K |
+| agy-implement "Legacy ... #2812" tail | 91-95 | D agent-delegation.md |
+| Untrusted advice, never approval | 96-97 | K |
+| Mixed teams inside herdr (all sub-bullets) | 98-113 | K (verbatim) |
+| Legacy agent-review paragraph | 114-128 | D agent-delegation.md; one-line pointer in K |
+| Never set HUMANIZE_CODEX_BYPASS_SANDBOX | 129 | K |
+| Subscription login only | 130 | K |
+| Module shape | 132-146 | K |
+| Commands | 148-157 | K |
+| Build / test / deploy | 159-173 | K |
+| Layout | 175-189 | K |
+| Adding a user | 191-195 | K |
+| Git (incl. worktree, Justfile branch rule) | 197-208 | K |
+| Infra: Hyprland keys | 214-215 | D infrastructure-notes.md + R |
+| Infra: no binary cache | 216-219 | D infrastructure-notes.md |
+| Infra: monitoring removed | 220-221 | D infrastructure-notes.md |
+| Infra: one Wayland session | 222-227 | D + R |
+| Infra: programs.hyprland by nixarchy | 228-237 | D + R |
+| Infra: Omarchy theme | 238-251 | D + R |
+| Infra: p510 Omarchy session | 252-264 | D + R |
+| Infra: Sunshine ("rule below" -> "rule in AGENTS.md, Non-negotiable 2") | 265-273 | D + R |
+| Infra: nixarchy runners / build-dir | 274-288 | D |
+| Infra: NVIDIA bump needs boot | 289-292 | D |
+| Infra: DEX5550 / Samsung / HP | 293 | D |
+| Infra: MicroVMs per host | 294-295 | D |
+| Infra pointer (new, 8 lines) | - | K |
+| Claude Code (2 bullets) | 297-306 | K |
+
+Result: AGENTS.md 199 lines (also dropped duplicate Layout rows and two duplicate Build/test lines that Commands and Read-first already carry).
+
+## KEEP marks (verified present verbatim in new AGENTS.md by grep)
+
+- KEEP: #2812 owner decision (agy --dangerously-skip-permissions, Codex bypass flags, every launch path, agent-review stays unused)
+- KEEP: instruction-only rules: Secrets, Herdr socket, Git and /etc/nixos, Nix daemon (p510 / unsigned paths), Network and host operations, Reviews (git status --porcelain)
+- KEEP: codex-implement limits (who may start it, task worktree, no commit/deploy/restart/gc/reboot, guard enforces, Issue #2081)
+- KEEP: agy-implement limits (same, Issues #2087, #2291)
+- KEEP: untrusted advice / never approval; Never set HUMANIZE_CODEX_BYPASS_SANDBOX; Subscription login only
+- KEEP: herdr-team block verbatim
+- MOVED (history only): the "Legacy, unused by default" tails and agent-review paragraph
