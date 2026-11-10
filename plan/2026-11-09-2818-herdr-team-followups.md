@@ -204,3 +204,13 @@ Line numbers are from commit 9085652e2.
 ## Rollback
 
 Revert the merge commit and deploy p620 and razer. The archive dir is plain tmpfs and needs no cleanup.
+
+## Deviations (step 3)
+
+- **The `archive` case** uses `down t1 implement`, not `finish t1 implement`, before the step-2 implementer. The
+  fake `codex` shares one `quit` file, so `finish` also ended the review member. The next `up` then swept the
+  task into a new generation, and `implement.2` could never appear. `finish` stays covered by
+  `orphan-after-exit`.
+- **`marker-guard`** brings up a real review member and overwrites its `pgid` file with the decoy, instead of a
+  hand-built state file.
+- **Not run:** the loaded run (`nice -n 19` under a parallel build). The 20 sequential runs passed.
