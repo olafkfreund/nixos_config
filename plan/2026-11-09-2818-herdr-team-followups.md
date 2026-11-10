@@ -43,7 +43,7 @@ Line numbers are from commit 9085652e2.
    - :354 waits for the pointer in `$TEST_STATE/prompts`;
    - :412 does `wait_for …/req/1.md`, and the unused lines :414–415 are dropped;
    - :485 does `wait "$owner"`;
-   - :609 polls `pgrep -g "$pgid" -x sleep`.
+   - :609 polls `pgrep -g "$pgid" -fx 'sleep 61.7'`.
 7. **`ANTHROPIC_API_KEY_FILE`** is stripped wherever `ANTHROPIC_API_KEY` is.
 
 ## Steps
@@ -57,8 +57,12 @@ Line numbers are from commit 9085652e2.
      - Then check `tr '\0' '\n' </proc/<pid>/environ | grep -qxF "HERDR_TEAM_MEMBER=<ctl>"`.
      - Print `pid start`.
    - `stop_member` (:166–182): drop line 168 (`alive "$2" "$3" || return 0`), and change the signature to
-     `stop_member ctl`. Update its one caller, `teardown` (:194).
-     - If `alive "$pgid" "$pstart"`, keep today's group path.
+     `stop_member ctl`.
+   - Update its caller in `teardown` (:195). Drop the now-unused `pid` and `start` locals and their `mget` lines
+     (:184, :187–188), because shellcheck flags them with SC2034.
+     - If `alive "$pgid" "$pstart"`, send the group TERM and wait as today.
+     - Before the group KILL, check `alive "$pgid" "$pstart"` again. If the leader is gone by then, the group may
+       have emptied and its id been reused, so KILL through the per-pid path below instead (Codex).
      - Otherwise collect `member_pids` into an array, TERM each pair still matched by `alive`, poll up to 10 × 0.5 s
        until none of the pairs is `alive`, then KILL the remaining pairs and poll again.
    - `sweep` (:146–158): before `rm_dirs`, call `stop_member "$ctl"` for each member, then `keep_answers`
@@ -73,7 +77,8 @@ Line numbers are from commit 9085652e2.
    - New `keep_answers <gen> <member> <work>`. The caller holds the lock.
      - Return 0 if `<work>` is empty or `<work>/ans` is missing, or `<gen>` fails `^[A-Za-z0-9]+$`.
      - Otherwise `mkdir -m 700 -p "$rt/archive" "$rt/archive/$gen"`, pick a free `<member>[.k]` and
-       `mkdir -m 700` it, `cp -a "$work/ans/." dest/`, and append `"$work/ans/"$'\t'"$dest/"` to
+       `mkdir -m 700` it, `cp -r -- "$work/ans/." dest/` (not `-a`, which would copy the source dir's mode onto
+       dest), and append `"$work/ans/"$'\t'"$dest/"` to
        `$rt/archive/$gen/paths`.
      - On any failure, print `herdr-team: archive failed for <member>` to stderr and return 0.
    - `teardown` (:183–202): call `keep_answers` under `lock … unlock` before `rm_dirs`. The `gen` comes from
@@ -94,31 +99,57 @@ Line numbers are from commit 9085652e2.
    - Add `wait_until() { for _ in {1..100}; do "$@" && return 0; sleep 0.05; done; return 1; }` next to
      `wait_for` (:184).
    - :345: delete the `sleep 0.2`.
-   - :354: replace `sleep 0.5` with ``wait_until grep -qxF "$(pointer t1 1)" "$TEST_STATE/prompts"``.
+   - :354: replace `sleep 0.5` with ``wait_until grep -qxsF "$(pointer t1 1)" "$TEST_STATE/prompts"``. The file
+     does not exist before the first prompt, and `-s` keeps grep quiet about that.
    - :412: replace `sleep 0.4` with `wait_for "$(field t1 review work)/req/1.md"`, and delete :414–415.
    - :485: replace `sleep 0.2` with `wait "$owner" 2>/dev/null || :`.
-   - :609: replace `sleep 0.3` with `wait_until pgrep -g "$pgid" -x sleep`.
-   - The fake `codex` (:91–100) gains `HERDR_TEAM_MEMBER` in its `env | grep` dump pattern. A new
-     `$TEST_STATE/orphan` switch starts `sleep 62.3 &` and then exits, which leaves an orphan with the marker.
+   - :609: replace `sleep 0.3` with `wait_until pgrep -g "$pgid" -fx 'sleep 61.7'`. `-x sleep` would match the
+     fake Codex's own `sleep 0.05` loop, and plain `-f` the parent `bash -c` before its trap is set.
+   - The fake `codex` (:91–100) writes `printenv HERDR_TEAM_MEMBER` to `$TEST_STATE/marker`. This is a separate
+     file: the `env-dump` must stay empty (:278, :281).
+     - Inside its wait loop it checks for a new switch file, `$TEST_STATE/orphan`. When the file appears, it starts
+       `sleep 62.3 &` and exits 0.
+     - The switch is set only after a successful `up`, because `up` needs the agent visible (herdr-team.sh:385).
+     - The member then exits, the launcher writes `exit` and leaves, and the orphan keeps the marker.
+   - `cleanup` (:9–15) and `reset` (:142–145) also `pkill -f 'sleep 62.3'` and `'sleep 63.1'`, so a failed case
+     leaks nothing.
    - New cases:
      - **orphan-after-exit:** `down` and `finish implement`. The member exits and the launcher writes `exit`. After
        `down`, no `sleep 62.3` remains.
-     - **sweep:** kill the launcher with `-KILL` while the orphan runs. The next `up` prints "removed stale task"
-       and the orphan is gone.
+     - **sweep:** do the orphan setup, wait for `ctl/exit`, then run `up` on another task. With no live member
+       left, `sweep` removes the task, prints "removed stale task", and the orphan is gone.
      - **marker guard:** start a decoy with `setsid sleep 63.1 &`, so its pgid is its own pid, with no marker.
        Write the member's `pgid` file by hand as `<decoy pid> 1`, a wrong start time, as the pid-reuse case
-       does at :580–600. This forces the per-pid path, and the decoy survives `down`.
-     - **archive:** after `converse` and `down`, check:
+       does at :580–600. This forces the per-pid path, and the decoy survives `down`. Add the decoy to
+       `sleepers` and kill it at the end of the case.
+     - **archive:** run this sequence:
+       1. `up review` and `up implement --step 1`, then arm both.
+       2. A `converse` from implement whose reply hands off `TO: review`, so both members get an `ans/1.md`.
+          Reuse the existing converse fixtures (:780–800).
+       3. `finish t1 implement`, then `up implement --step 2` and one `ask`, then `down t1`.
+
+       Then check:
        - `archive/<gen>/review/1.md` exists;
        - `conversation.jsonl` exists, and every non-null `.answer` in it exists;
        - `stat -c %a` is 700 on `archive`, `<gen>` and `review`.
-     - A second `implement` in one gen goes to `implement.2`.
-     - **forced down mid-converse:** the archived log ends with a `cancelled` hop.
-     - **env:** `ANTHROPIC_API_KEY_FILE=decoy` (at :277) is not in the dump, and `HERDR_TEAM_MEMBER` is.
-   - Verify:
-     - `bash home/development/herdr-team-test.sh` passes;
-     - `for i in $(seq 20); do bash home/development/herdr-team-test.sh || break; done` passes all 20;
-     - one run under `nice -n 19` with `stress-ng --cpu 0 -t 120` or a parallel `nix build` for load.
+       - the step-2 answers are in `implement.2/`.
+     - **forced down mid-converse:** start a `converse` in the background and wait for its first prompt. Then
+       `team down t1 --force` removes every member, so `rm_gen` runs while `converse` is in flight. Wait for the
+       background `converse`; the archived log's last line has `outcome == "cancelled"`.
+     - **env:** `ANTHROPIC_API_KEY_FILE=decoy` (at :277) is not in the dump. `$TEST_STATE/marker` equals the
+       member's `ctl`.
+   - Verify: the test takes the tool path (`tool=${1:?}`, :6), and the tool needs the Nix header lines, so:
+
+     ```bash
+     t=$(mktemp); printf 'agy_member=false\nsink_path=%s\n' "$(command -v herdr-team-sink)" >"$t"
+     cat home/development/herdr-team.sh >>"$t"; chmod +x "$t"
+     bash home/development/herdr-team-test.sh "$t" </dev/null
+     for i in $(seq 20); do bash home/development/herdr-team-test.sh "$t" </dev/null || break; done
+     nice -n 19 bash home/development/herdr-team-test.sh "$t" </dev/null   # with a parallel nix build for load
+     ```
+
+     The authoritative run is the `herdr-team` checkPhase (`home/development/agent-run.nix:23–28`), which
+     `just test-host` builds.
    - Traps:
      - The fake `agent-env` (:85–88) passes the whole environment, so the test does not prove the real allowlist.
        Step 4 covers that with a grep.
@@ -165,7 +196,7 @@ Line numbers are from commit 9085652e2.
 | Command | Expected |
 | ------- | -------- |
 | `shellcheck home/development/herdr-team.sh home/development/herdr-team-test.sh` | clean |
-| `bash home/development/herdr-team-test.sh` | all `ok` lines, exit 0 |
+| `bash home/development/herdr-team-test.sh "$t"` (step 3) | all `ok` lines, exit 0 |
 | 20× loop of the test, plus one loaded run | 20/20 and pass |
 | `just test-host p620` / `razer` | build |
 | the live check in step 6 | no `sleep 600` left; archive readable |
