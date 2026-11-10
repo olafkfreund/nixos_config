@@ -28,11 +28,22 @@ let
       runHook postCheck
     '';
   };
+  agy-acp-member = pkgs.writeShellApplication {
+    name = "agy-acp-member";
+    runtimeInputs = [ pkgs.python3 ];
+    text = ''exec python3 ${./agy-acp-member.py} "$@"'';
+    checkPhase = ''
+      runHook preCheck
+      ${lib.getExe pkgs.python3} ${./agy-acp-member-test.py} "$target"
+      runHook postCheck
+    '';
+  };
 in
 {
   home.packages = [
     herdr-run
     herdr-team
+    agy-acp-member
     (pkgs.writeShellApplication {
       name = "agent-run";
       runtimeInputs = with pkgs; [ git jq coreutils gnugrep herdr-run ];
