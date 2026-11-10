@@ -191,3 +191,7 @@ partial rollback is not needed.
   `timeout -k 10` and output capped at 64 KB; the fingerprint is refreshed after each retry; an empty outcome counts
   as `failed`; `--verify ''` is a usage error. A TERM-ignoring check records exit 137 (the KILL from `timeout -k`),
   not 124. Five new `verify-*` cases, and `no_leftovers` checks for `verify-*` temp files. Two full runs passed.
+- Codex PR review: the check's output went through `| tail`, which `timeout` does not cover, so a check that left a
+  background child holding stdout blocked `finish`. The check now writes straight to its file; `timeout` leads its
+  own process group, which is killed after the run, and the output is capped to 64 KB afterwards. New case
+  `verify-background-child`.

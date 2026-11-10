@@ -1032,9 +1032,14 @@ finish() {
       if ((i > 1)) && [[ $fp_pre != "$fp_post" ]]; then fp_impl=$fp_pre; fi
       attempts=$((attempts + 1))
       verify_exit=0
-      (cd "$root" && timeout -k 10 "$vt" agent-env env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY \
+      # timeout leads its own process group; a file, not a pipe, so a background child cannot hold finish open
+      (cd "$root" && exec timeout -k 10 "$vt" agent-env env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY \
         -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE \
-        bash -c "$cmd" </dev/null) 2>&1 | tail -c 65536 >"$out" || verify_exit=${PIPESTATUS[0]}
+        bash -c "$cmd" </dev/null >"$out" 2>&1) &
+      wait "$!" || verify_exit=$?
+      kill -KILL -- "-$!" 2>/dev/null || :
+      # shortcut: the output file is capped after the run, not during it; bounded by --verify-timeout
+      tail -c 65536 "$out" >"$out.cap" && mv -- "$out.cap" "$out"
       fp_post=$(fingerprint)
       if [[ $fp_post != "$fp_pre" ]]; then dirtied=true; fi
       tr -d '\000' <"$out" | tail -c 4096 >"$tail_file"

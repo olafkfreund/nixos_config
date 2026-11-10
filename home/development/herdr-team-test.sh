@@ -26,6 +26,7 @@ cleanup() {
   pkill -f 'sleep 61.7' 2>/dev/null || :
   pkill -f 'sleep 62.3' 2>/dev/null || :
   pkill -f 'sleep 63.1' 2>/dev/null || :
+  pkill -f 'sleep 61.5' 2>/dev/null || :
   drop_work
   rm -rf "$tmp"
 }
@@ -662,6 +663,17 @@ is '.reason == "verify_failed" and .verify.exit == 137 and .verify.attempts == 1
 ! pgrep -f 'sleep 61.9' >/dev/null || die "the TERM-ignoring check survived"
 no_leftovers
 ok verify-term-ignored
+
+# a background child holding the check's stdout neither blocks finish nor survives it
+vup
+s0=$SECONDS
+team finish t1 implement --verify 'sleep 61.5 & echo started; exit 1' --verify-timeout 30 --retries 0
+assert_code 1
+((SECONDS - s0 < 20)) || die "finish waited for the check's background child"
+is '.verify.exit == 1 and (.verify.tail | contains("started"))'
+! pgrep -f 'sleep 61.5' >/dev/null || die "the check's background child survived"
+no_leftovers
+ok verify-background-child
 
 # more than 4 KB of output with a NUL, cut mid-character at the front and ending in one
 vup
