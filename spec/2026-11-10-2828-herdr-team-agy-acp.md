@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2828
 intent: intent/2026-11-10-2828-herdr-team-agy-acp.md
 ---
