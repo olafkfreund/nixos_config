@@ -164,3 +164,5 @@ unit by hand (`systemctl --user list-units 'herdr-team-*'`), after the bus annou
     whose scope did not stop remain in the kept state file.
   - `finish` reports a failed stop in `scope_stop_failed` but keeps its exit status (its `ok` reflects the diff
     checks); only `down` exits 1 on a failed stop.
+- Step 2 (coder, same reason): the unchanged inner `bash -c` string is held in a `member='…'` variable that both the
+  scope and group branches pass to `bash -c "$member"`, instead of being written out twice.

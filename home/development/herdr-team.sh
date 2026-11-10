@@ -456,6 +456,7 @@ up() {
     printf '#!/usr/bin/env bash\ncd %q || exit 127\nPATH=%q\n' "$root" "$PATH"
     printf 'ctl=%q\nlead_pid=%q\nlead_start=%q\nscale=%q\nmaxsecs=%q\n' "$ctl" "$lead" "$lead_start" "$scale" \
       "$(awk -v n="$max" -v s="$scale" 'BEGIN { printf "%d", n*s }')"
+    printf 'scope=%q\ncontainment=%q\nstop_secs=%q\n' "$scope" "$containment" "$stop_secs"
     printf 'argv=('
     printf '%q ' "${argv[@]}"
     printf ')\n'
@@ -470,11 +471,17 @@ kill_group() {
   [[ $g =~ ^[0-9]+$ ]] && ((g > 1)) || return 1
   kill -"$1" -- "-$g" 2>/dev/null
 }
+stop_scope() { # unit: stop it; fails only if it is still active afterwards; no-op in group mode
+  [[ $containment == scope ]] || return 0
+  timeout "$((stop_secs + 5))" systemctl --user stop -- "$1" >/dev/null 2>&1 || :
+  ! systemctl --user is-active --quiet -- "$1" 2>/dev/null
+}
 # The lead going away (pid and start time) or the role's maximum ends the member.
 (
   while sleep_for 30; do
     if [[ $(start_of "$lead_pid") == "$lead_start" ]] && ((SECONDS < maxsecs)); then continue; fi
     : >"$ctl/stop"
+    stop_scope "$scope" || :
     kill_group TERM || :
     sleep_for 5
     kill_group KILL || :
@@ -483,11 +490,24 @@ kill_group() {
 ) &
 wd=$!
 code=0
+# HUP, TERM and INT leave through the EXIT trap, which stops the scope.
+trap 'stop_scope "$scope" || :' EXIT
+trap 'exit 129' HUP
+trap 'exit 143' TERM
+trap 'exit 130' INT
 # Job control gives the member its own process group and the terminal.
 set -m
-bash -c '[ ! -e "$0/stop" ] && echo "$$ $(sed "s/.*) //" /proc/$$/stat | awk "{ print \$20 }")" >"$0/pgid.tmp" && mv "$0/pgid.tmp" "$0/pgid" && export HERDR_TEAM_MEMBER="$0" && exec "$@"; exit 127' "$ctl" "${argv[@]}" 2>"$ctl/stderr" || code=$?
+member='[ ! -e "$0/stop" ] && echo "$$ $(sed "s/.*) //" /proc/$$/stat | awk "{ print \$20 }")" >"$0/pgid.tmp" && mv "$0/pgid.tmp" "$0/pgid" && export HERDR_TEAM_MEMBER="$0" && exec "$@"; exit 127'
+if [[ $containment == scope ]]; then
+  systemd-run --user --scope --quiet --collect --expand-environment=no --unit="$scope" \
+    -p TimeoutStopSec="$stop_secs" -- bash -c "$member" "$ctl" "${argv[@]}" 2>"$ctl/stderr" || code=$?
+else
+  bash -c "$member" "$ctl" "${argv[@]}" 2>"$ctl/stderr" || code=$?
+fi
 kill "$wd" 2>/dev/null
 tail -n 5 "$ctl/stderr" >"$ctl/status.tmp" 2>/dev/null && mv "$ctl/status.tmp" "$ctl/status"
+stop_scope "$scope" || :
+trap - EXIT
 printf '%s\n' "$code" >"$ctl/exit.tmp" && mv "$ctl/exit.tmp" "$ctl/exit"
 exit "$code"
 LAUNCH
