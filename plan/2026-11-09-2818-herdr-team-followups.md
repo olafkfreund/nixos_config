@@ -214,3 +214,25 @@ Revert the merge commit and deploy p620 and razer. The archive dir is plain tmpf
 - **`marker-guard`** brings up a real review member and overwrites its `pgid` file with the decoy, instead of a
   hand-built state file.
 - **Not run:** the loaded run (`nice -n 19` under a parallel build). The 20 sequential runs passed.
+
+## Deviations (step 6 review fixes)
+
+From Codex and a fresh Opus review. agy's review failed with a 500 error from its service.
+
+- **Group signals:** TERM and KILL go to the whole group only when the recorded leader is alive **and** carries
+  this member's marker. A forged or reused `pgid` falls back to the per-pid path.
+- **The marker** is matched as a whole NUL-separated entry (`grep -zqxF`, helper `marked`), not as a line after
+  `tr`.
+- **`emit`'s archive fallback** rewrites the answer path through the `paths` map, the same jq as `rm_gen`, now
+  shared as `archive_jq`. It keeps the original line if jq fails.
+- **`teardown`** survives a state file that a concurrent `down` already removed: `gen` read with `|| gen=''`.
+- **`second-opinion`'s four example `env -u` lists** also unset `ANTHROPIC_API_KEY_FILE`, which decision 7
+  covers and step 4's list missed.
+- **The test** unsets the caller's API key variables at the start, because the host exports
+  `ANTHROPIC_API_KEY_FILE`.
+- **The docs** say the whole group is signalled while the marked leader lives.
+- **Left as noted risks:**
+  - the archive copy has no size cap;
+  - the forced-down test has a window of tens of milliseconds;
+  - the test cleanup's `pkill -f 'sleep 62.3'` is unscoped;
+  - `agent_api_keys` has no consumer.

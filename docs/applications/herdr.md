@@ -238,8 +238,10 @@ herdr-team down <task> [member] [--force]
   `{ok, reason, changed, head_moved, exit}`.
 - **Archive.** Teardown copies each member's answers to
   `$XDG_RUNTIME_DIR/herdr-team/archive/<gen>/<member>/` and the log to `archive/<gen>/conversation.jsonl`. They stay
-  until logout. Stopping a member stops every process in its group that carries its `HERDR_TEAM_MEMBER` marker. A
-  process that drops the marker or leaves the group is not stopped.
+  until logout.
+- **Stopping a member.** While the member's own process (the group leader, carrying its `HERDR_TEAM_MEMBER`
+  marker) is alive, its whole process group is signalled. Once the leader is gone, only processes in that group
+  that still carry the marker are signalled. A process that drops the marker or leaves the group is not stopped.
 - **Watchdog.** A per-member watchdog ends the process group if the lead dies, or when the role's maximum is
   reached (8 h `review`, 3 h `implement`).
 

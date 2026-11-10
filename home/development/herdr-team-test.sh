@@ -2,6 +2,8 @@
 # shellcheck disable=SC2016 # The quoted strings are passed to child shells.
 # Clear the live pane's connection before creating any test state or subprocess.
 while IFS= read -r name; do unset "$name"; done < <(compgen -A variable HERDR_)
+# The key checks below plant their own decoys; the caller's real ones would read as leaks.
+unset OPENAI_API_KEY OPENAI_API_KEY_FILE GEMINI_API_KEY GEMINI_API_KEY_FILE GOOGLE_API_KEY ANTHROPIC_API_KEY ANTHROPIC_API_KEY_FILE
 set -euo pipefail
 tool=${1:?usage: herdr-team-test.sh <herdr-team>}
 tmp=$(mktemp -d)

@@ -122,6 +122,12 @@ conv_held() { # state file: succeeds while another live converse holds the task
   { read -r pid start; } < <(jq -r '.conversation // {} | "\(.pid // "-") \(.start // "-")"' "$1")
   [[ $pid != "$$" ]] && alive "$pid" "$start"
 }
+# Rewrites a log line's answer path from a member's work dir to its archive copy (the paths map).
+archive_jq='($paths | split("\n") | map(select(length > 0) | split("\t") | {(.[0]): .[1]}) | add // {}) as $map
+  | if .answer == null then . else
+      .answer |= reduce ($map | to_entries[]) as $entry (.;
+        if startswith($entry.key) then $entry.value + .[($entry.key | length):] else . end)
+    end'
 rm_gen() {
   [[ $1 =~ ^[A-Za-z0-9]+$ ]] || return 0
   if [[ -f $rt/$1/conversation.jsonl ]]; then
@@ -130,12 +136,8 @@ rm_gen() {
       && mkdir -m 700 -p "$rt/archive/$1" \
       && {
         if [[ -f $rt/archive/$1/paths ]]; then
-          jq -c --rawfile paths "$rt/archive/$1/paths" '
-            ($paths | split("\n") | map(select(length > 0) | split("\t") | {(.[0]): .[1]}) | add // {}) as $map
-            | if .answer == null then . else
-                .answer |= reduce ($map | to_entries[]) as $entry (.;
-                  if startswith($entry.key) then $entry.value + .[($entry.key | length):] else . end)
-              end' "$rt/$1/conversation.jsonl" >"$rt/archive/$1/conversation.jsonl.tmp"
+          jq -c --rawfile paths "$rt/archive/$1/paths" "$archive_jq" \
+            "$rt/$1/conversation.jsonl" >"$rt/archive/$1/conversation.jsonl.tmp"
         else
           cp -- "$rt/$1/conversation.jsonl" "$rt/archive/$1/conversation.jsonl.tmp"
         fi
@@ -209,15 +211,16 @@ same_pane() { # pane terminal [kind]
   reply=$(h pane get "$1" 2>/dev/null) || return 1
   jq -e --arg t "$2" --arg k "${3:-}" '.result.pane.terminal_id == $t and ($k == "" or .result.pane.agent == $k)' >/dev/null 2>&1 <<<"$reply"
 }
+# The process carries this member's marker as a whole environment entry.
+marked() { grep -zqxF "HERDR_TEAM_MEMBER=$2" "/proc/$1/environ" 2>/dev/null; }
 member_pids() { # pgid ctl: verified pid/start pairs
-  local pid stat env fields=()
+  local pid stat fields=()
   while IFS= read -r pid; do
     [[ $pid =~ ^[0-9]+$ ]] || continue
     IFS= read -r stat <"/proc/$pid/stat" 2>/dev/null || continue
     read -r -a fields <<<"${stat##*) }"
     [[ ${fields[2]:-} == "$1" ]] || continue
-    env=$(tr '\0' '\n' <"/proc/$pid/environ" 2>/dev/null) || continue
-    if grep -qxF "HERDR_TEAM_MEMBER=$2" <<<"$env"; then
+    if marked "$pid" "$2"; then
       printf '%s %s\n' "$pid" "${fields[19]:-}"
     fi
   done < <(pgrep -g "$1" 2>/dev/null)
@@ -227,13 +230,13 @@ stop_member() { # ctl
   local pgid pstart i pair pid start remaining signal pairs=()
   read -r pgid pstart <"$1/pgid" 2>/dev/null || return 0
   [[ $pgid =~ ^[0-9]+$ ]] && ((pgid > 1)) || return 0
-  if alive "$pgid" "$pstart"; then
+  if alive "$pgid" "$pstart" && marked "$pgid" "$1"; then
     kill -TERM -- "-$pgid" 2>/dev/null || :
     for ((i = 0; i < 10; i++)); do
       pgrep -g "$pgid" >/dev/null 2>&1 || return 0
       sleep_for 0.5
     done
-    if alive "$pgid" "$pstart"; then
+    if alive "$pgid" "$pstart" && marked "$pgid" "$1"; then
       kill -KILL -- "-$pgid" 2>/dev/null || :
       for ((i = 0; i < 10; i++)); do
         pgrep -g "$pgid" >/dev/null 2>&1 || return 0
@@ -275,7 +278,7 @@ teardown() { # state file, member: stop it, close its pane, remove its dirs and 
   stop_member "$ctl"
   if [[ -n $pane ]] && same_pane "$pane" "$terminal"; then h pane close "$pane" >/dev/null 2>&1 || :; fi
   lock
-  gen=$(jq -r .gen "$f")
+  gen=$(jq -r .gen "$f" 2>/dev/null) || gen=''
   keep_answers "$gen" "$m" "$work"
   unlock
   rm_dirs "$ctl" "$work"
@@ -749,7 +752,7 @@ converse() {
   : >>"$jl"
   end=$(($(date +%s) + limit))
   emit() { # from to n outcome answer changed
-    local line
+    local line rewritten
     line=$(jq -cn --argjson hop "$hop" --arg from "$1" --arg to "$2" --arg n "$3" --arg outcome "$4" --arg answer "$5" --argjson changed "${6:-null}" \
       '{hop: $hop, from: $from, to: (if $to == "" then null else $to end), n: (if $n == "" then null else ($n | tonumber) end),
         outcome: $outcome, answer: (if $answer == "" then null else $answer end), changed_during_review: $changed}')
@@ -757,6 +760,10 @@ converse() {
     if [[ -d $rt/$gen ]]; then
       printf '%s\n' "$line" >>"$rt/$gen/conversation.jsonl"
     elif [[ -d $rt/archive/$gen ]]; then
+      if [[ -f $rt/archive/$gen/paths ]]; then
+        rewritten=$(jq -c --rawfile paths "$rt/archive/$gen/paths" "$archive_jq" <<<"$line" 2>/dev/null) || rewritten=''
+        [[ -z $rewritten ]] || line=$rewritten
+      fi
       printf '%s\n' "$line" >>"$rt/archive/$gen/conversation.jsonl"
     fi
     unlock

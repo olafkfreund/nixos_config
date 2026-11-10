@@ -126,7 +126,7 @@ No prompt file, no pasting, no size cap.
 ```bash
 herdr-run codex timeout 900 \
   env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY \
-  -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY \
+  -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE \
   codex --dangerously-bypass-approvals-and-sandbox \
   -c forced_login_method=chatgpt review \
   --base "$base" > "$work/codex-review.md" < /dev/null
@@ -190,7 +190,7 @@ For a question, design or plan with no diff to point at. The prompt file in
 ```bash
 herdr-run codex timeout 600 \
   env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY \
-  -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY \
+  -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE \
   codex --dangerously-bypass-approvals-and-sandbox \
   -c forced_login_method=chatgpt exec --ephemeral \
   --skip-git-repo-check -C "$repo" -o "$work/codex.md" - < "$prompt"
@@ -208,7 +208,7 @@ without it headless agy auto-denies every command and returns an empty review.
 ```bash
 herdr-run agy timeout 600 \
   env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY \
-  -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY \
+  -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE \
   agy --dangerously-skip-permissions --mode plan \
   --output-format json --print-timeout 10m \
   -p "$(cat "$prompt")" > "$work/agy.json" < /dev/null
@@ -244,7 +244,7 @@ wrote run against a second model. `agy agents` lists the available names
 ```bash
 herdr-run agy timeout 900 \
   env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY \
-  -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY \
+  -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE \
   agy --dangerously-skip-permissions --mode plan --agent "$agent" \
   --output-format json --print-timeout 10m \
   -p "$(cat "$prompt")" > "$work/agy.json" < /dev/null
