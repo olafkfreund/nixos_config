@@ -170,3 +170,13 @@ unit by hand (`systemctl --user list-units 'herdr-team-*'`), after the bus annou
   `agy-implement` is refused in the suite. It waits for the child to go with `wait_until` and does not assert the
   time bound; the member-exit case does (exit record within 3 s of the member's exit at
   `HERDR_TEAM_TIME_SCALE=0.05`). 20 runs in a row passed.
+- Review fixes (Opus, Codex):
+  - `stop_scope` succeeds only when `systemctl show -p ActiveState` reads `inactive` or `failed`; a `deactivating`
+    unit or an unreachable manager counts as a failed stop.
+  - Decision 7's launcher traps are removed. Bash runs a trap only after the foreground member exits, so the traps
+    could not stop a running member, and on a hangup they kept the launcher alive, which hid a leftover member from
+    `sweep`. A hung-up launcher now dies as before, and `sweep` stops its scope.
+  - `sweep`'s second loop skips tasks with no live member, so a kept scope is not stopped twice under the lock.
+  - Reads of `scope` and `pgid` hide a missing file's error.
+  - New case: a scope systemd reports as still `deactivating` makes `down` exit 1 with `scope_stop_failed`, keeps
+    the record, and the next `down` removes it.

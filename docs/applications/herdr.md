@@ -249,9 +249,9 @@ herdr-team down <task> [member] [--force]
     carrying its `HERDR_TEAM_MEMBER` marker) is alive, its whole process group is signalled. Once the leader is
     gone, only processes in that group that still carry the marker are signalled. A process that drops the marker
     or leaves the group is not stopped.
-- **A scope that will not stop.** If a unit is still active after its stop, `down` and `finish` keep the member's
-  record and list it under `scope_stop_failed`, and `down` exits 1. The next `up` for the task sweeps it again.
-  To see what is left:
+- **A scope that will not stop.** Unless systemd confirms the unit is inactive after its stop, `down` and `finish`
+  keep the member's record and list it under `scope_stop_failed`, and `down` exits 1. Run `down` again to retry;
+  every `up` also retries it once the task has no live member. To see what is left:
 
   ```bash
   systemctl --user status 'herdr-team-*'

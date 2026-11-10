@@ -215,11 +215,11 @@ sweep() { # remove state files with no live member; hold the lock
   done
   # live tasks: a member whose launcher died may have left its scope running
   for f in "$rt"/*.json; do
-    [[ -f $f ]] || continue
+    [[ -f $f && -n $(live_members "$f") ]] || continue
     for m in $(jq -r '.members | keys[]' "$f"); do
       ctl=$(mget "$f" "$m" ctl)
       s=''
-      read -r s <"$ctl/scope" 2>/dev/null || :
+      { read -r s <"$ctl/scope"; } 2>/dev/null || :
       [[ $s =~ ^herdr-team-[A-Za-z0-9_-]+\.scope$ ]] || continue
       pid=$(mget "$f" "$m" pid)
       start=$(mget "$f" "$m" start)
@@ -249,17 +249,19 @@ member_pids() { # pgid ctl: verified pid/start pairs
     fi
   done < <(pgrep -g "$1" 2>/dev/null)
 }
-stop_scope() { # unit: stop it; fails only if it is still active afterwards
+stop_scope() { # unit: stop it; fails unless systemd confirms it is inactive
   timeout "$((stop_secs + 5))" systemctl --user stop -- "$1" >/dev/null 2>&1 || :
-  ! systemctl --user is-active --quiet -- "$1" 2>/dev/null
+  local state
+  state=$(systemctl --user show -p ActiveState --value -- "$1" 2>/dev/null) || return 1
+  [[ $state == inactive || $state == failed ]]
 }
 # Stop the member's scope, then TERM its group when its leader is still ours; otherwise signal only verified pid/start pairs.
 # Returns nonzero only when the scope is still active.
 stop_member() { # ctl
   local pgid pstart i pair pid start remaining signal sc='' rc=0 pairs=()
-  read -r sc <"$1/scope" 2>/dev/null || sc=''
+  { read -r sc <"$1/scope"; } 2>/dev/null || sc=''
   if [[ $sc =~ ^herdr-team-[A-Za-z0-9_-]+\.scope$ ]] && ! stop_scope "$sc"; then rc=1; fi
-  read -r pgid pstart <"$1/pgid" 2>/dev/null || return "$rc"
+  { read -r pgid pstart <"$1/pgid"; } 2>/dev/null || return "$rc"
   [[ $pgid =~ ^[0-9]+$ ]] && ((pgid > 1)) || return "$rc"
   if alive "$pgid" "$pstart" && marked "$pgid" "$1"; then
     kill -TERM -- "-$pgid" 2>/dev/null || :
@@ -467,14 +469,16 @@ sleep_for() { sleep "$(awk -v n="$1" -v s="$scale" 'BEGIN { printf "%.3f", n*s }
 printf '%s %s\n' "$$" "$(start_of $$)" >"$ctl/pid.tmp" && mv "$ctl/pid.tmp" "$ctl/pid"
 kill_group() {
   local g
-  read -r g _ <"$ctl/pgid" 2>/dev/null || return 1
+  { read -r g _ <"$ctl/pgid"; } 2>/dev/null || return 1
   [[ $g =~ ^[0-9]+$ ]] && ((g > 1)) || return 1
   kill -"$1" -- "-$g" 2>/dev/null
 }
-stop_scope() { # unit: stop it; fails only if it is still active afterwards; no-op in group mode
+stop_scope() { # unit: stop it; fails unless systemd confirms it is inactive; no-op in group mode
   [[ $containment == scope ]] || return 0
   timeout "$((stop_secs + 5))" systemctl --user stop -- "$1" >/dev/null 2>&1 || :
-  ! systemctl --user is-active --quiet -- "$1" 2>/dev/null
+  local state
+  state=$(systemctl --user show -p ActiveState --value -- "$1" 2>/dev/null) || return 1
+  [[ $state == inactive || $state == failed ]]
 }
 # The lead going away (pid and start time) or the role's maximum ends the member.
 (
@@ -490,11 +494,6 @@ stop_scope() { # unit: stop it; fails only if it is still active afterwards; no-
 ) &
 wd=$!
 code=0
-# HUP, TERM and INT leave through the EXIT trap, which stops the scope.
-trap 'stop_scope "$scope" || :' EXIT
-trap 'exit 129' HUP
-trap 'exit 143' TERM
-trap 'exit 130' INT
 # Job control gives the member its own process group and the terminal.
 set -m
 member='[ ! -e "$0/stop" ] && echo "$$ $(sed "s/.*) //" /proc/$$/stat | awk "{ print \$20 }")" >"$0/pgid.tmp" && mv "$0/pgid.tmp" "$0/pgid" && export HERDR_TEAM_MEMBER="$0" && exec "$@"; exit 127'
@@ -507,7 +506,6 @@ fi
 kill "$wd" 2>/dev/null
 tail -n 5 "$ctl/stderr" >"$ctl/status.tmp" 2>/dev/null && mv "$ctl/status.tmp" "$ctl/status"
 stop_scope "$scope" || :
-trap - EXIT
 printf '%s\n' "$code" >"$ctl/exit.tmp" && mv "$ctl/exit.tmp" "$ctl/exit"
 exit "$code"
 LAUNCH

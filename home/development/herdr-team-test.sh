@@ -1126,6 +1126,20 @@ else
   wait_until unit_unloaded "$unit" || die "unit not unloaded after sweep"
   team down t1
   team down t2
+  # a scope systemd still reports active is kept and reported, and the next down retries it
+  reset
+  up t1 review
+  mkdir -p "$tmp/shim"
+  printf '#!%s\n[[ " $* " == *" ActiveState "* ]] && { echo deactivating; exit 0; }\nexec %q "$@"\n' \
+    "$(command -v bash)" "$(command -v systemctl)" >"$tmp/shim/systemctl"
+  chmod +x "$tmp/shim/systemctl"
+  PATH=$tmp/shim:$PATH team down t1
+  assert_code 1
+  is '.scope_stop_failed == ["review"]'
+  jq -e '.members | has("review")' "$rt/t1.json" >/dev/null || die "record dropped after a failed stop"
+  team down t1
+  assert_code 0
+  [[ ! -e $rt/t1.json ]] || die "retry did not remove the record"
   ok containment-scope
 fi
 
