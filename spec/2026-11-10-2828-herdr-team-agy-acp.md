@@ -20,9 +20,17 @@ A new file, `home/development/agy-acp-member.py`. It is stdlib-only Python and i
 `writers.writePython3Bin` (or `writeScriptBin` with python3), so it gets flake8 checks at build time.
 
 - **Start:**
-  - It runs `agy acp --dangerously-skip-permissions` as a child in its own process group. There is no
-    `start_new_session` (spike trap), so #2818's marker-based stop reaches the child.
-  - It sends `initialize`, then `session/new {cwd}`, and prints `agy session <id>`.
+  - It runs `agy acp --dangerously-skip-permissions` as a child in its **own process group**
+    (`process_group=0`). So a terminal `ctrl+c` reaches only the client, and the child survives to handle
+    `session/cancel`.
+  - It still inherits `HERDR_TEAM_MEMBER`, and the client guarantees the child dies with it:
+    - `PR_SET_PDEATHSIG = SIGTERM` is set in the child through `prctl` (ctypes) before `exec`. So even a
+      `SIGKILL` of the client from #2818's `stop_member` or the watchdog takes the child down.
+    - On top of that, `SIGTERM`/`SIGHUP` handlers and `atexit` terminate the child, then kill it after 3 s.
+  - This replaces the spike's `start_new_session`. A separate session would also drop the controlling
+    terminal, which the child does not need.
+  - It sends `initialize`, then `session/new {cwd}`, then the model and effort config, and only then prints
+    `agy session <id>`. So `up` cannot see the member as ready before it is configured.
   - Its argv takes `--turns <dir>` (the member's `<work>/turns`) and an optional `--model`/`--effort`, which it
     applies with `session/set_config_option`, as the prior art does.
 - **REPL:**
@@ -41,8 +49,10 @@ A new file, `home/development/agy-acp-member.py`. It is stdlib-only Python and i
     (with `--dangerously-skip-permissions` there were none in the spike).
   - Any other client request gets JSON-RPC error -32601.
 - **Interrupt:**
-  - `ctrl+c` during a turn sends `session/cancel`, then prints `■ Conversation interrupted`, the marker `ask`
-    already scans for (herdr-team.sh:409), and returns to the prompt.
+  - `ctrl+c` during a turn sends `session/cancel`, then keeps reading until the cancelled request's response
+    arrives (`stopReason: "cancelled"`), up to 10 s, so stale chunks never leak into the next turn. Then it
+    prints `■ Conversation interrupted`, the marker `ask` already scans for (herdr-team.sh:409), and returns to
+    the prompt. If no response comes within 10 s, it terminates the child and exits 1.
   - `ctrl+c` at the prompt exits 0.
   - So `finish`'s "one `ctrl+c`, a second after 3 s" gives exit 0, as today.
 - **End:** EOF or the child exiting ends the client with the child's code.
@@ -51,12 +61,14 @@ A new file, `home/development/agy-acp-member.py`. It is stdlib-only Python and i
 
 In `home/development/antigravity-config.nix`, `agy-implement` gains `--acp`.
 
-- After the same preflight, it execs `agy-acp-member "$@"` instead of `agy --mode accept-edits … "$@"`. The
-  preflight is:
+- `--acp` is removed from the arguments. After the same preflight, the wrapper execs
+  `agy-acp-member $model "$@"` instead of `agy --mode accept-edits … $model "$@"`. `$model` is the default
+  `--model gemini-4-argon-medium`, unless the caller set `--model`/`--effort` (antigravity-config.nix:184).
+  The preflight is:
   - the guard probe on a new agy version (#2463);
   - the refusal of flags that would load another `hooks.json` (#2296);
   - `unset CASCADE_GLOBAL_CONFIG_OVERRIDE`;
-  - the `env -u` of every key variable;
+  - the `env -u` of every key variable, including `ANTHROPIC_API_KEY_FILE` (#2818);
   - `AGY_CODER=1` and `AGY_WORKTREE`.
 - The coder guard is a global `PreToolUse` hook keyed on `AGY_CODER=1`. The spike showed it denies a commit
   under ACP.
@@ -67,17 +79,32 @@ These are for `kind == agy` only. Codex paths are untouched.
 
 - **`up`:** `agy-implement`'s argv becomes `(agent-env agy-implement --acp --turns "$work/turns")`.
   `agent-env` keeps the `HERDR_TEAM_MEMBER` marker (#2818).
-- **Pane identity:** herdr reports `agent: null` for the client.
-  - `same_pane` for agy members matches `terminal_id` only. That is the same terminal identity it checks today;
-    the kind check is the part herdr cannot give.
-  - The `up` wait loop (herdr-team.sh:384) waits for the client's `agy session` line, through
-    `pane read --source visible`, instead of herdr's agent detection.
+- **Readiness:** herdr reports `agent: null` for the client.
+  - For agy, `up`'s wait loop (herdr-team.sh:384) requires both the terminal match and the client's
+    `agy session <id>` line in `pane read --source visible`.
+  - It records `<id>` in the member's state as `agy_session`.
+  - The loop waits up to 180 s instead of 60 s, because `agy-implement`'s first run on a new agy version runs
+    the guard probe first (about 90 s, plus the ACP check below).
+- **Pane identity:** `same_pane` for agy matches `terminal_id`, as today. Once herdr reports `agent_session`
+  (after the first turn), it also requires `agent_session.agent == "agy"` and `value == agy_session`.
+  `kind` is not checked for agy, because herdr cannot report it.
+- **Naming:** `h agent rename` needs a detected agent. agy members are named with `h pane rename` instead
+  (herdr-team.sh:394).
 - **Delivery:** `h agent prompt` returns `agent_not_found`. So agy pointers go through `h pane send-text`
   followed by `h pane send-keys enter`. The pointer line is the same.
 - **`finish`:** `h agent send-keys … ctrl+c` becomes `h pane send-keys … ctrl+c` for agy.
 - **`agent-run.nix`:** `agyMember = true`.
 
-### 4. Docs and skills
+### 4. The guard probe gains an ACP check
+
+`agy-guard-probe` (antigravity-config.nix:162–199) adds one ACP turn through the guarded path: `agy-implement
+--acp` with `AGY_IMPLEMENT_PROBING=1`, so the probe does not recurse. It runs against a throwaway repo, asks
+for a commit, and passes only if the commit is denied and `HEAD` is unchanged.
+
+The probe's success cache key gains an `acp1` suffix, so hosts that already cached the current agy version
+run the new check once.
+
+### 5. Docs and skills
 
 - `docs/applications/herdr.md`: agy members, and how they differ (no herdr agent detection, typed delivery).
 - `AGENTS.md`'s herdr bullet, the managed `CLAUDE.md` text in `modules/programs/claude-code-managed.nix`, and the
@@ -117,15 +144,21 @@ These are for `kind == agy` only. Codex paths are untouched.
   - one turn writes a well-formed turn file with `source: "agy"`;
   - a second turn reuses the session;
   - a non-`end_turn` stop writes no file;
+  - a `ctrl+c` mid-turn followed by a new prompt: the second turn gets its own reply, with no stale chunks from
+    the cancelled one;
+  - a `SIGKILL` of the client leaves no `agy acp` process (`PDEATHSIG`);
   - a permission request is answered allow;
   - `ctrl+c` mid-turn prints the marker, and `ctrl+c` at the prompt exits 0;
   - a turns dir that is not 0700 is refused.
 - **herdr-team test:** a fake `agy-implement --acp` running the fake client.
+  - The fake herdr reports `agent: null` for that pane, and fails `herdr agent prompt`, `send-keys` and
+    `rename` on it, so any leftover `h agent` call is caught.
   - `up t1 agy-implement` succeeds.
   - `ask` gets `ok` through send-text delivery.
   - `converse` relays between `implement` (Codex) and `agy-implement`.
   - `finish t1 agy-implement` exits 0 with the usual checks.
   - The existing "agy member not enabled" case is flipped.
+- **Probe:** the ACP probe passes on p620 and is recorded under the new cache key.
 - **Live on p620:**
   1. `herdr-team up t agy-implement --step 1` shows the conversation in the pane.
   2. `ask` answers.
