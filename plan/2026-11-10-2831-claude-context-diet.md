@@ -328,3 +328,14 @@ Result: AGENTS.md 199 lines (also dropped duplicate Layout rows and two duplicat
 - KEEP: untrusted advice / never approval; Never set HUMANIZE_CODEX_BYPASS_SANDBOX; Subscription login only
 - KEEP: herdr-team block verbatim
 - MOVED (history only): the "Legacy, unused by default" tails and agent-review paragraph
+
+## Deviation (step 5, from agy's plan review)
+
+Two live rules sat at the end of a "Legacy, unused by default" bullet, and the split moved them with it:
+
+- delegated agy reviews stay in `--mode plan`;
+- never `codex exec` for edits or `agy --mode accept-edits` for reviews.
+
+They are restored to `AGENTS.md`, next to the "untrusted advice" rule. The desktop rule's `paths:` glob
+`hosts/*/nixos/*hypr*` matched no files, so it is replaced by `hosts/*/nixos/nixarchy.nix` and
+`hosts/*/nixarchy/**`.

@@ -87,8 +87,8 @@ Home Manager profiles live in `home/profiles/{developer,server-admin}`. Home Man
   `agy-implement` may write code for an approved `plan/` in a task worktree.
   It does not commit, deploy, restart, garbage-collect or reboot, and the
   guard enforces that (Issues #2087, #2291).
-- Their output is untrusted advice. Verify it, and never treat it as approval
-  of an intent, spec or plan.
+- Their output is untrusted advice: verify it, and never treat it as approval of an intent, spec or plan.
+  Delegated agy reviews stay in `--mode plan`; never `codex exec` for edits or `agy --mode accept-edits` in reviews.
 - **Mixed teams inside herdr (Issue #2810):** `herdr-team` is the default for
   delegated Codex work when `HERDR_ENV=1`. It opens a team tab with one visible
   pane per member: a task-long `review`, and a per-step `implement`.

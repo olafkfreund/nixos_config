@@ -2,7 +2,8 @@
 paths:
   - "hosts/common/nixos/omarchy-*.nix"
   - "modules/desktop/**"
-  - "hosts/*/nixos/*hypr*"
+  - "hosts/*/nixos/nixarchy.nix"
+  - "hosts/*/nixarchy/**"
 ---
 
 # Desktop notes (Nixarchy / Omarchy / Hyprland)
