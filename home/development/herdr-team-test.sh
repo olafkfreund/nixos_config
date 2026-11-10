@@ -677,7 +677,7 @@ w=$(field t1 implement work)
 hook 2 "cp '$w/req/2.md' '$TEST_STATE/req2'; : >'$repo/fixed'"
 team finish t1 implement --verify 'echo boom-tail; test -e fixed'
 assert_code 0
-grep -qF 'test -e fixed' "$TEST_STATE/req2" && grep -qF 'Exit code: 1' "$TEST_STATE/req2" && grep -qF 'boom-tail' "$TEST_STATE/req2" || die "req/2.md lacks the command, exit code or tail"
+{ grep -qF 'test -e fixed' "$TEST_STATE/req2" && grep -qF 'Exit code: 1' "$TEST_STATE/req2" && grep -qF 'boom-tail' "$TEST_STATE/req2"; } || die "req/2.md lacks the command, exit code or tail"
 no_leftovers
 ok verify-retry-request
 
