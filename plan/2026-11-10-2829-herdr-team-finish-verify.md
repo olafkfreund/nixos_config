@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2829
 spec: spec/2026-11-10-2829-herdr-team-finish-verify.md
 coders:
