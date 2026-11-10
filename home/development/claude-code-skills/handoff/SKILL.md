@@ -62,6 +62,10 @@ herdr-team finish "$task" implement
   never approval: check the exchange and the diff against the plan yourself.
 - `finish` quits the implementer gracefully, runs `down`, and checks the exit code, `HEAD`, a non-empty diff,
   nothing staged and the last outcome. Its verdict replaces `agent-run`'s.
+- When the plan step names a check, pass it as `--verify '<cmd>'`: `finish` runs it in the worktree before the
+  quit and, if it fails, sends the output back to the live implementer (`--retries N`, default 1, at most 3;
+  `--verify-timeout S`, default 900). Run it with the Bash tool's `run_in_background`, because a check plus a
+  retry can outlast a foreground Bash call. Read `ok`, `reason`, `failures` and `verify` in the result.
 - Members run unrestricted (Issue #2812). Only the lead stages, commits and deploys.
 - agy steps stay on `agent-run agy "$prompt_file"` while `agyMember` is false. Outside herdr, `herdr-team`
   exits 2 and `agent-run` is the route.

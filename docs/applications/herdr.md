@@ -203,7 +203,7 @@ herdr-team up <task> review
 herdr-team up <task> implement --step <k>
 herdr-team ask <task> <member> <prompt-file> [--resume n] [--timeout s]
 herdr-team converse <task> <member> <prompt-file> [--max-hops N] [--deadline s]
-herdr-team finish <task> implement
+herdr-team finish <task> implement|agy-implement [--verify CMD] [--retries N] [--verify-timeout S]
 herdr-team status <task>
 herdr-team down <task> [member] [--force]
 ```
@@ -235,7 +235,20 @@ herdr-team down <task> [member] [--force]
   - the last `outcome == "ok"`.
 
   Git runs with the git dir recorded at `up`, with fsmonitor and hooks off. Then it prints
-  `{ok, reason, changed, head_moved, exit}`.
+  `{ok, reason, failures, changed, head_moved, exit, verify}`. `failures` lists every failed check in order, and
+  `reason` is the first.
+  - **`--verify CMD`** runs the lead's check in the worktree before the quit, with the API key variables unset
+    and a `--verify-timeout` (default 900 s). If it fails, `finish` sends the last 4 KB of output to the live
+    implementer and runs the check again, up to `--retries` times (default 1, at most 3). The check's own file
+    changes are excluded from the empty-diff check, but still show in `changed` and `verify.dirtied`.
+    Run `finish --verify` with the Bash tool's `run_in_background`: a check plus a retry can outlast a foreground
+    Bash call.
+  - `verify` is `null` without `--verify`, otherwise `{cmd, ok, exit, attempts, dirtied, retry_outcome, tail}`.
+    `failures` can add `verify_failed`, `verify_unsafe` and `verify_retry_<outcome>`.
+  - **`verify_unsafe`** means the check did not run: the worktree is `~/.config/nixos`, on `main`, or detached at
+    `origin/main`.
+  - While a `finish` holds the task, `ask`, `converse` and `down` (without `--force`) refuse with `busy`. Its own
+    retry is exempt.
 - **Archive.** Teardown copies each member's answers to
   `$XDG_RUNTIME_DIR/herdr-team/archive/<gen>/<member>/` and the log to `archive/<gen>/conversation.jsonl`. They stay
   until logout.
