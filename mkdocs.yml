@@ -198,6 +198,7 @@ nav:
       - "Cloudflared Tunnel (host)": applications/cloudflared-tunnel.md
       - "Agent Bus (Matrix + MCP)": applications/agent-bus.md
       - "Herdr (agent multiplexer)": applications/herdr.md
+      - "Craft apps (default applications)": applications/craftapps.md
       - "Sunshine (streaming)": applications/sunshine.md
       - "Agent voice (spoken summaries)": applications/agent-voice.md
       - "Hello Lock (lock screen)": applications/hello-lock.md

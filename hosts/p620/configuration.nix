@@ -497,6 +497,7 @@ in
   # omarchy in the Omarchy one. p620 only for now — razer and p510 stay on
   # stylix until this has been lived in. See modules/desktop/theme-owner.nix.
   features.themeOwner.enable = true;
+
   features.craftapps = {
     enable = true;
     apps = {

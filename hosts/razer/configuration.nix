@@ -318,6 +318,7 @@ in
   # Terminals follow whichever shell owns the session: DMS in the DMS sessions,
   # omarchy in the Omarchy one. See modules/desktop/theme-owner.nix.
   features.themeOwner.enable = true;
+
   features.craftapps = {
     enable = true;
     apps = {
