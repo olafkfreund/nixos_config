@@ -1,0 +1,212 @@
+---
+status: draft
+issue: 2831
+spec: spec/2026-11-10-2831-claude-context-diet.md
+coders:
+  1: coder   # managed settings: plugins, skillOverrides, env, ponytail, PARR (one Nix file + one md)
+  2: agy     # Atlassian removal: mechanical deletions across ~10 files
+  3: codex   # MCP reconciler retired-server logic (small, tricky jq + write test)
+  4: coder   # Explore agent file via activation
+  5: coder   # AGENTS.md split with the section map and checklist
+  6: coder   # skill description trims + second-opinion agy flag fix
+reviewers:
+  - codex    # it found the sync and AGENTS.md reach gaps in review
+  - agy      # second read; reruns with --dangerously-skip-permissions per #2812
+---
+
+# Plan: cut Claude Code's fixed context, in sync on every host
+
+Self-contained: implementing this needs only this file and the code. Line numbers are from commit 7aa8fedc2.
+Every Nix change lands in modules that both p620 and razer import:
+
+- `modules.programs.claude-code-managed`, at hosts/p620:251 and hosts/razer:419;
+- the shared Home Manager profile.
+
+## Approved decisions
+
+1. **Plugins.** Managed `enabledPlugins` sets six plugins to `false`:
+   - `frontend-design@claude-plugins-official`;
+   - `taste-skill@taste-skill`;
+   - `ui-ux-pro-max@ui-ux-pro-max-skill`;
+   - `impeccable@impeccable`;
+   - `jobs-to-be-done@pm-skills`;
+   - `daily.dev@daily.dev`.
+
+   They are merged with the existing `fleet-guard` entry from `claude-code-mods.nix`. The header note at
+   `claude-code-managed.nix:9–12` is updated. Fallback, only if the live check fails: a `jq` reconcile of
+   `~/.claude/settings.json` after `claudeUserSettingsInit`.
+2. **Skills.** `baselineSkillOverrides` gains the exact `name-only` and `off` tables from the spec (section 2).
+   Our own skills' descriptions over 300 characters are cut to about 250, keeping their trigger words.
+3. **Atlassian goes completely:**
+   - the host blocks;
+   - the option tree and secrets in `modules/ai/mcp-servers.nix`;
+   - the `claude-code-mcp.nix` and `claude-desktop/mcp-config.nix` entries;
+   - `pkgs/atlassian-mcp` and its line in `pkgs/default.nix`;
+   - the four secret declarations in `secrets.nix`, with their `.age` and `.placeholder` files;
+   - the Atlassian section of `docs/MCP-GUIDE.md`.
+
+   `intent/`, `spec/` and `plan/` are exempt as history.
+4. **The MCP reconciler** gets `retiredMcpServers = [ "atlassian" ]`:
+   - deletes those keys from `~/.claude.json` and `~/.claude/settings.local.json` `mcpServers`, and from Claude
+     Desktop's config, on every activation;
+   - counts a present retired key as a difference in the "already matches" test.
+5. **`AGENTS.md`** is split per the spec's section map. Every live rule stays, including:
+   - the first sentences of the `codex-implement` and `agy-implement` paragraphs;
+   - "advice only";
+   - `HUMANIZE_CODEX_BYPASS_SANDBOX`;
+   - subscription only.
+
+   Only the "Legacy, unused by default" text moves, to `docs/architecture/agent-delegation.md`. Infrastructure
+   notes go to `docs/architecture/infrastructure-notes.md`, with the desktop items also in a path-scoped
+   `.claude/rules/desktop.md`. Both docs pages go into `mkdocs.yml` and `mkdocs-full.yml`.
+6. **`MEMORY.md`.** The lead archives RESOLVED, FIXED and REMOVED entries, and decommissioned hosts or services,
+   to `memory/archive/`. The target is about 60 lines.
+7. **Models.**
+   - `~/.claude/agents/Explore.md` (Haiku, read-only tools) is written as a real file by activation on every
+     switch, never as a `home.file` symlink.
+   - The managed env gets `CLAUDE_CODE_SUBAGENT_MODEL = "sonnet"`.
+8. **Ponytail and PARR.**
+   - `PONYTAIL_DEFAULT_MODE = "lite"`.
+   - `parrProtocol.enable = false` on both hosts.
+   - The four PARR lines become a "## Working style" section in `claude-code-managed-claude.md`.
+   - `parr-protocol.txt` stays for Codex and agy.
+9. **The `second-opinion` skill bug.** Its agy commands gain `--dangerously-skip-permissions`, as #2812
+   requires. Without it, headless agy auto-denies every command and returns an empty review. That happened
+   three times on 2026-11-10.
+
+## Steps
+
+1. **`modules/programs/claude-code-managed.nix` and `claude-code-managed-claude.md`** (decisions 1, 2-overrides,
+   7-env, 8).
+   - **Plugins:** in the managed settings attrset, near where `skillOverrides` is merged (:750–753), add
+     `enabledPlugins` with the six set to `false`. `lib.recursiveUpdate`-merge it so `claude-code-mods.nix:43`'s
+     `fleet-guard` entry survives. Update the header comment (:9–12).
+   - **Skill overrides:** add the spec's tables to `baselineSkillOverrides` (:197–199). Keep `ask-gemini = "off"`.
+   - **Env:** in the `env` block (:722), set `CLAUDE_CODE_SUBAGENT_MODEL = "sonnet"` and change
+     `PONYTAIL_DEFAULT_MODE` to `"lite"` (:725).
+   - **PARR:** set `parrProtocol.enable = false` at hosts/p620/configuration.nix:253 and
+     hosts/razer/configuration.nix:421. Add the PARR text as `## Working style` after the "Model split" section
+     in `modules/programs/claude-code-managed-claude.md`.
+   - Verify:
+     - `just check-syntax`;
+     - `nix eval .#nixosConfigurations.p620.config.environment.etc."claude-code/managed-settings.json".text | jq`
+       shows the plugins, the overrides and the env, and the same for razer.
+   - Traps:
+     - do not add plugins to `managed-settings` in any other attr;
+     - `skillOverrides` values are only `off`, `user-invocable-only` and `name-only` (#1928);
+     - the managed `CLAUDE.md` is generated, so edit only its source `.md`.
+2. **Atlassian removal** (decision 3).
+   - **Delete:**
+     - hosts/p620/configuration.nix:358–(end of the `atlassian` block);
+     - hosts/razer/configuration.nix:242–(same);
+     - in `modules/ai/mcp-servers.nix`: :99–190 (the options), :270, :296 and :335–357 (the secrets);
+     - home/development/claude-code-mcp.nix:22 and :211–(end of the block);
+     - home/development/claude-desktop/mcp-config.nix:11 and :125–(end of the block);
+     - `pkgs/default.nix:4` and the directory `pkgs/atlassian-mcp/`;
+     - in `secrets.nix`, the entries `api-jira-token`, `api-confluence-token`, `api-jira-pat` and
+       `api-confluence-pat`;
+     - the files `secrets/api-jira-token.age`, `secrets/api-confluence-token.age`, any
+       `secrets/api-confluence-pat.age`, and `secrets/api-{jira,confluence}-{token,pat}.placeholder`;
+     - the Atlassian section of `docs/MCP-GUIDE.md`.
+   - Verify:
+     - `grep -rn "atlassian\|api-jira\|api-confluence" --exclude-dir={intent,spec,plan} .` finds nothing;
+     - `just check-syntax` passes.
+   - Traps:
+     - `secrets.nix` is evaluated by agenix, so keep its syntax valid;
+     - do not touch other secrets;
+     - `git rm` the files; do not leave them untracked.
+3. **The retired-server reconcile** in `home/development/claude-code-mcp.nix` (decision 4).
+   - Add `retiredMcpServers = [ "atlassian" ];` in the `let`.
+   - In `claudeSharedMcpServers` (:317–), extend the jq "already matches" test (:378) so that any retired key
+     present is a difference. Write with `del(.mcpServers[$r[]])` alongside the existing `+` merge.
+   - Apply the same delete to `~/.claude/settings.local.json` if the file exists, written atomically
+     (`mktemp` in the same dir, then `mv`).
+   - Apply the same delete to Claude Desktop's generated config path from `claude-desktop/mcp-config.nix`.
+   - Verify:
+     - build the HM activation: `just test-host p620`;
+     - in a temp `HOME`, a test script copies a `~/.claude.json` and a `settings.local.json` that contain
+       `atlassian`, runs the activation snippet, and checks the key is gone and the other servers are
+       untouched. The script is `home/development/claude-code-mcp-retire-test.sh`, run from the module's check
+       if one exists, or by hand.
+   - Traps:
+     - never print the files' contents; they may hold tokens;
+     - `$DRY_RUN_CMD` conventions;
+     - the activation must not `exit`.
+4. **The Explore agent** (decision 7) in `home/development/claude-code-agents.nix`.
+   - Add a store file `exploreAgent` with this frontmatter:
+
+     ```yaml
+     name: Explore
+     description: <the built-in's one-line purpose>
+     model: haiku
+     tools: Read, Grep, Glob, Bash
+     ```
+
+     The body is a 5–8 line read-only search prompt.
+   - Add a `home.activation.claudeExploreAgent` entry after `writeBoundary`:
+     `install -D -m 0644 ${exploreAgent} "$HOME/.claude/agents/Explore.md"`.
+   - Verify: `just test-host p620`.
+   - Traps:
+     - never `home.file`; `agents/**` is Syncthing-synced (home/syncthing-stignore.nix:106);
+     - the curation step must not move `Explore.md` to `agents-disabled`.
+5. **The `AGENTS.md` split** (decision 5).
+   - Work section by section, following the spec's map.
+   - Produce a checklist in the PR body that maps every bullet of the old file to its new place: kept, moved to
+     a doc, or moved to a rule.
+   - Create `docs/architecture/agent-delegation.md`, `docs/architecture/infrastructure-notes.md` and
+     `.claude/rules/desktop.md` (`paths:` per the spec). Add both docs to the `nav` in `mkdocs.yml` and
+     `mkdocs-full.yml`.
+   - Verify:
+     - `wc -l AGENTS.md` is under 200;
+     - `npx --no markdownlint-cli2` passes on all changed Markdown;
+     - `grep` that `AGENTS.md` still contains: `Never set`, `Subscription login only`, `p510`,
+       `AGENT_BUS_ANNOUNCED`, `instruction-only`, `codex-implement`, `agy-implement`, `herdr-team`,
+       `worktree`.
+   - Traps:
+     - markdownlint lints whole files;
+     - the nav must change in both mkdocs files;
+     - #2828 later edits the herdr-team bullet, so keep it intact.
+6. **Skill text** (decisions 2-trims and 9).
+   - **Trims:** for our own skills whose source is in this repo (`home/development/claude-code-skills/*` and
+     the skills table's `localSkills`), cut every description over 300 characters to about 250, keeping the
+     trigger words. List each with its before and after length in the PR.
+   - **`second-opinion`:** in `home/development/claude-code-skills/second-opinion/SKILL.md`, add
+     `--dangerously-skip-permissions` to both agy commands, the prose path and `--agent`. Add one line saying
+     why: #2812, and the empty reviews.
+   - Verify: `npx --no markdownlint-cli2` on the changed files.
+   - Traps: third-party skills are untouched; the YAML frontmatter must stay valid.
+7. **Lead: `MEMORY.md`** (decision 6). Move the archived files to `memory/archive/` and rewrite the index.
+   - Verify: `wc -l MEMORY.md` is about 60, and every remaining link resolves.
+   - Traps: outside git; done directly by the lead, not a coder.
+8. **Lead: build, review, deploy, verify.**
+   - **Before:** record `/context` in a fresh session on p620 at today's main.
+   - **Build:** `just check-syntax`, `just test-host p620`, `just test-host razer`.
+   - **Review:** a fresh Opus pass, then Codex and agy (with `--dangerously-skip-permissions`) on
+     `git diff origin/main`.
+   - **Ship:** open a PR with the intent, spec, plan, the checklist and the trim list. Announce on the bus, then
+     `just p620` and `just deploy-via-p620 razer`.
+   - **After**, in a fresh session on each host, check everything in the spec's Verification:
+     - the plugins, the skill list, `claude mcp list`, `/agents` for Explore, the subagent model, no PARR
+       reminder, and the ponytail banner;
+     - the Syncthing round trip for a plugin set to `true`;
+     - `/context` after;
+     - the bus, branch and p510 guards;
+     - the generated Codex and agy rules still contain the rules.
+   - **Owner:** disconnect Microsoft 365 and Spotify at claude.ai, then confirm their tools are gone.
+
+## Tests
+
+| Command | Expected |
+| ------- | -------- |
+| `just check-syntax` | passes |
+| `just test-host p620` and `just test-host razer` | both build |
+| the retire-test script | `atlassian` is gone, other servers untouched |
+| `grep` for Atlassian outside the history dirs | nothing found |
+| `wc -l AGENTS.md` | under 200 |
+| `/context` before and after | at least 20k tokens less (target) |
+| the post-deploy checks on p620 and razer | identical results |
+
+## Rollback
+
+Revert the merge commit and deploy both hosts. Atlassian's `.age` files stay in git history. Plugins come back
+when the managed `false` entries are gone. The `MEMORY.md` archive can be moved back by hand.
