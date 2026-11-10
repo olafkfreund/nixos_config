@@ -194,7 +194,6 @@ sweep() { # remove state files with no live member; hold the lock
   for f in "$rt"/*.json; do
     [[ -f $f ]] || continue
     if [[ -n $(live_members "$f") ]] || reserved "$f"; then continue; fi
-    echo "herdr-team: removed stale task $(basename "$f" .json)" >&2
     g=$(jq -r .gen "$f")
     kept=0
     for m in $(jq -r '.members | keys[]' "$f"); do
@@ -210,6 +209,7 @@ sweep() { # remove state files with no live member; hold the lock
       update "$f" 'del(.members[$m])' --arg m "$m" || :
     done
     if ((kept)); then continue; fi
+    echo "herdr-team: removed stale task $(basename "$f" .json)" >&2
     rm -f -- "$f"
     rm_gen "$g"
   done
@@ -504,6 +504,7 @@ else
   bash -c "$member" "$ctl" "${argv[@]}" 2>"$ctl/stderr" || code=$?
 fi
 kill "$wd" 2>/dev/null
+: >"$ctl/gone"
 tail -n 5 "$ctl/stderr" >"$ctl/status.tmp" 2>/dev/null && mv "$ctl/status.tmp" "$ctl/status"
 stop_scope "$scope" || :
 printf '%s\n' "$code" >"$ctl/exit.tmp" && mv "$ctl/exit.tmp" "$ctl/exit"
@@ -969,9 +970,14 @@ finish() {
   if alive "$pid" "$start" && same_pane "$pane" "$terminal" "$kind"; then
     h agent send-keys "$pane" ctrl+c >/dev/null 2>&1 || :
     for ((i = 0; i < 30; i++)); do
-      [[ -f $ctl/exit ]] && break
+      [[ -f $ctl/exit || -f $ctl/gone ]] && break
       if ((i == 6)); then h agent send-keys "$pane" ctrl+c >/dev/null 2>&1 || :; fi
       sleep_for 0.5
+    done
+    # the member is gone; the launcher writes exit once its scope has stopped (up to stop_secs)
+    for ((i = 0; i < 2 * (stop_secs + 5); i++)); do
+      [[ -f $ctl/exit || ! -f $ctl/gone ]] && break
+      sleep 0.5
     done
   fi
   if [[ -f $ctl/exit ]]; then

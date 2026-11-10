@@ -180,3 +180,8 @@ unit by hand (`systemctl --user list-units 'herdr-team-*'`), after the bus annou
   - Reads of `scope` and `pgid` hide a missing file's error.
   - New case: a scope systemd reports as still `deactivating` makes `down` exit 1 with `scope_stop_failed`, keeps
     the record, and the next `down` removes it.
+- Review fix (agy): the launcher stops the scope before it writes `exit`, which takes up to `stop_secs` when a child
+  ignores TERM. `finish` waited too briefly for that and could send its second ctrl+c to the launcher. The launcher
+  now writes `$ctl/gone` when the member returns; `finish` stops sending keys once it exists and waits up to
+  `stop_secs + 5` s more for `exit`. The `finish` scope case asserts the reason is not `not_exited`. `sweep` reports
+  a stale task as removed only when it is.

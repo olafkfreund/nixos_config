@@ -1108,6 +1108,7 @@ else
   up t1 implement
   wait_until kid_up || die "no scope child"
   team finish t1 implement
+  is '.reason != "not_exited"'
   wait_until kid_gone || die "child survived finish"
   team down t1
   # a killed launcher leaves its scope for the next up to stop
