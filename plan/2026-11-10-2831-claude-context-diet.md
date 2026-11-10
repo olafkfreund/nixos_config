@@ -275,7 +275,7 @@ when the managed `false` entries are gone. The `MEMORY.md` archive can be moved 
 
 ## Step 5 checklist: old AGENTS.md to its new place
 
-# AGENTS.md split checklist (old line ranges from commit 7aa8fedc2)
+### AGENTS.md split checklist (old line ranges from commit 7aa8fedc2)
 
 K = kept in AGENTS.md, D = moved to doc, R = also in .claude/rules/desktop.md
 
@@ -317,13 +317,17 @@ K = kept in AGENTS.md, D = moved to doc, R = also in .claude/rules/desktop.md
 | Infra pointer (new, 8 lines) | - | K |
 | Claude Code (2 bullets) | 297-306 | K |
 
-Result: AGENTS.md 199 lines (also dropped duplicate Layout rows and two duplicate Build/test lines that Commands and Read-first already carry).
+Result: AGENTS.md 199 lines (also dropped duplicate Layout rows and two duplicate Build/test lines that Commands and
+Read-first already carry).
 
-## KEEP marks (verified present verbatim in new AGENTS.md by grep)
+### KEEP marks (verified present verbatim in new AGENTS.md by grep)
 
-- KEEP: #2812 owner decision (agy --dangerously-skip-permissions, Codex bypass flags, every launch path, agent-review stays unused)
-- KEEP: instruction-only rules: Secrets, Herdr socket, Git and /etc/nixos, Nix daemon (p510 / unsigned paths), Network and host operations, Reviews (git status --porcelain)
-- KEEP: codex-implement limits (who may start it, task worktree, no commit/deploy/restart/gc/reboot, guard enforces, Issue #2081)
+- KEEP: #2812 owner decision (agy --dangerously-skip-permissions, Codex bypass flags, every launch path, agent-review
+  stays unused)
+- KEEP: instruction-only rules: Secrets, Herdr socket, Git and /etc/nixos, Nix daemon (p510 / unsigned paths), Network
+  and host operations, Reviews (git status --porcelain)
+- KEEP: codex-implement limits (who may start it, task worktree, no commit/deploy/restart/gc/reboot, guard enforces,
+  Issue #2081)
 - KEEP: agy-implement limits (same, Issues #2087, #2291)
 - KEEP: untrusted advice / never approval; Never set HUMANIZE_CODEX_BYPASS_SANDBOX; Subscription login only
 - KEEP: herdr-team block verbatim
