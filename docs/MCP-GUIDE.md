@@ -54,29 +54,6 @@ NixOS-specific integration for package management and system operations.
 
 ## Service Integrations
 
-### Atlassian (Jira and Confluence)
-
-Enables AI-assisted interaction with Jira and Confluence through natural language commands.
-
-**Supported:**
-
-- Cloud and self-hosted Atlassian instances
-- Jira issue management
-- Confluence page operations
-
-**Setup Requirements:**
-
-- Atlassian account credentials
-- API tokens for authentication
-- Workspace configuration
-
-**Common Tasks:**
-
-- Create/update Jira issues
-- Search and query tickets
-- Read/edit Confluence pages
-- Project analysis
-
 ### LinkedIn Professional Networking
 
 Access LinkedIn data for professional networking tasks.

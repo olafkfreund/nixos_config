@@ -19,7 +19,6 @@ let
   enabled = mcpCfg.enable or false;
   obsidianEnabled = mcpCfg.obsidian.enable or false;
   linkedinEnabled = mcpCfg.linkedin.enable or false;
-  atlassianEnabled = mcpCfg.atlassian.enable or false;
   whatsappEnabled = mcpCfg.whatsapp.enable or false;
   notebooklmEnabled = mcpCfg.notebooklm.enable or false;
 
@@ -207,47 +206,6 @@ let
             description = "WhatsApp messaging integration - AI-assisted WhatsApp send/receive, message history queries (requires bridge service + QR auth)";
           };
         })
-        # Atlassian MCP server (Jira and Confluence)
-        // (lib.optionalAttrs atlassianEnabled (
-          let
-            mode = mcpCfg.atlassian.mode or "cloud";
-            jiraEnabled = mcpCfg.atlassian.jira.enable or false;
-            confluenceEnabled = mcpCfg.atlassian.confluence.enable or false;
-          in
-          {
-            atlassian = {
-              command = "${mkWrapper "atlassian-mcp-wrapper" (
-                if mode == "cloud" then ''
-                  ${lib.optionalString jiraEnabled ''
-                    export JIRA_URL="${mcpCfg.atlassian.jira.url}"
-                    export JIRA_USERNAME="${mcpCfg.atlassian.jira.username}"
-                    export JIRA_TOKEN_FILE="${mcpCfg.atlassian.jira.tokenFile}"
-                  ''}
-                  ${lib.optionalString confluenceEnabled ''
-                    export CONFLUENCE_URL="${mcpCfg.atlassian.confluence.url}"
-                    export CONFLUENCE_USERNAME="${mcpCfg.atlassian.confluence.username}"
-                    export CONFLUENCE_TOKEN_FILE="${mcpCfg.atlassian.confluence.tokenFile}"
-                  ''}
-                  export ATLASSIAN_MODE="cloud"
-                  exec ${pkgs.customPkgs.atlassian-mcp}/bin/atlassian-mcp "$@"
-                '' else ''
-                  ${lib.optionalString jiraEnabled ''
-                    export JIRA_URL="${mcpCfg.atlassian.jira.url}"
-                    export JIRA_PAT_FILE="${mcpCfg.atlassian.jira.patFile}"
-                  ''}
-                  ${lib.optionalString confluenceEnabled ''
-                    export CONFLUENCE_URL="${mcpCfg.atlassian.confluence.url}"
-                    export CONFLUENCE_PAT_FILE="${mcpCfg.atlassian.confluence.patFile}"
-                  ''}
-                  export ATLASSIAN_MODE="self-hosted"
-                  exec ${pkgs.customPkgs.atlassian-mcp}/bin/atlassian-mcp "$@"
-                ''
-              )}";
-              args = [ ];
-              description = "Atlassian Jira and Confluence integration - issue tracking, project management, and documentation (${mode} mode)";
-            };
-          }
-        ))
         # Grafana MCP server (if enabled in servers configuration)
         // (lib.optionalAttrs (mcpCfg.servers.grafana or false) {
           grafana = {
@@ -477,18 +435,6 @@ in
       - Requires: whatsapp-bridge service running
       - Authentication: QR code scan (expires ~20 days)
       - View QR: journalctl -u whatsapp-bridge -f
-      ''}
-
-      ${lib.optionalString atlassianEnabled ''
-      #### Atlassian (${mcpCfg.atlassian.mode or "cloud"} mode)
-      ${lib.optionalString (mcpCfg.atlassian.jira.enable or false) ''
-      - **Jira Integration**:
-        - URL: ${mcpCfg.atlassian.jira.url or "Not configured"}
-      ''}
-      ${lib.optionalString (mcpCfg.atlassian.confluence.enable or false) ''
-      - **Confluence Integration**:
-        - URL: ${mcpCfg.atlassian.confluence.url or "Not configured"}
-      ''}
       ''}
 
       ${lib.optionalString (mcpCfg.servers.grafana or false) ''
