@@ -149,7 +149,10 @@ sweep() { # remove state files with no live member; hold the lock
     [[ -f $f ]] || continue
     if [[ -n $(live_members "$f") ]] || reserved "$f"; then continue; fi
     echo "herdr-team: removed stale task $(basename "$f" .json)" >&2
-    for m in $(jq -r '.members | keys[]' "$f"); do rm_dirs "$(mget "$f" "$m" ctl)" "$(mget "$f" "$m" work)"; done
+    for m in $(jq -r '.members | keys[]' "$f"); do
+      stop_member "$(mget "$f" "$m" ctl)"
+      rm_dirs "$(mget "$f" "$m" ctl)" "$(mget "$f" "$m" work)"
+    done
     m=$(jq -r .gen "$f")
     rm -f -- "$f"
     rm_gen "$m"
@@ -161,38 +164,70 @@ same_pane() { # pane terminal [kind]
   reply=$(h pane get "$1" 2>/dev/null) || return 1
   jq -e --arg t "$2" --arg k "${3:-}" '.result.pane.terminal_id == $t and ($k == "" or .result.pane.agent == $k)' >/dev/null 2>&1 <<<"$reply"
 }
-# TERM the member's group, KILL what is left after 5 s, and wait until none remains.
-# Only when the recorded launcher pid and start time still match, so a reused pid is never signalled.
-stop_member() { # ctl pid start
-  local pgid pstart i
-  alive "$2" "$3" || return 0
+member_pids() { # pgid ctl: verified pid/start pairs
+  local pid stat env fields=()
+  while IFS= read -r pid; do
+    [[ $pid =~ ^[0-9]+$ ]] || continue
+    IFS= read -r stat <"/proc/$pid/stat" 2>/dev/null || continue
+    read -r -a fields <<<"${stat##*) }"
+    [[ ${fields[2]:-} == "$1" ]] || continue
+    env=$(tr '\0' '\n' <"/proc/$pid/environ" 2>/dev/null) || continue
+    if grep -qxF "HERDR_TEAM_MEMBER=$2" <<<"$env"; then
+      printf '%s %s\n' "$pid" "${fields[19]:-}"
+    fi
+  done < <(pgrep -g "$1" 2>/dev/null)
+}
+# TERM the member's group when its leader is still ours; otherwise signal only verified pid/start pairs.
+stop_member() { # ctl
+  local pgid pstart i pair pid start remaining signal pairs=()
   read -r pgid pstart <"$1/pgid" 2>/dev/null || return 0
   [[ $pgid =~ ^[0-9]+$ ]] && ((pgid > 1)) || return 0
-  alive "$pgid" "$pstart" || return 0
-  kill -TERM -- "-$pgid" 2>/dev/null || :
-  for ((i = 0; i < 10; i++)); do
-    pgrep -g "$pgid" >/dev/null 2>&1 || return 0
-    sleep_for 0.5
-  done
-  kill -KILL -- "-$pgid" 2>/dev/null || :
-  for ((i = 0; i < 10; i++)); do
-    pgrep -g "$pgid" >/dev/null 2>&1 || return 0
-    sleep_for 0.5
+  if alive "$pgid" "$pstart"; then
+    kill -TERM -- "-$pgid" 2>/dev/null || :
+    for ((i = 0; i < 10; i++)); do
+      pgrep -g "$pgid" >/dev/null 2>&1 || return 0
+      sleep_for 0.5
+    done
+    if alive "$pgid" "$pstart"; then
+      kill -KILL -- "-$pgid" 2>/dev/null || :
+      for ((i = 0; i < 10; i++)); do
+        pgrep -g "$pgid" >/dev/null 2>&1 || return 0
+        sleep_for 0.5
+      done
+      return 0
+    fi
+  fi
+  mapfile -t pairs < <(member_pids "$pgid" "$1")
+  for signal in TERM KILL; do
+    for pair in "${pairs[@]}"; do
+      read -r pid start <<<"$pair"
+      if alive "$pid" "$start"; then kill -"$signal" "$pid" 2>/dev/null || :; fi
+    done
+    for ((i = 0; i < 10; i++)); do
+      remaining=0
+      for pair in "${pairs[@]}"; do
+        read -r pid start <<<"$pair"
+        if alive "$pid" "$start"; then
+          remaining=1
+          break
+        fi
+      done
+      ((remaining)) || return 0
+      sleep_for 0.5
+    done
   done
 }
 teardown() { # state file, member: stop it, close its pane, remove its dirs and record
-  local f=$1 m=$2 pane terminal pid start ctl work
+  local f=$1 m=$2 pane terminal ctl work
   pane=$(mget "$f" "$m" pane)
   terminal=$(mget "$f" "$m" terminal)
-  pid=$(mget "$f" "$m" pid)
-  start=$(mget "$f" "$m" start)
   ctl=$(mget "$f" "$m" ctl)
   work=$(mget "$f" "$m" work)
   lock
   update "$f" '.members[$m].cancelled = true' --arg m "$m" || :
   unlock
   if [[ -d $ctl ]]; then : >"$ctl/stop"; fi
-  stop_member "$ctl" "$pid" "$start"
+  stop_member "$ctl"
   if [[ -n $pane ]] && same_pane "$pane" "$terminal"; then h pane close "$pane" >/dev/null 2>&1 || :; fi
   rm_dirs "$ctl" "$work"
   lock
@@ -354,7 +389,7 @@ wd=$!
 code=0
 # Job control gives the member its own process group and the terminal.
 set -m
-bash -c '[ ! -e "$0/stop" ] && echo "$$ $(sed "s/.*) //" /proc/$$/stat | awk "{ print \$20 }")" >"$0/pgid.tmp" && mv "$0/pgid.tmp" "$0/pgid" && exec "$@"; exit 127' "$ctl" "${argv[@]}" 2>"$ctl/stderr" || code=$?
+bash -c '[ ! -e "$0/stop" ] && echo "$$ $(sed "s/.*) //" /proc/$$/stat | awk "{ print \$20 }")" >"$0/pgid.tmp" && mv "$0/pgid.tmp" "$0/pgid" && export HERDR_TEAM_MEMBER="$0" && exec "$@"; exit 127' "$ctl" "${argv[@]}" 2>"$ctl/stderr" || code=$?
 kill "$wd" 2>/dev/null
 tail -n 5 "$ctl/stderr" >"$ctl/status.tmp" 2>/dev/null && mv "$ctl/status.tmp" "$ctl/status"
 printf '%s\n' "$code" >"$ctl/exit.tmp" && mv "$ctl/exit.tmp" "$ctl/exit"
