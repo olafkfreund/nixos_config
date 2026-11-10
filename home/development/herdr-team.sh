@@ -791,6 +791,7 @@ converse() {
     t=$((rem < 900 ? rem : 900))
     res=$(ask "$task" "$cur" "$file" --timeout "$t") || :
     outcome=$(jq -r '.outcome // "failed"' <<<"$res" 2>/dev/null) || outcome=failed
+    outcome=${outcome:-failed}
     n=$(jq -r '.n // ""' <<<"$res" 2>/dev/null) || n=''
     chg=$(jq -c '.changed_during_review' <<<"$res" 2>/dev/null) || chg=null
     answer=$(jq -r '.answer // ""' <<<"$res" 2>/dev/null) || answer=''
@@ -862,13 +863,15 @@ down() {
     return
   fi
   if ((! force)) && conv_held "$f"; then refuse 'a conversation is running on this task; use --force' busy_conversation; fi
-  if ((! force)) && reserved "$f"; then refuse 'a finish is running on this task; use --force' busy; fi
   if [[ -n $member ]]; then
     jq -e --arg m "$member" '.members | has($m)' "$f" >/dev/null || refuse 'no such member'
     names=("$member")
   else
     mapfile -t names < <(jq -r '.members | keys[]' "$f")
   fi
+  lock
+  if ((! force)) && reserved "$f"; then refuse 'a finish is running on this task; use --force' busy; fi
+  unlock
   for m in "${names[@]}"; do teardown "$f" "$m"; done
   printf '%s\n' "${names[@]}" | jq -Rnc '{ok: true, downed: [inputs | select(length > 0)]}'
 }
@@ -876,14 +879,14 @@ down() {
 finish() {
   local role=${2:-} pane terminal kind pid start ctl root gd head fp last pre_last code='' i exited='' reason='' head_moved=false changed
   local cmd='' verifying=false retries=1 vt=900 out='' req='' tail_file='' verify_exit='' attempts=0 dirtied=false failures_json
-  local fp_impl fp_pre fp_post='' branch res outcome retry_outcome='' retry_ok=false unsafe=false
+  local fp_impl fp_pre fp_post='' fp_cur branch res outcome retry_outcome='' retry_ok=false unsafe=false
   local -a failures=() bytes=()
   task=${1:-}
   shift 2 || usage
   while (($#)); do
     case $1 in
       --verify)
-        (($# >= 2)) || usage
+        [[ -n ${2:-} ]] || usage
         verifying=true
         cmd=$2
         shift 2
@@ -905,12 +908,13 @@ finish() {
   f=$(sf "$task")
   case $role in implement | agy-implement) ;; *) usage ;; esac
   [[ -f $f ]] || refuse 'no such task'
-  jq -e --arg m "$role" '.members | has($m)' "$f" >/dev/null || refuse 'no such member'
-  if conv_held "$f"; then refuse 'a conversation is running on this task' busy_conversation; fi
-  if jq -e --arg m "$role" '.members[$m].pending != null' "$f" >/dev/null; then refuse 'a request is pending; use ask --resume or down' busy; fi
   root=$(jq -r .worktree "$f")
   gd=$(jq -r .gitdir "$f")
   lock
+  [[ -f $f ]] || refuse 'no such task'
+  jq -e --arg m "$role" '.members | has($m)' "$f" >/dev/null || refuse 'no such member'
+  if conv_held "$f"; then refuse 'a conversation is running on this task' busy_conversation; fi
+  if jq -e --arg m "$role" '.members[$m].pending != null' "$f" >/dev/null; then refuse 'a request is pending; use ask --resume or down' busy; fi
   if reservation_held "$root"; then refuse 'a finish is already in progress'; fi
   update "$f" '.reservation = {pid: $pid, start: $start}' --argjson pid $$ --arg start "$(stat_field $$ 20)"
   unlock
@@ -954,9 +958,9 @@ finish() {
       if ((i > 1)) && [[ $fp_pre != "$fp_post" ]]; then fp_impl=$fp_pre; fi
       attempts=$((attempts + 1))
       verify_exit=0
-      (cd "$root" && timeout "$vt" env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY \
+      (cd "$root" && timeout -k 10 "$vt" agent-env env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY \
         -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE \
-        bash -c "$cmd") >"$out" 2>&1 || verify_exit=$?
+        bash -c "$cmd" </dev/null) 2>&1 | tail -c 65536 >"$out" || verify_exit=${PIPESTATUS[0]}
       fp_post=$(fingerprint)
       if [[ $fp_post != "$fp_pre" ]]; then dirtied=true; fi
       tr -d '\000' <"$out" | tail -c 4096 >"$tail_file"
@@ -975,6 +979,9 @@ finish() {
       } >"$req"
       res=$(ask "$task" "$role" "$req" --timeout "${HERDR_TEAM_RETRY_TIMEOUT:-1800}") || :
       outcome=$(jq -r '.outcome // "failed"' <<<"$res" 2>/dev/null) || outcome=failed
+      outcome=${outcome:-failed}
+      fp_cur=$(fingerprint)
+      if [[ $fp_cur != "$fp_post" ]]; then fp_impl=$fp_cur; fi
       if [[ $outcome != ok ]]; then
         retry_outcome=$outcome
         break

@@ -186,3 +186,8 @@ partial rollback is not needed.
     at `origin/main`" can run, and remove it at the end of the block.
   - The temporary tool the suite runs drops the `#!` line of the packaged script; the cases call it through `bash`.
   - 20 runs in a row passed, each with the ten `verify-*` cases.
+- Review fixes (Opus, Codex, agy): `finish` takes its member, conversation and pending checks under the lock and
+  `down` checks the reservation under the lock; the check runs through `agent-env` with `</dev/null`,
+  `timeout -k 10` and output capped at 64 KB; the fingerprint is refreshed after each retry; an empty outcome counts
+  as `failed`; `--verify ''` is a usage error. A TERM-ignoring check records exit 137 (the KILL from `timeout -k`),
+  not 124. Five new `verify-*` cases, and `no_leftovers` checks for `verify-*` temp files. Two full runs passed.

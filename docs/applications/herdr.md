@@ -240,7 +240,9 @@ herdr-team down <task> [member] [--force]
   - **`--verify CMD`** runs the lead's check in the worktree before the quit, with the API key variables unset
     and a `--verify-timeout` (default 900 s). If it fails, `finish` sends the last 4 KB of output to the live
     implementer and runs the check again, up to `--retries` times (default 1, at most 3). The check's own file
-    changes never count as the implementer's diff.
+    changes are excluded from the empty-diff check, but still show in `changed` and `verify.dirtied`.
+    Run `finish --verify` with the Bash tool's `run_in_background`: a check plus a retry can outlast a foreground
+    Bash call.
   - `verify` is `null` without `--verify`, otherwise `{cmd, ok, exit, attempts, dirtied, retry_outcome, tail}`.
     `failures` can add `verify_failed`, `verify_unsafe` and `verify_retry_<outcome>`.
   - **`verify_unsafe`** means the check did not run: the worktree is `~/.config/nixos`, on `main`, or detached at

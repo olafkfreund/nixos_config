@@ -185,6 +185,7 @@ no_leftovers() {
   [[ -z $(find "$rt" -maxdepth 1 -name '*.json' -print -quit 2>/dev/null) ]] || die "state file left behind"
   [[ $(find "$tmp/work" -maxdepth 1 -name 'herdr-team.*' | wc -l) == "$dirs_before" ]] || die "work dir left behind"
   ! pgrep -f "$tmp/bin/" >/dev/null || die "member process left behind"
+  [[ -z $(find "$rt" -maxdepth 1 -name 'verify-*' -print -quit 2>/dev/null) ]] || die "verify temp file left behind"
 }
 dirs_before=$(find "$tmp/work" -maxdepth 1 -name 'herdr-team.*' | wc -l)
 pointer() { printf 'Request %s-%s: read %s/req/%s.md and answer it in your reply.' "$(jq -r .gen "$rt/$1.json")" "$2" "$(field "$1" "${3:-review}" work)" "$2"; }
@@ -636,6 +637,48 @@ wait "$bg" || die "finish --verify did not pass after its retry"
 jq -e '.ok == true and .verify.attempts == 2' "$tmp/out2" >/dev/null || die "$(cat "$tmp/out2")"
 no_leftovers
 ok verify-concurrency
+
+# a check that ignores TERM is killed by --verify-timeout
+vup
+team finish t1 implement --verify "trap '' TERM; sleep 61.9" --verify-timeout 1 --retries 0
+assert_code 1
+is '.reason == "verify_failed" and .verify.exit == 137 and .verify.attempts == 1' # timeout -k reports the KILL, not 124
+! pgrep -f 'sleep 61.9' >/dev/null || die "the TERM-ignoring check survived"
+no_leftovers
+ok verify-term-ignored
+
+# more than 4 KB of output with a NUL, cut mid-character at the front and ending in one
+vup
+team finish t1 implement --verify 'printf a; for i in $(seq 3000); do printf "\xc3\xa9"; done; printf "\0"; false' --retries 0
+assert_code 1
+is '(.verify.tail | utf8bytelength) <= 4096 and (.verify.tail | length) > 1000 and (.verify.tail | test("�|\u0000") | not) and (.verify.tail | endswith("é"))'
+no_leftovers
+ok verify-tail-utf8
+
+# the retry request names the command, the exit code and the tail
+vup
+w=$(field t1 implement work)
+hook 2 "cp '$w/req/2.md' '$TEST_STATE/req2'; : >'$repo/fixed'"
+team finish t1 implement --verify 'echo boom-tail; test -e fixed'
+assert_code 0
+grep -qF 'test -e fixed' "$TEST_STATE/req2" && grep -qF 'Exit code: 1' "$TEST_STATE/req2" && grep -qF 'boom-tail' "$TEST_STATE/req2" || die "req/2.md lacks the command, exit code or tail"
+no_leftovers
+ok verify-retry-request
+
+# the caller's tokens do not reach the check
+vup
+OPENAI_API_KEY=sk-test NIX_CONFIG=access-tokens=x team finish t1 implement --verify 'test -z "${OPENAI_API_KEY-}" && test -z "${NIX_CONFIG-}"' --retries 0
+assert_code 0
+is '.ok == true and .verify.attempts == 1'
+no_leftovers
+ok verify-env-stripped
+
+# an empty --verify is a usage error
+vup
+team finish t1 implement --verify ''
+assert_code 2
+team down t1
+ok verify-empty
 
 # --- two concurrent ups for one worktree ---
 reset
