@@ -5,7 +5,8 @@
 #        herdr-team converse <task> <member> <prompt-file> [--max-hops N] [--deadline s]
 #        herdr-team status <task> | down <task> [member] [--force]
 #        herdr-team finish <task> implement|agy-implement [--verify CMD] [--retries N] [--verify-timeout S]
-# HERDR_TEAM_TIME_SCALE, HERDR_TEAM_LEAD_PID, HERDR_TEAM_WORK_ROOT (default /tmp) and the lead-pid subcommand are for the self-test.
+# HERDR_TEAM_TIME_SCALE, HERDR_TEAM_LEAD_PID, HERDR_TEAM_WORK_ROOT (default /tmp), HERDR_TEAM_RUNTIME_DIR (state dir, default $XDG_RUNTIME_DIR/herdr-team),
+# HERDR_TEAM_NO_SCOPE=1 (force group containment) and the lead-pid subcommand are for the self-test.
 # A member is named after its role, so a task has at most one of each.
 usage() {
   echo 'usage: herdr-team up|ask|converse|status|down|finish ... (see the header of herdr-team.sh)' >&2
@@ -18,7 +19,8 @@ fi
 
 scale=${HERDR_TEAM_TIME_SCALE:-1}
 wroot=${HERDR_TEAM_WORK_ROOT:-/tmp}
-rt=${XDG_RUNTIME_DIR:?XDG_RUNTIME_DIR is not set}/herdr-team
+stop_secs=$(awk -v s="$scale" 'BEGIN { n = 5 * s; i = int(n); if (i < n) i++; if (i < 1) i = 1; print i }')
+rt=${HERDR_TEAM_RUNTIME_DIR:-${XDG_RUNTIME_DIR:?XDG_RUNTIME_DIR is not set}/herdr-team}
 mkdir -p "$rt"
 chmod 700 "$rt"
 sleep_for() { sleep "$(awk -v n="$1" -v s="$scale" 'BEGIN { printf "%.3f", n*s }')"; }
@@ -189,21 +191,43 @@ keep_answers() { # gen member work; hold the lock
   return 0
 }
 sweep() { # remove state files with no live member; hold the lock
-  local f m g ctl work
+  local f m g ctl work kept s pid start
   for f in "$rt"/*.json; do
     [[ -f $f ]] || continue
     if [[ -n $(live_members "$f") ]] || reserved "$f"; then continue; fi
-    echo "herdr-team: removed stale task $(basename "$f" .json)" >&2
     g=$(jq -r .gen "$f")
+    kept=0
     for m in $(jq -r '.members | keys[]' "$f"); do
       ctl=$(mget "$f" "$m" ctl)
       work=$(mget "$f" "$m" work)
-      stop_member "$ctl"
+      if ! stop_member "$ctl"; then
+        echo "herdr-team: scope of $m did not stop; keeping its record" >&2
+        kept=1
+        continue
+      fi
       keep_answers "$g" "$m" "$work"
       rm_dirs "$ctl" "$work"
+      update "$f" 'del(.members[$m])' --arg m "$m" || :
     done
+    if ((kept)); then continue; fi
+    echo "herdr-team: removed stale task $(basename "$f" .json)" >&2
     rm -f -- "$f"
     rm_gen "$g"
+  done
+  # live tasks: a member whose launcher died may have left its scope running
+  for f in "$rt"/*.json; do
+    [[ -f $f && -n $(live_members "$f") ]] || continue
+    for m in $(jq -r '.members | keys[]' "$f"); do
+      ctl=$(mget "$f" "$m" ctl)
+      s=''
+      { read -r s <"$ctl/scope"; } 2>/dev/null || :
+      [[ $s =~ ^herdr-team-[A-Za-z0-9_-]+\.scope$ ]] || continue
+      pid=$(mget "$f" "$m" pid)
+      start=$(mget "$f" "$m" start)
+      [[ -n $pid && $pid != null ]] || continue
+      if alive "$pid" "$start"; then continue; fi
+      stop_scope "$s" || :
+    done
   done
 }
 
@@ -226,24 +250,33 @@ member_pids() { # pgid ctl: verified pid/start pairs
     fi
   done < <(pgrep -g "$1" 2>/dev/null)
 }
-# TERM the member's group when its leader is still ours; otherwise signal only verified pid/start pairs.
+stop_scope() { # unit: stop it; fails unless systemd confirms it is inactive
+  timeout "$((stop_secs + 5))" systemctl --user stop -- "$1" >/dev/null 2>&1 || :
+  local state
+  state=$(timeout 5 systemctl --user show -p ActiveState --value -- "$1" 2>/dev/null) || return 1
+  [[ $state == inactive || $state == failed ]]
+}
+# Stop the member's scope, then TERM its group when its leader is still ours; otherwise signal only verified pid/start pairs.
+# Returns nonzero only when the scope is still active.
 stop_member() { # ctl
-  local pgid pstart i pair pid start remaining signal pairs=()
-  read -r pgid pstart <"$1/pgid" 2>/dev/null || return 0
-  [[ $pgid =~ ^[0-9]+$ ]] && ((pgid > 1)) || return 0
+  local pgid pstart i pair pid start remaining signal sc='' rc=0 pairs=()
+  { read -r sc <"$1/scope"; } 2>/dev/null || sc=''
+  if [[ $sc =~ ^herdr-team-[A-Za-z0-9_-]+\.scope$ ]] && ! stop_scope "$sc"; then rc=1; fi
+  { read -r pgid pstart <"$1/pgid"; } 2>/dev/null || return "$rc"
+  [[ $pgid =~ ^[0-9]+$ ]] && ((pgid > 1)) || return "$rc"
   if alive "$pgid" "$pstart" && marked "$pgid" "$1"; then
     kill -TERM -- "-$pgid" 2>/dev/null || :
     for ((i = 0; i < 10; i++)); do
-      pgrep -g "$pgid" >/dev/null 2>&1 || return 0
+      pgrep -g "$pgid" >/dev/null 2>&1 || return "$rc"
       sleep_for 0.5
     done
     if alive "$pgid" "$pstart" && marked "$pgid" "$1"; then
       kill -KILL -- "-$pgid" 2>/dev/null || :
       for ((i = 0; i < 10; i++)); do
-        pgrep -g "$pgid" >/dev/null 2>&1 || return 0
+        pgrep -g "$pgid" >/dev/null 2>&1 || return "$rc"
         sleep_for 0.5
       done
-      return 0
+      return "$rc"
     fi
   fi
   mapfile -t pairs < <(member_pids "$pgid" "$1")
@@ -261,13 +294,14 @@ stop_member() { # ctl
           break
         fi
       done
-      ((remaining)) || return 0
+      ((remaining)) || return "$rc"
       sleep_for 0.5
     done
   done
+  return "$rc"
 }
 teardown() { # state file, member: stop it, close its pane, remove its dirs and record
-  local f=$1 m=$2 pane terminal ctl work gen
+  local f=$1 m=$2 pane terminal ctl work gen pid start i
   pane=$(mget "$f" "$m" pane)
   terminal=$(mget "$f" "$m" terminal)
   ctl=$(mget "$f" "$m" ctl)
@@ -276,8 +310,19 @@ teardown() { # state file, member: stop it, close its pane, remove its dirs and 
   update "$f" '.members[$m].cancelled = true' --arg m "$m" || :
   unlock
   if [[ -d $ctl ]]; then : >"$ctl/stop"; fi
-  stop_member "$ctl"
+  if ! stop_member "$ctl"; then
+    echo "herdr-team: scope $(<"$ctl/scope") did not stop" >&2
+    if [[ -n $pane ]] && same_pane "$pane" "$terminal"; then h pane close "$pane" >/dev/null 2>&1 || :; fi
+    return 1
+  fi
   if [[ -n $pane ]] && same_pane "$pane" "$terminal"; then h pane close "$pane" >/dev/null 2>&1 || :; fi
+  # the launcher writes its last records after the member ends; let it finish before removing ctl
+  pid=$(mget "$f" "$m" pid)
+  start=$(mget "$f" "$m" start)
+  for ((i = 0; i < 50; i++)); do
+    if ! [[ $pid =~ ^[0-9]+$ ]] || ! alive "$pid" "$start"; then break; fi
+    sleep 0.1
+  done
   lock
   gen=$(jq -r .gen "$f" 2>/dev/null) || gen=''
   keep_answers "$gen" "$m" "$work"
@@ -330,6 +375,8 @@ up() {
   f=$(sf "$task")
   firstpane=''
   tab=''
+  containment=group
+  if [[ ${HERDR_TEAM_NO_SCOPE:-} != 1 ]] && timeout 3 systemctl --user show-environment >/dev/null 2>&1; then containment=scope; fi
   lock
   sweep
   if [[ -f $f ]]; then
@@ -356,6 +403,11 @@ up() {
   chmod 700 "$work" "$work/req" "$work/turns" "$work/turns/done" "$work/ans" # the sink insists on a 0700 turns dir
   ctl=$rt/$gen/$role
   mkdir -p "$ctl"
+  scope=''
+  if [[ $containment == scope ]]; then
+    scope=herdr-team-$task-$gen-$role.scope
+    printf '%s\n' "$scope" >"$ctl/scope"
+  fi
   now=$(date +%s)
   # Members run unrestricted (#2812). agent-env drops the token-bearing environment; the coder guard is a best-effort tripwire.
   notify="notify=[\"${sink_path:?}\",\"$work/turns\"]"
@@ -372,9 +424,10 @@ up() {
     agy-implement) argv=(agent-env agy-implement) ;;
   esac
   rec=$(jq -n --arg role "$role" --arg kind "$kind" --arg step "$step" \
-    --arg work "$work" --arg ctl "$ctl" --argjson since "$now" \
+    --arg work "$work" --arg ctl "$ctl" --argjson since "$now" --arg containment "$containment" --arg scope "$scope" \
     '{role: $role, kind: $kind, pane: "", terminal: "", pid: null, start: null, step: $step, fingerprint: null,
-      head: null, pending: null, last: null, next: 1, work: $work, ctl: $ctl, since: $since}')
+      head: null, pending: null, last: null, next: 1, work: $work, ctl: $ctl, since: $since, containment: $containment}
+      + (if $scope == "" then {} else {scope: $scope} end)')
   if [[ -f $f ]]; then
     update "$f" '.members[$m] = $rec' --arg m "$role" --argjson rec "$rec"
   else
@@ -413,6 +466,7 @@ up() {
     printf '#!/usr/bin/env bash\ncd %q || exit 127\nPATH=%q\n' "$root" "$PATH"
     printf 'ctl=%q\nlead_pid=%q\nlead_start=%q\nscale=%q\nmaxsecs=%q\n' "$ctl" "$lead" "$lead_start" "$scale" \
       "$(awk -v n="$max" -v s="$scale" 'BEGIN { printf "%d", n*s }')"
+    printf 'scope=%q\ncontainment=%q\nstop_secs=%q\n' "$scope" "$containment" "$stop_secs"
     printf 'argv=('
     printf '%q ' "${argv[@]}"
     printf ')\n'
@@ -423,15 +477,23 @@ sleep_for() { sleep "$(awk -v n="$1" -v s="$scale" 'BEGIN { printf "%.3f", n*s }
 printf '%s %s\n' "$$" "$(start_of $$)" >"$ctl/pid.tmp" && mv "$ctl/pid.tmp" "$ctl/pid"
 kill_group() {
   local g
-  read -r g _ <"$ctl/pgid" 2>/dev/null || return 1
+  { read -r g _ <"$ctl/pgid"; } 2>/dev/null || return 1
   [[ $g =~ ^[0-9]+$ ]] && ((g > 1)) || return 1
   kill -"$1" -- "-$g" 2>/dev/null
+}
+stop_scope() { # unit: stop it; fails unless systemd confirms it is inactive; no-op in group mode
+  [[ $containment == scope ]] || return 0
+  timeout "$((stop_secs + 5))" systemctl --user stop -- "$1" >/dev/null 2>&1 || :
+  local state
+  state=$(timeout 5 systemctl --user show -p ActiveState --value -- "$1" 2>/dev/null) || return 1
+  [[ $state == inactive || $state == failed ]]
 }
 # The lead going away (pid and start time) or the role's maximum ends the member.
 (
   while sleep_for 30; do
     if [[ $(start_of "$lead_pid") == "$lead_start" ]] && ((SECONDS < maxsecs)); then continue; fi
     : >"$ctl/stop"
+    stop_scope "$scope" || :
     kill_group TERM || :
     sleep_for 5
     kill_group KILL || :
@@ -442,9 +504,17 @@ wd=$!
 code=0
 # Job control gives the member its own process group and the terminal.
 set -m
-bash -c '[ ! -e "$0/stop" ] && echo "$$ $(sed "s/.*) //" /proc/$$/stat | awk "{ print \$20 }")" >"$0/pgid.tmp" && mv "$0/pgid.tmp" "$0/pgid" && export HERDR_TEAM_MEMBER="$0" && exec "$@"; exit 127' "$ctl" "${argv[@]}" 2>"$ctl/stderr" || code=$?
+member='[ ! -e "$0/stop" ] && echo "$$ $(sed "s/.*) //" /proc/$$/stat | awk "{ print \$20 }")" >"$0/pgid.tmp" && mv "$0/pgid.tmp" "$0/pgid" && export HERDR_TEAM_MEMBER="$0" && exec "$@"; exit 127'
+if [[ $containment == scope ]]; then
+  systemd-run --user --scope --quiet --collect --expand-environment=no --unit="$scope" \
+    -p TimeoutStopSec="$stop_secs" -- bash -c "$member" "$ctl" "${argv[@]}" 2>"$ctl/stderr" || code=$?
+else
+  bash -c "$member" "$ctl" "${argv[@]}" 2>"$ctl/stderr" || code=$?
+fi
 kill "$wd" 2>/dev/null
+: >"$ctl/gone"
 tail -n 5 "$ctl/stderr" >"$ctl/status.tmp" 2>/dev/null && mv "$ctl/status.tmp" "$ctl/status"
+stop_scope "$scope" || :
 printf '%s\n' "$code" >"$ctl/exit.tmp" && mv "$ctl/exit.tmp" "$ctl/exit"
 exit "$code"
 LAUNCH
@@ -487,8 +557,8 @@ LAUNCH
   unlock
   # shellcheck disable=SC2034 # read by the EXIT trap
   armed=0
-  jq -cn --arg task "$task" --arg member "$role" --arg pane "$pane" --arg tab "$tab" \
-    '{ok: true, task: $task, member: $member, pane: $pane, tab: $tab}'
+  jq -cn --arg task "$task" --arg member "$role" --arg pane "$pane" --arg tab "$tab" --arg containment "$containment" \
+    '{ok: true, task: $task, member: $member, pane: $pane, tab: $tab, containment: $containment}'
 }
 
 perr=("Usage limit reached" "reached your usage limit" "reached your workspace credit limit" "Selected model is at capacity"
@@ -848,7 +918,7 @@ status() {
 }
 
 down() {
-  local names=() m member='' force=0 a
+  local names=() failed=() m member='' force=0 a
   task_ok "${1:-}"
   f=$(sf "$1")
   shift
@@ -872,13 +942,17 @@ down() {
   lock
   if ((! force)) && reserved "$f"; then refuse 'a finish is running on this task; use --force' busy; fi
   unlock
-  for m in "${names[@]}"; do teardown "$f" "$m"; done
-  printf '%s\n' "${names[@]}" | jq -Rnc '{ok: true, downed: [inputs | select(length > 0)]}'
+  for m in "${names[@]}"; do
+    if ! teardown "$f" "$m"; then failed+=("$m"); fi
+  done
+  printf '%s\n' "${names[@]}" | jq -Rnc --args '{ok: true, downed: [inputs | select(length > 0)]}
+    + (if $ARGS.positional == [] then {} else {scope_stop_failed: $ARGS.positional} end)' "${failed[@]}"
+  ((${#failed[@]} == 0)) || return 1
 }
 
 finish() {
-  local role=${2:-} pane terminal kind pid start ctl root gd head fp last pre_last code='' i exited='' reason='' head_moved=false changed
-  local cmd='' verifying=false retries=1 vt=900 out='' req='' tail_file='' verify_exit='' attempts=0 dirtied=false failures_json
+  local role=${2:-} pane terminal kind pid start ctl root gd head fp last pre_last code='' i exited='' reason='' head_moved=false changed failed=()
+  local cmd='' verifying=false retries=1 vt=900 out='' req='' tail_file='' verify_exit='' attempts=0 dirtied=false failures_json ssf
   local fp_impl fp_pre fp_post='' fp_cur branch res outcome retry_outcome='' retry_ok=false unsafe=false
   local -a failures=() bytes=()
   task=${1:-}
@@ -994,16 +1068,21 @@ finish() {
   if alive "$pid" "$start" && same_pane "$pane" "$terminal" "$kind"; then
     h agent send-keys "$pane" ctrl+c >/dev/null 2>&1 || :
     for ((i = 0; i < 30; i++)); do
-      [[ -f $ctl/exit ]] && break
+      [[ -f $ctl/exit || -f $ctl/gone ]] && break
       if ((i == 6)); then h agent send-keys "$pane" ctrl+c >/dev/null 2>&1 || :; fi
       sleep_for 0.5
+    done
+    # the member is gone; the launcher writes exit once its scope has stopped (up to stop_secs)
+    for ((i = 0; i < 2 * (stop_secs + 5); i++)); do
+      [[ -f $ctl/exit || ! -f $ctl/gone ]] && break
+      sleep 0.5
     done
   fi
   if [[ -f $ctl/exit ]]; then
     code=$(<"$ctl/exit")
     exited=1
   fi
-  teardown "$f" "$role"
+  if ! teardown "$f" "$role"; then failed+=("$role"); fi
   [[ $(lg rev-parse HEAD) == "$head" ]] || head_moved=true
   changed=$(lg status --porcelain -uall | jq -Rsc 'split("\n") | map(select(length > 0) | .[3:])')
   [[ -n $exited ]] || failures+=(not_exited)
@@ -1024,20 +1103,23 @@ finish() {
   if ((attempts > 0)) && [[ $verify_exit != 0 ]]; then failures+=(verify_failed); fi
   reason=${failures[0]:-}
   failures_json=$(printf '%s\n' "${failures[@]}" | jq -Rsc 'split("\n") | map(select(length > 0))')
+  ssf=$(printf '%s\n' "${failed[@]}" | jq -Rsc 'split("\n") | map(select(length > 0))')
   if [[ $verifying == true ]]; then
     jq -cn --arg reason "$reason" --argjson failures "$failures_json" \
       --argjson changed "$changed" --argjson head_moved "$head_moved" --arg code "$code" \
       --arg cmd "$cmd" --arg vexit "$verify_exit" --argjson attempts "$attempts" --argjson dirtied "$dirtied" \
-      --arg retry "$retry_outcome" --rawfile tail "$tail_file" \
+      --arg retry "$retry_outcome" --rawfile tail "$tail_file" --argjson ssf "$ssf" \
       '{ok: ($reason == ""), reason: $reason, failures: $failures, changed: $changed, head_moved: $head_moved,
         exit: (if $code == "" then null else ($code | tonumber) end),
         verify: {cmd: $cmd, ok: ($vexit == "0"), exit: (if $vexit == "" then null else ($vexit | tonumber) end),
-          attempts: $attempts, dirtied: $dirtied, retry_outcome: (if $retry == "" then null else $retry end), tail: $tail}}'
+          attempts: $attempts, dirtied: $dirtied, retry_outcome: (if $retry == "" then null else $retry end), tail: $tail}}
+        + (if $ssf == [] then {} else {scope_stop_failed: $ssf} end)'
   else
     jq -cn --arg reason "$reason" --argjson failures "$failures_json" \
-      --argjson changed "$changed" --argjson head_moved "$head_moved" --arg code "$code" \
+      --argjson changed "$changed" --argjson head_moved "$head_moved" --arg code "$code" --argjson ssf "$ssf" \
       '{ok: ($reason == ""), reason: $reason, failures: $failures, changed: $changed, head_moved: $head_moved,
-        exit: (if $code == "" then null else ($code | tonumber) end), verify: null}'
+        exit: (if $code == "" then null else ($code | tonumber) end), verify: null}
+        + (if $ssf == [] then {} else {scope_stop_failed: $ssf} end)'
   fi
   release
   trap - EXIT

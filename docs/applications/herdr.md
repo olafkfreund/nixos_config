@@ -252,11 +252,26 @@ herdr-team down <task> [member] [--force]
 - **Archive.** Teardown copies each member's answers to
   `$XDG_RUNTIME_DIR/herdr-team/archive/<gen>/<member>/` and the log to `archive/<gen>/conversation.jsonl`. They stay
   until logout.
-- **Stopping a member.** While the member's own process (the group leader, carrying its `HERDR_TEAM_MEMBER`
-  marker) is alive, its whole process group is signalled. Once the leader is gone, only processes in that group
-  that still carry the marker are signalled. A process that drops the marker or leaves the group is not stopped.
-- **Watchdog.** A per-member watchdog ends the process group if the lead dies, or when the role's maximum is
-  reached (8 h `review`, 3 h `implement`).
+- **Containment** (Issue #2835). `up` picks one of two modes and records it as `containment` in its reply and in
+  the task's state file:
+  - `scope` when the systemd user manager answers: the member runs in its own transient unit,
+    `herdr-team-<task>-<gen>-<member>.scope`. Stopping the member stops the unit, which ends every process in it,
+    including children that left the process group, dropped the marker or ignore TERM (killed after
+    `TimeoutStopSec`, 5 s at the default time scale). The member keeps its PID, process group and tty.
+  - `group` otherwise (or with `HERDR_TEAM_NO_SCOPE=1`): while the member's own process (the group leader,
+    carrying its `HERDR_TEAM_MEMBER` marker) is alive, its whole process group is signalled. Once the leader is
+    gone, only processes in that group that still carry the marker are signalled. A process that drops the marker
+    or leaves the group is not stopped.
+- **A scope that will not stop.** Unless systemd confirms the unit is inactive after its stop, `down` and `finish`
+  keep the member's record and list it under `scope_stop_failed`, and `down` exits 1. Run `down` again to retry;
+  every `up` also retries it once the task has no live member. To see what is left:
+
+  ```bash
+  systemctl --user status 'herdr-team-*'
+  ```
+
+- **Watchdog.** A per-member watchdog ends the member (its scope first, then the process group) if the lead dies,
+  or when the role's maximum is reached (8 h `review`, 3 h `implement`).
 
 ## Claude agent teams
 

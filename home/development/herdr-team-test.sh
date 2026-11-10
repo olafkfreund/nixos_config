@@ -8,8 +8,20 @@ set -euo pipefail
 tool=${1:?usage: herdr-team-test.sh <herdr-team>}
 tmp=$(mktemp -d)
 sleepers=()
+# stop the units this run made (the scope files under $rt) and any leftover scope sleeper
+stop_units() {
+  local f u
+  for f in "$rt"/*/*/scope; do
+    [[ -f $f ]] || continue
+    read -r u <"$f" || continue
+    [[ $u =~ ^herdr-team-[A-Za-z0-9_-]+\.scope$ ]] || continue
+    timeout 10 systemctl --user stop -- "$u" >/dev/null 2>&1 || :
+  done
+  pkill -f 'sleep 64.7' 2>/dev/null || :
+}
 cleanup() {
   kill "${sleepers[@]}" 2>/dev/null || :
+  stop_units
   pkill -f "$tmp/bin/" 2>/dev/null || :
   pkill -f 'sleep 61.7' 2>/dev/null || :
   pkill -f 'sleep 62.3' 2>/dev/null || :
@@ -18,12 +30,13 @@ cleanup() {
   rm -rf "$tmp"
 }
 trap cleanup EXIT
-export HOME="$tmp/home" XDG_RUNTIME_DIR="$tmp/runtime" TEST_STATE="$tmp/state" HERDR_BIN_PATH="$tmp/fake-herdr" TMPDIR="$tmp"
-mkdir -p "$tmp/work" "$HOME/.config" "$XDG_RUNTIME_DIR" "$TEST_STATE" "$tmp/bin"
+export HOME="$tmp/home" HERDR_TEAM_RUNTIME_DIR="$tmp/runtime/herdr-team" TEST_STATE="$tmp/state" HERDR_BIN_PATH="$tmp/fake-herdr" TMPDIR="$tmp"
+mkdir -p "$tmp/work" "$HOME/.config" "$HERDR_TEAM_RUNTIME_DIR" "$TEST_STATE" "$tmp/bin"
 export HERDR_TEAM_WORK_ROOT="$tmp/work"
 export HERDR_ENV=1 HERDR_SOCKET_PATH="$tmp/socket" HERDR_WORKSPACE_ID=workspace HERDR_TEAM_TIME_SCALE=0.05
 export PATH="$tmp/bin:$PATH"
-rt=$XDG_RUNTIME_DIR/herdr-team
+rt=$HERDR_TEAM_RUNTIME_DIR
+[[ ${2:-} != group ]] || export HERDR_TEAM_NO_SCOPE=1
 
 cat >"$HERDR_BIN_PATH" <<'FAKE'
 #!/usr/bin/env bash
@@ -100,12 +113,14 @@ if [[ -e $TEST_STATE/refuse1 ]]; then echo 'codex-implement: guard not registere
 printenv HERDR_TEAM_MEMBER > "$TEST_STATE/marker" || :
 : > "$TEST_STATE/agent-up"
 if [[ -e $TEST_STATE/grandchild ]]; then bash -c 'trap "" TERM; sleep 61.7' & fi
+if [[ -e $TEST_STATE/scopekid ]]; then setsid bash -c 'trap "" TERM; exec sleep 64.7' >/dev/null 2>&1 & fi
 trap 'exit 143' TERM
 while [[ ! -e $TEST_STATE/quit ]]; do
   if [[ -e $TEST_STATE/orphan ]]; then sleep 62.3 & exit 0; fi
   sleep 0.05
 done
 code=$(cat "$TEST_STATE/quit")
+if [[ -e $TEST_STATE/scopekid ]]; then date +%s.%N >"$TEST_STATE/exit-ts"; fi
 if [[ $code == 2 ]]; then echo 'agent: refused: test reason' >&2; fi
 exit "$code"
 FAKE
@@ -148,6 +163,7 @@ drop_work() {
   done
 }
 reset() {
+  stop_units
   pkill -f "$tmp/bin/" 2>/dev/null || :
   pkill -f 'sleep 61.7' 2>/dev/null || :
   pkill -f 'sleep 62.3' 2>/dev/null || :
@@ -1128,7 +1144,7 @@ ok converse-reservation
 
 # --- stopping by marker: a process that outlives the member ---
 reset
-up t1 review
+HERDR_TEAM_NO_SCOPE=1 up t1 review
 ctl=$(field t1 review ctl)
 : >"$TEST_STATE/orphan"
 wait_for "$ctl/exit"
@@ -1137,7 +1153,7 @@ team down t1
 assert_code 0
 ! pgrep -f 'sleep 62.3' >/dev/null || die "orphan survived down"
 reset
-up t1 implement --step 1
+HERDR_TEAM_NO_SCOPE=1 up t1 implement --step 1
 arm t1 implement
 printf 'done' >"$TEST_STATE/reply"
 team ask t1 implement "$tmp/prompt" --timeout 5
@@ -1151,13 +1167,13 @@ team down t1
 ok orphan-after-exit
 # sweep stops the orphan of a task with no live member
 reset
-up t1 review
+HERDR_TEAM_NO_SCOPE=1 up t1 review
 ctl=$(field t1 review ctl)
 : >"$TEST_STATE/orphan"
 wait_for "$ctl/exit"
 wait_until pgrep -f 'sleep 62.3' >/dev/null || die "no orphan to sweep"
 rm "$TEST_STATE/orphan"
-up t2 review
+HERDR_TEAM_NO_SCOPE=1 up t2 review
 grep -q 'removed stale task t1' "$tmp/err"
 [[ ! -e $rt/t1.json ]]
 ! pgrep -f 'sleep 62.3' >/dev/null || die "orphan survived sweep"
@@ -1211,6 +1227,98 @@ assert_code 0
 wait "$bg" || :
 tail -n1 "$rt/archive/$gen/conversation.jsonl" | jq -e '.outcome == "cancelled"' >/dev/null || die "archived log lacks the cancelled hop"
 ok archive-forced-down
+
+# --- containment ---
+reset
+HERDR_TEAM_NO_SCOPE=1 up t1 review
+is '.containment == "group"'
+jq -e '.members.review.containment == "group" and (.members.review | has("scope") | not)' "$rt/t1.json" >/dev/null || die "group record"
+[[ ! -e $(field t1 review ctl)/scope ]]
+team down t1
+ok containment-group
+if [[ ${HERDR_TEAM_NO_SCOPE:-} == 1 ]] || ! timeout 3 systemctl --user show-environment >/dev/null 2>&1; then
+  ok skip containment-scope
+else
+  kid_up() { pgrep -f 'sleep 64.7' >/dev/null; }
+  kid_gone() { ! pgrep -f 'sleep 64.7' >/dev/null; }
+  unit_unloaded() { [[ $(systemctl --user show -P LoadState "$1") == not-found ]]; }
+  # the member exits, leaving a TERM-ignoring child in its own session
+  reset
+  : >"$TEST_STATE/scopekid"
+  up t1 review
+  is '.containment == "scope"'
+  ctl=$(field t1 review ctl)
+  unit=$(<"$ctl/scope")
+  jq -e --arg u "$unit" '.members.review.containment == "scope" and .members.review.scope == $u' "$rt/t1.json" >/dev/null || die "scope record"
+  [[ $unit == herdr-team-t1-*-review.scope ]] || die "scope name $unit"
+  wait_until kid_up || die "no scope child"
+  echo 3 >"$TEST_STATE/quit"
+  wait_for "$ctl/exit" || die "member did not exit"
+  wait_until kid_gone || die "child survived the member's exit"
+  # TimeoutStopSec (stop_secs = 1 at this scale), not systemd's 90 s default, bounds the stop
+  awk -v t="$(<"$TEST_STATE/exit-ts")" -v e="$(stat -c %.Y "$ctl/exit")" 'BEGIN { exit !(e - t <= 3) }' || die "scope took too long to stop after the member exited"
+  wait_until unit_unloaded "$unit" || die "unit not unloaded"
+  team down t1
+  # the watchdog fires
+  reset
+  : >"$TEST_STATE/scopekid"
+  : >"$TEST_STATE/tamper-max"
+  up t1 review
+  ctl=$(field t1 review ctl)
+  wait_for "$ctl/exit" || die "watchdog did not fire"
+  wait_until kid_gone || die "child survived the watchdog"
+  team down t1
+  # down --force
+  reset
+  : >"$TEST_STATE/scopekid"
+  up t1 review
+  unit=$(<"$(field t1 review ctl)/scope")
+  wait_until kid_up || die "no scope child"
+  team down t1 --force
+  assert_code 0
+  kid_gone || die "child survived down --force"
+  wait_until unit_unloaded "$unit" || die "unit not unloaded after down"
+  # finish
+  reset
+  : >"$TEST_STATE/scopekid"
+  up t1 implement
+  wait_until kid_up || die "no scope child"
+  team finish t1 implement
+  is '.reason != "not_exited"'
+  wait_until kid_gone || die "child survived finish"
+  team down t1
+  # a killed launcher leaves its scope for the next up to stop
+  reset
+  : >"$TEST_STATE/scopekid"
+  up t1 review
+  ctl=$(field t1 review ctl)
+  unit=$(<"$ctl/scope")
+  wait_until kid_up || die "no scope child"
+  rm "$TEST_STATE/scopekid"
+  up t1 implement
+  pkill -KILL -f "$ctl/launch"
+  kid_up || die "the child should outlive its launcher"
+  up t2 review
+  wait_until kid_gone || die "next up did not stop the dead launcher's scope"
+  wait_until unit_unloaded "$unit" || die "unit not unloaded after sweep"
+  team down t1
+  team down t2
+  # a scope systemd still reports active is kept and reported, and the next down retries it
+  reset
+  up t1 review
+  mkdir -p "$tmp/shim"
+  printf '#!%s\n[[ " $* " == *" ActiveState "* ]] && { echo deactivating; exit 0; }\nexec %q "$@"\n' \
+    "$(command -v bash)" "$(command -v systemctl)" >"$tmp/shim/systemctl"
+  chmod +x "$tmp/shim/systemctl"
+  PATH=$tmp/shim:$PATH team down t1
+  assert_code 1
+  is '.scope_stop_failed == ["review"]'
+  jq -e '.members | has("review")' "$rt/t1.json" >/dev/null || die "record dropped after a failed stop"
+  team down t1
+  assert_code 0
+  [[ ! -e $rt/t1.json ]] || die "retry did not remove the record"
+  ok containment-scope
+fi
 
 # --- status and unknown tasks ---
 reset
