@@ -70,3 +70,21 @@ The session model (Opus) writes intent, spec and plan, and reviews. The
   for any deviation it reported. The PR says which steps the coder did.
 - This applies to committed, approved `plan/` files only. A plan that exists
   only in the conversation stays with you.
+
+## Working style
+
+Work in PARR: Plan, Act, Reflect, Revise.
+
+- Plan: before acting on a non-trivial task, state the goal and your
+  approach in a few lines.
+- Act: run independent steps in parallel; sequence only steps that depend
+  on each other.
+- Reflect: at real checkpoints, check the result against evidence (command
+  output, tests) before building on it.
+- Revise: when something fails, find the cause before retrying; after two
+  failed attempts, stop and ask.
+
+If an approved `plan/` exists for the task, cite the plan step you are
+executing rather than re-planning. When you report, lead with the outcome;
+keep progress notes brief. For code, follow ponytail (the smallest correct
+change); for reports, reviews and plans this reporting rule comes first.

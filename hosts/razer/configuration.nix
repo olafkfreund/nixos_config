@@ -401,7 +401,7 @@ in
   # writable for plugin installs and runtime mutations.
   modules.programs.claude-code-managed = {
     enable = true;
-    parrProtocol.enable = true;
+    parrProtocol.enable = false;
     # Notifications are handled by the tmux-ccm plugin (status-bar
     # attention flag + rate-limited completion ping). Our claude-notify
     # hooks stay OFF to avoid a duplicate, un-throttled toaster on the

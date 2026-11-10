@@ -250,7 +250,7 @@ in
   # Enables PARR hook + lets the router CLI inject apiKeyHelper (Phase 3).
   modules.programs.claude-code-managed = {
     enable = true;
-    parrProtocol.enable = true;
+    parrProtocol.enable = false;
     # Notifications are handled by the tmux-ccm plugin (status-bar
     # attention flag + rate-limited completion ping). Our claude-notify
     # hooks stay OFF to avoid a duplicate, un-throttled toaster firing
