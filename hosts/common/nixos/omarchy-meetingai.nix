@@ -8,12 +8,16 @@
 # One-time steps per machine (both files are user-owned):
 #   omarchy plugin enable nixarchy.meetingai --section right
 #   add `pcall(require, "hypr.meetingai-binds")` to ~/.config/hypr/bindings.lua
-{ inputs, ... }:
+{ inputs, pkgs, ... }:
 {
   home-manager.users.olafkfreund = {
     imports = [ inputs.nixarchy-meetingai.homeManagerModules.default ];
     programs.nixarchy-meetingai = {
       enable = true;
+      # Opt out of cargoSetupHook's forced system libs (zstd-sys); see overlays/upstream-fixes.nix.
+      package = inputs.nixarchy-meetingai.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs {
+        dontCargoUseSystemLibs = true;
+      };
       ollamaCloud.keyFile = "/run/agenix/api-ollama";
       deepgram.keyFile = "/run/agenix/api-deepgram";
       # Each finished meeting is written here as Markdown (notes, transcript,
