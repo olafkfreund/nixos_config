@@ -252,7 +252,7 @@ member_pids() { # pgid ctl: verified pid/start pairs
 stop_scope() { # unit: stop it; fails unless systemd confirms it is inactive
   timeout "$((stop_secs + 5))" systemctl --user stop -- "$1" >/dev/null 2>&1 || :
   local state
-  state=$(systemctl --user show -p ActiveState --value -- "$1" 2>/dev/null) || return 1
+  state=$(timeout 5 systemctl --user show -p ActiveState --value -- "$1" 2>/dev/null) || return 1
   [[ $state == inactive || $state == failed ]]
 }
 # Stop the member's scope, then TERM its group when its leader is still ours; otherwise signal only verified pid/start pairs.
@@ -300,7 +300,7 @@ stop_member() { # ctl
   return "$rc"
 }
 teardown() { # state file, member: stop it, close its pane, remove its dirs and record
-  local f=$1 m=$2 pane terminal ctl work gen
+  local f=$1 m=$2 pane terminal ctl work gen pid start i
   pane=$(mget "$f" "$m" pane)
   terminal=$(mget "$f" "$m" terminal)
   ctl=$(mget "$f" "$m" ctl)
@@ -315,6 +315,13 @@ teardown() { # state file, member: stop it, close its pane, remove its dirs and 
     return 1
   fi
   if [[ -n $pane ]] && same_pane "$pane" "$terminal"; then h pane close "$pane" >/dev/null 2>&1 || :; fi
+  # the launcher writes its last records after the member ends; let it finish before removing ctl
+  pid=$(mget "$f" "$m" pid)
+  start=$(mget "$f" "$m" start)
+  for ((i = 0; i < 50; i++)); do
+    if ! [[ $pid =~ ^[0-9]+$ ]] || ! alive "$pid" "$start"; then break; fi
+    sleep 0.1
+  done
   lock
   gen=$(jq -r .gen "$f" 2>/dev/null) || gen=''
   keep_answers "$gen" "$m" "$work"
@@ -477,7 +484,7 @@ stop_scope() { # unit: stop it; fails unless systemd confirms it is inactive; no
   [[ $containment == scope ]] || return 0
   timeout "$((stop_secs + 5))" systemctl --user stop -- "$1" >/dev/null 2>&1 || :
   local state
-  state=$(systemctl --user show -p ActiveState --value -- "$1" 2>/dev/null) || return 1
+  state=$(timeout 5 systemctl --user show -p ActiveState --value -- "$1" 2>/dev/null) || return 1
   [[ $state == inactive || $state == failed ]]
 }
 # The lead going away (pid and start time) or the role's maximum ends the member.

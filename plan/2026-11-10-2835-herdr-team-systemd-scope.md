@@ -185,3 +185,6 @@ unit by hand (`systemctl --user list-units 'herdr-team-*'`), after the bus annou
   now writes `$ctl/gone` when the member returns; `finish` stops sending keys once it exists and waits up to
   `stop_secs + 5` s more for `exit`. The `finish` scope case asserts the reason is not `not_exited`. `sweep` reports
   a stale task as removed only when it is.
+- Build fix: a p620 build failed in the sandbox suite with `rm: … Directory not empty`, because teardown removed
+  `ctl` while the launcher was still writing its last records. Teardown now waits up to 5 s for the launcher to exit
+  before removing directories. Per the Codex PR review, both `stop_scope` state queries are bounded by `timeout 5`.
