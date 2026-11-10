@@ -166,3 +166,7 @@ unit by hand (`systemctl --user list-units 'herdr-team-*'`), after the bus annou
     checks); only `down` exits 1 on a failed stop.
 - Step 2 (coder, same reason): the unchanged inner `bash -c` string is held in a `member='…'` variable that both the
   scope and group branches pass to `bash -c "$member"`, instead of being written out twice.
+- Step 3 (coder): the killed-launcher case brings up the third member as a `t2` review in another task, because
+  `agy-implement` is refused in the suite. It waits for the child to go with `wait_until` and does not assert the
+  time bound; the member-exit case does (exit record within 3 s of the member's exit at
+  `HERDR_TEAM_TIME_SCALE=0.05`). 20 runs in a row passed.
