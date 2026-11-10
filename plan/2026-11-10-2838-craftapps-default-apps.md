@@ -92,7 +92,8 @@ Branch `feat/2838-craftapps-default-apps`, worktree `~/.config/nixos-2838`.
      ."audio/flac" == ["org.gnome.Music.desktop"] and
      (has("text/markdown") | not)'
    nix eval --json '.#nixosConfigurations.razer.config.home-manager.users.olafkfreund.xdg.mimeApps.defaultApplications."application/pdf"'
-   nix build --no-link .#nixosConfigurations.p620.config.system.checks
+   nix build --no-link --impure --expr "builtins.head (builtins.filter (d: d.name == \"craftapps-mime-check\")
+     (builtins.getFlake \"path:$PWD\").nixosConfigurations.p620.config.system.checks)"
    ```
 
    The razer eval prints `["ai.storyteller.pdfcraft.desktop"]` (one entry). The last line builds the check.
@@ -156,3 +157,9 @@ done
 
 Revert the merge commit and redeploy p620 and razer. The revert restores #2837's PDF blocks, so PDF stays in
 PdfCraft. The other types go back to eog, Evince and the MIME cache.
+
+## Deviations
+
+- Step 1 (coder): `system.checks` is a list, so the verify line builds the one check by filtering it by name
+  (`craftapps-mime-check`) instead of `nix build …config.system.checks`. Checked: 77 Craft defaults, matching the
+  77 types in decision 2.
