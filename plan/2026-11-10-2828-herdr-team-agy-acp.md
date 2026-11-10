@@ -203,3 +203,39 @@ comment; the spike client is in the lead's scratchpad (`acp/repl.py`) and is a s
 
 Set `agyMember = false` and redeploy. That disables agy members without reverting the client. A full revert
 of the merge commit also works.
+
+## Amendments (2026-11-10, from agy's plan review; no decision changed)
+
+- **ACP wire shapes,** as observed in the spike on agy 1.5.3, with JSON-RPC 2.0, one object per line:
+  - `initialize` takes `{"protocolVersion": 1, "clientCapabilities": {}}`.
+  - `session/new` takes `{"cwd": <abs>, "mcpServers": []}` and returns `{"sessionId": …, "models": …,
+    "modes": …, "configOptions": …}`. Read `configOptions` for the model and effort keys, and set them with
+    `session/set_config_option {"sessionId", "configId", "value"}`.
+  - `session/prompt` takes `{"sessionId", "prompt": [{"type": "text", "text": …}]}` and returns
+    `{"stopReason": "end_turn" | "cancelled" | …}`.
+  - The `session/update` notification carries `params.update.sessionUpdate`. It is `agent_message_chunk`, with
+    the text in `content.text` when `content.type == "text"`, or `tool_call`, with a `title`. Other values are
+    ignored.
+  - An agent request carries an `id` and a `method`. For `session/request_permission`, reply with the result
+    `{"outcome": {"outcome": "selected", "optionId": <the first option whose kind starts with "allow">}}`. Any
+    other method gets the error `{"code": -32601}`.
+- **The probe's ACP check** has its own files: `mkdir -m 700 "$out/turns"`, `AGY_GUARD_LOG="$out/log-acp"`.
+  - It requires a guard denial in `log-acp`, two turn files in `$out/turns`, and the recall word in the second
+    reply. A denial in the `-p` probe's log never counts.
+  - The cache line is `"$v acp1"`, written at antigravity-config.nix:263 and compared at :165–178. The probe
+    code itself is at :216–281.
+- **Child cleanup:**
+  - Load `libc` and record `parent_pid` before `Popen`.
+  - In `preexec_fn`, call `libc.prctl(1, 15, 0, 0, 0)`, then `if os.getppid() != parent_pid: os._exit(1)`.
+  - Cleanup signals the child's process group (`os.killpg(child.pid, …)`), is idempotent, and scales its 3 s
+    wait by `HERDR_TEAM_TIME_SCALE` when that is set.
+  - The fake `agy acp` exits at once on stdin EOF or `SIGTERM`.
+- **`agy_session` plumbing:**
+  - `up` adds `agy_session: null` to the member record (:286–289) and sets it after readiness (:397–398).
+  - `ask`, `finish` and `teardown` read it with `mget` and pass it to `same_pane`.
+  - `same_pane`'s added condition, when `$4` is non-empty:
+
+    ```jq
+    (.result.pane.agent_session == null
+     or (.result.pane.agent_session.agent == "agy" and .result.pane.agent_session.value == $s))
+    ```
