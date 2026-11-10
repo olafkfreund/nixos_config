@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2831
 spec: spec/2026-11-10-2831-claude-context-diet.md
 coders:
