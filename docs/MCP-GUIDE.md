@@ -5,7 +5,8 @@ Status: Active
 
 ## Overview
 
-The infrastructure includes comprehensive MCP (Model Context Protocol) server support, enabling AI agents to interact with external tools and data sources through a standardized protocol.
+The infrastructure includes comprehensive MCP (Model Context Protocol) server support, enabling AI agents
+to interact with external tools and data sources through a standardized protocol.
 
 MCP is an open protocol released by Anthropic that standardizes how AI applications connect to external tools and data sources.
 
@@ -53,29 +54,6 @@ NixOS-specific integration for package management and system operations.
 **Usage**: Ask Claude naturally about NixOS operations.
 
 ## Service Integrations
-
-### Atlassian (Jira and Confluence)
-
-Enables AI-assisted interaction with Jira and Confluence through natural language commands.
-
-**Supported:**
-
-- Cloud and self-hosted Atlassian instances
-- Jira issue management
-- Confluence page operations
-
-**Setup Requirements:**
-
-- Atlassian account credentials
-- API tokens for authentication
-- Workspace configuration
-
-**Common Tasks:**
-
-- Create/update Jira issues
-- Search and query tickets
-- Read/edit Confluence pages
-- Project analysis
 
 ### LinkedIn Professional Networking
 
@@ -168,7 +146,6 @@ The infrastructure provides NixOS-compatible configurations for all MCP servers:
 Ask Claude naturally:
 
 - "Search for NixOS packages related to X"
-- "Create a Jira ticket for Y"
 - "Send a WhatsApp message to Z"
 - "Find Obsidian notes about A"
 - "Analyze LinkedIn profile for B"

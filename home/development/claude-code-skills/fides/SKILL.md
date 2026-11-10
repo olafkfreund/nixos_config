@@ -1,20 +1,7 @@
 ---
 name: fides
 description: >-
-  Operate Fides — the compliance, provenance & evidence-tracking system — from the
-  `fides` CLI, the API, and CI/CD pipelines. Use when recording build provenance
-  (trails, artifacts, attestations), gating deploys on policy/compliance, running
-  the change gate + segregation-of-duties approvals, adopting control frameworks
-  (SOC 2, ISO 27001, NIST 800-53, PCI-DSS, DORA, PSD2, SOX, SLSA), verifying
-  supply-chain provenance (cosign/Sigstore signatures, SLSA in-toto, SBOM),
-  snapshotting runtimes (docker/k8s/ecs/lambda), verifying tamper-evidence chains,
-  the continuous control-test timeline, wiring integrations (ServiceNow — including
-  consuming ServiceNow's MCP server and grounding Now Assist — Slack, Git providers,
-  webhooks), managing service accounts/users, reading DORA metrics, or
-  configuring/deploying the Fides server and its MCP server. Triggers on "fides",
-  "compliance gate", "attestation", "provenance", "change gate", "SBOM evidence",
-  "policy gate", "control coverage", "verify-image", "control timeline",
-  "servicenow mcp", "now assist grounding".
+  Operate Fides (compliance, provenance, evidence) via the `fides` CLI, API and CI/CD: build provenance, policy and change gates, control frameworks (SOC 2, SLSA), SBOM and cosign checks. Triggers: "fides", "compliance gate", "attestation", "provenance", "change gate".
 ---
 
 # Fides — Compliance, Provenance & Evidence Tracking

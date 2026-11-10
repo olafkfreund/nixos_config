@@ -48,6 +48,16 @@ let
     linkedin-post = { src = ./linkedin-post; to = everyAgent; };
     reddit-post = { src = ./reddit-post; to = everyAgent; };
     cosmic-ui-design-skill = { src = ./cosmic-ui-design-skill; to = everyAgent; };
+    # Third-party (benjitaylor/skills, MIT). Read-only in the store: copy an example out before `npm install`.
+    stageshow = {
+      src = "${pkgs.fetchFromGitHub {
+        owner = "benjitaylor";
+        repo = "skills";
+        rev = "299140fafd08df55a9c234e610c3f64af3f45531";
+        hash = "sha256-23vysV6e5emspdlr4lOfaKc205ZTbFr8SKICwT6hLyY=";
+      }}/stageshow";
+      to = everyAgent;
+    };
     # Its MCP server is configured for Claude and Codex, not Antigravity.
     agent-bus = { src = ./agent-bus; to = [ "claude" "codex" ]; };
     # Claude only: for codex/agy it would let reviewers delegate to each other (#1831).

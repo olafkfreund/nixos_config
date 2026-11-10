@@ -8,6 +8,7 @@
 , webkitgtk_6_0
 , libsoup_3
 , glib
+, oniguruma
 ,
 }:
 # FlyCrys — GTK4/Libadwaita-native GUI for Anthropic's Claude Code CLI.
@@ -41,6 +42,7 @@ rustPlatform.buildRustPackage rec {
     webkitgtk_6_0
     libsoup_3
     glib
+    oniguruma
   ];
 
   # Upstream's .deb assets reference a desktop entry + icons that

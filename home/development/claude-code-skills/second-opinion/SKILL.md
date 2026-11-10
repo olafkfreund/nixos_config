@@ -1,13 +1,7 @@
 ---
 name: second-opinion
 description: >-
-  Ask OpenAI (Codex, ChatGPT subscription) and Google (Antigravity
-  subscription) models for an independent read-only review of a plan, diff,
-  design or decision. Use only when the user explicitly asks for another
-  model's opinion, a second opinion or a cross-model review, or invokes
-  `/second-opinion`, or when an approved plan/ lists the provider in
-  reviewers, or when Claude Code's agent-team mode is on (managed
-  CLAUDE.md). Never use it otherwise or to approve an intent, spec or plan.
+  Ask Codex and agy for an independent read-only review of a plan, diff or decision. Use only when the user asks for a second opinion, `/second-opinion`, an approved plan/ lists a reviewer, or agent-team mode is on. Never use it to approve an intent, spec or plan.
 ---
 
 # Second opinion
@@ -207,6 +201,9 @@ The answer is in `$work/codex.md`. The model name is in the header codex
 prints to stderr, next to `model:`.
 
 ## Google (Antigravity subscription)
+
+Keep `--dangerously-skip-permissions` (#2812) on every agy call, `--agent` included:
+without it headless agy auto-denies every command and returns an empty review.
 
 ```bash
 herdr-run agy timeout 600 \

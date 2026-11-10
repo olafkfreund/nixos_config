@@ -1,13 +1,7 @@
 ---
 name: gog
 description: >-
-  Operate Google Workspace from the terminal via the `gog` CLI (gogcli).
-  Use for checking and replying to Gmail, managing Google Tasks, reading and
-  creating Calendar events, Google Chat (spaces/DMs/messages), Meet spaces,
-  Contacts, Drive/Docs/Sheets, and more. Triggers on `/gog`, `/gog mail`,
-  `/gog tasks`, `/gog events`, `/gog chat`, `/gog meet`, or any request to
-  check/read/reply/send email, list or add tasks, see today's agenda, or
-  message someone on Chat for the user's Google account.
+  Operate Google Workspace from the terminal via the `gog` CLI: Gmail, Tasks, Calendar, Chat, Meet, Contacts, Drive/Docs/Sheets. Triggers: `/gog`, `/gog mail|tasks|events|chat|meet`, or any request to read, reply or send email, list or add tasks, see today's agenda, or message someone on Chat.
 version: 0.2.0
 category: communication
 tags: [google, gmail, calendar, tasks, cli, workspace]

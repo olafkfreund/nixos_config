@@ -1,12 +1,7 @@
 ---
 name: 1password
 description: >-
-  Read, write and inject secrets with the 1Password CLI (`op`). Look up
-  logins/API keys/SSH keys, resolve `op://` secret references, run a command
-  with secrets as env vars (`op run`), fill config templates (`op inject`),
-  and create/edit items. Triggers on `/1password`, "get my <service> API key",
-  "what's the password for X", "put this secret in 1Password", "run this with
-  the <service> credentials", or any mention of `op`, `op://`, or 1Password.
+  Read, write and inject secrets with the 1Password CLI (`op`): look up logins and API keys, resolve `op://` references, `op run` with secrets as env vars, `op inject` templates, create or edit items. Triggers: `/1password`, "get my <service> API key", "put this secret in 1Password", `op`, `op://`.
 version: 0.1.0
 category: security
 tags: [1password, op, secrets, credentials, cli]
