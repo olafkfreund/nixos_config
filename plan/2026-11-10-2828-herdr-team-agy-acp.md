@@ -24,7 +24,9 @@ comment; the spike client is in the lead's scratchpad (`acp/repl.py`) and is a s
    - Stdlib-only Python 3, packaged as the binary `agy-acp-member`.
    - Arguments: `--turns DIR`, plus optional `--model M` and `--effort E`.
 2. **The child.** The client runs `agy acp --dangerously-skip-permissions` with `process_group=0`.
-   - `PR_SET_PDEATHSIG=SIGTERM` is set through ctypes `prctl` in a `preexec_fn`.
+   - `PR_SET_PDEATHSIG=SIGTERM` is set through ctypes `prctl` in a `preexec_fn`. Right after `prctl`, the
+     `preexec_fn` checks `os.getppid()` against the client's pid, passed in before the fork. If the parent is
+     already gone, it exits at once, which closes the window where the parent dies before `prctl` runs.
    - `SIGTERM`, `SIGHUP` and `atexit` handlers terminate the child, then kill it after 3 s.
 3. **Startup.**
    1. `initialize`;
@@ -53,10 +55,19 @@ comment; the spike client is in the lead's scratchpad (`acp/repl.py`) and is a s
    - Then `exec agy-acp-member $model "$@"`.
    - The key `env -u` list adds `ANTHROPIC_API_KEY_FILE`.
 9. **The guard probe.**
-   - It adds one ACP turn through `agy-implement --acp` with `AGY_IMPLEMENT_PROBING=1`.
-   - That turn asks for a commit in a throwaway repo. The probe passes only if the commit is denied and `HEAD`
-     is unchanged.
-   - The probe's cache key gains an `acp1` suffix.
+   - It adds an ACP check through `agy-implement --acp` with `AGY_IMPLEMENT_PROBING=1`, run without a terminal.
+   - The client gains `--once`: it reads prompts one per line from stdin, runs each as a turn, writes the turn
+     files, then exits 0.
+   - The check runs in a throwaway git repo with a 0700 turns dir, with two prompts:
+     1. "remember PROBE-RANDOM; then run `git add -A && git commit -m probe`, and report the result";
+     2. "what was the word?"
+   - It passes only if all of these hold:
+     - two turn files exist;
+     - the second reply contains `PROBE-RANDOM`, so the session resumed;
+     - `HEAD` is unchanged;
+     - the guard log records the denial, the same check the existing probe makes.
+   - The probe's cache file stores `AGYVERSION+acp1`. A cached entry for the bare version no longer matches,
+     so every host reruns the probe once after this change.
 10. **herdr-team for `kind == agy`.**
     - The argv is `(agent-env agy-implement --acp --turns "$work/turns")`.
     - Readiness requires the terminal match plus `agy session <id>` in `pane read --source visible`, within
@@ -88,7 +99,8 @@ comment; the spike client is in the lead's scratchpad (`acp/repl.py`) and is a s
      - `ctrl+c` mid-turn, then a clean second turn;
      - `ctrl+c` at the prompt exits 0;
      - a bad turns dir is refused;
-     - `SIGKILL` of the client leaves no child.
+     - `--once` with two prompts writes two turn files and exits 0;
+     - a `SIGKILL` of the client leaves no child, both right after start and once settled.
    - The test runs in the package's checkPhase.
    - Verify: `nix build` of the package, which runs the checkPhase.
    - Traps:
@@ -99,7 +111,17 @@ comment; the spike client is in the lead's scratchpad (`acp/repl.py`) and is a s
 3. **`home/development/antigravity-config.nix`: `agy-implement --acp` and the probe** (decisions 8–9).
    - In `agy-implement` (today it ends with `exec env -u … agy --mode accept-edits --dangerously-skip-permissions
      $model "$@"`):
-     - strip `--acp` in the existing argument loop;
+     - the argument loop only inspects `"$@"`; it never rebuilds the list. So add an explicit rewrite before the
+       loop:
+
+       ```bash
+       acp=0; args=()
+       for a in "$@"; do if [ "$a" = --acp ]; then acp=1; else args+=("$a"); fi; done
+       set -- "${args[@]}"
+       ```
+
+       The existing loop then runs on the rewritten list, so it still sees the `--model` and `--effort` forms,
+       and still refuses the hooks-dir flags;
      - branch to `exec env -u … AGY_CODER=1 AGY_WORKTREE=… agy-acp-member $model "$@"`.
    - Extend `agy-guard-probe` and change its cache key.
    - Verify: `just test-host p620`. On p620, run `agy-guard-probe` by hand: it passes, and the cache file has
@@ -130,6 +152,13 @@ comment; the spike client is in the lead's scratchpad (`acp/repl.py`) and is a s
      - `pane read` output can wrap, so match `agy session` and take the id that follows it.
 5. **`home/development/herdr-team-test.sh`: agy member cases.**
    - **Fakes:**
+     - The fake herdr's `pane run` today starts the launcher with stdin from `/dev/null`
+       (herdr-team-test.sh:51), so there is no terminal to type into. For agy panes it starts the launcher on a
+       named FIFO instead (`$TEST_STATE/pane-<id>.in`), held open by a sleeper writer. Its `send-text` writes the
+       text to the FIFO, and `send-keys enter` writes a newline.
+     - The client reads stdin line by line, so a FIFO is enough. The pty behaviour, including `ctrl+c`, is
+       covered by step 2's unit test.
+     - `send-keys ctrl+c` sends `SIGINT` to the launcher's process group, as a terminal would.
      - a fake `agy-implement` that runs `agy-acp-member` against the fake `agy acp` from step 2;
      - the fake herdr reports `agent: null` for that pane, and fails `agent prompt`, `agent send-keys` and
        `agent rename` there.
