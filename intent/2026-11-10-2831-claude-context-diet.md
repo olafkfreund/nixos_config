@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2831
 author: olafkfreund
 ---
@@ -130,6 +130,6 @@ The owner's decision (#2831) is every must-do item from the review except moving
   - make the `coder` run `just check-syntax` before handing back.
 
   Are they in scope? Default: no, as a follow-up issue, because the owner asked for the must-do list.
-- **The Atlassian removal:** remove only the MCP server, or the Jira/Confluence token secrets and the
-  `atlassian-mcp` package too? Default: only the Claude Code MCP entry (`mcp-servers.atlassian.enable = false` on
-  both hosts). The secrets stay declared but unused, so turning it back on is one line.
+- **The Atlassian removal**, decided by the owner on 2026-11-10: remove all of it on p620 and razer. That is the
+  Claude Code MCP entry, the `atlassian-mcp` package, the Jira and Confluence token secrets
+  (`api-jira-token`, `api-confluence-token`, `api-jira-pat`) and the host config blocks.
