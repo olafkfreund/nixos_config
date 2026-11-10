@@ -122,7 +122,31 @@ conv_held() { # state file: succeeds while another live converse holds the task
   { read -r pid start; } < <(jq -r '.conversation // {} | "\(.pid // "-") \(.start // "-")"' "$1")
   [[ $pid != "$$" ]] && alive "$pid" "$start"
 }
-rm_gen() { if [[ $1 =~ ^[A-Za-z0-9]+$ ]]; then rm_retry "${rt:?}/$1"; fi; }
+rm_gen() {
+  [[ $1 =~ ^[A-Za-z0-9]+$ ]] || return 0
+  if [[ -f $rt/$1/conversation.jsonl ]]; then
+    # shellcheck disable=SC2174 # $rt exists; create each child with mode 700.
+    if mkdir -m 700 -p "$rt/archive" \
+      && mkdir -m 700 -p "$rt/archive/$1" \
+      && {
+        if [[ -f $rt/archive/$1/paths ]]; then
+          jq -c --rawfile paths "$rt/archive/$1/paths" '
+            ($paths | split("\n") | map(select(length > 0) | split("\t") | {(.[0]): .[1]}) | add // {}) as $map
+            | if .answer == null then . else
+                .answer |= reduce ($map | to_entries[]) as $entry (.;
+                  if startswith($entry.key) then $entry.value + .[($entry.key | length):] else . end)
+              end' "$rt/$1/conversation.jsonl" >"$rt/archive/$1/conversation.jsonl.tmp"
+        else
+          cp -- "$rt/$1/conversation.jsonl" "$rt/archive/$1/conversation.jsonl.tmp"
+        fi
+      } && mv -- "$rt/archive/$1/conversation.jsonl.tmp" "$rt/archive/$1/conversation.jsonl"; then
+      :
+    else
+      echo "herdr-team: archive failed for $1" >&2
+    fi
+  fi
+  rm_retry "${rt:?}/$1"
+}
 drop_if_empty() {
   local g
   if jq -e '(.members | length) == 0 and .reservation == null' "$1" >/dev/null 2>&1; then
@@ -143,19 +167,40 @@ rm_dirs() { # ctl work: only paths this tool makes
   case $2 in "$wroot"/herdr-team.*) rm_retry "$2" ;; esac
   case $1 in "$rt"/*/*) rm_retry "$1" && rmdir -- "$(dirname "$1")" 2>/dev/null || : ;; esac
 }
+keep_answers() { # gen member work; hold the lock
+  local dest i=2
+  [[ -n $3 && -d $3/ans && $1 =~ ^[A-Za-z0-9]+$ ]] || return 0
+  if ! (
+    # shellcheck disable=SC2174 # $rt exists; create each child with mode 700.
+    mkdir -m 700 -p "$rt/archive" && mkdir -m 700 -p "$rt/archive/$1" || exit 1
+    dest=$rt/archive/$1/$2
+    while [[ -e $dest || -L $dest ]]; do
+      dest=$rt/archive/$1/$2.$i
+      ((i++))
+    done
+    mkdir -m 700 "$dest" && cp -r -- "$3/ans/." "$dest/" \
+      && printf '%s\t%s\n' "$3/ans/" "$dest/" >>"$rt/archive/$1/paths"
+  ); then
+    echo "herdr-team: archive failed for $2" >&2
+  fi
+  return 0
+}
 sweep() { # remove state files with no live member; hold the lock
-  local f m
+  local f m g ctl work
   for f in "$rt"/*.json; do
     [[ -f $f ]] || continue
     if [[ -n $(live_members "$f") ]] || reserved "$f"; then continue; fi
     echo "herdr-team: removed stale task $(basename "$f" .json)" >&2
+    g=$(jq -r .gen "$f")
     for m in $(jq -r '.members | keys[]' "$f"); do
-      stop_member "$(mget "$f" "$m" ctl)"
-      rm_dirs "$(mget "$f" "$m" ctl)" "$(mget "$f" "$m" work)"
+      ctl=$(mget "$f" "$m" ctl)
+      work=$(mget "$f" "$m" work)
+      stop_member "$ctl"
+      keep_answers "$g" "$m" "$work"
+      rm_dirs "$ctl" "$work"
     done
-    m=$(jq -r .gen "$f")
     rm -f -- "$f"
-    rm_gen "$m"
+    rm_gen "$g"
   done
 }
 
@@ -218,7 +263,7 @@ stop_member() { # ctl
   done
 }
 teardown() { # state file, member: stop it, close its pane, remove its dirs and record
-  local f=$1 m=$2 pane terminal ctl work
+  local f=$1 m=$2 pane terminal ctl work gen
   pane=$(mget "$f" "$m" pane)
   terminal=$(mget "$f" "$m" terminal)
   ctl=$(mget "$f" "$m" ctl)
@@ -229,6 +274,10 @@ teardown() { # state file, member: stop it, close its pane, remove its dirs and 
   if [[ -d $ctl ]]; then : >"$ctl/stop"; fi
   stop_member "$ctl"
   if [[ -n $pane ]] && same_pane "$pane" "$terminal"; then h pane close "$pane" >/dev/null 2>&1 || :; fi
+  lock
+  gen=$(jq -r .gen "$f")
+  keep_answers "$gen" "$m" "$work"
+  unlock
   rm_dirs "$ctl" "$work"
   lock
   update "$f" 'del(.members[$m])' --arg m "$m" || :
@@ -700,9 +749,18 @@ converse() {
   : >>"$jl"
   end=$(($(date +%s) + limit))
   emit() { # from to n outcome answer changed
-    jq -cn --argjson hop "$hop" --arg from "$1" --arg to "$2" --arg n "$3" --arg outcome "$4" --arg answer "$5" --argjson changed "${6:-null}" \
+    local line
+    line=$(jq -cn --argjson hop "$hop" --arg from "$1" --arg to "$2" --arg n "$3" --arg outcome "$4" --arg answer "$5" --argjson changed "${6:-null}" \
       '{hop: $hop, from: $from, to: (if $to == "" then null else $to end), n: (if $n == "" then null else ($n | tonumber) end),
-        outcome: $outcome, answer: (if $answer == "" then null else $answer end), changed_during_review: $changed}' | tee -a "$jl"
+        outcome: $outcome, answer: (if $answer == "" then null else $answer end), changed_during_review: $changed}')
+    lock
+    if [[ -d $rt/$gen ]]; then
+      printf '%s\n' "$line" >>"$rt/$gen/conversation.jsonl"
+    elif [[ -d $rt/archive/$gen ]]; then
+      printf '%s\n' "$line" >>"$rt/archive/$gen/conversation.jsonl"
+    fi
+    unlock
+    printf '%s\n' "$line"
   }
   while true; do
     hop=$((hop + 1))
