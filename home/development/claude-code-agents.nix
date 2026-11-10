@@ -12,11 +12,30 @@
 # Reversible: drop a name from the list and move its file back.
 { config
 , lib
+, pkgs
 , ...
 }:
 let
   cfg = config.programs.claudeCode.agentCuration;
   disabledStr = lib.concatStringsSep " " cfg.disabledAgents;
+
+  # Replaces the built-in Explore (Opus-class default) with a Haiku one. Written
+  # as a real file, never home.file: agents/** is syncthing-synced.
+  exploreAgent = pkgs.writeText "Explore.md" ''
+    ---
+    name: Explore
+    description: Fast read-only agent for searching and reading a codebase. Use it to find files, grep for symbols or answer questions about how code works.
+    model: haiku
+    tools: Read, Grep, Glob, Bash
+    ---
+
+    You are a read-only code search agent.
+    Find files with Glob, search contents with Grep, and read what matters.
+    Use Bash only for read-only commands (ls, git log, git diff, git show).
+    Never edit, write, move or delete anything.
+    Run independent searches in parallel.
+    Report file paths with line numbers and a short answer, not file dumps.
+  '';
 in
 {
   options.programs.claudeCode.agentCuration = {
@@ -79,6 +98,10 @@ in
           fi
         done
       fi
+    '';
+
+    home.activation.claudeExploreAgent = lib.hm.dag.entryAfter [ "writeBoundary" "claudeAgentCuration" ] ''
+      $DRY_RUN_CMD install -D -m 0644 ${exploreAgent} "$HOME/.claude/agents/Explore.md"
     '';
   };
 }
