@@ -168,3 +168,9 @@ PdfCraft. The other types go back to eog, Evince and the MIME cache.
   disabled-owner eval needs `lib.mkForce false`, because p620 sets `features.craftapps.apps.vectorcraft = true`
   explicitly; with that it prints `{"forced":null,"removed":["ai.storyteller.figcraft.desktop"]}`. Both guards
   failed as intended on a temporary edit, which was reverted.
+- Review (Opus): decision 4's `associations.removed` is honoured only by GIO-based openers (Nautilus, `gio open`, the
+  GTK portal). Under Hyprland, `xdg-open` and `xdg-mime` take the first `mimeinfo.cache` entry and skip
+  `[Removed Associations]`, so with CADCraft off a DXF would open in VectorCraft. No host turns an owner off today.
+  Recorded in the docs as a known limit, not fixed: a full fix needs a hand-kept table of non-Craft fallbacks per
+  shared type. Also from the review: the docs' wrong statements are corrected, and the check uses
+  `runCommandLocal`.

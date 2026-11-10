@@ -2,8 +2,8 @@
 
 The ArtCraft Craft apps are the default application for the file types they
 declare. `modules/desktop/craftapps.nix` owns the mapping. It is enabled on
-p620 and razer through `features.craftapps.enable`. p510 is unchanged and keeps
-Evince and the GNOME defaults.
+p620 and razer through `features.craftapps.enable`. p510 does not enable the
+Craft apps and its defaults are unchanged.
 
 ## Which app opens what
 
@@ -30,22 +30,30 @@ for PDF, VectorCraft for SVG, CADCraft for DXF.
 
 ## What stays where it was
 
-- Video (`video/*`) stays on Totem or mpv, and audio (`audio/*`) on GNOME Music.
-  FilmCraft and SoundCraft only take their own project files.
+- Video and audio keep the players they had (Totem, mpv, GNOME Music, Amberol
+  and others, per type). FilmCraft and SoundCraft only take their own project
+  files.
 - Markdown, HTML and TeX stay on their current editor and browser, even though
   WordCraft can read them.
 - Legacy `application/vnd.ms-excel` stays on LibreOffice Calc.
 
 ## Turning an app off
 
+Change the app's existing line in the host's `features.craftapps.apps` block
+(p620 and razer list every app explicitly, so adding a second line conflicts):
+
 ```nix
-features.craftapps.apps.vectorcraft = false;
+vectorcraft = false;
 ```
 
 The app is not installed and its types are no longer forced to it. The default
-then falls back to whatever the GNOME and Evince modules set. For a shared type
-the module also removes the other Craft apps' claim, so SVG does not move to
-FigCraft by accident.
+then falls back to whatever the GNOME and Evince modules set, or the MIME cache.
+
+For a shared type the module also writes the other Craft apps into
+`[Removed Associations]`, so SVG does not move to FigCraft. Only GIO-based
+openers honour that section (Nautilus, `gio open`, the GTK portal). Under
+Hyprland, `xdg-open` and `xdg-mime` skip it and take the first entry in the MIME
+cache: with CADCraft off, `xdg-open` on a DXF file opens VectorCraft.
 
 ## Where the mapping lives and how it is checked
 
@@ -59,7 +67,8 @@ Two guards run at build time:
 - An assertion fails the build if one MIME type appears under two apps.
 - The `craftapps-mime-check` derivation in `system.checks` reads each enabled
   app's desktop file and fails, naming the app and type, if it no longer
-  declares a type in the table. A craftapps input bump that drops a type fails
+  declares a type in the table (or with a `sed` error if the desktop file is
+  gone). A craftapps input bump that drops a type fails
   here instead of silently changing the default.
 
 ## Checking a host

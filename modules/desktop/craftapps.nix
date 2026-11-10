@@ -192,7 +192,7 @@ in
       }];
 
       system.checks = [
-        (pkgs.runCommand "craftapps-mime-check" { } ''
+        (pkgs.runCommandLocal "craftapps-mime-check" { } ''
           fail=0
           ${lib.concatMapStrings checkFor (builtins.attrNames enabled)}
           [ "$fail" = 0 ] || exit 1
