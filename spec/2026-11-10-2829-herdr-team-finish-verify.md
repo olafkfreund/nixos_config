@@ -23,52 +23,70 @@ herdr-team finish <task> implement|agy-implement [--verify '<cmd>'] [--retries N
 **Order inside `finish`** (today's steps are marked "as today"):
 
 1. Validate and take the reservation, as today.
-2. **New, `--verify` only:** refuse with `refuse` (no reservation leak, because the EXIT trap releases it) when
-   either is true:
-   - `realpath "$root"` equals `realpath -m ~/.config/nixos`;
-   - `lg branch --show-current` is `main`, or `HEAD` is detached at `origin/main`'s commit.
-
-   This re-checks at finish time what `up` checked at start (herdr-team.sh:223–228).
+   - `finish` gains `trap 'exit 130' INT`, `trap 'exit 143' TERM` and `trap 'exit 129' HUP`, as `up` and
+     `converse` have, so the EXIT trap (`release`) always runs.
+   - `release` also removes the temp files of step 3.
+2. **New, `--verify` only:** read `pre_last` (the member's `.last.outcome`) and the up-time `fp`. Set
+   `fp_impl=$(fingerprint)`, the tree as the implementer left it, and `dirtied=false`.
 3. **New, the verify loop.** For attempt `a = 1 … retries+1`:
-   1. `fp_pre=$(fingerprint)`, the tree as the implementer left it.
-   2. Run the check.
+   1. **Guard**, before every attempt, because an unrestricted member may have switched branches during a
+      retry. Refuse (`verify_unsafe`) if any of these is true:
+      - `realpath "$root"` equals `realpath -m ~/.config/nixos`;
+      - `lg branch --show-current` is `main`;
+      - the branch is empty (detached), `origin/main` exists (`lg rev-parse -q --verify origin/main`), and it
+        equals `HEAD`.
+
+      A named feature branch still at `origin/main`'s commit passes. A test repo without `origin` passes.
+   2. `fp_pre=$(fingerprint)`. If `a > 1` and `fp_pre != fp_post` of the previous attempt, the implementer
+      changed the tree during the retry, so `fp_impl=$fp_pre`. Otherwise `fp_impl` is kept. Check output
+      therefore never becomes "the implementer's change".
+   3. Run the check:
       - The command is `(cd "$root" && timeout "$vt" env -u <key list> bash -c "$cmd") >"$out" 2>&1`.
-      - `<key list>` is the same list the members use, including `ANTHROPIC_API_KEY_FILE` after #2818.
-      - `$out` is a `mktemp` file under `$rt` (0700), removed on exit.
+      - `<key list>` is the members' list, including `ANTHROPIC_API_KEY_FILE` (#2818).
+      - `$out` is a `mktemp` file under `$rt`.
       - Exit 124 means timed out.
-   3. `fp_post=$(fingerprint)`. If it differs from `fp_pre`, the check changed the tree (build output, caches).
-      Record `dirtied: true`.
-   4. If the exit is 0, stop the loop.
-   5. If `a > retries`, stop: the check failed.
-   6. Otherwise, write a retry request to a `mktemp` file:
-      - a fixed header saying it is from the lead;
+   4. `fp_post=$(fingerprint)`. If `fp_post != fp_pre`, set `dirtied=true`, which sticks across attempts.
+   5. If the exit is 0, stop the loop.
+   6. If `a > retries`, stop: the check failed.
+   7. Otherwise, write the retry request to a `mktemp` file:
+      - a fixed header from the lead;
       - the command;
       - the exit code;
-      - the last 4 KB of `$out`.
-
-      Then call `res=$(ask "$task" "$role" "$req" --timeout 1800)`, the same in-process call `converse` uses
-      (herdr-team.sh:686). If `res`'s `outcome` is not `ok`, stop at once and record `retry_outcome` (for example
-      `timeout`). The request stays pending, and `finish` goes on to tear the member down, which clears it.
-4. **The implementer's fingerprint** is `fp_pre` of the last attempt that ran: the tree the implementer
-   produced, before any changes made by the check itself.
+      - the last 4 KB of `$out`, trimmed on a UTF-8 boundary with NULs removed. That uses the `cut_msg`
+        approach (herdr-team.sh:596).
+   8. Call `res=$(ask "$task" "$role" "$req" --timeout "${HERDR_TEAM_RETRY_TIMEOUT:-1800}")`, the same
+      in-process call `converse` uses (:686). The env override exists for the tests.
+      - If `outcome` is `ok`, go to the next attempt.
+      - Otherwise set `retry_outcome` to that outcome and stop the loop at once. A `timeout` or `cancelled`
+        leaves the request pending; teardown clears it.
+4. **Before** the graceful quit and `teardown`, which delete the member record, read `last` as today
+   (:801). A retry's `ok` answer updates it.
 5. The graceful quit (`ctrl+c`) and `teardown`, as today.
-6. **`last` is read after the verify loop**, not before as today (herdr-team.sh:801). A retry's answer counts,
-   and a retry that did not answer leaves the earlier `last`. Step 3.6 already stopped and recorded the failure
-   in that case, so it cannot pass silently.
-7. The reason chain runs as today, with two changes:
-   - "empty diff" compares the up-time `fp` with the implementer's fingerprint from step 4, instead of a fresh
-     `fingerprint`, when `--verify` ran. Without `--verify`, it is unchanged.
-   - New, last in the chain, so it never masks the safety reasons: `verify_failed` when the check's final exit
-     is not 0, and `verify_retry_<outcome>` when a retry did not answer `ok`.
+6. **Failures.** Every check below that fails is appended, in this order, to a `failures` array:
 
-**Output.** The JSON gains `verify`: `null` without `--verify`, otherwise:
+   | Failure | Condition |
+   | ------- | --------- |
+   | `not_exited` | as today |
+   | `tool exited N` | as today |
+   | `verify_unsafe` | the guard in step 3.1 refused |
+   | `verify_retry_<outcome>` | a retry did not answer `ok`. It replaces `last outcome is …` for that case, so `agent_gone`, `interrupted`, `empty` and the rest are named as retry failures |
+   | `last outcome is …` | as today, when `pre_last` was not `ok` and no retry answered `ok` |
+   | `HEAD moved`, `changes are staged` | as today |
+   | `empty diff` | `fp_impl == fp` when `--verify` ran, else as today |
+   | `verify_failed` | the check's final exit is not 0 |
+
+   `reason` stays the first entry, so today's callers keep working, and `failures` lists them all.
+
+**Concurrency.** `ask`, `converse` and `down` without `--force` refuse with `busy` while a `finish` holds the
+task's reservation (`reserved "$f"`). A verify run can last minutes, so another caller must not type into
+the implementer mid-check. `finish`'s own retry `ask` is exempt: it passes the reservation holder's pid.
+
+**Output.** The JSON gains `failures` (an array, empty when `ok`) and `verify`. `verify` is `null` without
+`--verify`, otherwise:
 
 ```json
 {"cmd": "...", "ok": true, "exit": 0, "attempts": 1, "dirtied": false, "retry_outcome": null, "tail": "..."}
 ```
-
-The check's own result is always visible here, even when `reason` reports a safety failure such as
-`HEAD moved`.
 
 **Skills.** The `handoff` and `team` skills say: when a plan step names a check, pass it as `--verify` to
 `herdr-team finish`.
@@ -77,13 +95,15 @@ The check's own result is always visible here, even when `reason` reports a safe
 
 - **Running the check after the implementer has quit:** this loses the live session, which is the point of
   the issue.
-- **A list of all failure reasons instead of one `reason`:** that changes the contract every caller parses.
-  `verify` carries the check's result separately, so nothing is hidden.
+- **Replacing `reason` with a list:** that would break every caller that parses `reason`. `failures` is added
+  next to it instead.
 - **Letting a member's reply supply or change the command:** the lead's command is the only input (intent
   constraint).
 - **A sandbox for the check:** the check is trusted because the lead wrote it (intent constraint). A working
   directory is not a sandbox.
-- **A configurable retry-answer timeout:** 1800 s is generous, and it can be added later if a step needs it.
+- **A retry-answer timeout flag:** 1800 s is generous. `HERDR_TEAM_RETRY_TIMEOUT` exists only for the tests.
+- **Deleting files the check created:** that removes the lead's own build output, and it cannot tell them from
+  implementer files at the same path. Tracking `fp_impl` avoids both problems.
 
 ## Risks
 
@@ -100,19 +120,29 @@ The check's own result is always visible here, even when `reason` reports a safe
 
 `home/development/herdr-team-test.sh` gains these cases:
 
-- **pass:** the check exits 0 on the first try. `ok: true`, `verify.attempts == 1`, and no request is sent.
-- **retry fixes it:** the check fails first, the fake agent's answer makes a file appear, and the second run
-  passes. `attempts == 2`, a prompt was logged, `ok: true`.
-- **still failing:** `ok: false`, `reason == "verify_failed"`, `verify.exit` non-zero, and the implementer is
+- **pass:** the check exits 0 on the first try. `ok: true`, `attempts == 1`, no prompt is logged, and
+  `failures == []`.
+- **retry fixes it:** the first check fails. The fake agent's answer creates a file, the second check passes.
+  Then `attempts == 2`, one prompt is logged, and `ok: true`.
+- **still failing:** `failures` ends with `verify_failed`, `verify.exit` is non-zero, and the implementer is
   stopped.
-- **retry not answered:** the fake agent gives no turn. Then `reason == "verify_retry_timeout"` and `ok: false`,
-  using a short `--timeout` via a test hook or the fake agent's quit.
-- **check dirties the tree:** the implementer changed nothing and the check creates `out.log`. Then
-  `reason == "empty diff"` and `verify.dirtied == true`.
-- **safety first:** the implementer moved `HEAD` and the check fails. Then `reason == "HEAD moved"` and
-  `verify.ok == false`.
-- **guards:** `--verify` with the worktree on `main` is refused. `--retries 5` is a usage error.
-- **unchanged:** `finish` without `--verify` gives the same JSON as today, plus `verify: null`.
+- **retry timeout:** with `HERDR_TEAM_RETRY_TIMEOUT=2` and no turn from the fake agent,
+  `reason == "verify_retry_timeout"`. The member is gone afterwards, so no pending request outlives `finish`.
+- **retry agent_gone:** the fake agent quits on the retry. `reason == "verify_retry_agent_gone"`, not
+  `last outcome is …`.
+- **check dirties, single attempt:** the implementer changed nothing, and the check creates `out.log` and
+  passes. Then `reason == "empty diff"` and `dirtied == true`.
+- **check dirties across retries:** the first check creates `out.log` and fails. The agent answers `ok` without
+  changing files, and the second check passes. Still `reason == "empty diff"`.
+- **all failures shown:** the implementer moves `HEAD` and stages a change, and the check fails. Then
+  `reason == "HEAD moved"`, and `failures` contains `changes are staged` and `verify_failed`.
+- **guards:**
+  - a worktree on `main` gives `verify_unsafe`;
+  - a detached `HEAD` at `origin/main` gives `verify_unsafe`;
+  - a feature branch at `origin/main`'s commit passes;
+  - `--retries 5` is a usage error.
+- **concurrency:** an `ask` while `finish --verify` runs is refused with `busy`.
+- **unchanged:** `finish` without `--verify` gives today's JSON, plus `failures` and `verify: null`.
 
-Then `shellcheck`, `just test-host p620` and `razer`. Live on p620: a real implementer step with a check that
-fails first, for example `shellcheck` on a file it must fix, and passes after one retry.
+Then `shellcheck`, `just test-host p620` and `razer`. Live on p620: a real implementer step whose check fails
+first and passes after one retry.
