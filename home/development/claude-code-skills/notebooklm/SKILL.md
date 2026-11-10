@@ -1,17 +1,7 @@
 ---
 name: notebooklm
 description: >-
-  Drive Gemini Notebook (formerly Google NotebookLM) from inside the agent —
-  ask questions of a notebook and get sourced answers, add sources (URLs,
-  PDFs, text, YouTube, Google Drive), and generate then download artifacts
-  (audio overview / podcast, video, report, mind map, slide deck, infographic,
-  data table, quiz, flashcards). Use for research against a notebook's own
-  sources rather than the open web. Triggers on `/notebooklm`, `/nlm`, "ask my
-  notebook", "what do my sources say about X", "add this to NotebookLM",
-  "make an audio overview / podcast / study guide / mind map / quiz /
-  flashcards", "download the report", "refactor document", "critique draft",
-  "plan usage", "quota", or any mention of Gemini Notebook, NotebookLM, `nlm`,
-  or a notebook by alias.
+  Drive Gemini Notebook (NotebookLM): ask a notebook sourced questions, add sources (URLs, PDFs, YouTube, Drive), generate artifacts (audio overview, report, mind map, slides, quiz). Triggers: `/notebooklm`, `/nlm`, "ask my notebook", "add this to NotebookLM", "podcast", `nlm`.
 version: 0.2.0
 category: research
 tags: [notebooklm, google, research, mcp, artifacts, cli]

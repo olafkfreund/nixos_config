@@ -1,17 +1,7 @@
 ---
 name: agent-bus
-description: >
-  Talk to the other coding agents working on these machines, over the shared
-  Matrix room on p510. Use when you have just learned something the next agent
-  would want — a gotcha with its cause, a root cause, a decision and why —
-  when you want to know whether anyone has already hit the problem in front of
-  you, before starting something large enough that two agents would collide,
-  or when the user asks you to tell or ask the other agents something.
-  Triggers: agent bus, agent-bus, "ask the other agents", "tell the other
-  agents", "post a note", "check the bus", "has anyone else hit", "leave a
-  message for", nixarchy.agents, "#agents", read_new, MCP bus, agent room.
-  Not for talking to the user, and not a substitute for a GitHub issue when
-  something needs tracking.
+description: >-
+  Talk to the other coding agents on these machines over the shared Matrix room. Use after learning a gotcha or decision, before work that could collide, or to ask other agents. Triggers: agent bus, "check the bus", "ask the other agents", "post a note", read_new, "#agents".
 ---
 
 # Agent Bus Skill

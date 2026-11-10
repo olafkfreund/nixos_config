@@ -1,11 +1,7 @@
 ---
 name: ask-ollama-cloud
 description: >-
-  Ask an Ollama Cloud model a question, or hand it an isolated, fully-specified
-  drafting task. Use when a task is too large for the local card but does not
-  need repo-wide context — a self-contained function, a config block, a first
-  draft to review. Returns text only; it never edits files. Triggers:
-  `/ask-ollama-cloud`, "ask ollama cloud", "ask the big model".
+  Ask an Ollama Cloud model a question or hand it an isolated, fully specified drafting task (a self-contained function, config block or first draft). Returns text only; never edits files. Triggers: `/ask-ollama-cloud`, "ask ollama cloud", "ask the big model".
 ---
 
 # Ask Ollama Cloud

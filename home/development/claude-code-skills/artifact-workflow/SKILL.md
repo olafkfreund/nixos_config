@@ -1,10 +1,7 @@
 ---
 name: artifact-workflow
 description: >-
-  Write and gate the intent → spec → plan artifacts for a task. Use when
-  starting any task tracked as an issue or touching more than one file, when
-  asked to write an intent, spec or plan, on `/create-spec`, or when the user
-  approves one of these artifacts. Not for typos, lock bumps or one-line config.
+  Write and gate the intent, spec and plan artifacts for a task. Use when starting any task tracked as an issue or touching more than one file, when asked to write an intent, spec or plan, on `/create-spec`, or when the user approves one. Not for typos or one-line config.
 ---
 
 # Artifact workflow
