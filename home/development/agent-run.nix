@@ -1,7 +1,6 @@
 { pkgs, lib, ... }:
 let
-  # The module system ignores argument defaults, so this is a binding; step 4 of the plan turns it on.
-  agyMember = false;
+  agyMember = true;
   sandbox = import ./agent-sandbox-pkgs.nix { inherit pkgs lib; };
   testPath = lib.makeBinPath (with pkgs; [ bash coreutils util-linux procps jq socat gnugrep gnused gawk findutils diffutils git ]);
   herdr-run = pkgs.writeShellApplication {

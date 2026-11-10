@@ -234,10 +234,14 @@ sweep() { # remove state files with no live member; hold the lock
   done
 }
 
-same_pane() { # pane terminal [kind]
+same_pane() { # pane terminal [kind] [agy_session]
   local reply
   reply=$(h pane get "$1" 2>/dev/null) || return 1
-  jq -e --arg t "$2" --arg k "${3:-}" '.result.pane.terminal_id == $t and ($k == "" or .result.pane.agent == $k)' >/dev/null 2>&1 <<<"$reply"
+  jq -e --arg t "$2" --arg k "${3:-}" --arg s "${4:-}" \
+    '.result.pane.terminal_id == $t and ($k == "" or $k == "agy" or .result.pane.agent == $k)
+     and ($s == "" or .result.pane.agent_session == null
+       or (.result.pane.agent_session.agent == "agy" and .result.pane.agent_session.value == $s))' \
+    >/dev/null 2>&1 <<<"$reply"
 }
 # The process carries this member's marker as a whole environment entry.
 marked() { grep -zqxF "HERDR_TEAM_MEMBER=$2" "/proc/$1/environ" 2>/dev/null; }
@@ -304,9 +308,10 @@ stop_member() { # ctl
   return "$rc"
 }
 teardown() { # state file, member: stop it, close its pane, remove its dirs and record
-  local f=$1 m=$2 pane terminal ctl work gen pid start i
+  local f=$1 m=$2 pane terminal agy_session ctl work gen pid start i
   pane=$(mget "$f" "$m" pane)
   terminal=$(mget "$f" "$m" terminal)
+  agy_session=$(mget "$f" "$m" agy_session)
   ctl=$(mget "$f" "$m" ctl)
   work=$(mget "$f" "$m" work)
   lock
@@ -315,10 +320,10 @@ teardown() { # state file, member: stop it, close its pane, remove its dirs and 
   if [[ -d $ctl ]]; then : >"$ctl/stop"; fi
   if ! stop_member "$ctl"; then
     echo "herdr-team: scope $(<"$ctl/scope") did not stop" >&2
-    if [[ -n $pane ]] && same_pane "$pane" "$terminal"; then h pane close "$pane" >/dev/null 2>&1 || :; fi
+    if [[ -n $pane ]] && same_pane "$pane" "$terminal" '' "$agy_session"; then h pane close "$pane" >/dev/null 2>&1 || :; fi
     return 1
   fi
-  if [[ -n $pane ]] && same_pane "$pane" "$terminal"; then h pane close "$pane" >/dev/null 2>&1 || :; fi
+  if [[ -n $pane ]] && same_pane "$pane" "$terminal" '' "$agy_session"; then h pane close "$pane" >/dev/null 2>&1 || :; fi
   # the launcher writes its last records after the member ends; let it finish before removing ctl
   pid=$(mget "$f" "$m" pid)
   start=$(mget "$f" "$m" start)
@@ -338,7 +343,7 @@ teardown() { # state file, member: stop it, close its pane, remove its dirs and 
 }
 
 up() {
-  local branch kind wrapper notify common trust lead lead_start max created reply attempt i matched mpid mstart now first rec firstpane gd root
+  local branch kind wrapper notify common trust lead lead_start max created reply attempt i matched mpid mstart now first rec firstpane gd root agy_session screen ready_attempts
   task=${1:-}
   role=${2:-}
   shift 2 || usage
@@ -424,11 +429,11 @@ up() {
         -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE codex --dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt -c "$notify" -c "$trust")
       ;;
     implement) argv=(agent-env codex-implement -c "$notify" -c "$trust") ;;
-    agy-implement) argv=(agent-env agy-implement) ;;
+    agy-implement) argv=(agent-env agy-implement --acp --turns "$work/turns") ;;
   esac
   rec=$(jq -n --arg role "$role" --arg kind "$kind" --arg step "$step" \
     --arg work "$work" --arg ctl "$ctl" --argjson since "$now" --arg containment "$containment" --arg scope "$scope" \
-    '{role: $role, kind: $kind, pane: "", terminal: "", pid: null, start: null, step: $step, fingerprint: null,
+    '{role: $role, kind: $kind, pane: "", terminal: "", agy_session: null, pid: null, start: null, step: $step, fingerprint: null,
       head: null, pending: null, last: null, next: 1, work: $work, ctl: $ctl, since: $since, containment: $containment}
       + (if $scope == "" then {} else {scope: $scope} end)')
   if [[ -f $f ]]; then
@@ -543,16 +548,33 @@ LAUNCH
   update "$f" '.members[$m] |= (.pid = $pid | .start = $start)' --arg m "$role" --argjson pid "$mpid" --arg start "$mstart"
   unlock
   matched=
-  for ((i = 0; i < 60; i++)); do
+  ready_attempts=60
+  [[ $kind != agy ]] || ready_attempts=180
+  for ((i = 0; i < ready_attempts; i++)); do
     if same_pane "$pane" "$terminal" "$kind"; then
-      matched=1
-      break
+      if [[ $kind != agy ]]; then
+        matched=1
+        break
+      fi
+      screen=$(h pane read "$pane" --source visible 2>/dev/null) || screen=''
+      if [[ $screen =~ agy[[:space:]]session[[:space:]]([^[:space:]]+) ]]; then
+        agy_session=${BASH_REMATCH[1]}
+        matched=1
+        break
+      fi
     fi
     [[ ! -f $ctl/exit ]] || fail "launcher exited $(<"$ctl/exit"): $(tr '\n' ' ' <"$ctl/status")"
     sleep_for 1
   done
   [[ -n $matched ]] || fail "herdr did not report $kind in the pane"
-  h agent rename "$pane" "$task-$role" >/dev/null 2>&1 || fail 'agent rename failed'
+  if [[ $kind == agy ]]; then
+    lock
+    update "$f" '.members[$m].agy_session = $s' --arg m "$role" --arg s "$agy_session"
+    unlock
+    h pane rename "$pane" "$task-$role" >/dev/null 2>&1 || fail 'pane rename failed'
+  else
+    h agent rename "$pane" "$task-$role" >/dev/null 2>&1 || fail 'agent rename failed'
+  fi
   reply=$(fingerprint)
   lock
   update "$f" '.members[$m] |= (.fingerprint = $fp | .head = $head)' --arg m "$role" \
@@ -583,7 +605,7 @@ reminder() { # state file: the protocol every request file ends with
 }
 
 ask() {
-  local resume='' timeout=900 pane terminal pid start kind ctl work root gd gen pointer deadline screen s
+  local resume='' timeout=900 pane terminal agy_session pid start kind ctl work root gd gen pointer deadline screen s
   local t json line baseline pbase count outcome='' reply done_dir pargs=() re k inp
   task=${1:-}
   member=${2:-}
@@ -614,6 +636,7 @@ ask() {
   [[ -n $resume || -f $prompt ]] || refuse 'prompt file not found'
   pane=$(mget "$f" "$member" pane)
   terminal=$(mget "$f" "$member" terminal)
+  agy_session=$(mget "$f" "$member" agy_session)
   pid=$(mget "$f" "$member" pid)
   start=$(mget "$f" "$member" start)
   kind=$(mget "$f" "$member" kind)
@@ -637,7 +660,7 @@ ask() {
     code=$(<"$ctl/exit")
     outcome=agent_gone
     if [[ $code == 2 ]]; then outcome=refused; fi
-  elif ! alive "$pid" "$start" || ! same_pane "$pane" "$terminal" "$kind"; then
+  elif ! alive "$pid" "$start" || ! same_pane "$pane" "$terminal" "$kind" "$agy_session"; then
     outcome=agent_gone
   else
     rev_send=$(fingerprint)
@@ -657,7 +680,11 @@ ask() {
       cat -- "$prompt"
       reminder "$f" "$member"
     } >"$work/req/$n.md.tmp" && mv "$work/req/$n.md.tmp" "$work/req/$n.md" \
-      && h agent prompt "$pane" "$pointer" >/dev/null 2>&1; }; then
+      && { if [[ $kind == agy ]]; then
+        h pane send-text "$pane" "$pointer" >/dev/null 2>&1 && h pane send-keys "$pane" enter >/dev/null 2>&1
+      else
+        h agent prompt "$pane" "$pointer" >/dev/null 2>&1
+      fi; }; }; then
       outcome=send_failed
     fi
   fi
@@ -954,7 +981,7 @@ down() {
 }
 
 finish() {
-  local role=${2:-} pane terminal kind pid start ctl root gd head fp last pre_last code='' i exited='' reason='' head_moved=false changed failed=()
+  local role=${2:-} pane terminal kind agy_session pid start ctl root gd head fp last pre_last code='' i exited='' reason='' head_moved=false changed failed=()
   local cmd='' verifying=false retries=1 vt=900 out='' req='' tail_file='' verify_exit='' attempts=0 dirtied=false failures_json ssf
   local fp_impl fp_pre fp_post='' fp_cur branch res outcome retry_outcome='' retry_ok=false unsafe=false
   local -a failures=() bytes=()
@@ -1012,6 +1039,7 @@ finish() {
   pane=$(mget "$f" "$role" pane)
   terminal=$(mget "$f" "$role" terminal)
   kind=$(mget "$f" "$role" kind)
+  agy_session=$(mget "$f" "$role" agy_session)
   pid=$(mget "$f" "$role" pid)
   start=$(mget "$f" "$role" start)
   ctl=$(mget "$f" "$role" ctl)
@@ -1073,11 +1101,17 @@ finish() {
   fi
   last=$(jq -r --arg m "$role" '.members[$m].last.outcome // ""' "$f")
   # A graceful quit only: one ctrl+c, a second if the agent is still there after 3 s.
-  if alive "$pid" "$start" && same_pane "$pane" "$terminal" "$kind"; then
-    h agent send-keys "$pane" ctrl+c >/dev/null 2>&1 || :
+  if alive "$pid" "$start" && same_pane "$pane" "$terminal" "$kind" "$agy_session"; then
+    if [[ $kind == agy ]]; then
+      h pane send-keys "$pane" ctrl+c >/dev/null 2>&1 || :
+    else h agent send-keys "$pane" ctrl+c >/dev/null 2>&1 || :; fi
     for ((i = 0; i < 30; i++)); do
       [[ -f $ctl/exit || -f $ctl/gone ]] && break
-      if ((i == 6)); then h agent send-keys "$pane" ctrl+c >/dev/null 2>&1 || :; fi
+      if ((i == 6)); then
+        if [[ $kind == agy ]]; then
+          h pane send-keys "$pane" ctrl+c >/dev/null 2>&1 || :
+        else h agent send-keys "$pane" ctrl+c >/dev/null 2>&1 || :; fi
+      fi
       sleep_for 0.5
     done
     # the member is gone; the launcher writes exit once its scope has stopped (up to stop_secs)
