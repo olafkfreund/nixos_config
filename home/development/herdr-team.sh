@@ -3,7 +3,8 @@
 # Usage: herdr-team up <task> review|implement|agy-implement [--step k]
 #        herdr-team ask <task> <member> <prompt-file> [--resume n] [--timeout s]
 #        herdr-team converse <task> <member> <prompt-file> [--max-hops N] [--deadline s]
-#        herdr-team status <task> | down <task> [member] [--force] | finish <task> implement|agy-implement
+#        herdr-team status <task> | down <task> [member] [--force]
+#        herdr-team finish <task> implement|agy-implement [--verify CMD] [--retries N] [--verify-timeout S]
 # HERDR_TEAM_TIME_SCALE, HERDR_TEAM_LEAD_PID, HERDR_TEAM_WORK_ROOT (default /tmp) and the lead-pid subcommand are for the self-test.
 # A member is named after its role, so a task has at most one of each.
 usage() {
@@ -535,6 +536,8 @@ ask() {
   [[ -f $f ]] || refuse 'no such task'
   jq -e --arg m "$member" '.members | has($m)' "$f" >/dev/null || refuse 'no such member'
   if conv_held "$f"; then refuse 'a conversation is running on this task' busy_conversation; fi
+  if reserved "$f" && ! jq -e --argjson pid "$$" --arg start "$(stat_field $$ 20)" \
+    '.reservation.pid == $pid and .reservation.start == $start' "$f" >/dev/null; then refuse 'a finish is running on this task' busy; fi
   [[ -n $resume || -f $prompt ]] || refuse 'prompt file not found'
   pane=$(mget "$f" "$member" pane)
   terminal=$(mget "$f" "$member" terminal)
@@ -569,6 +572,8 @@ ask() {
     baseline=$(grep -cF "$marker" <<<"$screen" || :)
     pbase=$(perr_count "$screen")
     lock
+    if reserved "$f" && ! jq -e --argjson pid "$$" --arg start "$(stat_field $$ 20)" \
+      '.reservation.pid == $pid and .reservation.start == $start' "$f" >/dev/null; then refuse 'a finish is running on this task' busy; fi
     if jq -e --arg m "$member" '.members[$m].pending != null' "$f" >/dev/null; then refuse "a request is pending; use --resume" busy; fi
     n=$(jq -r --arg m "$member" '.members[$m].next' "$f")
     pointer="Request $gen-$n: read $work/req/$n.md and answer it in your reply."
@@ -740,6 +745,7 @@ converse() {
   [[ -f $file ]] || refuse 'prompt file not found'
   lock
   if conv_held "$f"; then refuse 'a conversation is already running on this task' busy_conversation; fi
+  if reserved "$f"; then refuse 'a finish is running on this task' busy; fi
   update "$f" '.conversation = {pid: $pid, start: $s}' --argjson pid $$ --arg s "$(stat_field $$ 20)"
   unlock
   trap conv_clear EXIT
@@ -856,6 +862,7 @@ down() {
     return
   fi
   if ((! force)) && conv_held "$f"; then refuse 'a conversation is running on this task; use --force' busy_conversation; fi
+  if ((! force)) && reserved "$f"; then refuse 'a finish is running on this task; use --force' busy; fi
   if [[ -n $member ]]; then
     jq -e --arg m "$member" '.members | has($m)' "$f" >/dev/null || refuse 'no such member'
     names=("$member")
@@ -867,8 +874,33 @@ down() {
 }
 
 finish() {
-  local role=${2:-} pane terminal kind pid start ctl root gd head fp last code='' i exited='' reason='' head_moved=false changed
+  local role=${2:-} pane terminal kind pid start ctl root gd head fp last pre_last code='' i exited='' reason='' head_moved=false changed
+  local cmd='' verifying=false retries=1 vt=900 out='' req='' tail_file='' verify_exit='' attempts=0 dirtied=false failures_json
+  local fp_impl fp_pre fp_post='' branch res outcome retry_outcome='' retry_ok=false unsafe=false
+  local -a failures=() bytes=()
   task=${1:-}
+  shift 2 || usage
+  while (($#)); do
+    case $1 in
+      --verify)
+        (($# >= 2)) || usage
+        verifying=true
+        cmd=$2
+        shift 2
+        ;;
+      --retries)
+        [[ ${2:-} =~ ^[0-3]$ ]] || usage
+        retries=$2
+        shift 2
+        ;;
+      --verify-timeout)
+        [[ ${2:-} =~ ^[1-9][0-9]*$ ]] || usage
+        vt=$2
+        shift 2
+        ;;
+      *) usage ;;
+    esac
+  done
   task_ok "$task"
   f=$(sf "$task")
   case $role in implement | agy-implement) ;; *) usage ;; esac
@@ -884,12 +916,18 @@ finish() {
   unlock
   # shellcheck disable=SC2329 # EXIT trap
   release() {
+    [[ -z $out ]] || rm -f -- "$out"
+    [[ -z $req ]] || rm -f -- "$req"
+    [[ -z $tail_file ]] || rm -f -- "$tail_file" "$tail_file.tmp"
     lock
     update "$f" '.reservation = null' || :
     drop_if_empty "$f"
     unlock
   }
   trap release EXIT
+  trap 'exit 130' INT
+  trap 'exit 143' TERM
+  trap 'exit 129' HUP
   pane=$(mget "$f" "$role" pane)
   terminal=$(mget "$f" "$role" terminal)
   kind=$(mget "$f" "$role" kind)
@@ -898,6 +936,52 @@ finish() {
   ctl=$(mget "$f" "$role" ctl)
   head=$(mget "$f" "$role" head)
   fp=$(mget "$f" "$role" fingerprint)
+  pre_last=$(jq -r --arg m "$role" '.members[$m].last.outcome // ""' "$f")
+  fp_impl=$(fingerprint)
+  if [[ $verifying == true ]]; then
+    out=$(mktemp "$rt/verify-out.XXXXXX")
+    req=$(mktemp "$rt/verify-req.XXXXXX")
+    tail_file=$(mktemp "$rt/verify-tail.XXXXXX")
+    for ((i = 1; i <= retries + 1; i++)); do
+      branch=$(lg branch --show-current)
+      if [[ $(realpath "$root") == "$(realpath -m "$HOME/.config/nixos")" || $branch == main ]] \
+        || [[ -z $branch && -n $(lg rev-parse -q --verify origin/main 2>/dev/null) &&
+        $(lg rev-parse HEAD) == "$(lg rev-parse origin/main)" ]]; then
+        unsafe=true
+        break
+      fi
+      fp_pre=$(fingerprint)
+      if ((i > 1)) && [[ $fp_pre != "$fp_post" ]]; then fp_impl=$fp_pre; fi
+      attempts=$((attempts + 1))
+      verify_exit=0
+      (cd "$root" && timeout "$vt" env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY \
+        -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE \
+        bash -c "$cmd") >"$out" 2>&1 || verify_exit=$?
+      fp_post=$(fingerprint)
+      if [[ $fp_post != "$fp_pre" ]]; then dirtied=true; fi
+      tr -d '\000' <"$out" | tail -c 4096 >"$tail_file"
+      read -ra bytes < <(head -c 4 "$tail_file" | od -An -tu1 -v) || :
+      local drop=0 byte
+      for byte in "${bytes[@]}"; do
+        if ((byte < 128 || byte > 191)); then break; fi
+        drop=$((drop + 1))
+      done
+      tail -c +"$((drop + 1))" "$tail_file" >"$tail_file.tmp"
+      mv -- "$tail_file.tmp" "$tail_file"
+      if ((verify_exit == 0 || i > retries)); then break; fi
+      {
+        printf 'Verification failed. Fix the implementation, then answer this request.\nCommand: %s\nExit code: %s\nLast output (up to 4 KB):\n' "$cmd" "$verify_exit"
+        cat -- "$tail_file"
+      } >"$req"
+      res=$(ask "$task" "$role" "$req" --timeout "${HERDR_TEAM_RETRY_TIMEOUT:-1800}") || :
+      outcome=$(jq -r '.outcome // "failed"' <<<"$res" 2>/dev/null) || outcome=failed
+      if [[ $outcome != ok ]]; then
+        retry_outcome=$outcome
+        break
+      fi
+      retry_ok=true
+    done
+  fi
   last=$(jq -r --arg m "$role" '.members[$m].last.outcome // ""' "$f")
   # A graceful quit only: one ctrl+c, a second if the agent is still there after 3 s.
   if alive "$pid" "$start" && same_pane "$pane" "$terminal" "$kind"; then
@@ -915,22 +999,41 @@ finish() {
   teardown "$f" "$role"
   [[ $(lg rev-parse HEAD) == "$head" ]] || head_moved=true
   changed=$(lg status --porcelain -uall | jq -Rsc 'split("\n") | map(select(length > 0) | .[3:])')
-  if [[ -z $exited ]]; then
-    reason=not_exited
-  elif [[ $code != 0 ]]; then
-    reason="tool exited $code"
-  elif [[ $last != ok ]]; then
-    reason="last outcome is ${last:-none}"
-  elif [[ $head_moved == true ]]; then
-    reason='HEAD moved'
-  elif ! lg diff --cached --quiet; then
-    reason='changes are staged'
-  elif [[ $(fingerprint) == "$fp" ]]; then
-    reason='empty diff'
+  [[ -n $exited ]] || failures+=(not_exited)
+  [[ -z $code || $code == 0 ]] || failures+=("tool exited $code")
+  [[ $unsafe != true ]] || failures+=(verify_unsafe)
+  if [[ -n $retry_outcome ]]; then
+    failures+=("verify_retry_$retry_outcome")
+  elif [[ $pre_last != ok && $retry_ok != true ]]; then
+    failures+=("last outcome is ${last:-none}")
   fi
-  jq -cn --arg reason "$reason" --argjson changed "$changed" --argjson head_moved "$head_moved" --arg code "$code" \
-    '{ok: ($reason == ""), reason: $reason, changed: $changed, head_moved: $head_moved,
-      exit: (if $code == "" then null else ($code | tonumber) end)}'
+  [[ $head_moved != true ]] || failures+=('HEAD moved')
+  if ! lg diff --cached --quiet; then failures+=('changes are staged'); fi
+  if [[ $verifying == true ]]; then
+    [[ $fp_impl != "$fp" ]] || failures+=('empty diff')
+  elif [[ $(fingerprint) == "$fp" ]]; then
+    failures+=('empty diff')
+  fi
+  if ((attempts > 0)) && [[ $verify_exit != 0 ]]; then failures+=(verify_failed); fi
+  reason=${failures[0]:-}
+  failures_json=$(printf '%s\n' "${failures[@]}" | jq -Rsc 'split("\n") | map(select(length > 0))')
+  if [[ $verifying == true ]]; then
+    jq -cn --arg reason "$reason" --argjson failures "$failures_json" \
+      --argjson changed "$changed" --argjson head_moved "$head_moved" --arg code "$code" \
+      --arg cmd "$cmd" --arg vexit "$verify_exit" --argjson attempts "$attempts" --argjson dirtied "$dirtied" \
+      --arg retry "$retry_outcome" --rawfile tail "$tail_file" \
+      '{ok: ($reason == ""), reason: $reason, failures: $failures, changed: $changed, head_moved: $head_moved,
+        exit: (if $code == "" then null else ($code | tonumber) end),
+        verify: {cmd: $cmd, ok: ($vexit == "0"), exit: (if $vexit == "" then null else ($vexit | tonumber) end),
+          attempts: $attempts, dirtied: $dirtied, retry_outcome: (if $retry == "" then null else $retry end), tail: $tail}}'
+  else
+    jq -cn --arg reason "$reason" --argjson failures "$failures_json" \
+      --argjson changed "$changed" --argjson head_moved "$head_moved" --arg code "$code" \
+      '{ok: ($reason == ""), reason: $reason, failures: $failures, changed: $changed, head_moved: $head_moved,
+        exit: (if $code == "" then null else ($code | tonumber) end), verify: null}'
+  fi
+  release
+  trap - EXIT
   [[ -z $reason ]]
 }
 
