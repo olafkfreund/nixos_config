@@ -24,20 +24,29 @@ child in its cgroup, and stopping the scope ended it.
 
 ## Proposed outcome
 
-- Every herdr-team member, Codex now and agy after #2828, runs inside its own transient systemd user scope named
-  after the task, generation and member.
-- `finish`, `down` and `sweep` end every process of a member that is still running, whatever its session,
-  process group or environment, and never a process outside that member's scope.
-- A crashed or force-stopped member leaves nothing behind.
-- If user systemd is unavailable (no user manager, no session bus), herdr-team falls back to today's
-  marker-and-group stop and says so in its output, instead of failing.
+- **With user systemd** (p620 and razer): every herdr-team member, Codex now and agy after #2828, runs inside its
+  own transient user scope, named after the task, generation and member and recorded in the state file.
+  - Every process the member started is ended, whatever its session, process group or environment, and never
+    a process outside that scope. That happens at each of these points:
+    - when the member's main process exits, including a crash, at the launcher's exit;
+    - when the watchdog fires;
+    - on `finish`, `down` and `sweep`.
+  - A launcher that is itself killed outright is caught by the next `sweep`, which every `up` runs.
+  - The stop keeps today's bound: TERM, then KILL after about 5 s, scaled by `HERDR_TEAM_TIME_SCALE`. Never
+    systemd's default 90 s.
+- **Without user systemd** (no user manager or session bus), herdr-team keeps #2818's group-and-marker stop. That
+  mode is weaker: commands that leave the group or drop the marker can survive. So `up` reports
+  `containment: "group"` instead of `"scope"`, and the docs say what that mode misses.
 
 ## Affected users and systems
 
-- `home/development/herdr-team.sh`: the launcher, `stop_member`, `sweep`, `teardown` and the watchdog.
+- `home/development/herdr-team.sh`: the launcher, `stop_member`, `sweep`, `teardown` and the watchdog;
+  `home/development/agent-run.nix`, which may need `systemd` on the script's runtime path.
 - `home/development/herdr-team-test.sh`, which today runs without user systemd; the Nix build sandbox has none.
 - `docs/applications/herdr.md`.
-- p620 and razer, both running a user systemd manager. p510 is not touched.
+- p620 and razer, both running a user systemd manager.
+- p510 imports the same Home Manager config, so it gets the change at its next deploy, which needs the owner's
+  OK. It is not built or deployed here.
 
 ## Constraints
 
@@ -47,18 +56,26 @@ child in its cgroup, and stopping the scope ended it.
   lists stay as they are.
 - **Visibility.** The member still runs in its visible herdr pane, with the same terminal and the same
   `ctrl+c`-based graceful quit.
-- **Bus announcements.** Stopping a member's own scope is part of herdr-team's normal teardown, not a host
-  disruption. The `systemctl --user stop` it issues must not need a bus announcement each time. Today the
-  guard blocks that command.
+- **Bus announcements.** The bus guard inspects only the command text of Claude's own Bash tool calls, so it
+  never sees the scope stop that herdr-team runs internally. Stopping a member's own scope is normal teardown, not
+  a host disruption.
+  - The guard is not changed.
+  - No exemption is added: an exemption by unit-name pattern would let any agent stop matching scopes without
+    the bus.
+  - A direct `systemctl` call by an agent still needs the announcement.
+- **The launcher records exit first.** The scope must not end the launcher before it writes `$ctl/status` and
+  `$ctl/exit`. Stopping the scope must not flood `$ctl/stderr`.
 - **Only the member's scope.** herdr-team never stops a scope it did not create: scope names are unique and
   recorded in the state file.
 - **Ordering.** It lands after #2829 and before #2828, which then reuses it for agy.
 
 ## Open questions
 
-- **The bus guard.** Should it exempt `systemctl --user stop herdr-team-*.scope` by pattern, or should
-  herdr-team stop its scopes through a path the guard does not match (for example the D-Bus `StopUnit` call)?
-  Default: a narrow guard exemption for exactly that unit-name pattern.
-- **The fallback** without user systemd: keep #2818's marker path, or refuse to start a member? Default: keep the
-  marker path and report `containment: "group"` in `up`'s output, so the test suite and hosts without a user
-  manager still work.
+- **Terminal and job control inside a scope.** The launcher relies on `set -m` to give the member the pane's
+  foreground process group. That is what makes `ctrl+c` in the pane, and `finish`'s graceful quit, reach the
+  member. Does starting the member inside a scope keep that?
+  - The `setsid` probe on p620 proved containment only, not terminal behaviour.
+  - Default: the spec must keep the member in the pane's terminal session. The outcome is met only after a live
+    pane check on p620, where `ctrl+c` and `finish` behave as today.
+- **What the scope wraps:** the whole launcher, or only the member command? Default: only the member command,
+  so the launcher stays outside, records the exit, and stops the scope.
