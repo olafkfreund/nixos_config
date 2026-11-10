@@ -19,12 +19,132 @@ let
   enabled = mcpCfg.enable or false;
   obsidianEnabled = mcpCfg.obsidian.enable or false;
   linkedinEnabled = mcpCfg.linkedin.enable or false;
-  atlassianEnabled = mcpCfg.atlassian.enable or false;
   whatsappEnabled = mcpCfg.whatsapp.enable or false;
   notebooklmEnabled = mcpCfg.notebooklm.enable or false;
+  retiredMcpServers = [ "atlassian" ];
+
+  reconcileJq = ''
+    .mcpServers as $m
+    | if $mode == "retired" then
+        ([ $retired[] as $key | select($m | has($key)) ] | length == 0)
+      elif $mode == "matches" then
+        ($d[0].mcpServers | to_entries | all(.value == $m[.key]))
+        and ([ $retired[] as $key | select($m | has($key)) ] | length == 0)
+      elif $mode == "shared" then
+        .mcpServers = ((.mcpServers // {}) + $d[0].mcpServers | del(.[$retired[]]))
+      else
+        .mcpServers |= del(.[$retired[]])
+      end
+  '';
+  reconcileJqFile = pkgs.writeText "claude-mcp-reconcile.jq" reconcileJq;
+  sharedMcpDesired =
+    pkgs.writeText "claude-shared-mcp.json" (builtins.toJSON {
+      mcpServers = {
+        # stdio rather than a shared SSE daemon, and that is the whole
+        # point: Claude Code spawns one of these per session, so the
+        # process inherits CLAUDE_CODE_SESSION_ID and can derive an
+        # identity of its own. A network daemon serves every session
+        # through one connection and cannot tell them apart.
+        #
+        # A wrapper rather than an `env` block, matching the github entry:
+        # the wrapper inherits whatever environment Claude Code hands it,
+        # so the session id survives regardless of how `env` is merged.
+        agent-bus = {
+          type = "stdio";
+          command = "${mkWrapper "agent-bus-mcp-wrapper" ''
+            export MATRIX_HOMESERVER=https://matrix.freundcloud.org.uk
+            export MATRIX_SERVER_NAME=freundcloud.org.uk
+            export MATRIX_REGISTRATION_TOKEN_FILE=${osConfig.age.secrets."matrix-registration-token".path}
+            # Room administration. `#agents` is invite-only, so a session
+            # registered a moment ago has to invite itself before it can
+            # join; this is the credential that permits that, and the one
+            # an outside agent is never given (#1687).
+            export MATRIX_ADMIN_TOKEN_FILE=${osConfig.age.secrets."agent-bus-matrix-token".path}
+            exec ${pkgs.customPkgs.agent-bus-mcp}/bin/agent-bus-mcp "$@"
+          ''}";
+          args = [ ];
+        };
+
+        # Declared here as well as in the seed template, because the seed
+        # is never re-read. This is the copy that keeps the registration
+        # pointing at the current build after a package change (#1933).
+        ollama-code = {
+          type = "stdio";
+          command = "${pkgs.customPkgs.ollama-mcp}/bin/ollama-mcp";
+          args = [ ];
+          env = {
+            OLLAMA_HOST =
+              if osConfig.networking.hostName == "p620"
+              then "http://localhost:11434"
+              else "http://p620:11434";
+          };
+        };
+      }
+      # The Craft servers are reconciled here so their store paths follow
+      # each rebuild, like the two above (#1933). The jq merge only adds
+      # and replaces: an app dropped later needs `claude mcp remove <app>`.
+      // lib.mapAttrs (_: s: s // { type = "stdio"; })
+        (osConfig.programs.craftapps.mcp.servers or { });
+    });
 
   # Helper function to create shell script wrappers
   mkWrapper = name: script: pkgs.writeShellScript name script;
+
+  sharedMcpActivation = ''
+    target="$HOME/.claude.json"
+    desired=${sharedMcpDesired}
+    retired='${builtins.toJSON retiredMcpServers}'
+    program=${reconcileJqFile}
+
+    if [ ! -e "$target" ]; then
+      $DRY_RUN_CMD install -m 0600 "$desired" "$target"
+    else
+      # `+` on .mcpServers replaces each declared server wholesale, rather
+      # than `*` which recurses into it. That matters when a server changes
+      # transport: deep-merging {type:"sse",url} with {type:"stdio",command}
+      # leaves the dead `url` behind. Undeclared servers are untouched.
+      if ! ${pkgs.jq}/bin/jq -e --slurpfile d "$desired" --argjson retired "$retired" \
+           --arg mode matches -f "$program" \
+           "$target" >/dev/null 2>&1; then
+        # Same dir as the target and 0600 from the start: the copy holds the target's credentials.
+        tmp=$(mktemp "$HOME/.claude.json.XXXXXX")
+        if ${pkgs.jq}/bin/jq --slurpfile d "$desired" --argjson retired "$retired" \
+             --arg mode shared -f "$program" "$target" > "$tmp" 2>/dev/null \
+           && [ -s "$tmp" ]; then
+          $DRY_RUN_CMD cp --preserve=mode "$target" "$target.bak"
+          $DRY_RUN_CMD mv "$tmp" "$target"
+          if [ -n "$DRY_RUN_CMD" ]; then rm -f "$tmp"; fi
+          $DRY_RUN_CMD echo "Reconciled shared MCP servers into $target"
+        else
+          rm -f "$tmp"
+          $DRY_RUN_CMD echo "WARNING: could not merge MCP servers into $target; left unchanged"
+        fi
+      fi
+    fi
+
+    local_settings="$HOME/.claude/settings.local.json"
+    if [ -f "$local_settings" ] &&
+       ! ${pkgs.jq}/bin/jq -e --slurpfile d "$desired" --argjson retired "$retired" \
+         --arg mode retired -f "$program" "$local_settings" >/dev/null 2>&1; then
+      tmp=$(mktemp "$HOME/.claude/.settings.local.json.XXXXXX")
+      if ${pkgs.jq}/bin/jq --slurpfile d "$desired" --argjson retired "$retired" \
+           --arg mode local -f "$program" "$local_settings" > "$tmp" 2>/dev/null \
+         && [ -s "$tmp" ]; then
+        $DRY_RUN_CMD chmod --reference="$local_settings" "$tmp"
+        $DRY_RUN_CMD mv "$tmp" "$local_settings"
+        if [ -n "$DRY_RUN_CMD" ]; then rm -f "$tmp"; fi
+        $DRY_RUN_CMD echo "Removed retired MCP servers from $local_settings"
+      else
+        rm -f "$tmp"
+        $DRY_RUN_CMD echo "WARNING: could not remove retired MCP servers from $local_settings; left unchanged"
+      fi
+    fi
+  '';
+
+  mcpRetireTest = pkgs.runCommand "claude-mcp-retire-test" { nativeBuildInputs = [ pkgs.jq ]; } ''
+    ${pkgs.bash}/bin/bash ${./claude-code-mcp-retire-test.sh} ${sharedMcpDesired} ${pkgs.writeShellScript "claude-shared-mcp-activation" sharedMcpActivation}
+    touch "$out"
+  '';
 
   mcpSettingsTemplate = pkgs.writeText "claude-mcp-settings.local.json"
     (builtins.toJSON {
@@ -207,47 +327,6 @@ let
             description = "WhatsApp messaging integration - AI-assisted WhatsApp send/receive, message history queries (requires bridge service + QR auth)";
           };
         })
-        # Atlassian MCP server (Jira and Confluence)
-        // (lib.optionalAttrs atlassianEnabled (
-          let
-            mode = mcpCfg.atlassian.mode or "cloud";
-            jiraEnabled = mcpCfg.atlassian.jira.enable or false;
-            confluenceEnabled = mcpCfg.atlassian.confluence.enable or false;
-          in
-          {
-            atlassian = {
-              command = "${mkWrapper "atlassian-mcp-wrapper" (
-                if mode == "cloud" then ''
-                  ${lib.optionalString jiraEnabled ''
-                    export JIRA_URL="${mcpCfg.atlassian.jira.url}"
-                    export JIRA_USERNAME="${mcpCfg.atlassian.jira.username}"
-                    export JIRA_TOKEN_FILE="${mcpCfg.atlassian.jira.tokenFile}"
-                  ''}
-                  ${lib.optionalString confluenceEnabled ''
-                    export CONFLUENCE_URL="${mcpCfg.atlassian.confluence.url}"
-                    export CONFLUENCE_USERNAME="${mcpCfg.atlassian.confluence.username}"
-                    export CONFLUENCE_TOKEN_FILE="${mcpCfg.atlassian.confluence.tokenFile}"
-                  ''}
-                  export ATLASSIAN_MODE="cloud"
-                  exec ${pkgs.customPkgs.atlassian-mcp}/bin/atlassian-mcp "$@"
-                '' else ''
-                  ${lib.optionalString jiraEnabled ''
-                    export JIRA_URL="${mcpCfg.atlassian.jira.url}"
-                    export JIRA_PAT_FILE="${mcpCfg.atlassian.jira.patFile}"
-                  ''}
-                  ${lib.optionalString confluenceEnabled ''
-                    export CONFLUENCE_URL="${mcpCfg.atlassian.confluence.url}"
-                    export CONFLUENCE_PAT_FILE="${mcpCfg.atlassian.confluence.patFile}"
-                  ''}
-                  export ATLASSIAN_MODE="self-hosted"
-                  exec ${pkgs.customPkgs.atlassian-mcp}/bin/atlassian-mcp "$@"
-                ''
-              )}";
-              args = [ ];
-              description = "Atlassian Jira and Confluence integration - issue tracking, project management, and documentation (${mode} mode)";
-            };
-          }
-        ))
         # Grafana MCP server (if enabled in servers configuration)
         // (lib.optionalAttrs (mcpCfg.servers.grafana or false) {
           grafana = {
@@ -314,83 +393,8 @@ in
     # life of the session, so a running session keeps the old binary and the
     # old descriptions. Rebuild, then restart the session, THEN check. Judging
     # this from a still-running session is how it gets mistaken for inert.
-    home.activation.claudeSharedMcpServers = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      target="$HOME/.claude.json"
-      desired=${
-        pkgs.writeText "claude-shared-mcp.json" (builtins.toJSON {
-          mcpServers = {
-            # stdio rather than a shared SSE daemon, and that is the whole
-            # point: Claude Code spawns one of these per session, so the
-            # process inherits CLAUDE_CODE_SESSION_ID and can derive an
-            # identity of its own. A network daemon serves every session
-            # through one connection and cannot tell them apart.
-            #
-            # A wrapper rather than an `env` block, matching the github entry:
-            # the wrapper inherits whatever environment Claude Code hands it,
-            # so the session id survives regardless of how `env` is merged.
-            agent-bus = {
-              type = "stdio";
-              command = "${mkWrapper "agent-bus-mcp-wrapper" ''
-                export MATRIX_HOMESERVER=https://matrix.freundcloud.org.uk
-                export MATRIX_SERVER_NAME=freundcloud.org.uk
-                export MATRIX_REGISTRATION_TOKEN_FILE=${osConfig.age.secrets."matrix-registration-token".path}
-                # Room administration. `#agents` is invite-only, so a session
-                # registered a moment ago has to invite itself before it can
-                # join; this is the credential that permits that, and the one
-                # an outside agent is never given (#1687).
-                export MATRIX_ADMIN_TOKEN_FILE=${osConfig.age.secrets."agent-bus-matrix-token".path}
-                exec ${pkgs.customPkgs.agent-bus-mcp}/bin/agent-bus-mcp "$@"
-              ''}";
-              args = [ ];
-            };
-
-            # Declared here as well as in the seed template, because the seed
-            # is never re-read. This is the copy that keeps the registration
-            # pointing at the current build after a package change (#1933).
-            ollama-code = {
-              type = "stdio";
-              command = "${pkgs.customPkgs.ollama-mcp}/bin/ollama-mcp";
-              args = [ ];
-              env = {
-                OLLAMA_HOST =
-                  if osConfig.networking.hostName == "p620"
-                  then "http://localhost:11434"
-                  else "http://p620:11434";
-              };
-            };
-          }
-          # The Craft servers are reconciled here so their store paths follow
-          # each rebuild, like the two above (#1933). The jq merge only adds
-          # and replaces: an app dropped later needs `claude mcp remove <app>`.
-          // lib.mapAttrs (_: s: s // { type = "stdio"; })
-            (osConfig.programs.craftapps.mcp.servers or { });
-        })
-      }
-
-      if [ ! -e "$target" ]; then
-        $DRY_RUN_CMD install -m 0600 "$desired" "$target"
-      else
-        # `+` on .mcpServers replaces each declared server wholesale, rather
-        # than `*` which recurses into it. That matters when a server changes
-        # transport: deep-merging {type:"sse",url} with {type:"stdio",command}
-        # leaves the dead `url` behind. Undeclared servers are untouched.
-        if ! ${pkgs.jq}/bin/jq -e --slurpfile d "$desired" \
-             '.mcpServers as $m | ($d[0].mcpServers | to_entries | all(.value == $m[.key]))' \
-             "$target" >/dev/null 2>&1; then
-          tmp=$(mktemp)
-          if ${pkgs.jq}/bin/jq -s '.[0] | .mcpServers = ((.mcpServers // {}) + $d[0].mcpServers)' \
-               --slurpfile d "$desired" "$target" > "$tmp" 2>/dev/null \
-             && [ -s "$tmp" ]; then
-            $DRY_RUN_CMD cp --preserve=mode "$target" "$target.bak"
-            $DRY_RUN_CMD mv "$tmp" "$target"
-            $DRY_RUN_CMD echo "Reconciled shared MCP servers into $target"
-          else
-            rm -f "$tmp"
-            $DRY_RUN_CMD echo "WARNING: could not merge MCP servers into $target; left unchanged"
-          fi
-        fi
-      fi
-    '';
+    home.activation.claudeSharedMcpServers = lib.hm.dag.entryAfter [ "writeBoundary" "claudeMcpSettingsInit" ]
+      (sharedMcpActivation + "\n: ${mcpRetireTest}\n");
 
     # Documentation file: Claude Code never reads it, never writes it,
     # so a nix-store symlink is fine.
@@ -477,18 +481,6 @@ in
       - Requires: whatsapp-bridge service running
       - Authentication: QR code scan (expires ~20 days)
       - View QR: journalctl -u whatsapp-bridge -f
-      ''}
-
-      ${lib.optionalString atlassianEnabled ''
-      #### Atlassian (${mcpCfg.atlassian.mode or "cloud"} mode)
-      ${lib.optionalString (mcpCfg.atlassian.jira.enable or false) ''
-      - **Jira Integration**:
-        - URL: ${mcpCfg.atlassian.jira.url or "Not configured"}
-      ''}
-      ${lib.optionalString (mcpCfg.atlassian.confluence.enable or false) ''
-      - **Confluence Integration**:
-        - URL: ${mcpCfg.atlassian.confluence.url or "Not configured"}
-      ''}
       ''}
 
       ${lib.optionalString (mcpCfg.servers.grafana or false) ''

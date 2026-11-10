@@ -1,6 +1,7 @@
 ---
 name: obsidian
-description: Read, write, search and reorganise notes in the local Obsidian vaults. Use for anything touching ~/Documents/R3_vault, ~/Documents/Synechron or ~/Documents/My_Obsidian_Vault/Privat — finding notes, adding or editing content, renaming/moving notes without breaking links, and daily notes. Triggers on "my notes", "my vault", "Obsidian", "write this up in my notes", or a request to look something up in personal documentation.
+description: >-
+  Read, write, search and reorganise notes in the local Obsidian vaults (R3_vault, Synechron, My_Obsidian_Vault/Privat): find, edit, rename or move notes without breaking links, daily notes. Triggers: "my notes", "my vault", "Obsidian".
 ---
 
 # Obsidian vaults

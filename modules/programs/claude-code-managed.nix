@@ -7,9 +7,10 @@
 # Use this for settings the user must not be able to disable from the CLI
 # (PARR hooks, baseline permissions, apiKeyHelper). User-scope preferences
 # like statusLine and enabledPlugins should NOT live here — see the init-
-# template pattern in home/development/claude-code-lsp.nix instead. The one
-# exception is an organization mod, which only counts as one when managed
-# enabledPlugins names it (modules/programs/claude-code-mods.nix, #2218).
+# template pattern in home/development/claude-code-lsp.nix instead. Two
+# exceptions: an organization mod, which only counts as one when managed
+# enabledPlugins names it (modules/programs/claude-code-mods.nix, #2218), and
+# a plugin declared *off*, which a synced user-scope true cannot undo (#2831).
 #
 # Reference: https://code.claude.com/docs/en/settings.md
 # Tracked in issue #398.
@@ -194,9 +195,76 @@ let
   # in favour of customPkgs.antigravity-cli. The skill can only ever exit 1,
   # and the sanctioned Google route is the second-opinion skill via agy.
   # Keyed on the bare name, which also covers the `<dir>:name` listing.
-  baselineSkillOverrides = {
-    ask-gemini = "off";
-  };
+  #
+  # name-only: still invocable with `/`, only the name reaches the prompt.
+  # off (#2831): each duplicates something that stays. gemini-review runs bare
+  # `agy` with no --dangerously-skip-permissions, so it returns an empty
+  # review; second-opinion replaces it.
+  baselineSkillOverrides =
+    {
+      ask-gemini = "off";
+      gemini-review = "off";
+      code-reviewer = "off"; # the code-reviewer agent and /code-review
+      security-audit = "off"; # /security-review and security-patrol
+      nixos-expert = "off"; # the nixos skill
+      system-doctor = "off"; # the nixos-doctor skill
+      devops-architect = "name-only"; # only partly covered by deployment-coordinator and cloud-architect
+    }
+    // lib.genAttrs [
+      # repo .claude/commands
+      "check-nixos-issues"
+      "check-updates"
+      "nix-check-tasks"
+      "nix-clean"
+      "nix-deploy"
+      "nix-fix"
+      "nix-help"
+      "nix-info"
+      "nix-manix-search"
+      "nix-module"
+      "nix-network"
+      "nix-new-task"
+      "nix-optimize"
+      "nix-precommit"
+      "nix-review"
+      "nix-secrets"
+      "nix-security"
+      "nix-test"
+      "nix-validate"
+      "nix-workflow-bugfix"
+      "nix-workflow-feature"
+      "nix-workflow-security"
+      "parr"
+      "update-antigravity"
+      "update-claude-code"
+      "update-codex"
+      "update-warp"
+      "update-waveterm"
+      # user ~/.claude/commands
+      "agent-team"
+      "analyze-product"
+      "blog"
+      "create-spec"
+      "crew"
+      "demo"
+      "dns"
+      "execute-tasks"
+      "plan-product"
+      "team"
+    ]
+      (_: "name-only");
+
+  # Plugins held off on every host (#2831). Managed scope beats a user-scope
+  # true that Syncthing or /plugin brings back.
+  disabledPlugins = lib.genAttrs [
+    "frontend-design@claude-plugins-official"
+    "taste-skill@taste-skill"
+    "ui-ux-pro-max@ui-ux-pro-max-skill"
+    "impeccable@impeccable"
+    "jobs-to-be-done@pm-skills"
+    "daily.dev@daily.dev"
+  ]
+    (_: false);
 
   # Baseline auto-approved commands — read-only / build / test / format only.
   # Enforced from managed scope so safe repo operations never prompt. Anything
@@ -718,12 +786,15 @@ let
   mergedSettings =
     (cfg.settings // {
       # Opus 5+ delegates readily; cap it (#2062). Ponytail's coding rules at
-      # ultra on every host; PARR's reporting rule still owns output (#2062).
+      # lite on every host (/ponytail ultra per session); PARR's reporting rule
+      # still owns output (#2062, #2831).
       env = {
         CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS = "4";
         CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH = "1";
-        PONYTAIL_DEFAULT_MODE = "ultra";
+        PONYTAIL_DEFAULT_MODE = "lite";
+        CLAUDE_CODE_SUBAGENT_MODEL = "sonnet"; # subagents with no model: (#2831)
       } // (cfg.settings.env or { });
+      enabledPlugins = (cfg.settings.enabledPlugins or { }) // disabledPlugins;
       # Per-event list concatenation (NOT shallow //) so hook sets that share
       # an event — e.g. tmux-ccm + parr on UserPromptSubmit, tmux-ccm + notify
       # on Stop/Notification — all survive instead of clobbering each other.

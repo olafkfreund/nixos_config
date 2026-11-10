@@ -87,14 +87,6 @@ in
   # Read with: age -d -i ~/.ssh/id_ed25519 secrets/servicenow-calitti-env.age
   "secrets/servicenow-calitti-env.age".publicKeys = allUsers ++ workstations;
 
-  # Atlassian MCP secrets (cloud mode - API tokens)
-  "secrets/api-jira-token.age".publicKeys = allUsers ++ workstations;
-  "secrets/api-confluence-token.age".publicKeys = allUsers ++ workstations;
-
-  # Atlassian MCP secrets (self-hosted mode - Personal Access Tokens)
-  "secrets/api-jira-pat.age".publicKeys = allUsers ++ workstations;
-  "secrets/api-confluence-pat.age".publicKeys = allUsers ++ workstations;
-
   # System secrets
   "secrets/wifi-password.age".publicKeys = allUsers ++ workstations;
   "secrets/tailscale-auth-key.age".publicKeys = allUsers ++ allHosts;

@@ -1,12 +1,7 @@
 ---
 name: dns
 description: >-
-  Manage DNS records for the user's GoDaddy-registered domains. Add/upsert,
-  delete, list, look up specific records, verify a stored record matches
-  an expected value, and check public DNS resolution via dig. Triggers on
-  `/dns`, requests to add/change/check A, AAAA, CNAME, MX, TXT, NS, SRV
-  records on the user's domains, debugging DNS propagation, or auditing
-  what's set at GoDaddy vs what's resolving in the wild.
+  Manage DNS records for the user's GoDaddy domains: upsert, delete, list, look up, verify a stored record, and check public resolution with dig. Triggers: `/dns`, requests to add, change or check A, AAAA, CNAME, MX, TXT, NS or SRV records, DNS propagation, auditing GoDaddy against what resolves.
 version: 0.1.0
 category: infrastructure
 tags: [dns, godaddy, domains, cli]

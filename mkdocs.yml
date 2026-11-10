@@ -155,6 +155,8 @@ nav:
       - Hardware Profiles: architecture/hardware-profiles.md
       - Overlays: architecture/overlays.md
       - "Desktop (Nixarchy)": architecture/desktop.md
+      - Agent Delegation: architecture/agent-delegation.md
+      - Infrastructure Notes: architecture/infrastructure-notes.md
       - Theming (Stylix): architecture/theming.md
       - Secrets (agenix): architecture/secrets.md
       - Home Manager: architecture/home-manager.md
