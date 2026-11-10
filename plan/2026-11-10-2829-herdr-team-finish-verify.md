@@ -178,3 +178,11 @@ partial rollback is not needed.
   - `verify_failed` is appended only when a check ran and its last exit was non-zero.
 - **The 4 KB tail:** drop NULs first, then the UTF-8 continuation bytes (`0x80`–`0xBF`) at the front of the
   slice. This is the mirror of `cut_msg`, which trims the end.
+
+## Deviations
+
+- Step 3 (coder):
+  - The `verify-*` cases add a bare `origin` remote to the shared test repo, so the `verify_unsafe` case for "detached
+    at `origin/main`" can run, and remove it at the end of the block.
+  - The temporary tool the suite runs drops the `#!` line of the packaged script; the cases call it through `bash`.
+  - 20 runs in a row passed, each with the ten `verify-*` cases.
