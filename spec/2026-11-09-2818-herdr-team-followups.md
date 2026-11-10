@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2818
 intent: intent/2026-11-09-2818-herdr-team-followups.md
 ---
