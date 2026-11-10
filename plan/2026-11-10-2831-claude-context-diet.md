@@ -210,3 +210,65 @@ Every Nix change lands in modules that both p620 and razer import:
 
 Revert the merge commit and deploy both hosts. Atlassian's `.age` files stay in git history. Plugins come back
 when the managed `false` entries are gone. The `MEMORY.md` archive can be moved back by hand.
+
+## Amendments (2026-11-10, from Codex's plan review; no decision changed)
+
+- **Step 1, plugins:** `fleet-guard` comes in through `cfg.settings.enabledPlugins` (claude-code-mods.nix:38–43).
+  Merge as `enabledPlugins = (cfg.settings.enabledPlugins or { }) // { <the six> = false; }`, so the declared
+  `false` values win and `fleet-guard = true` survives.
+  - Verify by reading the rendered file:
+
+    ```bash
+    nix eval --raw .#nixosConfigurations.<host>.config.environment.etc."claude-code/managed-settings.json".source
+    ```
+
+    Then `jq` the path, which must show the six `false` and `fleet-guard` `true`, for p620 and razer. `.text`
+    is not set; `.source` is.
+- **Step 1, skill overrides:** the exact entries.
+
+  **`name-only`:** `check-nixos-issues`, `check-updates`, `nix-check-tasks`, `nix-clean`, `nix-deploy`,
+  `nix-fix`, `nix-help`, `nix-info`, `nix-manix-search`, `nix-module`, `nix-network`, `nix-new-task`,
+  `nix-optimize`, `nix-precommit`, `nix-review`, `nix-secrets`, `nix-security`, `nix-test`, `nix-validate`,
+  `nix-workflow-bugfix`, `nix-workflow-feature`, `nix-workflow-security`, `parr`, `update-antigravity`,
+  `update-claude-code`, `update-codex`, `update-warp`, `update-waveterm`, `agent-team`, `analyze-product`,
+  `blog`, `create-spec`, `crew`, `demo`, `dns`, `execute-tasks`, `plan-product`, `team`.
+
+  **`off`:**
+
+  | Name | Duplicate it is checked against |
+  | ---- | ------------------------------- |
+  | `gemini-review` | `second-opinion` |
+  | `code-reviewer` | the `code-reviewer` agent and `/code-review` |
+  | `security-audit` | `/security-review` and `security-patrol` |
+  | `nixos-expert` | the `nixos` skill |
+  | `system-doctor` | `nixos-doctor` |
+  | `devops-architect` | `deployment-coordinator` and `cloud-architect` |
+
+  Before setting an entry `off`, compare the two descriptions. If the duplicate does not cover the entry's
+  purpose, make the entry `name-only` instead, and note it in the PR.
+- **Step 2, the true ranges:**
+  - `mcp-servers.nix`: the option tree runs :99–201, and the secrets :335–362.
+  - The documentation blocks in `claude-code-mcp.nix` (:482–492) and `claude-desktop/mcp-config.nix` (:244–265)
+    are also removed.
+  - The final `grep` is the completeness check.
+- **Step 3, Claude Desktop:** its config is a Home Manager `xdg.configFile` with `force = true`
+  (mcp-config.nix:17). Step 2's removal of the declaration is what removes Atlassian there; step 3 never `jq`s
+  that store-backed file. The retired-key delete applies only to `~/.claude.json` and
+  `~/.claude/settings.local.json`.
+- **Step 3, the test:** `home/development/claude-code-mcp-retire-test.sh` builds a fixture `~/.claude.json` in a
+  temp `HOME`.
+  - Every declared server already matches, and `atlassian` is the only difference, plus one unrelated
+    undeclared server.
+  - It extracts the reconcile `jq` program as a shared Nix string, used by the activation and the test.
+  - It asserts that `atlassian` is gone and that the unrelated server and all declared servers are unchanged.
+  - It covers `settings.local.json` the same way.
+  - The test runs as a `pkgs.runCommand` check, referenced from the module, so `just test-host` runs it.
+- **Step 4, Explore:**
+  - `$DRY_RUN_CMD install …`;
+  - `entryAfter [ "writeBoundary" "claudeAgentCuration" ]`;
+  - `Explore` is never in `disabledAgents`.
+- **Step 5:** the old-to-new checklist for `AGENTS.md` is written by the coder, reviewed by the lead, and then
+  copied into this plan, in the same commit as the `AGENTS.md` change. Every #2812 rule, every
+  `codex-implement`/`agy-implement` limit and every non-negotiable is marked KEEP, with its new line number.
+- **Step 6:** the `second-opinion` agy flag was already applied during implementation, which is what Codex saw.
+  The step is complete when the diff shows it on both agy commands.
