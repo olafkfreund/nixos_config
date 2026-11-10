@@ -161,12 +161,15 @@ drop_if_empty() {
   fi
 }
 # The launcher writes status/exit (and the watchdog stop) just after the member's group exits, so retry briefly.
-rm_retry() {
-  for _ in 1 2 3 4 5 6 7 8 9 10; do
+rm_retry() { # a late writer (the launcher's last records) can refill the dir; real seconds, not scaled
+  for _ in {1..30}; do
     rm -rf -- "$1" 2>/dev/null && return 0
-    sleep_for 0.2
+    sleep 0.1
   done
-  rm -rf -- "$1"
+  rm -rf -- "$1" || {
+    echo "herdr-team: left in $1: $(find "$1" -mindepth 1 -printf '%P ' 2>/dev/null)" >&2
+    return 1
+  }
 }
 rm_dirs() { # ctl work: only paths this tool makes
   case $2 in "$wroot"/herdr-team.*) rm_retry "$2" ;; esac

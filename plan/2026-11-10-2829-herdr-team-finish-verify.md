@@ -195,3 +195,6 @@ partial rollback is not needed.
   background child holding stdout blocked `finish`. The check now writes straight to its file; `timeout` leads its
   own process group, which is killed after the run, and the output is capped to 64 KB afterwards. New case
   `verify-background-child`.
+- Build flake (also on main since #2835): the sandbox suite failed with `rm: … Directory not empty` when a late
+  write refilled a member's `ctl` during teardown. `rm_retry` waited a scaled 0.1 s in all at the test time scale;
+  it now retries for up to 3 real seconds and, if the directory still will not go, names what was left.
