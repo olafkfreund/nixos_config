@@ -23,7 +23,8 @@ Self-contained: implementing this needs only this file and the code.
    finish <task> implement|agy-implement [--verify CMD] [--retries N] [--verify-timeout S]
    ```
 
-   `--retries` defaults to 1 and allows 0–3; `--verify-timeout` defaults to 900. Without `--verify`, behaviour is
+   `--retries` defaults to 1 and allows 0–3. `--verify-timeout` defaults to 900 and must be a positive integer;
+   anything else is a usage error. Without `--verify`, behaviour is
    today's, plus `failures` and `verify: null` in the JSON.
 2. `finish` gets the INT, TERM and HUP traps (`exit 130`, `143`, `129`). `release` removes the temp files.
 3. **The guard, before every attempt.** Refuse with `verify_unsafe` if any of these is true:
@@ -48,7 +49,11 @@ Self-contained: implementing this needs only this file and the code.
      UTF-8-safe like `cut_msg` with NULs dropped;
    - sent with `res=$(ask "$task" "$role" "$req" --timeout "${HERDR_TEAM_RETRY_TIMEOUT:-1800}")`;
    - if the outcome is not `ok`, set `retry_outcome` and stop the loop.
-7. **`last`** is read after the loop and before the graceful quit and teardown.
+7. **`last`.**
+   - Before the loop, `pre_last` is the member's `.last.outcome`.
+   - After the loop, and before the graceful quit and teardown, `last` is read again.
+   - The `last outcome is …` failure applies only when `pre_last` was not `ok` and no retry answered `ok`.
+   - When a retry failed, `verify_retry_<o>` reports it instead.
 8. **`failures`** collects every failure, in this order:
    1. `not_exited`;
    2. `tool exited N`;
@@ -61,9 +66,12 @@ Self-contained: implementing this needs only this file and the code.
    9. `verify_failed`.
 
    `reason` is `failures[0]`, or `""`.
-9. **Concurrency.** While the task's reservation is held, `ask`, `converse` and `down` (without `--force`)
-   refuse with `busy`. `finish`'s own retry `ask` is exempt because it runs as the reservation holder (`$$`
-   matches the reservation pid).
+9. **Concurrency.**
+   - While the task's reservation is held, `ask`, `converse` and `down` (without `--force`) refuse with `busy`.
+   - `finish`'s own retry `ask` is exempt only when the reservation's recorded pid **and** start time equal `$$`
+     and `stat_field $$ 20`. In a `$( )` subshell, `$$` is still the reserving shell's pid.
+   - The check runs under the state lock, at the point where `ask` sets `pending`. That closes the race with
+     another caller that starts a `finish` in between.
 10. **Output.**
 
     ```json
@@ -87,9 +95,9 @@ Self-contained: implementing this needs only this file and the code.
      (`if alive "$pid" "$start" && same_pane …`).
    - **The failure chain** replaces today's `if … elif …` block with appends to a `failures` array.
    - **Reservation checks:**
-     - add `reserved "$f"` refusals near the existing `conv_held` refusals in `ask`, `converse` and `down`;
-     - in `ask`, skip the check when the reservation pid is `$$` or its parent. `finish` calls `ask` in a
-       command substitution, a subshell of the same script, where `$$` stays the parent's pid.
+     - add `reserved "$f"` refusals near the existing `conv_held` refusals in `converse` and `down`;
+     - in `ask`, add the refusal inside the existing `lock … update … pending` block (decision 9), with the
+       exact pid and start exemption.
    - Verify:
      - `shellcheck --exclude=SC2016 home/development/herdr-team.sh`;
      - the existing suite through the temp-tool recipe passes:
@@ -115,7 +123,8 @@ Self-contained: implementing this needs only this file and the code.
    - all failures shown;
    - the guards: `main` gives `verify_unsafe`, a detached `HEAD` at `origin/main` gives `verify_unsafe`, a
      feature branch at `origin/main`'s commit passes, and `--retries 5` is a usage error;
-   - concurrency: `ask` during `finish --verify` gets `busy`;
+   - concurrency: an external `ask` during `finish --verify` gets `busy`, while `finish`'s own retry `ask`
+     proceeds;
    - unchanged: no `--verify`.
 
    For the `origin/main` cases, add a bare repo as `origin` in a local copy of the test repo.
@@ -126,8 +135,9 @@ Self-contained: implementing this needs only this file and the code.
 4. **`docs/applications/herdr.md` and the skills:**
    - **Docs:** under the `finish` bullet, describe `--verify`, `--retries` and `--verify-timeout`, the `verify`
      and `failures` fields, and the `busy` refusals during a finish.
-   - **Skills:** in the `handoff` and `team` skill sources (find them with
-     `grep -rl "herdr-team finish" home/ modules/`), say to pass the plan step's check as `--verify`.
+   - **Skills:** in the `handoff` skill (`home/development/claude-code-skills/handoff/SKILL.md`) and the `/team`
+     command (the `teamCommand` text in `home/development/claude-code-commands/default.nix`, installed at :128),
+     say to pass the plan step's check as `--verify`.
    - Verify: `npx --no markdownlint-cli2` on the changed Markdown.
    - Traps: markdownlint lints whole files.
 5. **Lead: build, review, ship.**
