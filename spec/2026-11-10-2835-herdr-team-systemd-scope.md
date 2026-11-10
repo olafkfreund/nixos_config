@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2835
 intent: intent/2026-11-10-2835-herdr-team-systemd-scope.md
 ---
