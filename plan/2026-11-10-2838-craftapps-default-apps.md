@@ -163,3 +163,8 @@ PdfCraft. The other types go back to eog, Evince and the MIME cache.
 - Step 1 (coder): `system.checks` is a list, so the verify line builds the one check by filtering it by name
   (`craftapps-mime-check`) instead of `nix build …config.system.checks`. Checked: 77 Craft defaults, matching the
   77 types in decision 2.
+- Step 3 (Claude): p510 has no `application/pdf` default at all, on `main` and on this branch alike (6 defaults
+  in both), so the expectation "prints Evince" was wrong; the check that matters, p510 unchanged, holds. The
+  disabled-owner eval needs `lib.mkForce false`, because p620 sets `features.craftapps.apps.vectorcraft = true`
+  explicitly; with that it prints `{"forced":null,"removed":["ai.storyteller.figcraft.desktop"]}`. Both guards
+  failed as intended on a temporary edit, which was reverted.
