@@ -23,8 +23,13 @@ Branch `fix/2835-herdr-team-systemd-scope`, worktree `~/.config/nixos-2835`. Lan
 2. Mode is chosen once at `up`: `containment=scope` when `timeout 3 systemctl --user show-environment` succeeds
    (run outside the lock), else `group`. `HERDR_TEAM_NO_SCOPE=1` forces `group` (self-test only). The member record
    gains `containment` and, in scope mode, `scope`; `up`'s JSON reply gains `containment`.
-3. The launch line in scope mode is
-   `systemd-run --user --scope --quiet --collect --expand-environment=no --unit="$scope" -p TimeoutStopSec="$stop_secs" -- bash -c '…' "$ctl" "${argv[@]}"`.
+3. The launch line in scope mode is:
+
+   ```bash
+   systemd-run --user --scope --quiet --collect --expand-environment=no --unit="$scope" \
+     -p TimeoutStopSec="$stop_secs" -- bash -c '…' "$ctl" "${argv[@]}"
+   ```
+
    `--expand-environment=no` is mandatory: systemd 262 otherwise turns `$$` into `$`. systemd-run execs in place, so
    PID, process group, session and terminal are unchanged (probed on p620), and the recorded `pgid` stays right.
 4. `stop_secs` = `5 × HERDR_TEAM_TIME_SCALE`, rounded up, at least 1.
@@ -46,7 +51,10 @@ Branch `fix/2835-herdr-team-systemd-scope`, worktree `~/.config/nixos-2835`. Lan
 8. `sweep` also walks live tasks: for each member whose launcher is dead and that has a `scope`, it calls
    `stop_scope`, leaving the record.
 9. If `stop_scope` fails in `teardown`, the record (marked `cancelled`) and `$ctl` are kept, it prints
-   `herdr-team: scope <unit> did not stop`, closes the pane and returns nonzero. The next `sweep` retries.
+   `herdr-team: scope <unit> did not stop`, closes the pane and returns nonzero. The next `sweep` retries. The
+   same holds in `sweep`'s stale-task path: a member whose `stop_member` fails keeps its record and `$ctl`, and the
+   state file stays. `down` and `finish` go on with the other members and their JSON reply, and add
+   `"scope_stop_failed": [<member>…]`; `down` then exits 1.
 10. No silent fallback: if `systemd-run` fails, the member never starts and `up` fails.
 11. `rt=${HERDR_TEAM_RUNTIME_DIR:-${XDG_RUNTIME_DIR:?XDG_RUNTIME_DIR is not set}/herdr-team}`, so the test can isolate
     its state and keep the real `XDG_RUNTIME_DIR` for `systemctl --user`.
@@ -62,12 +70,16 @@ Branch `fix/2835-herdr-team-systemd-scope`, worktree `~/.config/nixos-2835`. Lan
    - `up` (`:291`): before the `lock` near `:332`, set `containment` (decision 2). After `ctl=$rt/$gen/$role`
      (`:356`), set `scope`, write `$ctl/scope` in scope mode, and add `containment`/`scope` to `rec` (`:373`). Add
      `containment` to the final reply (`:489`).
-   - `stop_member` (`:229`): read `$1/scope` and call `stop_scope` first; return its status after the existing group
-     pass runs. Keep the group-and-marker pass unchanged.
+   - `stop_member` (`:229`): read `$1/scope` and call `stop_scope` first, keeping its status in `rc` (0 when there is
+     no `scope` file, as in group mode). The group-and-marker pass keeps its signalling exactly, but each of its
+     `return 0` (`:231`, `:232`, `:236`, `:242`, `:245`, `:263`) becomes `return "$rc"`, and it ends `return "$rc"`.
    - `teardown` (`:268`): decision 9. `stop_member` failing must not abort under `errexit`
      (`if ! stop_member …; then`).
-   - `sweep` (`:190`): decision 8, using `alive` on the recorded `pid`/`start`; skip members still starting up (no
-     `pid`).
+   - `down` (`:865`) and `finish` (`:915`): call `teardown` as `if ! teardown …; then failed+=("$m"); fi`, and report
+     them (decision 9).
+   - `sweep` (`:190`): the stale-task path follows decision 9 (`if ! stop_member "$ctl"; then` keep that member and
+     the file). Decision 8 for live tasks, using `alive` on the recorded `pid`/`start`; skip members still starting
+     up (no `pid`); call it as `stop_scope "$s" || :`.
    - `home/development/agent-run.nix:21`: add `systemd` to `runtimeInputs` (decision 12).
    → verify: `shellcheck --exclude=SC2016 home/development/herdr-team.sh`; the existing suite passes (command under
    Tests).
@@ -79,26 +91,35 @@ Branch `fix/2835-herdr-team-systemd-scope`, worktree `~/.config/nixos-2835`. Lan
    - Define `stop_scope` there (decision 5), a no-op when `containment` is `group`.
    - In scope mode, the member line at `:444` becomes the `systemd-run` line of decision 3, wrapping the existing
      `bash -c` unchanged. Group mode keeps today's line.
-   - After the member returns: `kill "$wd"`, write `status`, call `stop_scope "$scope" || :`, then write `exit`.
+   - After the member returns: `kill "$wd" 2>/dev/null`, write `status`, call `stop_scope "$scope" || :`, then
+     `trap - EXIT`, then write `exit`, so a normal exit stops the scope once.
    - `trap 'stop_scope "$scope" || :' EXIT` set before `set -m`; HUP, TERM and INT exit through it
      (`trap 'exit 129' HUP` etc.).
    - Watchdog (`:430-439`): `stop_scope "$scope" || :` before the existing `kill_group` sequence, which stays.
-   → verify: as step 1.
-   Traps: the heredoc is quoted (`<<'LAUNCH'`); variables come only from the `printf '%q'` header. The inner `bash -c`
-   string must not change, or the `pgid` record and marker break.
+   → verify: as step 1. Until step 3 the suite runs in group mode only (it sets its own `XDG_RUNTIME_DIR`), so steps
+   1–2 are proven in scope mode only at step 3.
+   Traps: the launch script is plain `bash` without `errexit`. The heredoc is quoted (`<<'LAUNCH'`); variables
+   come only from the `printf '%q'` header. The inner `bash -c` string must not change, or the `pgid` record and
+   marker break.
 
 3. **Tests** (`home/development/herdr-team-test.sh`).
-   - `:21-26`: export `HERDR_TEAM_RUNTIME_DIR="$tmp/runtime/herdr-team"` and set `rt` from it; keep the real
-     `XDG_RUNTIME_DIR` (the line-4 loop unsets `HERDR_*`, so set test vars after it).
+   - `:21-26`: drop `XDG_RUNTIME_DIR` from the `export` at `:21`, export
+     `HERDR_TEAM_RUNTIME_DIR="$tmp/runtime/herdr-team"`, set `rt` from it, and make `:22` create
+     `$HERDR_TEAM_RUNTIME_DIR` instead of `$XDG_RUNTIME_DIR` (unset in the Nix sandbox, `nounset` is on). The line-4
+     loop unsets `HERDR_*`, so set test vars after it.
+   - The #2818 orphan cases (`:953-989`, "stopping by marker") assert that `sleep 62.3` outlives the member, which
+     scope mode prevents: run their `up` calls with `HERDR_TEAM_NO_SCOPE=1`.
    - A second argument `group` exports `HERDR_TEAM_NO_SCOPE=1` for the whole run. Without it, the existing cases run
      in the host's mode.
-   - `cleanup`: stop every unit named in `$rt/*/*/scope` (only units this run made).
+   - One helper stops every unit named in `$rt/*/*/scope` (only units this run made); `cleanup` and `reset` (`:150`)
+     call it before they delete `$rt`. Both also `pkill -f 'sleep 64.7'`.
    - New cases, skipped (`ok skip …`) when `timeout 3 systemctl --user show-environment` fails or `group` was given:
      - fake member starts `setsid bash -c 'trap "" TERM; exec sleep 64.7' &` then exits 3: once `$ctl/exit`
        exists the sleep is gone, within `stop_secs + 2` s of the member's exit;
      - the same after the watchdog fires, after `down --force`, and after `finish`;
      - launcher killed with KILL while another member is live: the next `up` of a third member stops its scope;
-     - afterwards `systemctl --user is-active` reports the unit not active; the state file had
+     - afterwards `systemctl --user show -P LoadState <unit>` prints `not-found` (`--collect` unloaded it); the
+       state file had
        `containment: "scope"` and the `scope` name.
    - New: with `group`, `up` reports `containment: "group"`.
    → verify: the suite passes with and without `group`; 20 runs in a row without `group` on p620.
@@ -133,4 +154,5 @@ Live check on p620 after deploy, in a herdr team tab with a Codex member:
 ## Rollback
 
 Revert the merge commit and redeploy p620 and razer. No state migrates: the new record fields and `$ctl/scope` are
-ignored by the old script. A leftover unit ends when its last process does; the old script does not stop it.
+ignored by the old script, which does not stop a scope. Before the revert, with no team running, stop any leftover
+unit by hand (`systemctl --user list-units 'herdr-team-*'`), after the bus announcement.
