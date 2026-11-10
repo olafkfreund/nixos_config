@@ -37,15 +37,17 @@ The owner's decision (#2831) is every must-do item from the review except moving
 1. **Plugins:** frontend-design, taste-skill, ui-ux-pro-max, impeccable, jobs-to-be-done and daily.dev are off.
    `humanize`, `ponytail`, `prismantis` and `nix-lsp` stay on.
 2. **Skills:**
-   - The 32 `nix-*` commands, and skills that duplicate others, are shown by name only or hidden.
+   - The 32 `nix-*` commands, and skills that duplicate others, are shown by name only or hidden. The spec
+     names each one and its state.
    - Our own skills' descriptions are cut to about 250 characters.
    - Third-party skills stay as they are.
 3. **MCP:** the Atlassian MCP server is removed from p620 and razer. Microsoft 365 and Spotify are disconnected.
    The others stay.
 4. **`AGENTS.md`** is under 200 lines. History and infrastructure notes move to `docs/`, or to path-scoped
    `.claude/rules/`. No rule is lost, and every non-negotiable and every instruction-only rule (#2812) stays.
-5. **`MEMORY.md`** keeps only live entries, about 60 lines. Resolved and removed entries are archived, not
-   deleted.
+5. **`MEMORY.md`** keeps only live entries, about 60 lines. An entry is archived, not deleted, when it describes
+   something marked RESOLVED, FIXED or REMOVED, or a host or service that no longer exists. Archived files move
+   to `memory/archive/`.
 6. **Models:**
    - The built-in Explore subagent runs on Haiku.
    - Unnamed subagents default to Sonnet.
@@ -56,8 +58,16 @@ The owner's decision (#2831) is every must-do item from the review except moving
    - PARR moves from a per-turn hook into the managed `CLAUDE.md`, which is loaded once.
    - PARR's text for Codex and agy (`agent-rules.nix`) is unchanged.
 
-**Observable result:** a fresh session on p620 and on razer shows the same skill list, plugins, MCP servers and
-subagent models. Its fixed context (measured with `/context`) is at least 20k tokens smaller than today.
+**Observable result**, after a deploy to both hosts and after a Syncthing round trip:
+
+- A fresh session on p620 and on razer shows the same results for each of these:
+  - `enabledPlugins` (the six listed plugins are `false`);
+  - the skill list (`/skills` or the system prompt), with the hidden and name-only names listed in the spec;
+  - `claude mcp list`, with no `atlassian`;
+  - the subagent model each agent resolves to.
+- `/context` in a fresh session, on the same host, in the same repo, before and after, shows the fixed context
+  at least 20k tokens smaller. Both readings go in the PR. The 20k figure is a target from Fable's estimate,
+  not a measured fact.
 
 ## Affected users and systems
 
@@ -76,10 +86,19 @@ subagent models. Its fixed context (measured with `/context`) is at least 20k to
 
 ## Constraints
 
-- **Declared once, applied everywhere.** Every change goes through Nix or Home Manager modules that p620 and
-  razer both import, so both hosts converge on deploy. Nothing is a per-host hand edit.
-  - `~/.claude` is Syncthing-synced between hosts. Hand-edited state there must not fight the declared state.
-  - A plugin turned off must stay off after a deploy, a sync or a plugin update.
+- **Declared once, reconciled on every activation.** Every change is declared in Nix or Home Manager modules
+  that p620 and razer both import. Today that is not enough on its own:
+  - `~/.claude/settings.json` is seeded only when it is missing (claude-code-lsp.nix:135–161);
+  - the MCP reconciler adds and replaces entries but never removes one (claude-code-mcp.nix:370–393).
+
+  So this task needs reconciliation that runs on every activation. It sets the named plugins to `false` and
+  removes the `atlassian` entry from every place Claude Code reads it, without touching unrelated user
+  settings. Then a stale value brought back by Syncthing or a plugin update is corrected at the next
+  activation.
+- **The one exception: account-level connectors.** Microsoft 365 and Spotify are claude.ai connectors, not
+  host config, so Nix cannot converge them. The owner disconnects them at claude.ai. Checked by: their
+  `mcp__claude_ai_Microsoft_365__*` and `mcp__claude_ai_Spotify__*` tools are absent from a fresh session's tool
+  list.
 - **No safety rule is weakened:**
   - the artifact gates;
   - subscription-only login and no API keys (#1831);
@@ -88,7 +107,15 @@ subagent models. Its fixed context (measured with `/context`) is at least 20k to
   - #2812's unrestricted agents with instruction-only rules;
   - the branch and worktree rules.
 
-  These rules may move between files, for example from `AGENTS.md` to the managed `CLAUDE.md`, but not shrink.
+  These rules may move between files, but not shrink, and not lose reach:
+  - A rule that Codex, agy or another repo needs stays in a source that agent actually loads: `AGENTS.md`, the
+    managed `CLAUDE.md`, or `agent-rules.nix` for Codex and agy.
+  - Path-scoped `.claude/rules/` files get only Claude-only, path-specific notes (for example Hyprland), never
+    the #2812 instruction-only rules or the non-negotiables.
+  - The spec lists every `AGENTS.md` section and where it ends up.
+- **PARR moving out of the per-turn hook** must not remove any guard. The artifact gates are already in the
+  managed `CLAUDE.md`, and the bus, p510 and worktree guards are `PreToolUse` hooks, not PARR. The spec
+  confirms each one still fires after the change.
 - **Codex and agy keep their instructions:** `~/.codex/AGENTS.md` and agy's rules come from `agent-rules.nix`
   and are not cut here.
 - **Changes land between sessions.** Changing plugins or MCP servers rebuilds the prompt cache once.
