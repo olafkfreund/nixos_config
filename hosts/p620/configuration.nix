@@ -497,6 +497,14 @@ in
   # omarchy in the Omarchy one. p620 only for now — razer and p510 stay on
   # stylix until this has been lived in. See modules/desktop/theme-owner.nix.
   features.themeOwner.enable = true;
+  # PdfCraft opens and edits PDFs. mkForce: home/desktop/{evince,gnome} set
+  # Evince, and defaultApplications lists merge rather than replace.
+  home-manager.sharedModules = [
+    {
+      xdg.mimeApps.defaultApplications."application/pdf" = lib.mkForce [ "ai.storyteller.pdfcraft.desktop" ];
+    }
+  ];
+
   features.craftapps = {
     enable = true;
     apps = {
