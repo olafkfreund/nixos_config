@@ -161,3 +161,20 @@ Self-contained: implementing this needs only this file and the code.
 
 Revert the merge commit and deploy p620 and razer. Without `--verify`, nothing changes for callers, so a
 partial rollback is not needed.
+
+## Amendments (2026-11-10, from agy's plan review; no decision changed)
+
+- **The retry call** is `res=$(ask "$task" "$role" "$req" --timeout "${HERDR_TEAM_RETRY_TIMEOUT:-1800}") || :`.
+  `writeShellApplication` runs under `set -e`, and `converse` guards the same call at herdr-team.sh:686. The
+  temp-tool recipe also gets `set -euo pipefail` as its first header line, so local runs match the packaged
+  shell.
+- **The reservation check in `ask`** runs twice:
+  - next to the early `conv_held` refusal (:450), which also covers `--resume`;
+  - inside the `lock … pending` block (:485).
+
+  Both use the exact pid and start exemption.
+- **`verify_unsafe`** stops the loop before the command runs.
+  - `verify.attempts` counts the checks that actually ran, and `verify.exit` is `null` if none ran.
+  - `verify_failed` is appended only when a check ran and its last exit was non-zero.
+- **The 4 KB tail:** drop NULs first, then the UTF-8 continuation bytes (`0x80`–`0xBF`) at the front of the
+  slice. This is the mirror of `cut_msg`, which trims the end.
