@@ -92,7 +92,7 @@ FAKE
 cat >"$tmp/bin/codex" <<'FAKE'
 #!/usr/bin/env bash
 printf '%s %s\n' "$(basename "$0")" "$*" >> "$TEST_STATE/launched"
-env | grep -E '^(NIX_CONFIG|GITHUB_API_TOKEN|OPENAI_API_KEY|ANTHROPIC_API_KEY)=' >> "$TEST_STATE/env-dump" || :
+env | grep -E '^(NIX_CONFIG|GITHUB_API_TOKEN|OPENAI_API_KEY|ANTHROPIC_API_KEY|ANTHROPIC_API_KEY_FILE)=' >> "$TEST_STATE/env-dump" || :
 if [[ -e $TEST_STATE/refuse ]]; then echo 'agent: refused: test reason' >&2; exit 2; fi
 if [[ -e $TEST_STATE/refuse1 ]]; then echo 'codex-implement: guard not registered' >&2; exit 1; fi
 printenv HERDR_TEAM_MEMBER > "$TEST_STATE/marker" || :
@@ -291,7 +291,7 @@ ok flow
 # --- unrestricted launch: agent-env, no tokens, the guard preflight ---
 reset
 export DECOY_NIX='access-tokens = github.com=DECOY'
-NIX_CONFIG=$DECOY_NIX GITHUB_API_TOKEN=decoy OPENAI_API_KEY=decoy ANTHROPIC_API_KEY=decoy up t1 review
+NIX_CONFIG=$DECOY_NIX GITHUB_API_TOKEN=decoy OPENAI_API_KEY=decoy ANTHROPIC_API_KEY=decoy ANTHROPIC_API_KEY_FILE=decoy up t1 review
 [[ ! -s $TEST_STATE/env-dump ]] || die "a token reached the review agent: $(cat "$TEST_STATE/env-dump")"
 # the real codex-implement strips the API keys itself, so only agent-env's job is checked here
 NIX_CONFIG=$DECOY_NIX GITHUB_API_TOKEN=decoy up t1 implement --step 1
