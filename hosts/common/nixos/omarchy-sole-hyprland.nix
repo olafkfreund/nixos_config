@@ -42,7 +42,9 @@ in
       pkgs.xdg-desktop-portal-hyprland
       pkgs.xdg-desktop-portal-gtk
     ];
-    configPackages = lib.mkDefault [ pkgs.hyprland ];
+    # The session's Hyprland: portal.nix adds configPackages to systemPackages,
+    # so pkgs.hyprland here installed a second, shadowed compositor.
+    configPackages = lib.mkDefault [ hyprland ];
   };
 
   # From wayland-session.nix. All of these are mkDefault upstream and most are
