@@ -5,7 +5,8 @@ Status: Active
 
 ## Overview
 
-The infrastructure includes comprehensive MCP (Model Context Protocol) server support, enabling AI agents to interact with external tools and data sources through a standardized protocol.
+The infrastructure includes comprehensive MCP (Model Context Protocol) server support, enabling AI agents
+to interact with external tools and data sources through a standardized protocol.
 
 MCP is an open protocol released by Anthropic that standardizes how AI applications connect to external tools and data sources.
 
@@ -145,7 +146,6 @@ The infrastructure provides NixOS-compatible configurations for all MCP servers:
 Ask Claude naturally:
 
 - "Search for NixOS packages related to X"
-- "Create a Jira ticket for Y"
 - "Send a WhatsApp message to Z"
 - "Find Obsidian notes about A"
 - "Analyze LinkedIn profile for B"

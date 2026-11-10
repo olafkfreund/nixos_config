@@ -339,3 +339,18 @@ Two live rules sat at the end of a "Legacy, unused by default" bullet, and the s
 They are restored to `AGENTS.md`, next to the "untrusted advice" rule. The desktop rule's `paths:` glob
 `hosts/*/nixos/*hypr*` matched no files, so it is replaced by `hosts/*/nixos/nixarchy.nix` and
 `hosts/*/nixarchy/**`.
+
+## Deviations (step 8 review fixes)
+
+- **Explore gets `tools: Read, Grep, Glob`, without Bash.** With Bash, "read-only" rested only on the prompt
+  (Opus review).
+- **The `~/.claude.json` reconcile** writes its temp copy in the same directory and removes it on a dry run, so
+  no credential-bearing copy is left in `/tmp`. The fault existed before this task (Codex, Opus and agy). The
+  retire test gains a dry-run case.
+- **Non-negotiable 2 in `AGENTS.md`** names the Sunshine exception, so Codex and agy see it (Opus).
+- **p510's `parrProtocol.enable` is set to `false` in config only**, so the three hosts do not drift apart. p510
+  is not built or deployed without the owner's OK.
+- A leftover Jira example and a long line, both in `docs/MCP-GUIDE.md`, are fixed.
+- Two review claims did not hold up on testing:
+  - the null-`mcpServers` edge case cannot happen;
+  - no skill description is over 300 characters (checked with `yq`).

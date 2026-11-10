@@ -106,12 +106,14 @@ let
       if ! ${pkgs.jq}/bin/jq -e --slurpfile d "$desired" --argjson retired "$retired" \
            --arg mode matches -f "$program" \
            "$target" >/dev/null 2>&1; then
-        tmp=$(mktemp)
+        # Same dir as the target and 0600 from the start: the copy holds the target's credentials.
+        tmp=$(mktemp "$HOME/.claude.json.XXXXXX")
         if ${pkgs.jq}/bin/jq --slurpfile d "$desired" --argjson retired "$retired" \
              --arg mode shared -f "$program" "$target" > "$tmp" 2>/dev/null \
            && [ -s "$tmp" ]; then
           $DRY_RUN_CMD cp --preserve=mode "$target" "$target.bak"
           $DRY_RUN_CMD mv "$tmp" "$target"
+          if [ -n "$DRY_RUN_CMD" ]; then rm -f "$tmp"; fi
           $DRY_RUN_CMD echo "Reconciled shared MCP servers into $target"
         else
           rm -f "$tmp"

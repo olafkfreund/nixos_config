@@ -39,3 +39,15 @@ before=$(sha256sum "$HOME/.claude.json" "$HOME/.claude/settings.local.json")
 bash "$activation" >/dev/null
 after=$(sha256sum "$HOME/.claude.json" "$HOME/.claude/settings.local.json")
 test "$before" = "$after"
+
+# Dry run: nothing changes, and no temp copy (it holds credentials) is left behind.
+rm -f "$HOME"/.claude.json.* "$HOME"/.claude/settings.local.json.*
+jq '.mcpServers += {atlassian: {command: "retired"}}' "$HOME/.claude.json" >"$fixture/c" && mv "$fixture/c" "$HOME/.claude.json"
+jq '.mcpServers += {atlassian: {command: "retired"}}' "$HOME/.claude/settings.local.json" >"$fixture/s" \
+  && mv "$fixture/s" "$HOME/.claude/settings.local.json"
+before=$(sha256sum "$HOME/.claude.json" "$HOME/.claude/settings.local.json")
+DRY_RUN_CMD="echo" bash "$activation" >/dev/null
+after=$(sha256sum "$HOME/.claude.json" "$HOME/.claude/settings.local.json")
+test "$before" = "$after"
+leftover=$(find "$HOME" -maxdepth 2 \( -name '.claude.json.*' -o -name '.settings.local.json.*' \) -print -quit)
+test -z "$leftover"

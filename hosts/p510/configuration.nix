@@ -483,7 +483,7 @@ in
   # /etc/claude-code; user ~/.claude/settings.json remains writable.
   modules.programs.claude-code-managed = {
     enable = true;
-    parrProtocol.enable = true;
+    parrProtocol.enable = false; # PARR lives in the managed CLAUDE.md (#2831)
   };
 
   # Network-specific overrides that go beyond the network profile

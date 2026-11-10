@@ -30,7 +30,7 @@ Home Manager profiles live in `home/profiles/{developer,server-admin}`. Home Man
 1. **Services belong in `modules/`**, never inline in `hosts/*/configuration.nix`. Enable
    them through `features.<name>.enable` in the host.
 2. **Every service** gets `DynamicUser = true`, `ProtectSystem = "strict"`,
-   `NoNewPrivileges = true`, `ProtectHome = true`.
+   `NoNewPrivileges = true`, `ProtectHome = true` (one exception: Sunshine, see `docs/applications/sunshine.md`).
 3. **Secrets load at runtime only** — `passwordFile` / agenix paths. Never
    `builtins.readFile` a secret; that puts it in the Nix store.
 4. **No `mkIf cond true`** — assign the boolean directly.
