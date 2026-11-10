@@ -156,3 +156,11 @@ Live check on p620 after deploy, in a herdr team tab with a Codex member:
 Revert the merge commit and redeploy p620 and razer. No state migrates: the new record fields and `$ctl/scope` are
 ignored by the old script, which does not stop a scope. Before the revert, with no team running, stop any leftover
 unit by hand (`systemctl --user list-units 'herdr-team-*'`), after the bus announcement.
+
+## Deviations
+
+- Step 1 (coder; Codex's coder guard refused the scope-stop code, so the coder took it):
+  - `sweep`'s stale-task path deletes each member that stopped cleanly from the record at once, so only the members
+    whose scope did not stop remain in the kept state file.
+  - `finish` reports a failed stop in `scope_stop_failed` but keeps its exit status (its `ok` reflects the diff
+    checks); only `down` exits 1 on a failed stop.
