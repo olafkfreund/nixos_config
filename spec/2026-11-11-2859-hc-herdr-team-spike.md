@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2859
 intent: intent/2026-11-11-2859-hc-herdr-team-spike.md
 ---
