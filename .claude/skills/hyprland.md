@@ -11,7 +11,7 @@ A specialized skill for configuring and customizing Hyprland window manager in N
 - Setting up Hyprland window manager
 - Configuring Hyprland via Home Manager
 - Installing Hyprland plugins and extensions
-- Setting up Waybar, rofi-wayland, or other companions
+- Setting up Waybar or other companions
 - Troubleshooting Hyprland issues
 - Migrating from X11 window managers to Hyprland
 - Customizing Hyprland keybindings and behavior
@@ -321,7 +321,6 @@ wayland.windowManager.hyprland.settings = {
     "$mod, M, exit"
     "$mod, E, exec, thunar"
     "$mod, V, togglefloating"
-    "$mod, R, exec, rofi -show drun"
     "$mod, P, pseudo"  # dwindle
     "$mod, J, togglesplit"  # dwindle
 
@@ -448,9 +447,6 @@ wayland.windowManager.hyprland.settings = {
 
     # Status bar and panels
     waybar            # Status bar
-
-    # Application launcher
-    rofi-wayland      # App launcher
 
     # Notifications
     dunst             # Notification daemon
@@ -725,101 +721,7 @@ programs.waybar = {
 };
 ```
 
-### 6. Rofi Configuration
-
-**Rofi-Wayland Setup**:
-
-```nix
-programs.rofi = {
-  enable = true;
-  package = pkgs.rofi-wayland;
-
-  terminal = "${pkgs.alacritty}/bin/alacritty";
-
-  theme = "Arc-Dark";
-
-  extraConfig = {
-    modi = "drun,run,window";
-    show-icons = true;
-    icon-theme = "Papirus";
-    display-drun = " Apps";
-    display-run = " Run";
-    display-window = " Windows";
-    drun-display-format = "{name}";
-    window-format = "{w} · {c} · {t}";
-    font = "JetBrainsMono Nerd Font 10";
-  };
-};
-
-# Custom rofi theme
-xdg.configFile."rofi/themes/custom.rasi".text = ''
-  * {
-    bg: #1e1e2e;
-    bg-alt: #313244;
-    fg: #cdd6f4;
-    fg-alt: #6c7086;
-
-    background-color: @bg;
-    border: 0;
-    margin: 0;
-    padding: 0;
-    spacing: 0;
-  }
-
-  window {
-    width: 30%;
-    border: 2px;
-    border-color: #89b4fa;
-    border-radius: 10px;
-  }
-
-  element {
-    padding: 8 12;
-    text-color: @fg-alt;
-  }
-
-  element selected {
-    text-color: @fg;
-    background-color: @bg-alt;
-  }
-
-  element-text {
-    background-color: inherit;
-    text-color: inherit;
-  }
-
-  element-icon {
-    size: 1.2em;
-  }
-
-  entry {
-    padding: 12;
-    text-color: @fg;
-  }
-
-  inputbar {
-    children: [prompt, entry];
-    background-color: @bg-alt;
-  }
-
-  listview {
-    columns: 1;
-    lines: 8;
-  }
-
-  mainbox {
-    children: [inputbar, listview];
-  }
-
-  prompt {
-    enabled: true;
-    padding: 12 0 0 12;
-    text-color: @fg;
-  }
-'';
-```
-
-### 7. Additional Components
+### 6. Additional Components
 
 **Hyprpaper (Wallpaper)**:
 
@@ -970,7 +872,7 @@ services.dunst = {
 };
 ```
 
-### 8. Plugins (Hyprland-Plugins)
+### 7. Plugins (Hyprland-Plugins)
 
 **Plugin Installation (NixOS)**:
 
@@ -1019,7 +921,7 @@ wayland.windowManager.hyprland.settings = {
 };
 ```
 
-### 9. Per-Device Configuration
+### 8. Per-Device Configuration
 
 **Multi-Monitor Setup**:
 
@@ -1173,11 +1075,6 @@ systemd.user.services.cliphist = {
 
   Install.WantedBy = [ "hyprland-session.target" ];
 };
-
-# Rofi clipboard menu keybind
-wayland.windowManager.hyprland.settings.bind = [
-  "$mod, V, exec, cliphist list | rofi -dmenu | cliphist decode | wl-copy"
-];
 ```
 
 ## Troubleshooting Guide

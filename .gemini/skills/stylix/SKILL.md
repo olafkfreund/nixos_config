@@ -656,7 +656,6 @@ Disable individual targets while keeping others enabled:
     qutebrowser.enable = true;
 
     # Applications
-    rofi.enable = true;
     fzf.enable = true;
     bat.enable = true;
     btop.enable = true;
@@ -851,7 +850,6 @@ nix run github:nix-community/stylix#testbed:gnome:dark
     stylix.targets.hyprland.enable = true;
     stylix.targets.waybar.enable = true;
     stylix.targets.kitty.enable = true;
-    stylix.targets.rofi.enable = true;
 
     # Stylix colors available in Hyprland config
     wayland.windowManager.hyprland.settings = {
@@ -1033,21 +1031,6 @@ nix run github:nix-community/stylix#testbed:gnome:dark
 }
 ```
 
-### Application Launchers
-
-**Rofi**:
-
-```nix
-{
-  stylix.targets.rofi.enable = true;
-
-  programs.rofi = {
-    enable = true;
-    # Stylix provides theme
-  };
-}
-```
-
 ### Notification Daemons
 
 **Dunst**:
@@ -1138,7 +1121,6 @@ nix run github:nix-community/stylix#testbed:gnome:dark
       hyprland.enable = true;
       waybar.enable = true;
       kitty.enable = true;
-      rofi.enable = true;
       dunst.enable = true;
       neovim.enable = true;
       firefox.enable = true;
@@ -1147,7 +1129,6 @@ nix run github:nix-community/stylix#testbed:gnome:dark
     };
 
     programs.kitty.enable = true;
-    programs.rofi.enable = true;
     programs.waybar.enable = true;
     services.dunst.enable = true;
   };
