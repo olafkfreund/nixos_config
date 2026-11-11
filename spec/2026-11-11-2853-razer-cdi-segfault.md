@@ -19,8 +19,8 @@ All changes are in `hosts/razer/nixos/nvidia.nix`.
    (`nvidia.com/gpu=0`, `=all`). A real failure ends the unit as `failed`,
    because the script uses `set -e -u -o pipefail`.
 
-2. **Re-wire the unit in its place**, so a failure cannot stop a runtime or
-   a switch:
+2. **Re-wire the unit in its place**, so a failure cannot stop a runtime,
+   and a driver bump cannot fail a switch:
 
    ```nix
    # The generator must not take docker/podman down or fail a switch (#2853).
@@ -38,8 +38,21 @@ All changes are in `hosts/razer/nixos/nvidia.nix`.
    - `restartIfChanged = false` is what prevents exit 4. A driver bump
      changes `ExecStart`, and with this setting `switch-to-configuration`
      leaves the active (exited) unit alone instead of re-running it against
-     the old kernel module. The unit next runs at boot, where driver and
-     module match.
+     the old kernel module (`switch-to-configuration-ng/src/main.rs`,
+     `handle_modified_unit`: an active unit with `X-RestartIfChanged=false`
+     goes to `units_to_skip`). The unit next runs at boot, where driver and
+     module match, either from `multi-user.target` or from upstream's
+     `KERNEL=="nvidia"` udev rule (`default.nix:222-224`), both of which
+     stay as they are.
+   - **The guarantee is for an active unit only.** If the generator is
+     already `failed` (it failed at boot, or someone restarted it between
+     a driver bump and the next boot), every switch calls `reset-failed`,
+     starts `multi-user.target`, re-runs the generator, and exits 4 if it
+     fails again (`main.rs:2354-2356, 2565-2566, 2622-2684`). That is
+     accepted on purpose: it only happens when the generator is genuinely
+     broken on the running system, and a loud deploy failure is the
+     visible error the intent asks for, not the hidden one this issue is
+     about. The answer to it is to reboot or fix the cause, not to mask it.
    - `requiredBy = mkForce [ ]` + `wantedBy`/`before` is p510's fix
      (`hosts/p510/nixos/resilience.nix:117-127`): a failed generator
      degrades GPU containers instead of stopping docker/podman, and the
@@ -75,11 +88,22 @@ naming; wiring local to razer, no shared module, p510 untouched.
   takes effect at the next boot or a manual restart of the unit. Driver
   changes need a boot anyway; the others are rare. Accepted.
 - **The deploying switch itself does not re-run the unit** (same
-  setting), so `/run/cdi` stays empty until the unit is started by hand or
-  razer boots. Verification starts it by hand.
-- **docker/podman may be restarted on this deploy.** The changed
-  `requires`/`wants` links can make `switch-to-configuration` restart
-  them. razer runs no containers today (`docker ps` empty on 2026-11-11).
+  setting). The unit is active (exited) from the old wrapper's fake
+  success, so `systemctl start` is a no-op; `/run/cdi` stays empty until
+  the unit is **restarted** or razer boots. Verification restarts it.
+- **A failed generator fails later switches** (exit 4), as described in
+  Design. Accepted; reboot or fix the cause.
+- **docker and its CDI watch.** The deploy does not restart docker or
+  podman: `switch-to-configuration-ng` compares unit files and `.d`
+  drop-ins only, not `.wants`/`.requires` links (`main.rs` `parse_unit`,
+  `compare_units`). But restarting the generator deletes and recreates
+  `/run/cdi` (`RuntimeDirectory = "cdi"`), and dockerd may miss the new
+  spec until it is restarted. If the docker check fails on that, restart
+  docker once (announced); razer runs no containers (`docker ps` empty on
+  2026-11-11). At boot, `before` creates the spec first.
+- **Rootless podman** cannot open `/dev/nvidia*` (`0664 root:video`)
+  without `--group-add keep-groups`. Verification uses rootful
+  `sudo podman`; rootless GPU use is out of scope.
 - **`udevadm settle --timeout=180`** from upstream already runs today; it
   is unchanged.
 - razer only. p510 and p620 evaluations are not touched.
@@ -89,16 +113,31 @@ naming; wiring local to razer, no shared module, p510 untouched.
 1. Eval on p620:
    - `ExecStart` of the unit is the upstream `nvidia-cdi-generator` script
      (no `nvidia-cdi-generator-safe`).
-   - `restartIfChanged = false`, `requiredBy = [ ]`, `before` and
-     `wantedBy` contain both runtimes.
-2. `just test-host razer` builds.
-3. Deploy with `just deploy-via-p620 razer`, after a bus announcement. The
-   switch has no failed unit from this generator.
-4. On razer (announced): start the unit, then check
-   - `systemctl show -p Result,ActiveState` is `success` / `active`,
+   - `restartIfChanged = false` and the rendered unit text has
+     `X-RestartIfChanged=false`; `requiredBy = [ ]`; `before` has both
+     runtimes; `wantedBy` has both runtimes and `multi-user.target`.
+2. `just check-syntax`, then `just test-host razer` builds.
+3. Deploy from `main` after the PR merges, with
+   `just deploy-via-p620 razer` and a bus announcement. The switch reports
+   no failed unit from this generator.
+4. On razer (announced): **restart** the unit, then check
+   - `systemctl show -p Result,ActiveState,ExecMainStartTimestamp` gives
+     `success` / `active` with a start time after the restart,
    - `/run/cdi/nvidia-container-toolkit.json` lists `0` and `all`,
    - the journal for that run has no `SIGSEGV`,
-   - `docker run --rm --device nvidia.com/gpu=all ubuntu:24.04 nvidia-smi`
-     and the same with `podman` print the GPU.
-5. The failure path (unit `failed` on a real error) follows from upstream's
-   `set -e` and is not forced on the host. Shown by eval/reading only.
+   - `docker run --rm --device nvidia.com/gpu=all
+     docker.io/library/ubuntu:24.04 nvidia-smi` and the same with
+     `sudo podman` print the GPU.
+5. Not exercised on the host, shown by reading only: the failure path
+   (unit `failed` on a real error, from upstream's `set -e`); a driver bump
+   switch being skipped (`main.rs` `handle_modified_unit`); the boot path
+   (`before` + `udevadm settle`) until razer's next boot.
+
+## Review notes
+
+The draft was reviewed by Codex (gpt-6.1-sol) and agy (model not reported),
+read-only. Confirmed and fixed: `start` is a no-op on the active oneshot
+(now `restart`); dependency-link changes do not restart docker/podman;
+`restartIfChanged = false` protects an active unit only (now stated, and
+the failed-unit case accepted on purpose); rootless podman, the dockerd CDI
+watch and extra eval checks added. Advice only, not approval.
