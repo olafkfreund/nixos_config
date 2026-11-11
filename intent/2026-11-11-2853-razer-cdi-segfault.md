@@ -25,34 +25,44 @@ That script passes three flags our wrapper drops:
 - `--nvidia-cdi-hook-path <toolkit.tools>/bin/nvidia-cdi-hook`
 - `--ldconfig-path <glibc>/bin/ldconfig`
 
-Without them, `nvidia-ctk` cannot find `libnvidia-ml` or the hook on NixOS,
-and it has no `/etc/ld.so.cache` to fall back on. Those are the three
-warnings logged just before the crash.
+Without them, `nvidia-ctk` cannot find the driver libraries, the hook or
+an ld cache on NixOS (there is no `/etc/ld.so.cache`), and a cgo bug in
+`nvidia-ctk` 1.20.1 on that lookup-failure path segfaults. The override also
+drops the upstream `jq` step that adds the NixOS driver/glibc mounts to the
+spec, and removes the toolkit's `tools` output (`nvidia-cdi-hook`) from
+razer's closure. Today it is not on the host at all.
 
 Checked on razer on 2026-11-11, with nvidia-container-toolkit 1.20.1 and
-driver 615.78.08 (kernel module and userspace match): the same `nvidia-ctk`
-with those three flags exits 0 and writes a spec with devices `gpu0` and
-`all`. The remaining `nvsandboxutils` / egl warnings are harmless.
+driver 615.78.08 (kernel module and userspace match, so this is no
+mismatch): the same `nvidia-ctk` with all three flags restored exits 0 and
+writes a spec with devices `gpu0` and `all`. The remaining `nvsandboxutils`
+/ egl warnings did not stop generation. Which of the three flags matters
+most was not isolated, because they were restored together.
 
 The wrapper's `|| echo "skipped (driver mismatch…)"` turns every failure,
-this crash included, into a success with a misleading message. It was added
-so a driver bump could not fail a switch. p510 solves the same problem
-another way (`hosts/p510/nixos/resilience.nix:117-127`): it keeps the
-upstream script, and turns upstream's `requiredBy` on docker and podman into
-`wantedBy` + `before`. A failed generator then degrades GPU containers,
-doesn't stop the runtime, and still shows as failed.
+this crash included, into success with a misleading message. It was added
+so a driver bump could not fail a switch. That risk is real: on an nvidia
+bump the unit's `ExecStart` changes, so a switch re-runs it against the
+still-loaded old kernel module. It then fails with an NVML mismatch, and
+`switch-to-configuration` exits 4, which the deploy wrapper treats as a
+failure and rolls back. Removing the wrapper alone brings that back.
 
 ## Proposed outcome
 
-- After a razer switch or boot, `/var/run/cdi/nvidia.yaml` exists and lists
-  `nvidia.com/gpu=gpu0` and `=all`.
-- The generator uses the nixpkgs script with its flags, not a hand-written
-  copy.
-- When the generator really fails (for example, a driver/library mismatch
-  after an nvidia bump before a reboot), the unit shows as **failed** with
-  the real error. It does not stop docker or podman, and it does not report
-  success.
-- razer is deployed with the fix, and the spec is checked on the host.
+- After a razer boot or a normal switch, the upstream spec
+  `/run/cdi/nvidia-container-toolkit.json` exists and lists the GPU and
+  `all`, and `docker`/`podman run --device nvidia.com/gpu=all … nvidia-smi`
+  sees the GPU.
+- The generator uses the nixpkgs script with its flags, mounts and closure,
+  not a hand-written copy.
+- When the generator runs and fails (at boot, or run by hand), the unit is
+  **failed** with the real error. It does not report success, and it does
+  not stop docker or podman.
+- A switch that only changes the driver (before the next boot) does not
+  exit 4 because of this unit. Leaving the old spec in place until then is
+  acceptable.
+- razer is deployed with the fix, and the spec and a GPU container are
+  checked on the host.
 
 ## Affected users and systems
 
@@ -66,15 +76,31 @@ doesn't stop the runtime, and still shows as failed.
   A failed unit at switch time gives exit 4, which can roll back a deploy
   (see the deploy-rollback note).
 - Use the upstream script. Don't copy its flags.
+- The mechanism (unit wiring, when the unit re-runs) belongs in the spec.
+  p510's `requiredBy` → `wantedBy`/`before` re-wiring
+  (`hosts/p510/nixos/resilience.nix:117-127`) keeps the runtimes up, but on
+  its own it does **not** prevent exit 4.
 - razer builds on p620 (`just deploy-via-p620 razer`). Announce on the agent
   bus before deploying.
 - No p510 build or deploy.
 
 ## Open questions
 
-1. Keep CDI on razer, or turn `hardware.nvidia-container-toolkit` off since
-   nothing uses it? Proposed: keep it. The issue asks for it to work, and the
-   fix is mostly a deletion.
-2. Should p510's `requiredBy` → `wantedBy`/`before` re-wiring become a shared
-   module both hosts import, or be repeated on razer? Proposed: repeat the
-   few lines on razer now, and leave sharing it as a possible follow-up.
+1. Keep CDI on razer, or turn `hardware.nvidia-container-toolkit` off? No
+   container uses the GPU there today, and turning it off removes the unit,
+   the 180 s `udevadm settle` and the switch-time risk entirely. Proposed:
+   keep it, since the issue asks for working GPU containers. This is your
+   call.
+2. Device names: upstream defaults to `index` (`nvidia.com/gpu=0`). The old
+   wrapper asked for `type-index` (`gpu0`), but no spec was ever written, so
+   nothing depends on it. Proposed: the upstream default.
+3. Share the unit wiring with p510 in a module? Proposed: no. Keep it local
+   to razer, because a shared module changes p510's evaluation, and p510 may
+   not be built without your OK. Sharing it is a possible follow-up.
+
+## Review notes
+
+The draft was reviewed by Codex (gpt-6.1-sol) and agy (model not reported),
+read-only. Both flagged the exit-4 contradiction and the wrong spec
+path/name in the first draft; both points were confirmed against the
+nixpkgs module and fixed above. Advice only, not approval.
