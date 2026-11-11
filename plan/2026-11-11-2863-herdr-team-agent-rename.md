@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2863
 spec: spec/2026-11-11-2863-herdr-team-agent-rename.md
 coders:
