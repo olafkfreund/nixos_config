@@ -109,15 +109,16 @@
     initrd.kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" ];
   };
 
-  # nvidia-container-toolkit CDI generator fails during switch when driver version
-  # mismatches (old kernel module vs new userspace). It succeeds after reboot.
-  # Wrap ExecStart so failure doesn't block deployment.
-  systemd.services.nvidia-container-toolkit-cdi-generator.serviceConfig.ExecStart = lib.mkForce
-    (pkgs.writeShellScript "nvidia-cdi-generator-safe" ''
-      ${pkgs.nvidia-container-toolkit}/bin/nvidia-ctk cdi generate \
-        --output=/var/run/cdi/nvidia.yaml --device-name-strategy=type-index 2>&1 || \
-        echo "nvidia-cdi-generator: skipped (driver mismatch, will retry after reboot)"
-    '');
+  # The CDI generator must not take docker/podman down or fail a switch
+  # (#2853). After an nvidia bump the new driver can't talk to the loaded
+  # kernel module until reboot, so don't re-run it at switch; the old spec
+  # stays valid until then. Runtime wiring as on p510 (resilience.nix).
+  systemd.services.nvidia-container-toolkit-cdi-generator = {
+    restartIfChanged = false;
+    requiredBy = lib.mkForce [ ];
+    wantedBy = [ "docker.service" "podman.service" ];
+    before = [ "docker.service" "podman.service" ];
+  };
 
   # Create proper device nodes for NVIDIA.
   # Note the 0664 + video group: some configs float around using MODE="0666",
