@@ -2,7 +2,7 @@
 let
   agyMember = true;
   sandbox = import ./agent-sandbox-pkgs.nix { inherit pkgs lib; };
-  testPath = lib.makeBinPath (with pkgs; [ bash coreutils util-linux procps jq socat gnugrep gnused gawk findutils diffutils git ]);
+  testPath = lib.makeBinPath (with pkgs; [ bash coreutils util-linux procps jq socat gnugrep gnused gawk findutils diffutils git python3 ]);
   herdr-run = pkgs.writeShellApplication {
     name = "herdr-run";
     runtimeInputs = with pkgs; [ jq socat coreutils util-linux procps gawk gnused ];
@@ -23,7 +23,7 @@ let
       runHook preCheck
       ${pkgs.stdenv.shellDryRun} "$target"
       ${lib.getExe pkgs.shellcheck-minimal} --exclude=SC2016 "$target" # jq filters are single-quoted on purpose
-      PATH=${testPath}:$PATH bash ${./herdr-team-test.sh} "$target" < /dev/null
+      AGY_ACP_MEMBER_PY=${./agy-acp-member.py} PATH=${testPath}:$PATH bash ${./herdr-team-test.sh} "$target" < /dev/null
       runHook postCheck
     '';
   };

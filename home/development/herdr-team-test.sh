@@ -61,6 +61,10 @@ case "$1 $2" in
     ;;
   'pane get')
     [[ ! -e $TEST_STATE/vanish ]] || exit 1
+    if [[ -e $TEST_STATE/pane-$3.in ]]; then
+      jq -nc --arg terminal "t${3#p}" '{result:{pane:{terminal_id:$terminal,agent:null}}}'
+      exit 0
+    fi
     terminal="t${3#p}"
     [[ ! -e $TEST_STATE/change-id ]] || terminal=changed
     kind=$(cat "$TEST_STATE/kind" 2>/dev/null || { [[ -e $TEST_STATE/agent-up ]] && echo codex || echo ''; })
@@ -73,12 +77,41 @@ case "$1 $2" in
     launch=${line% || exit}
     if [[ -e $TEST_STATE/tamper-lead ]]; then sed -i 's/^lead_start=.*/lead_start=bogus/' "$launch"; fi
     if [[ -e $TEST_STATE/tamper-max ]]; then sed -i 's/^maxsecs=.*/maxsecs=0/' "$launch"; fi
+    if [[ -e $TEST_STATE/agy-next ]]; then
+      # an agy pane has a terminal: the launcher reads a FIFO that a sleeper keeps open for writing
+      rm -f "$TEST_STATE/agy-next"
+      mkfifo "$TEST_STATE/pane-$3.in"
+      ( exec sleep 61.5 >"$TEST_STATE/pane-$3.in" ) >/dev/null 2>&1 &
+      # a background job starts with SIGINT ignored; a terminal's foreground group does not
+      setsid nohup python3 -c 'import os, signal, sys; signal.signal(signal.SIGINT, signal.SIG_DFL); os.execvp("bash", ["bash", "-c", sys.argv[1]])' "$4" >"$TEST_STATE/pane-$3.out" 2>&1 <"$TEST_STATE/pane-$3.in" &
+      printf '%s\n' "$!" >"$TEST_STATE/pane-$3.pgid"
+      exit 0
+    fi
     nohup bash -c "$4" >/dev/null 2>&1 </dev/null &
     ;;
+  'pane send-text') printf '%s' "$4" >"$TEST_STATE/pane-$3.in" ;;
+  'pane send-keys')
+    case $4 in
+      enter) printf '\n' >"$TEST_STATE/pane-$3.in" ;;
+      # the launcher runs the member in its own group, which is the terminal's foreground group
+      ctrl+c) kill -INT -- "-$(ps -o pid=,pgid= --ppid "$(cat "$TEST_STATE/pane-$3.pgid")" | awk -v l="$(cat "$TEST_STATE/pane-$3.pgid")" '$2 != l { print $2; exit }')" ;;
+      *) exit 2 ;;
+    esac
+    ;;
+  'pane rename') : ;;
   'pane close') printf '%s\n' "$3" >> "$TEST_STATE/closed" ;;
-  'pane read') cat "$TEST_STATE/screen" 2>/dev/null || : ;;
-  'agent rename') : ;;
-  'agent prompt')
+  'pane read')
+    if [[ -e $TEST_STATE/pane-$3.in ]]; then cat "$TEST_STATE/pane-$3.out" 2>/dev/null || :; else cat "$TEST_STATE/screen" 2>/dev/null || :; fi
+    ;;
+  'agent rename'|'agent prompt'|'agent send-keys')
+    [[ ! -e $TEST_STATE/pane-$3.in ]] || exit 1
+    case $2 in
+      rename) exit 0 ;;
+      send-keys)
+        [[ ! -e $TEST_STATE/no-quit ]] || exit 0
+        ( sleep "$(cat "$TEST_STATE/quit-delay" 2>/dev/null || echo 0)"; cat "$TEST_STATE/quit-code" 2>/dev/null > "$TEST_STATE/quit.tmp" || echo 0 > "$TEST_STATE/quit.tmp"; mv "$TEST_STATE/quit.tmp" "$TEST_STATE/quit" ) >/dev/null 2>&1 &
+        exit 0 ;;
+    esac
     printf '%s\n' "$4" >> "$TEST_STATE/prompts"
     idx=$(wc -l < "$TEST_STATE/prompts")
     r=$TEST_STATE/script/$idx
@@ -92,10 +125,6 @@ case "$1 $2" in
     fi
     [[ ! -e $TEST_STATE/reply-delay ]] || sleep "$(cat "$TEST_STATE/reply-delay")"
     [[ ! -e $TEST_STATE/hook.$idx ]] || bash "$TEST_STATE/hook.$idx" >/dev/null 2>&1
-    ;;
-  'agent send-keys')
-    [[ ! -e $TEST_STATE/no-quit ]] || exit 0
-    ( sleep "$(cat "$TEST_STATE/quit-delay" 2>/dev/null || echo 0)"; cat "$TEST_STATE/quit-code" 2>/dev/null > "$TEST_STATE/quit.tmp" || echo 0 > "$TEST_STATE/quit.tmp"; mv "$TEST_STATE/quit.tmp" "$TEST_STATE/quit" ) >/dev/null 2>&1 &
     ;;
   *) exit 2 ;;
 esac
@@ -127,7 +156,40 @@ exit "$code"
 FAKE
 sed -i "1s|.*|#!$(command -v bash)|" "$HERDR_BIN_PATH" "$tmp/bin/agent-env" "$tmp/bin/codex"
 cp "$tmp/bin/codex" "$tmp/bin/codex-implement"
-cp "$tmp/bin/codex" "$tmp/bin/agy-implement"
+# agy members: the real client against a fake `agy acp` that answers from $TEST_STATE/agyscript/<n> or echoes the prompt
+py=$(command -v python3) || {
+  echo 'python3 is needed for the agy member cases' >&2
+  exit 1
+}
+client=${AGY_ACP_MEMBER_PY:-$(dirname "$(realpath "$0")")/agy-acp-member.py}
+[[ -f $client ]] || {
+  echo "agy-acp-member.py not found ($client); set AGY_ACP_MEMBER_PY" >&2
+  exit 1
+}
+printf '#!%s\nshift\nexec %s %s "$@"\n' "$(command -v bash)" "$py" "$client" >"$tmp/bin/agy-implement"
+cat >"$tmp/bin/agy" <<FAKE
+#!$py
+import json, os, signal, sys
+signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
+count = 0
+def send(obj):
+    print(json.dumps({'jsonrpc': '2.0', **obj}), flush=True)
+for line in sys.stdin:
+    msg = json.loads(line)
+    method = msg.get('method')
+    if method == 'initialize':
+        send({'id': msg['id'], 'result': {'protocolVersion': 1}})
+    elif method == 'session/new':
+        send({'id': msg['id'], 'result': {'sessionId': 'fake-session', 'configOptions': [{'id': 'model'}, {'id': 'thought_level'}]}})
+    elif method == 'session/set_config_option':
+        send({'id': msg['id'], 'result': {}})
+    elif method == 'session/prompt':
+        count += 1
+        script = os.path.join(os.environ['TEST_STATE'], 'agyscript', str(count))
+        text = open(script).read() if os.path.exists(script) else 'agy reply %d' % count
+        send({'method': 'session/update', 'params': {'update': {'sessionUpdate': 'agent_message_chunk', 'content': {'type': 'text', 'text': text}}}})
+        send({'id': msg['id'], 'result': {'stopReason': 'end_turn'}})
+FAKE
 chmod +x "$HERDR_BIN_PATH" "$tmp/bin"/*
 
 g() { git -c user.name=t -c user.email=t@t "$@"; }
@@ -169,6 +231,7 @@ reset() {
   pkill -f 'sleep 61.7' 2>/dev/null || :
   pkill -f 'sleep 62.3' 2>/dev/null || :
   pkill -f 'sleep 63.1' 2>/dev/null || :
+  pkill -f 'sleep 61.5' 2>/dev/null || :
   drop_work
   rm -rf "$rt"
   find "$TEST_STATE" -mindepth 1 -delete
@@ -252,7 +315,9 @@ team up t1 review
 assert_code 2
 is '.reason == "not a git worktree"'
 cd "$repo"
-team up t1 agy-implement
+sed 's/^agy_member=.*/agy_member=false/' "$tool" >"$tmp/herdr-team-noagy"
+chmod +x "$tmp/herdr-team-noagy"
+"$tmp/herdr-team-noagy" up t1 agy-implement >"$tmp/out" 2>"$tmp/err" || code=$?
 assert_code 2
 is '.reason == "agy member not enabled"'
 printf 'dirty\n' >"$repo/dirty"
@@ -1331,6 +1396,51 @@ else
   [[ ! -e $rt/t1.json ]] || die "retry did not remove the record"
   ok containment-scope
 fi
+
+# --- agy member: the ACP client behind a fake terminal ---
+reset
+touch "$TEST_STATE/agy-next"
+up t1 agy-implement --step 1
+is '.member == "agy-implement"'
+[[ $(field t1 agy-implement kind) == agy && $(field t1 agy-implement agy_session) == fake-session ]] || die "agy record"
+grep -q 'agy session fake-session' "$TEST_STATE/pane-$(field t1 agy-implement pane).out"
+grep -q "^pane rename $(field t1 agy-implement pane) t1-agy-implement" "$TEST_STATE/log" || die "pane rename"
+! grep -q '^agent rename' "$TEST_STATE/log" || die "agent rename on an agy pane"
+printf 'the question\n' >"$tmp/prompt"
+team ask t1 agy-implement "$tmp/prompt" --timeout 10
+assert_code 0
+is '.outcome == "ok" and .n == 1 and .turn_id != null'
+[[ $(cat "$(jq -r .answer "$tmp/out")") == 'agy reply 1' ]] || die "agy answer"
+grep -q '^pane send-text ' "$TEST_STATE/log" && grep -q '^pane send-keys .* enter' "$TEST_STATE/log" || die "ask did not type"
+! grep -q '^agent prompt' "$TEST_STATE/log" || die "agent prompt on an agy pane"
+ok agy-up-ask
+# converse: review (codex) -> agy-implement (two implementers cannot share a worktree)
+reset
+up t1 review
+touch "$TEST_STATE/agy-next"
+up t1 agy-implement --step 1
+arm t1 review
+mkdir -p "$TEST_STATE/script" "$TEST_STATE/agyscript"
+printf 'TO: agy-implement\nplease review f\nEND\n' >"$TEST_STATE/script/1"
+printf 'looks fine\n' >"$TEST_STATE/agyscript/1"
+team converse t1 review "$tmp/prompt" --deadline 20
+assert_code 0
+jq -es 'map(.outcome) == ["ok","ok"] and map(.from) == ["review","agy-implement"] and map(.to) == ["agy-implement",null]' "$tmp/out" >/dev/null || die "agy converse"
+grep -q 'please review f' "$(field t1 agy-implement work)/req/1.md"
+ok agy-converse
+# finish: ctrl+c through the terminal ends the client
+reset
+touch "$TEST_STATE/agy-next"
+up t1 agy-implement --step 1
+team ask t1 agy-implement "$tmp/prompt" --timeout 10
+is '.outcome == "ok"'
+printf 'edit\n' >>"$repo/f"
+team finish t1 agy-implement
+assert_code 0
+is '.ok == true and .exit == 0 and .failures == [] and .changed == ["f"]'
+! grep -q '^agent send-keys' "$TEST_STATE/log" || die "agent send-keys on an agy pane"
+grep -q '^pane send-keys .* ctrl+c' "$TEST_STATE/log" || die "no ctrl+c"
+ok agy-finish
 
 # --- status and unknown tasks ---
 reset
