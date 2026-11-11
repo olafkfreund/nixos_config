@@ -25,24 +25,33 @@ error output kept, herdr says why:
 - `home/development/herdr-team.sh:579` renames the agent to
   `"$task-$role"` (`2863-review`). That starts with a digit, so herdr
   rejects it.
-- `task_ok` (line 60) allows `^[A-Za-z0-9][A-Za-z0-9_-]*$`: leading digits,
-  capitals, any length. herdr's agent names allow none of those, and are
-  capped at 32 characters.
-- The call sends stderr to `/dev/null`, so the reason was lost.
-- `herdr-team-test.sh` uses task `t1`, which is a valid agent name, and its
-  fake `herdr` accepts any rename. So the tests never hit this.
+- `task_ok` (line 60) allows `^[A-Za-z0-9][A-Za-z0-9_-]*$`: a leading
+  digit, capitals, any length. herdr agent names must start with a
+  lowercase letter, may then have digits, `-` and `_`, and are capped at 32
+  characters.
+- The call sends both stdout and stderr to `/dev/null`. herdr wrote the error
+  JSON on stderr, and it was lost. The `pane rename` call (line 577) swallows
+  its output the same way.
+- `herdr-team-test.sh` covers a rename failure in general (`fail-agent-rename`,
+  lines 46 and 819), but its fake `herdr` accepts any name, and every test task
+  (`t1`, `t2`, `a`, …) starts with a lowercase letter. A rejected name is
+  never tested.
 - The agy branch (line 577) uses `pane rename`, which accepted
   `2853-agy-implement`, so agy members are not affected.
-- Nothing reads the agent name back: it only labels the member in herdr.
+- Nothing reads the agent name back: identity checks use the pane, the
+  terminal and `.result.pane.agent == "codex"` (`same_pane`, line 237), not
+  the name.
 
-Every `herdr-team` run since herdr started enforcing this has fallen back to
-headless `agent-run` / `codex exec`.
+Every Codex member whose task name is an issue number fails and is torn
+down. That happened twice on 2026-11-11, and the work moved to headless
+`agent-run` / `codex exec`. A task name like `t1` still works.
 
 ## Proposed outcome
 
 - `herdr-team up` works for Codex members with issue-number task names (and
-  any other name `task_ok` accepts), and the member gets a valid herdr agent
-  name.
+  any other name `task_ok` accepts), and each member's herdr label still
+  shows its task and role, distinct between members.
+- `ask` and `finish` still recognise the member after the rename.
 - If a rename does fail, the failure reason includes herdr's own message.
 - A test covers a task name that starts with a digit, and the fake `herdr`
   enforces herdr's name rule, so a regression is caught.
@@ -63,11 +72,25 @@ headless `agent-run` / `codex exec`.
 
 ## Open questions
 
-1. Agent name format. Proposed: lowercase the name, swap any character
-   outside `[a-z0-9_-]` for `-`, add a `t` prefix when it doesn't start with
-   a letter (`2863-review` → `t2863-review`), and cut it to 32 characters.
-   The other option is to drop the rename (it is cosmetic), but then the
-   member shows as plain `codex` in herdr.
+1. Keep the rename with a mapped name (`2863-review` → `t2863-review`; the
+   exact rule goes in the spec), or drop it, since it is cosmetic? Proposed:
+   keep it, so members are easy to tell apart in herdr. Both reviewers
+   agree. A long task name must be shortened before `-<role>` is added, or
+   members collide (agy).
 2. A rename failure: keep it fatal (with herdr's message), or warn and
-   continue, since the name is cosmetic? Proposed: keep it fatal, because a
-   failure now means something unexpected, and herdr's message says what.
+   continue? Proposed: keep it fatal, because once names are valid a failure
+   means the pane or agent is in a bad state, and the existing test (line
+   819) already expects that. agy agrees. Codex prefers warn-and-continue,
+   since the name is only a label. Your call.
+
+## Review notes
+
+Reviewed read-only by Codex (gpt-6.1-sol) and agy (model not reported).
+Both confirmed the root cause. They corrected:
+
+- the "every run" claim (narrowed to issue-number task names);
+- that both output streams are discarded, not only stderr;
+- that rename failure in general is tested, but a rejected name is not;
+- that truncating after `-<role>` would collide members (agy).
+
+They disagree on question 2. Advice only, not approval.
