@@ -874,6 +874,7 @@ reset
 team up 2863 review
 assert_code 1
 is '.reason | test("injected rename error")'
+[[ $(grep -c '^agent rename' "$TEST_STATE/log") == 1 ]] || die 'non-collision rename error was retried'
 no_leftovers
 reset
 ok agent-names
