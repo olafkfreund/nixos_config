@@ -63,6 +63,7 @@
     gnome.enable = false;
     kde.enable = false;
     qt.enable = false; # Qt theming handled by home/desktop/theme/qt.nix
+    rofi.enable = false; # rofi is on no host (Omarchy's menu replaced it); its target only adds a rename warning
   };
 
   # Common programs for all users
