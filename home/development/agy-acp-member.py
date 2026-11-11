@@ -51,16 +51,20 @@ def main():
     )
 
     def cleanup():
-        if child.poll() is not None:
-            return
-        try:
-            os.killpg(child.pid, signal.SIGTERM)
-            child.wait(timeout=3 * float(os.environ.get("HERDR_TEAM_TIME_SCALE", "1")))
-        except subprocess.TimeoutExpired:
-            os.killpg(child.pid, signal.SIGKILL)
-            child.wait()
-        except ProcessLookupError:
-            pass
+        # signal the whole group even if agy itself is gone: its tool children may still run
+        for sig in (signal.SIGTERM, signal.SIGKILL):
+            try:
+                os.killpg(child.pid, sig)
+            except ProcessLookupError:
+                break
+            if sig == signal.SIGTERM:
+                try:
+                    child.wait(
+                        timeout=3 * float(os.environ.get("HERDR_TEAM_TIME_SCALE", "1"))
+                    )
+                except subprocess.TimeoutExpired:
+                    pass
+        child.poll()
 
     atexit.register(cleanup)
 
@@ -92,7 +96,10 @@ def main():
             pending.extend(data)
         line, _, rest = pending.partition(b"\n")
         pending[:] = rest
-        message = json.loads(line)
+        try:
+            message = json.loads(line)
+        except json.JSONDecodeError:
+            return {}  # a stray log line on stdout is not protocol
         if "method" in message and "id" in message:
             if message["method"] == "session/request_permission":
                 options = message.get("params", {}).get("options", [])
