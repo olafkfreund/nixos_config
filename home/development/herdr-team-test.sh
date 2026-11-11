@@ -1416,7 +1416,9 @@ team ask t1 agy-implement "$tmp/prompt" --timeout 10
 assert_code 0
 is '.outcome == "ok" and .n == 1 and .turn_id != null'
 [[ $(cat "$(jq -r .answer "$tmp/out")") == 'agy reply 1' ]] || die "agy answer"
-grep -q '^pane send-text ' "$TEST_STATE/log" && grep -q '^pane send-keys .* enter' "$TEST_STATE/log" || die "ask did not type"
+if ! grep -q '^pane send-text ' "$TEST_STATE/log" || ! grep -q '^pane send-keys .* enter' "$TEST_STATE/log"; then
+  die "ask did not type"
+fi
 ! grep -q '^agent prompt' "$TEST_STATE/log" || die "agent prompt on an agy pane"
 ok agy-up-ask
 # converse: review (codex) -> agy-implement (two implementers cannot share a worktree)

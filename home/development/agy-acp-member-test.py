@@ -127,7 +127,7 @@ def main(client):
             for prompt in ("first", "permission", "unknown", "other"):
                 os.write(master, (prompt + "\n").encode())
                 output = read_until(master, "❯ ")
-                assert "· fake tool" in output and f"reply" in output, output
+                assert "· fake tool" in output and "reply" in output, output
             os.write(master, b"wait\n")
             assert "waiting" in read_until(master, "waiting")
             os.killpg(process.pid, signal.SIGINT)
