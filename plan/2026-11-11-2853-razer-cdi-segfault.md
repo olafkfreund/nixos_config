@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2853
 spec: spec/2026-11-11-2853-razer-cdi-segfault.md
 coders:
