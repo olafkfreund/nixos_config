@@ -41,6 +41,10 @@ in
     home.file = lib.mkIf cfg.enable {
       ".claude/skills/herdr".source = herdrSkill;
       ".agents/skills/herdr".source = herdrSkill;
+      ".claude/skills/hc".source = pkgs.customPkgs.herdr-core.skill;
+      ".agents/skills/hc".source = pkgs.customPkgs.herdr-core.skill;
+      ".claude/skills/herdr-app".source = pkgs.customPkgs.herdr-app.skill;
+      ".agents/skills/herdr-app".source = pkgs.customPkgs.herdr-app.skill;
     };
 
     home.activation.herdrSkillCleanup = lib.mkIf cfg.enable (lib.hm.dag.entryBefore [ "linkGeneration" ] ''

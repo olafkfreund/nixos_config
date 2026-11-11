@@ -523,6 +523,8 @@ in
     # Bash is the login shell (see modules/common/base-user.nix); zsh stays
     # installed as the rollback path.
     shell = pkgs.bashInteractive;
+    # hc (herdr-core) keeps agents running after logout (#2861).
+    linger = username == "olafkfreund";
   });
 
   # System packages - consolidated from individual nixos modules

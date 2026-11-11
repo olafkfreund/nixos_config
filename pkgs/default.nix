@@ -126,6 +126,12 @@
   # okena — GPUI-based native terminal multiplexer (contember/okena).
   okena = pkgs.callPackage ./okena { };
 
+  # herdr-core (hc) — headless server for Herdr terminals and agents.
+  herdr-core = pkgs.callPackage ./herdr-core { };
+
+  # herdr-app — native Herdr desktop app, wrapped to use herdr-core.
+  herdr-app = pkgs.callPackage ./herdr-app { herdr-core = pkgs.customPkgs.herdr-core; };
+
   # FlyCrys — GTK4-native GUI for Claude Code (Rust). Not in nixpkgs yet;
   # custom buildRustPackage derivation. Wraps the local `claude` binary.
   flycrys = pkgs.callPackage ./flycrys { };
