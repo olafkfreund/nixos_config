@@ -106,7 +106,15 @@ case "$1 $2" in
   'agent rename'|'agent prompt'|'agent send-keys')
     [[ ! -e $TEST_STATE/pane-$3.in ]] || exit 1
     case $2 in
-      rename) exit 0 ;;
+      rename)
+        (LC_ALL=C; [[ ${4:-} =~ ^[a-z][a-z0-9_-]{0,31}$ ]]) || { echo '{"error":{"code":"invalid_agent_name","message":"bad name"}}' >&2; exit 1; }
+        [[ ! -e $TEST_STATE/bad-agent-rename ]] || { echo '{"error":{"code":"test_bad","message":"injected rename error"}}' >&2; exit 1; }
+        if [[ -e $TEST_STATE/taken-agent-rename ]]; then
+          rm -f "$TEST_STATE/taken-agent-rename"
+          echo '{"error":{"code":"agent_name_taken","message":"taken"}}' >&2
+          exit 1
+        fi
+        exit 0 ;;
       send-keys)
         [[ ! -e $TEST_STATE/no-quit ]] || exit 0
         ( sleep "$(cat "$TEST_STATE/quit-delay" 2>/dev/null || echo 0)"; cat "$TEST_STATE/quit-code" 2>/dev/null > "$TEST_STATE/quit.tmp" || echo 0 > "$TEST_STATE/quit.tmp"; mv "$TEST_STATE/quit.tmp" "$TEST_STATE/quit" ) >/dev/null 2>&1 &
@@ -839,6 +847,37 @@ up t1 review
 [[ $(grep -c '^pane run' "$TEST_STATE/log") == 2 ]]
 team down t1
 ok up-failures
+
+# --- agent names: herdr wants ^[a-z][a-z0-9_-]{0,31}$, unique ---
+reset
+up 2863 review
+grep -qx 'agent rename p[0-9]* t2863-review' "$TEST_STATE/log"
+team down 2863
+reset
+up PR-2863 review
+grep -qx 'agent rename p[0-9]* pr-2863-review' "$TEST_STATE/log"
+team down PR-2863
+reset
+long=$(printf 'a%.0s' {1..40})
+up "$long" implement
+name=$(grep '^agent rename' "$TEST_STATE/log" | awk '{print $4}')
+[[ ${#name} == 32 && $name == *-implement ]] || die "long name: $name"
+team down "$long"
+reset
+: >"$TEST_STATE/taken-agent-rename"
+up 2863 review
+[[ $(grep -c '^agent rename' "$TEST_STATE/log") == 2 ]]
+grep '^agent rename' "$TEST_STATE/log" | tail -1 | grep -qE ' t2863-review-[0-9a-f]{4}$'
+team down 2863
+reset
+: >"$TEST_STATE/bad-agent-rename"
+team up 2863 review
+assert_code 1
+is '.reason | test("injected rename error")'
+[[ $(grep -c '^agent rename' "$TEST_STATE/log") == 1 ]] || die 'non-collision rename error was retried'
+no_leftovers
+reset
+ok agent-names
 
 # --- a stale state file is reported and removed ---
 reset
