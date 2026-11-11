@@ -37,7 +37,7 @@ Self-contained summary of the approved decisions:
      # herdr agent names: ^[a-z][a-z0-9_-]{0,31}$; shorten the task, never the role
      agent_name() {
        local t
-       t=$(printf '%s' "$1" | LC_ALL=C tr 'A-Z' 'a-z' | LC_ALL=C tr -c 'a-z0-9_-' '-')
+       t=$(printf '%s' "$1" | LC_ALL=C tr '[:upper:]' '[:lower:]' | LC_ALL=C tr -c 'a-z0-9_-' '-')
        [[ $t == [a-z]* ]] || t=t$t
        printf '%s-%s' "${t:0:$((31 - ${#2}))}" "$2"
      }

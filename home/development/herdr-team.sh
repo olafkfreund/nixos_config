@@ -58,6 +58,13 @@ lead_pid() {
   echo "$p"
 }
 task_ok() { [[ ${1:-} =~ ^[A-Za-z0-9][A-Za-z0-9_-]*$ ]] || refuse 'bad task name'; }
+# herdr agent names: ^[a-z][a-z0-9_-]{0,31}$; shorten the task, never the role
+agent_name() {
+  local t
+  t=$(printf '%s' "$1" | LC_ALL=C tr '[:upper:]' '[:lower:]' | LC_ALL=C tr -c 'a-z0-9_-' '-')
+  [[ $t == [a-z]* ]] || t=t$t
+  printf '%s-%s' "${t:0:$((31 - ${#2}))}" "$2"
+}
 # The member can rewrite the worktree's .git, so every git call after launch uses the git dir recorded before it
 # started (globals root and gd), with the config that runs code switched off.
 gq() { git -c core.fsmonitor=false -c core.hooksPath=/dev/null "$@"; }
@@ -343,7 +350,7 @@ teardown() { # state file, member: stop it, close its pane, remove its dirs and 
 }
 
 up() {
-  local branch kind wrapper notify common trust lead lead_start max created reply attempt i matched mpid mstart now first rec firstpane gd root agy_session screen ready_attempts
+  local branch kind wrapper notify common trust lead lead_start max created reply attempt i matched mpid mstart now first rec firstpane gd root agy_session screen ready_attempts err name
   task=${1:-}
   role=${2:-}
   shift 2 || usage
@@ -576,7 +583,12 @@ LAUNCH
     unlock
     h pane rename "$pane" "$task-$role" >/dev/null 2>&1 || fail 'pane rename failed'
   else
-    h agent rename "$pane" "$task-$role" >/dev/null 2>&1 || fail 'agent rename failed'
+    name=$(agent_name "$task" "$role")
+    if ! err=$(h agent rename "$pane" "$name" 2>&1 >/dev/null); then
+      [[ $err == *agent_name_taken* ]] || fail "agent rename failed${err:+: ${err//$'\n'/ }}"
+      name=$(agent_name "$task" "$role-${gen:0:4}")
+      err=$(h agent rename "$pane" "$name" 2>&1 >/dev/null) || fail "agent rename failed${err:+: ${err//$'\n'/ }}"
+    fi
   fi
   reply=$(fingerprint)
   lock
