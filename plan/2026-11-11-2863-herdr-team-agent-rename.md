@@ -65,22 +65,29 @@ Self-contained summary of the approved decisions:
      - don't touch line 577 (agy).
 
 2. **`home/development/herdr-team-test.sh`** (coder: coder).
-   - In the fake `herdr`, replace `rename) exit 0 ;;` (line 109) with a
-     check that:
-     - if `$TEST_STATE/bad-agent-rename` exists, prints
-       `{"error":{"code":"test_bad","message":"injected rename error"}}` to
-       stderr and exits 1;
-     - if `$TEST_STATE/taken-agent-rename` exists, removes it, prints
-       `{"error":{"code":"agent_name_taken","message":"taken"}}` to stderr
-       and exits 1;
-     - if `$4` doesn't match `^[a-z][a-z0-9_-]{0,31}$`, checked with
-       `LC_ALL=C`, prints an `invalid_agent_name` JSON to stderr and exits 1;
-     - otherwise exits 0.
+   - In the fake `herdr`, replace `rename) exit 0 ;;` (line 109) with
+     checks in this order:
+     1. if `$4` doesn't match `^[a-z][a-z0-9_-]{0,31}$`, print
+        `{"error":{"code":"invalid_agent_name","message":"bad name"}}` to
+        stderr and exit 1. Check it in a subshell,
+        `(LC_ALL=C; [[ ${4:-} =~ ^[a-z][a-z0-9_-]{0,31}$ ]])`: `LC_ALL=C [[ … ]]`
+        is not valid Bash;
+     2. if `$TEST_STATE/bad-agent-rename` exists, print
+        `{"error":{"code":"test_bad","message":"injected rename error"}}` to
+        stderr and exit 1;
+     3. if `$TEST_STATE/taken-agent-rename` exists, remove it, print
+        `{"error":{"code":"agent_name_taken","message":"taken"}}` to stderr
+        and exit 1;
+     4. otherwise exit 0.
 
      Keep the logging line (line 45) and the existing `fail-*` hook (line
      46) as they are.
-   - Add cases next to the `fails` block (around line 819), each followed by
-     the file's usual `reset`:
+   - Add the cases as their own block right after `ok up-failures` (line 841),
+     starting with a `reset`. Successful cases use `up <task> <role>`, then
+     the `$TEST_STATE/log` check, then `team down <task>` and `reset` (as at
+     lines 833 and 840). Failing cases use `team up …`, `assert_code 1`,
+     `is '.reason | test("…")'` and `no_leftovers`, then `reset`. End the
+     block with `ok agent-names`.
      - `up 2863 review`: success; the log has `agent rename <pane>
        t2863-review`.
      - `up PR-2863 review`: the log has `pr-2863-review`.
@@ -99,11 +106,24 @@ Self-contained summary of the approved decisions:
      - the fake's `$3` is the pane and `$4` the name;
      - never call the real `herdr`.
 
-3. **Build (lead).** Build the `herdr-team` package (its `checkPhase` runs
-   shellcheck and the suite), then `just test-host p620` and
-   `just test-host razer`. Also confirm the new cases fail against the old
-   line 579: temporarily restore that one line in a scratch copy, run the
-   suite, and expect failures.
+3. **Build (lead).**
+   - Build the package. Its `checkPhase` (`home/development/agent-run.nix`
+     lines 22-27) runs `shellcheck --exclude=SC2016` and the suite:
+
+     ```bash
+     nix build --no-link --print-out-paths --impure --expr 'let f = builtins.getFlake (toString ./.); pkgs = f.nixosConfigurations.p620.pkgs; m = import ./home/development/agent-run.nix { inherit pkgs; lib = pkgs.lib; }; in builtins.elemAt m.home.packages 1'
+     ```
+
+     `getFlake` sees only tracked files, so `git add` first.
+   - Then `just test-host p620` and `just test-host razer`.
+   - **Regression check:** take the old built script (`$(readlink -f $(which herdr-team))`,
+     before the deploy), and for each of the `2863`, `PR-2863` and `taken`
+     cases, run a scratch copy of the new test file that has only that case
+     in the new block (the suite stops at the first failure):
+     `AGY_ACP_MEMBER_PY=home/development/agy-acp-member.py bash <scratch test> <old script>`.
+     Each must fail.
+   - Traps: the raw `herdr-team.sh` lacks the Nix prefix (`agy_member`,
+     `sink_path`), so always test a built script.
 4. **Review (lead).** A fresh Opus review gets only this plan and
    `git diff origin/main...HEAD`, and Codex and agy review read-only
    (`reviewers:`). Check `git status --porcelain` before and after. Fix,
@@ -111,16 +131,21 @@ Self-contained summary of the approved decisions:
 5. **PR, merge, deploy (lead).**
    - Open a PR linking the intent, spec and plan; say which steps Codex and
      the coder did. Merge once CI is green.
-   - Announce on `#agents:freundcloud.org.uk`, then deploy p620
-     (`just p620`) and razer (`just deploy-via-p620 razer`), and post the
-     outcome.
+   - `read_new("#agents:freundcloud.org.uk")`, post the deploy, then deploy
+     with `AGENT_BUS_ANNOUNCED=1`: p620 (`just p620`), then razer
+     (`just deploy-via-p620 razer`), from `~/.config/nixos` on main after
+     the merge. Post the outcome.
+   - Check: `systemctl --failed` is empty on both, and the installed
+     `herdr-team` contains `agent_name`.
+   - Traps: never deploy from the branch; p510 is not touched.
 6. **Live checks, p620 (lead).**
    - In this worktree, `herdr-team up 2863 review` returns `ok: true`, and
      `herdr agent list` shows `t2863-review` with `agent: "codex"`.
    - `herdr-team ask 2863 review` with a one-line prompt returns
      `ok: true`.
-   - In a second worktree, `herdr-team up t2863 review` returns `ok: true`
-     with a `t2863-review-<4 hex>` name.
+   - In a second worktree, `herdr-team up t2863 review` returns `ok: true`,
+     and `herdr agent list` shows its member as `t2863-review-<4 hex>`
+     (`up` itself only prints the role).
    - `down` both, then comment the results on #2863 and close it.
 
 ## Tests
