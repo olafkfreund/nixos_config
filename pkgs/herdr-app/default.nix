@@ -48,6 +48,8 @@ stdenv.mkDerivation (finalAttrs: {
 
   nativeBuildInputs = [ autoPatchelfHook makeWrapper copyDesktopItems ];
   buildInputs = [ libxkbcommon libxcb stdenv.cc.cc.lib ];
+  # dlopen'd GPU/Wayland libs go into RUNPATH, not LD_LIBRARY_PATH, which hc terminals would inherit.
+  runtimeDependencies = [ vulkan-loader libglvnd wayland libxkbcommon ];
 
   installPhase = ''
     runHook preInstall
@@ -73,7 +75,6 @@ stdenv.mkDerivation (finalAttrs: {
 
   postFixup = ''
     wrapProgram "$out/bin/herdr-app" \
-      --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ vulkan-loader libglvnd wayland libxkbcommon ]}" \
       --prefix PATH : "${lib.makeBinPath [ curl pipewire herdr-core ]}" \
       --set HERDR_CORE_DIRS "${herdr-core}/bin" \
       --set HERDR_RELEASES_URL "file://${releases}" \
