@@ -16,6 +16,10 @@ import uuid
 from pathlib import Path
 
 
+class ReplyError(RuntimeError):
+    """agy answered a request with a JSON-RPC error."""
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--turns", required=True, type=Path)
@@ -85,6 +89,9 @@ def main():
     pending = bytearray()
 
     def receive(deadline=None):
+        # checked first, so a stream of queued lines cannot outlast the deadline
+        if deadline is not None and time.monotonic() >= deadline:
+            raise TimeoutError("cancel response timed out")
         while b"\n" not in pending:
             if (
                 deadline is not None
@@ -111,19 +118,12 @@ def main():
                 option = next(
                     (o for o in options if o.get("kind", "").startswith("allow")), None
                 )
-                if option is None:
-                    raise RuntimeError("permission request has no allow option")
-                send(
-                    {
-                        "id": message["id"],
-                        "result": {
-                            "outcome": {
-                                "outcome": "selected",
-                                "optionId": option["optionId"],
-                            }
-                        },
-                    }
+                outcome = (
+                    {"outcome": "selected", "optionId": option["optionId"]}
+                    if option
+                    else {"outcome": "cancelled"}
                 )
+                send({"id": message["id"], "result": {"outcome": outcome}})
             else:
                 send(
                     {
@@ -160,7 +160,7 @@ def main():
                             )  # keep a TO: block after a tool call at line start
                 if message.get("id") == request_id and "method" not in message:
                     if "error" in message:
-                        raise RuntimeError(f"{method}: {message['error']}")
+                        raise ReplyError(f"{method}: {message['error']}")
                     return message.get("result", {})
         except KeyboardInterrupt:
             if stream is None:
@@ -168,7 +168,10 @@ def main():
             send({"method": "session/cancel", "params": {"sessionId": session_id}})
             deadline = time.monotonic() + 10
             while True:
-                message = receive(deadline)
+                try:
+                    message = receive(deadline)
+                except KeyboardInterrupt:
+                    continue  # already cancelling; the deadline still bounds the wait
                 if message.get("id") == request_id and "method" not in message:
                     print("\n■ Conversation interrupted", flush=True)
                     return None
@@ -189,6 +192,9 @@ def main():
                 {"sessionId": session_id, "configId": option["id"], "value": value},
             )
     print(f"agy session {session_id}", flush=True)
+    # herdr-team reads the id from here: a wrapped pane line could cut it short
+    (directory / ".session.tmp").write_text(session_id)
+    os.replace(directory / ".session.tmp", directory / "session")
 
     while True:
         try:
@@ -210,6 +216,11 @@ def main():
         except TimeoutError:
             cleanup()
             return 1
+        except ReplyError as error:
+            print(
+                f"\nagy error: {error}", flush=True
+            )  # a provider error; the session goes on
+            continue
         print(flush=True)
         if result is not None and result.get("stopReason") == "end_turn":
             turn_id = str(uuid.uuid4())
@@ -234,6 +245,8 @@ def main():
 if __name__ == "__main__":
     try:
         sys.exit(main())
+    except KeyboardInterrupt:
+        sys.exit(130)
     except (OSError, RuntimeError, json.JSONDecodeError) as error:
         print(f"agy-acp-member: {error}", file=sys.stderr, flush=True)
         sys.exit(1)

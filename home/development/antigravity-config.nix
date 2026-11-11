@@ -201,7 +201,7 @@ let
       # shellcheck disable=SC2086
       exec env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE \
         -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE AGY_CODER=1 AGY_WORKTREE="$(git rev-parse --show-toplevel)" \
-        agy-acp-member $model "$@"
+        agy-acp-member ''${model:+--model gemini-4-argon --effort medium} "$@" # ACP takes the effort as its own option
     fi
     # shellcheck disable=SC2086
     exec env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE \
@@ -290,7 +290,7 @@ let
     fi
 
     title="agy $v: coder guard probe failed on $(hostname)"
-    { cat "$report"; echo; cat "$out/log" 2>/dev/null; } >"$report.body"
+    { cat "$report"; echo; cat "$out/log" "$out/log-acp" "$out/acp.txt" 2>/dev/null; } >"$report.body"
     gh=${pkgs.gh}/bin/gh
     if $gh auth status >/dev/null 2>&1; then
       n=$($gh issue list -R olafkfreund/nixos_config --state open --search "in:title \"$title\"" --json number --jq length 2>/dev/null)

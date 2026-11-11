@@ -239,3 +239,23 @@ of the merge commit also works.
     (.result.pane.agent_session == null
      or (.result.pane.agent_session.agent == "agy" and .result.pane.agent_session.value == $s))
     ```
+
+## Deviations (implementation, 2026-11-11)
+
+- **Model and effort (decision 8):** `agy acp` offers `model` values such as `gemini-4-argon` and a separate
+  `thought_level` (`low|medium|high`); the CLI slug `gemini-4-argon-medium` is not a valid ACP value. `--acp` maps
+  the default to `--model gemini-4-argon --effort medium`.
+- **Session id (decision 10):** the client also writes the id to `<turns>/session`, and `up` reads it from there
+  once the pane shows `agy session`, so a wrapped pane line cannot cut it short.
+- **Readiness wait (decision 10):** while the pane shows the guard probe running (first use of a new agy, up to
+  300 s + 600 s), `up` waits up to 1200 s instead of 180 s.
+- **Client hardening (decisions 6, 7):** a permission request with no allow option is answered `cancelled`; a
+  JSON-RPC error reply to a prompt prints `agy error: …` and keeps the session (herdr-team counts it as a
+  provider error); stray non-JSON or non-object stdout lines are skipped; the cancel deadline is checked before
+  each read; a second `ctrl+c` during the cancel drain or cleanup is ignored; cleanup signals agy's whole group
+  even after agy has exited; a newline separates text before and after a tool call; `-32601` carries a message.
+- **`same_pane` for agy:** accepts only a pane whose `agent` is empty or `agy`.
+- **Guard probe:** the ACP run is bounded by `timeout 600`; the recall turn is found by its input; the denial
+  match is the guard's commit block; a failure report includes `log-acp` and `acp.txt`.
+- **Suite (step 5):** `reset` retries removing the runtime dir (a launcher's last records raced it in the razer
+  build sandbox); the checkPhase gets `python3` and `AGY_ACP_MEMBER_PY`.

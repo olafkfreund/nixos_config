@@ -557,8 +557,9 @@ LAUNCH
         break
       fi
       screen=$(h pane read "$pane" --source visible 2>/dev/null) || screen=''
-      if [[ $screen =~ agy[[:space:]]session[[:space:]]([^[:space:]]+) ]]; then
-        agy_session=${BASH_REMATCH[1]}
+      # the client writes the id to a file: a wrapped pane line could cut it short
+      if [[ $screen == *'agy session '* && -f $work/turns/session ]] && agy_session=$(<"$work/turns/session") \
+        && [[ $agy_session =~ ^[A-Za-z0-9._-]+$ ]]; then
         matched=1
         break
       fi
@@ -590,7 +591,7 @@ LAUNCH
 
 perr=("Usage limit reached" "reached your usage limit" "reached your workspace credit limit" "Selected model is at capacity"
   "service unavailable" "rate limit exceeded" "rate limit reached" "exceeded retry limit" "Quota exceeded"
-  "stream disconnected before completion")
+  "stream disconnected before completion" "agy error:")
 marker='■ Conversation interrupted'
 perr_args() {
   pargs=()
