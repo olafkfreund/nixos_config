@@ -1,6 +1,7 @@
 # Hyprland Skill
 
-A specialized skill for configuring and customizing Hyprland window manager in NixOS using Home Manager, providing expert guidance on Wayland compositor setup, essential packages, plugins, and declarative configuration.
+A specialized skill for configuring and customizing the Hyprland window manager in NixOS using Home Manager.
+It gives guidance on Wayland compositor setup, essential packages, plugins, and declarative configuration.
 
 ## Skill Overview
 
@@ -21,7 +22,7 @@ A specialized skill for configuring and customizing Hyprland window manager in N
 
 ### 1. Installation and Configuration
 
-**Two-Module Approach (Recommended)**
+#### Two-Module Approach (Recommended)
 
 The best practice is using both NixOS and Home Manager modules for optimal integration.
 
@@ -1395,7 +1396,9 @@ systemctl --user status xdg-desktop-portal-hyprland
 - **[Hyprland Wiki](https://wiki.hypr.land/)** - Complete Hyprland documentation
 - **[Hyprland on NixOS](https://wiki.hypr.land/Nix/Hyprland-on-NixOS/)** - NixOS integration guide
 - **[Hyprland on Home Manager](https://wiki.hypr.land/Nix/Hyprland-on-Home-Manager/)** - Home Manager module docs
-- **[Home Manager Options](https://github.com/nix-community/home-manager/blob/master/modules/services/window-managers/hyprland.nix)** - All available options
+- **[Home Manager Options][hm-hyprland]** - All available options
+
+[hm-hyprland]: https://github.com/nix-community/home-manager/blob/master/modules/services/window-managers/hyprland.nix
 
 ### Community Resources
 
