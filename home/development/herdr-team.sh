@@ -562,6 +562,8 @@ LAUNCH
         matched=1
         break
       fi
+      # first use of a new agy runs the guard probe before the client (up to 300 s + 600 s)
+      [[ $screen != *'running the guard probe'* ]] || ready_attempts=1200
     fi
     [[ ! -f $ctl/exit ]] || fail "launcher exited $(<"$ctl/exit"): $(tr '\n' ' ' <"$ctl/status")"
     sleep_for 1
