@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2863
 intent: intent/2026-11-11-2863-herdr-team-agent-rename.md
 ---
