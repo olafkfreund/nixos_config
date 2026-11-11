@@ -32,8 +32,9 @@ Approved decisions (intent + spec):
 ## Steps
 
 1. `hosts/razer/nixos/nvidia.nix:112-120`: replace the comment block and
-   the `systemd.services.nvidia-container-toolkit-cdi-generator.serviceConfig.ExecStart = lib.mkForce (pkgs.writeShellScript "nvidia-cdi-generator-safe" …);`
-   assignment with exactly:
+   the `serviceConfig.ExecStart = lib.mkForce (pkgs.writeShellScript
+   "nvidia-cdi-generator-safe" …)` assignment on
+   `systemd.services.nvidia-container-toolkit-cdi-generator` with exactly:
 
    ```nix
    # The CDI generator must not take docker/podman down or fail a switch
@@ -54,7 +55,7 @@ Approved decisions (intent + spec):
    Don't touch `hardware.nvidia-container-toolkit.enable` (line 81) or the
    udev rules below. The commit hook runs nixfmt; let it format.
 
-2. Eval and build (lead), from the worktree:
+2. Eval and build (lead), on p620 (this host), from the worktree:
 
    ```bash
    C=.#nixosConfigurations.razer.config.systemd.services.nvidia-container-toolkit-cdi-generator
@@ -64,59 +65,92 @@ Approved decisions (intent + spec):
    nix eval --json $C.wantedBy                      # docker, podman, multi-user.target
    nix eval --json $C.before                        # docker, podman
    nix eval --raw .#nixosConfigurations.razer.config.systemd.units.\"nvidia-container-toolkit-cdi-generator.service\".text | grep X-RestartIfChanged=false
-   just check-syntax
+   nix-instantiate --parse hosts/razer/nixos/nvidia.nix >/dev/null
    just test-host razer
    ```
 
-   Traps: `set -o pipefail` around any `nix build | tail`.
+   Traps: `just check-syntax` doesn't return a failing status on errors,
+   so `nix-instantiate --parse` is the gate. Use `set -o pipefail` around
+   any `nix build | tail`.
 
 3. Commit (lead) `fix(razer): use the upstream CDI generator script and stop it failing a switch (#2853)`.
-   Open the PR linking intent, spec and plan; run the Opus review
-   (fresh agent: plan path + `git diff origin/main`) and the Codex and agy
-   reviews on the diff. Merge once clean.
+   Open the PR linking intent, spec and plan, with `Refs #2853` (not
+   `Closes`, so the issue stays open until step 5 passes). Run the Opus
+   review (fresh agent: plan path + `git diff origin/main`) and the Codex
+   and agy reviews on the diff. Merge once clean.
    Traps: write the commit body and PR text to files (`-F`,
    `--body-file`), because the bus guard matches words in command text.
 
-4. Deploy (lead) from `~/.config/nixos` on `main` after the merge:
-   check `nhs` is not running there, `git pull --ff-only`, read
-   `#agents:freundcloud.org.uk`, post the razer deploy (about 10 min), then
+4. Deploy (lead) from `~/.config/nixos` on `main` after the merge, on
+   p620: check that `nhs` is not running there, `git pull --ff-only`, read
+   `#agents:freundcloud.org.uk`, post the razer deploy plus the step 5
+   checks (about 15 min), then
    `AGENT_BUS_ANNOUNCED=1 just deploy-via-p620 razer`.
-   Expect: no failed unit from the generator. A cosmetic exit 4 from
-   syncthing on razer is known; read the `units failed:` line.
+   Expect: no failed unit from the generator. `just` exits non-zero on a
+   switch exit 4. A cosmetic exit 4 from syncthing on razer is known, so
+   read the `units failed:` line before deciding. Remove `./result`
+   afterwards if the recipe left one.
    Traps: never deploy from the task worktree; leave the checkout on
    `main`.
 
-5. Runtime check on razer (lead, announced in the same post), one SSH call:
+5. Runtime check on razer (lead). Write this to the scratchpad as
+   `cdi-check.sh` and run it with
+   `AGENT_BUS_ANNOUNCED=1 ssh razer bash -s < cdi-check.sh`:
 
    ```bash
-   sudo systemctl restart nvidia-container-toolkit-cdi-generator
-   systemctl show -p Result,ActiveState,ExecMainStartTimestamp nvidia-container-toolkit-cdi-generator
-   jq -r '.devices[].name' /run/cdi/nvidia-container-toolkit.json   # 0, all
-   journalctl -u nvidia-container-toolkit-cdi-generator --since -5min | grep -c SIGSEGV   # 0
-   docker run --rm --device nvidia.com/gpu=all docker.io/library/ubuntu:24.04 nvidia-smi -L
-   sudo podman run --rm --device nvidia.com/gpu=all docker.io/library/ubuntu:24.04 nvidia-smi -L
+   set -eu -o pipefail
+   u=nvidia-container-toolkit-cdi-generator
+   img=docker.io/library/ubuntu:24.04
+   sudo systemctl restart "$u"
+   systemctl show -p Result,ActiveState,ExecMainStartTimestamp "$u"
+   [ "$(systemctl show -P Result "$u")" = success ]
+   inv=$(systemctl show -P InvocationID "$u")
+   ! journalctl _SYSTEMD_INVOCATION_ID="$inv" --no-pager | grep -q SIGSEGV
+   [ "$(jq -r '[.devices[].name] | sort | join(",")' /run/cdi/nvidia-container-toolkit.json)" = "0,all" ]
+   rc=0
+   docker run --rm --device nvidia.com/gpu=all "$img" nvidia-smi -L || rc=1
+   sudo podman run --rm --device nvidia.com/gpu=all "$img" nvidia-smi -L || rc=$((rc | 2))
+   docker image rm -f "$img" >/dev/null 2>&1 || true
+   sudo podman image rm -f "$img" >/dev/null 2>&1 || true
+   echo "containers rc=$rc"   # 0 = both OK, 1 = docker failed, 2 = podman failed
+   exit "$rc"
    ```
 
-   If only the docker run fails to resolve the device, restart docker once
-   (announced) and retry: dockerd may have missed the recreated
-   `/run/cdi`. Then remove the pulled image.
+   If only docker failed (`rc=1`), dockerd may have missed the recreated
+   `/run/cdi`. Restart docker once (`AGENT_BUS_ANNOUNCED=1`, already in
+   the post) and run the script again.
    Traps: `start` is a no-op on this active oneshot; it must be
-   `restart`. Rootless podman is out of scope.
+   `restart`. Rootless podman is out of scope. One SSH call per check
+   (p510-style SSH limits don't apply, but keep it batched).
 
-6. Close #2853 with the results, and post the outcome on the bus.
+6. Comment the results on #2853 and close it, then post the outcome on
+   the bus.
 
 ## Tests
 
-- Step 2: every eval matches; `just test-host razer` exits 0.
+- Step 2: every eval matches, the parse succeeds, and
+  `just test-host razer` exits 0.
 - Step 4: the deploy has no failed generator unit.
-- Step 5: `Result=success`, a fresh start time, devices `0` and `all`, no
-  `SIGSEGV`, and both `nvidia-smi -L` print the GPU.
+- Step 5: the script exits 0: `Result=success`, no `SIGSEGV` in that
+  invocation, devices `0,all`, and both `nvidia-smi -L` print the GPU.
 - Not tested on the host (reading only): failure path, driver-bump switch,
-  boot path.
+  boot path. As the spec notes, `restartIfChanged = false` also defers
+  toolkit-only or `mounts` changes until a boot or a manual restart.
 
 ## Rollback
 
-Revert the step 1 commit on `main` and deploy razer again
-(`just deploy-via-p620 razer`), or switch razer to the previous generation
-(`sudo nixos-rebuild switch --rollback` on razer). Nothing outside
-`/run/cdi` holds state.
+Fastest: on razer, switch to the previous generation
+(`sudo nixos-rebuild switch --rollback`), after a bus post and with
+`AGENT_BUS_ANNOUNCED=1`. Permanent: a revert PR from a worktree branch
+(never a commit on `main`), merged, then `git pull --ff-only` in
+`~/.config/nixos` and `just deploy-via-p620 razer` (announced). Nothing
+outside `/run/cdi` holds state.
+
+## Review notes
+
+The draft was reviewed by Codex (gpt-6.1-sol) and agy (model not reported),
+read-only. Fixed: step 5 now fails loudly (no `grep -c` exit-1 trap, the
+journal scoped to that invocation, a script run via `ssh bash -s`), the PR
+uses `Refs`, rollback goes through a PR, images are removed, the parse gate
+replaces `check-syntax`, and p620 is named as the build host. Advice only,
+not approval.
