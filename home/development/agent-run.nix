@@ -1,9 +1,8 @@
 { pkgs, lib, ... }:
 let
-  # The module system ignores argument defaults, so this is a binding; step 4 of the plan turns it on.
-  agyMember = false;
+  agyMember = true;
   sandbox = import ./agent-sandbox-pkgs.nix { inherit pkgs lib; };
-  testPath = lib.makeBinPath (with pkgs; [ bash coreutils util-linux procps jq socat gnugrep gnused gawk findutils diffutils git ]);
+  testPath = lib.makeBinPath (with pkgs; [ bash coreutils util-linux procps jq socat gnugrep gnused gawk findutils diffutils git python3 ]);
   herdr-run = pkgs.writeShellApplication {
     name = "herdr-run";
     runtimeInputs = with pkgs; [ jq socat coreutils util-linux procps gawk gnused ];
@@ -24,7 +23,17 @@ let
       runHook preCheck
       ${pkgs.stdenv.shellDryRun} "$target"
       ${lib.getExe pkgs.shellcheck-minimal} --exclude=SC2016 "$target" # jq filters are single-quoted on purpose
-      PATH=${testPath}:$PATH bash ${./herdr-team-test.sh} "$target" < /dev/null
+      AGY_ACP_MEMBER_PY=${./agy-acp-member.py} PATH=${testPath}:$PATH bash ${./herdr-team-test.sh} "$target" < /dev/null
+      runHook postCheck
+    '';
+  };
+  agy-acp-member = pkgs.writeShellApplication {
+    name = "agy-acp-member";
+    runtimeInputs = [ pkgs.python3 ];
+    text = ''exec python3 ${./agy-acp-member.py} "$@"'';
+    checkPhase = ''
+      runHook preCheck
+      ${lib.getExe pkgs.python3} ${./agy-acp-member-test.py} "$target"
       runHook postCheck
     '';
   };
@@ -33,6 +42,7 @@ in
   home.packages = [
     herdr-run
     herdr-team
+    agy-acp-member
     (pkgs.writeShellApplication {
       name = "agent-run";
       runtimeInputs = with pkgs; [ git jq coreutils gnugrep herdr-run ];
