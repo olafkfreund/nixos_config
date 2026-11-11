@@ -233,6 +233,11 @@ reset() {
   pkill -f 'sleep 63.1' 2>/dev/null || :
   pkill -f 'sleep 61.5' 2>/dev/null || :
   drop_work
+  # a launcher from the last case may still write its final records into $rt
+  for _ in {1..30}; do
+    rm -rf "$rt" 2>/dev/null && break
+    sleep 0.1
+  done
   rm -rf "$rt"
   find "$TEST_STATE" -mindepth 1 -delete
   printf '0\n' >"$TEST_STATE/n"
