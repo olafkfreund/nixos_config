@@ -51,6 +51,9 @@ def main():
     )
 
     def cleanup():
+        signal.signal(
+            signal.SIGINT, signal.SIG_IGN
+        )  # a second ctrl+c must not cut the kill short
         # signal the whole group even if agy itself is gone: its tool children may still run
         for sig in (signal.SIGTERM, signal.SIGKILL):
             try:
@@ -100,6 +103,8 @@ def main():
             message = json.loads(line)
         except json.JSONDecodeError:
             return {}  # a stray log line on stdout is not protocol
+        if not isinstance(message, dict):
+            return {}
         if "method" in message and "id" in message:
             if message["method"] == "session/request_permission":
                 options = message.get("params", {}).get("options", [])
@@ -120,7 +125,12 @@ def main():
                     }
                 )
             else:
-                send({"id": message["id"], "error": {"code": -32601}})
+                send(
+                    {
+                        "id": message["id"],
+                        "error": {"code": -32601, "message": "Method not found"},
+                    }
+                )
         return message
 
     serial = 0
@@ -144,6 +154,10 @@ def main():
                         print(chunk, end="", flush=True)
                     elif update.get("sessionUpdate") == "tool_call":
                         print(f"\n· {update.get('title', 'tool')}", flush=True)
+                        if stream and not stream[-1].endswith("\n"):
+                            stream.append(
+                                "\n"
+                            )  # keep a TO: block after a tool call at line start
                 if message.get("id") == request_id and "method" not in message:
                     if "error" in message:
                         raise RuntimeError(f"{method}: {message['error']}")

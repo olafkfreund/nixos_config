@@ -270,7 +270,7 @@ let
     acp_ok() {
       # turn files are uuid-named, so find the recall turn by its input, not by order
       [ "$(find "$out/turns" -name '*.json' | wc -l)" = 2 ] &&
-        $grep -l 'What was the word' "$out/turns"/*.json | xargs $grep -q "$word" &&
+        $grep -l 'What was the word' "$out/turns"/*.json | xargs -r $grep -q "$word" &&
         head_same &&
         $grep -q '^run_command deny .*BLOCKED by the coder guard' "$out/log-acp" 2>/dev/null
     }

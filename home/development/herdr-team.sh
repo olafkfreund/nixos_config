@@ -238,7 +238,7 @@ same_pane() { # pane terminal [kind] [agy_session]
   local reply
   reply=$(h pane get "$1" 2>/dev/null) || return 1
   jq -e --arg t "$2" --arg k "${3:-}" --arg s "${4:-}" \
-    '.result.pane.terminal_id == $t and ($k == "" or $k == "agy" or .result.pane.agent == $k)
+    '.result.pane.terminal_id == $t and ($k == "" or .result.pane.agent == $k or ($k == "agy" and (.result.pane.agent // "") == ""))
      and ($s == "" or .result.pane.agent_session == null
        or (.result.pane.agent_session.agent == "agy" and .result.pane.agent_session.value == $s))' \
     >/dev/null 2>&1 <<<"$reply"
