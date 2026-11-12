@@ -3,8 +3,12 @@
 # (#1832). Codex reads ~/.codex/AGENTS.md; Antigravity reads ~/.gemini/AGENTS.md.
 #
 # Policy and templates are inlined so they do not depend on skill selection.
-{ lib, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 let
+  # p620 only: the llm-index tool instructions (#2882); empty where the module is absent.
+  llmIndex = lib.optional (lib.attrByPath [ "services" "llm-index" "enable" ] false config)
+    config.services.llm-index.agentInstructions;
+
   # The model-split section names Claude's own agents (#2079); keep it to Claude.
   managedPolicy = lib.head (lib.splitString "\n## Model split (Claude Code only)"
     (builtins.readFile ../../modules/programs/claude-code-managed-claude.md));
@@ -36,14 +40,14 @@ let
     pkgs.writeText "global-agents.md" text;
 in
 {
-  home.file.".codex/AGENTS.md".source = agentsMd [
+  home.file.".codex/AGENTS.md".source = agentsMd ([
     (builtins.readFile ./agent-rules/codex-standards.md)
     "## PARR protocol\n"
     (builtins.readFile ../../modules/programs/parr-protocol.txt)
-  ];
-  home.file.".gemini/AGENTS.md".source = agentsMd [
+  ] ++ llmIndex);
+  home.file.".gemini/AGENTS.md".source = agentsMd ([
     (builtins.readFile ./agent-rules/agy-standards.md)
     "## PARR protocol\n"
     (builtins.readFile ../../modules/programs/parr-protocol.txt)
-  ];
+  ] ++ llmIndex);
 }

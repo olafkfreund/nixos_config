@@ -142,6 +142,13 @@
       inputs.nixarchy-meeting-mode.follows = "nixarchy-meeting-mode";
       inputs.home-manager.follows = "home-manager";
     };
+    # nixarchy-llm-index: local document and code index served to agents over MCP;
+    # hosts/common/nixos/llm-index.nix (#2882). Pinned by rev so an update cannot move it.
+    nixarchy-llm-index = {
+      url = "github:olafkfreund/nixarchy-llm-index/84fc98656c77fa56c2b00515b13db47574069695";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
 
     # nixarchy-flea: Flea file manager (prebuilt upstream binaries in an FHS
     # runtime); hosts/common/nixos/omarchy-flea.nix.
