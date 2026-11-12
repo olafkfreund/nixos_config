@@ -44,6 +44,7 @@
     ../../common/nixos/omarchy-altscape.nix
     ../../common/nixos/omarchy-expose.nix
     ../../common/nixos/omarchy-omateams.nix
+    ../../common/nixos/omarchy-gmessages.nix
     ../../common/nixos/omarchy-hello-lock.nix
     ../../common/nixos/omarchy-omaoutlook.nix
     ../../common/nixos/omarchy-omamail.nix

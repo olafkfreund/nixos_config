@@ -719,6 +719,27 @@
         "type": "github"
       }
     },
+    "gmessages": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794430863,
+        "narHash": "sha256-Q3xrR6+gYj0eZm+tWCqDa8xbVUwHdilR9NibaX4MoCM=",
+        "ref": "feat/nixos-flake",
+        "rev": "ac7e10292de03e6349c7a901b10f4159e48ae10d",
+        "revCount": 124,
+        "type": "git",
+        "url": "file:///mnt/code/Source-home/GitHub/nix-gmsg-tui"
+      },
+      "original": {
+        "ref": "feat/nixos-flake",
+        "type": "git",
+        "url": "file:///mnt/code/Source-home/GitHub/nix-gmsg-tui"
+      }
+    },
     "gnome-shell": {
       "flake": false,
       "locked": {
@@ -3727,6 +3748,7 @@
         "claude-skills-borghei": "claude-skills-borghei",
         "cosmic-applet-spotify": "cosmic-applet-spotify",
         "flyline": "flyline",
+        "gmessages": "gmessages",
         "gogmail": "gogmail",
         "gscratch": "gscratch",
         "herdr": "herdr",
