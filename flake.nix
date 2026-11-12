@@ -65,9 +65,10 @@
       inputs.nixarchy-voice.url = "github:olafkfreund/nixarchy-voice";
       inputs.nixarchy-voice.inputs.nixpkgs.follows = "nixpkgs";
       inputs.nixarchy-voice.inputs.ai-mirror.follows = "nixarchy/ai-mirror";
-      # #2732: slow-login fix; remove once nixarchy pins this commit or later.
-      inputs.nixarchy-omatheme.url = "github:olafkfreund/nixarchy-omatheme/d734fc3652a432e2d331d5f2a253ec0d7d498842";
+      # #2732 slow-login fix, #2880 live editor themes; remove once nixarchy pins this commit or later.
+      inputs.nixarchy-omatheme.url = "github:olafkfreund/nixarchy-omatheme/8e6fbcd84e3b7aecd1ec739166cc7231149520bc";
       inputs.nixarchy-omatheme.inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixarchy-omatheme.inputs.home-manager.follows = "home-manager";
 
       # nixarchy's NixOS module imports home-manager.nixosModules.home-manager
       # itself. From its own pin that is a second copy of nixos/common.nix, and
@@ -143,9 +144,9 @@
     };
 
     # gmessages: Google Messages as an Omarchy shell plugin (daemon + QML), on p620
-    # for testing; hosts/common/nixos/omarchy-gmessages.nix. Local branch until it is pushed.
+    # for testing; hosts/common/nixos/omarchy-gmessages.nix.
     gmessages = {
-      url = "github:olafkfreund/nix-gmsg-tui/feat/nixos-flake";
+      url = "github:olafkfreund/nix-gmsg-tui";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -192,6 +193,7 @@
     lanzaboote = {
       url = "github:nix-community/lanzaboote/v1.1.0";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.rust-overlay.follows = "rust-overlay";
     };
 
     # Additional tools
@@ -200,13 +202,6 @@
     # Anthropic's OFFICIAL Linux beta .deb ourselves (pkgs/claude-desktop-beta,
     # exposed via overlays/default.nix as pkgs.claude-desktop-linux). The old
     # aaddrick/claude-desktop-debian Windows-repackage input was removed.
-
-    # GogMail — keyboard-driven Google Workspace TUI (Gmail/Calendar/Tasks/
-    # Drive/Contacts/Chat) built on the gog CLI. Consumed via overlays as
-    # pkgs.gogmail; launched from the tmux ai-tools palette + M-c. Uses its
-    # own locked nixpkgs (no follows) so the tested Python closure builds
-    # as-released. Bump with `nix flake update gogmail`.
-    gogmail.url = "github:olafkfreund/gogmail";
 
     # Claude Code skill catalogue (borghei). flake = false because it's a
     # plain markdown/assets catalogue, not a Nix flake. We symlink one
