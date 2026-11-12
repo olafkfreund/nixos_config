@@ -45,10 +45,18 @@ Never work in `~/.config/nixos`.
      and the blank line after it, so the list has no empty overlay.
    - Run `nix flake lock`.
 
-   → verify: `nix flake metadata --json | jq '.locks.nodes | keys | map(select(test("gogmail|flake-utils_2|nixpkgs_2|systems_2")))'`
-   prints `[]`, and
-   `diff <(git show origin/main:flake.lock | jq -S '.nodes | del(.gogmail, ."flake-utils_2", .nixpkgs_2, .systems_2) | del(.root.inputs.gogmail)') <(jq -S .nodes flake.lock)`
-   is empty.
+   → verify: the first command prints `[]`, the diff prints nothing:
+
+   ```bash
+   nix flake metadata --json \
+     | jq '.locks.nodes | keys | map(select(test("gogmail|flake-utils_2|nixpkgs_2|systems_2")))'
+   diff \
+     <(git show f1910be2e:flake.lock \
+       | jq -S '.nodes | del(.gogmail, ."flake-utils_2", .nixpkgs_2, .systems_2)
+                | del(.root.inputs.gogmail)') \
+     <(jq -S .nodes flake.lock)
+   ```
+
    Traps: if `nix flake lock` updates any other node (a missing `locked`
    for something else), stop and report; do not run `nix flake update`.
    Step 1 alone leaves `pkgs.gogmail` dangling in tmux, so do not
@@ -65,7 +73,7 @@ Never work in `~/.config/nixos`.
      `"      - name: GogMail (Google Workspace TUI)"`, `"        key: m"`
      and `"        command: display-popup … 'gogmail-tmux'"`. The
      `"      - separator: true"` line after them stays.
-   - 608-612: delete the last list element, from `{` with
+   - 608-613: delete the last list element, from `{` with
      `icon = "󰇮";` through its closing `}`. The previous element's `}` is
      then directly followed by `]);`.
    - 618-638: delete the `# GogMail — Google Workspace TUI …` comment, the
@@ -127,9 +135,12 @@ Never work in `~/.config/nixos`.
 | 6 | `nix path-info -r <out> \| grep -i gogmail` for p620 and razer | no output |
 | 7 | in `home-files/` of `nix build --no-link --print-out-paths .#nixosConfigurations.p620.config.home-manager.users.olafkfreund.home.activationPackage`: `grep -n 'M-c\|gogmail' .config/tmux/tmux.conf`; `grep -c GogMail` on `.config/tmux/plugins/tmux-which-key/config.yaml` and `.config/tmux-palette/palettes/ai-tools.json`; `yq .` / `jq .` parse them | no matches, 0, 0; both parse |
 
+All builds run on p620. razer is never built on razer itself.
+
 ## Rollback
 
-`git revert` the implementation commit, then `nix flake lock` re-adds the
-input at its latest rev. To get the old pin back exactly, check out
-`flake.lock` from `origin/main` instead. Nothing on the hosts changes until
-a deploy, and a deploy rolls back with the previous NixOS generation.
+`git revert` the implementation commit alone. That restores `flake.nix`,
+the overlay, tmux and the original `flake.lock` pin together. Don't run
+`nix flake lock` or check out a lock from a later `origin/main`. Nothing
+on the hosts changes until a deploy, and a deploy rolls back with the
+previous NixOS generation.
