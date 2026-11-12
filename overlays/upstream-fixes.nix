@@ -1,4 +1,4 @@
-final: prev: {
+_final: prev: {
   # typescript-language-server 6.0.2's pnpm-deps hash is wrong in nixos-unstable
   # 7fd4004; fixed by nixpkgs#572951 (6.0.3 builds). The hash is only valid for
   # 6.0.2: forced onto 6.0.3 it reuses the 6.0.2 deps and fails offline (#2688).
@@ -224,7 +224,7 @@ final: prev: {
   # is the hook's own opt-out. Drop each once its nixpkgs fix reaches the channel.
   # nixarchy-meetingai gets the same in hosts/common/nixos/omarchy-meetingai.nix.
 }
-// builtins.listToAttrs (map
+  // builtins.listToAttrs (map
   (name: {
     inherit name;
     value = prev.${name}.overrideAttrs { dontCargoUseSystemLibs = true; };
@@ -240,11 +240,3 @@ final: prev: {
   "viddy"
   "voxtype"
 ])
-  // {
-  # terraform-provider-tailscale 0.29.2's vendored deps do not build with Go 1.27.
-  terraform-providers = prev.terraform-providers // {
-    tailscale_tailscale = prev.terraform-providers.tailscale_tailscale.override {
-      mkProviderGoModule = final.buildGo126Module;
-    };
-  };
-}
