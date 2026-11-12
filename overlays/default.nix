@@ -4,10 +4,6 @@
     customPkgs = import ../pkgs { pkgs = final; };
   })
 
-  (_final: prev: {
-    gogmail = inputs.gogmail.packages.${prev.stdenv.hostPlatform.system}.gogmail;
-  })
-
   # Claude Desktop — Anthropic's OFFICIAL Linux beta, packaged from the signed
   # apt-repo .deb (pkgs/claude-desktop-beta). Replaced the aaddrick Windows-
   # repackage in #986. Attribute name kept as `claude-desktop-linux` so

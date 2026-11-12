@@ -194,13 +194,6 @@
     # exposed via overlays/default.nix as pkgs.claude-desktop-linux). The old
     # aaddrick/claude-desktop-debian Windows-repackage input was removed.
 
-    # GogMail — keyboard-driven Google Workspace TUI (Gmail/Calendar/Tasks/
-    # Drive/Contacts/Chat) built on the gog CLI. Consumed via overlays as
-    # pkgs.gogmail; launched from the tmux ai-tools palette + M-c. Uses its
-    # own locked nixpkgs (no follows) so the tested Python closure builds
-    # as-released. Bump with `nix flake update gogmail`.
-    gogmail.url = "github:olafkfreund/gogmail";
-
     # Claude Code skill catalogue (borghei). flake = false because it's a
     # plain markdown/assets catalogue, not a Nix flake. We symlink one
     # subdirectory (engineering/claude-code-mastery) into ~/.claude/skills/

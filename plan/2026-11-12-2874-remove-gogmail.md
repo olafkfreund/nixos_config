@@ -27,8 +27,10 @@ Self-contained summary of the approved decisions:
 - No new option, no flag. Explicit imports only.
 - p510 is evaluated, never built or deployed in this task.
 
-Baseline for checks is `origin/main` at `f1910be2e`. Line numbers below
-are from that commit. Work happens in the worktree
+Line numbers below are from `origin/main` at `f1910be2e`. The baseline for
+the checks is the branch's own base, `37969f833` (#2871, a flake bump that
+landed before the worktree was created; the source lines are unchanged).
+Work happens in the worktree
 `/home/olafkfreund/.config/nixos-2874`, branch `chore/2874-remove-gogmail`.
 Never work in `~/.config/nixos`.
 
@@ -45,16 +47,15 @@ Never work in `~/.config/nixos`.
      and the blank line after it, so the list has no empty overlay.
    - Run `nix flake lock`.
 
-   → verify: the first command prints `[]`, the diff prints nothing:
+   → verify by content, not node names. Nix renumbers `_N` nodes when one is
+   dropped, so a name-based diff is noisy (deviation found in step 1). The
+   removed narHashes must be exactly gogmail's 4 nodes, with none added:
 
    ```bash
-   nix flake metadata --json \
-     | jq '.locks.nodes | keys | map(select(test("gogmail|flake-utils_2|nixpkgs_2|systems_2")))'
-   diff \
-     <(git show f1910be2e:flake.lock \
-       | jq -S '.nodes | del(.gogmail, ."flake-utils_2", .nixpkgs_2, .systems_2)
-                | del(.root.inputs.gogmail)') \
-     <(jq -S .nodes flake.lock)
+   locks() { jq -r '.nodes[] | select(.locked) | .locked.narHash' | sort; }
+   jq '.nodes | has("gogmail")' flake.lock          # false
+   comm -23 <(git show 37969f833:flake.lock | locks) <(locks < flake.lock) | wc -l  # 4
+   comm -13 <(git show 37969f833:flake.lock | locks) <(locks < flake.lock) | wc -l  # 0
    ```
 
    Traps: if `nix flake lock` updates any other node (a missing `locked`

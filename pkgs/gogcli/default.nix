@@ -20,15 +20,6 @@
 #
 # The Go module path is still `github.com/steipete/gogcli`, so the version
 # ldflags target that path even though the source lives at openclaw.
-#
-# Bumping this does NOT update every gog on the machine. gogmail is a flake
-# input with its own locked nixpkgs (flake.nix says no follows, on purpose, so
-# its tested Python closure builds as released) and it bakes its own gogcli into
-# its wrapper PATH -- which is why a built host closure contains two gogcli
-# versions at once. `nix why-depends <system> <old-gogcli>` names gogmail as the
-# holder. That is intended, not drift: the TUI is tested against its pin. Only
-# the `gog` on PATH, the gog-dashboard timer and the agenix token import use
-# this derivation.
 buildGoModule (finalAttrs: {
   pname = "gogcli";
   version = "0.48.0";

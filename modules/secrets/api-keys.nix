@@ -203,7 +203,7 @@ in
       };
     }
     # Password for gog's file keyring backend — read by gog-token-import (to
-    # seed the keyring) and the gogmail launcher (to read it at runtime).
+    # seed the keyring) and the gog wrapper (to read it at runtime).
     // lib.optionalAttrs (builtins.pathExists ../../secrets/gogcli-keyring-password.age) {
       gogcli-keyring-password = {
         file = ../../secrets/gogcli-keyring-password.age;
