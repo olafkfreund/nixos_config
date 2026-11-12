@@ -22,9 +22,8 @@ let
   # `gog` with its keyring unlocked. The file keyring backend refuses to open
   # without GOG_KEYRING_PASSWORD in any non-TTY context — a bar widget, a hook,
   # an agent, or the collector below — and the password lives in agenix rather
-  # than the session environment. Same pattern as gogmail-tmux in
-  # home/shell/tmux. Falls through untouched when the secret is absent, so an
-  # interactive shell still gets the normal password prompt.
+  # than the session environment. Falls through untouched when the secret is
+  # absent, so an interactive shell still gets the normal password prompt.
   #
   # Everything that invokes gog must go through this, not cfg.package directly.
   gogWrapped = pkgs.writeShellApplication {
@@ -87,7 +86,7 @@ in
       description = ''
         Path to the agenix-decrypted password for gog's file keyring backend.
         Exported as GOG_KEYRING_PASSWORD by the import service (to seed the
-        keyring) and by the gogmail launcher (to read it). Runtime only.
+        keyring) and by the gog wrapper (to read it). Runtime only.
       '';
     };
 

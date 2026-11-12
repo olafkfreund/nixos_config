@@ -191,10 +191,6 @@ in
         bind-key -n M-Space run-shell '${pkgs.customPkgs.tmux-palette}/bin/tmux-palette'
         bind-key -n M-p     run-shell '${pkgs.customPkgs.tmux-palette}/bin/tmux-palette'
         bind-key -n M-a     run-shell '${pkgs.customPkgs.tmux-palette}/bin/tmux-palette ai-tools'
-        # M-c → GogMail TUI (Gmail / Calendar / Tasks / Drive / Contacts /
-        # Chat) in a floating popup. Direct launch, same pattern as the AI
-        # tools — also available from the M-a ai-tools palette.
-        bind-key -n M-c     display-popup -w 90% -h 90% -d '#{pane_current_path}' -E 'gogmail-tmux'
 
         # ========== Terminal and Display Settings ==========
         set-option -g terminal-overrides ',xterm-256color:RGB,alacritty:RGB,kitty:RGB,foot:RGB,wezterm:RGB,ghostty:RGB'
@@ -361,10 +357,7 @@ in
         # ========== Remove Round Corners and Fix Powerline ==========
         # Force flat separators and prevent powerline curve characters
         set -g status-left "#{?client_prefix,#[bg=#${colors.base0A}]#[fg=#${colors.base00}],#[bg=#${colors.base0D}]#[fg=#${colors.base00}]} #S #[fg=default,bg=default] "
-        # Path + clock. (The former gog Google-Workspace segments were
-        # removed when the PIM widgets were replaced by the gogmail TUI —
-        # gogmail is launched on demand via M-c / the ai-tools palette and
-        # doesn't feed a passive status segment.)
+        # Path + clock. (The former gog Google-Workspace status segments were removed.)
         set -g status-right " #[fg=#${colors.base04}]#{s|$HOME|~|:pane_current_path} │ %H:%M │ %d-%b "
 
         # Override window status format to ensure clean appearance.
@@ -511,9 +504,6 @@ in
           "      - name: Command palette"
           "        key: p"
           "        command: run-shell ${palette}"
-          "      - name: GogMail (Google Workspace TUI)"
-          "        key: m"
-          "        command: display-popup -w 90% -h 90% -d '#{pane_current_path}' -E 'gogmail-tmux'"
           "      - separator: true"
           "      - name: Session expose"
           "        key: e"
@@ -605,38 +595,10 @@ in
           subtitle = "agy in a named window; tmux flashes on 20s idle, desktop toast on exit";
           action.tmux = "run-shell agy-window-launcher";
         }
-        {
-          icon = "󰇮";
-          title = "GogMail (Popup)";
-          subtitle = "Google Workspace TUI — Gmail, Calendar, Tasks, Drive, Contacts, Chat";
-          action.tmux = "display-popup -w 90% -h 90% -d '#{pane_current_path}' -E 'gogmail-tmux'";
-        }
       ]);
     };
 
     home.packages = [
-      # GogMail — Google Workspace TUI (Gmail/Calendar/Tasks/Drive/Contacts/
-      # Chat). Replaces the old gog-backed PIM popups. Launched on demand
-      # from the M-a ai-tools palette and the M-c keybind. Wraps the gog
-      # CLI + clipboard/browser tools onto its own PATH.
-      pkgs.gogmail
-
-      # gogmail launch wrapper for the tmux popups: pins GOG_HOME and sources
-      # GOG_KEYRING_PASSWORD from the agenix file so gog can unlock its file
-      # keyring regardless of the (possibly older) tmux server environment.
-      (pkgs.writeShellApplication {
-        name = "gogmail-tmux";
-        runtimeInputs = [ pkgs.gogmail pkgs.coreutils ];
-        text = ''
-          export GOG_HOME="$HOME/.config/gogcli"
-          if [ -r /run/agenix/gogcli-keyring-password ]; then
-            GOG_KEYRING_PASSWORD="$(cat /run/agenix/gogcli-keyring-password)"
-            export GOG_KEYRING_PASSWORD
-          fi
-          exec gogmail "$@"
-        '';
-      })
-
       pkgs.customPkgs.tmux-ccm
 
       # agy lifecycle wrappers — agy has no hook system (unlike Claude
