@@ -2755,7 +2755,6 @@
     "nixarchy-omatheme": {
       "inputs": {
         "home-manager": [
-          "nixarchy",
           "home-manager"
         ],
         "nixpkgs": [
@@ -2764,17 +2763,17 @@
         "omarchroma": "omarchroma"
       },
       "locked": {
-        "lastModified": 1793894731,
-        "narHash": "sha256-muVxwDmTApM/TkHC+JK4u3D6Xw34CYv2newBqWA2Aqw=",
+        "lastModified": 1794504360,
+        "narHash": "sha256-gmVO5379WI7+WkVWTVSZ7XawWIgzQohaCLm1u51uLP0=",
         "owner": "olafkfreund",
         "repo": "nixarchy-omatheme",
-        "rev": "d734fc3652a432e2d331d5f2a253ec0d7d498842",
+        "rev": "8e6fbcd84e3b7aecd1ec739166cc7231149520bc",
         "type": "github"
       },
       "original": {
         "owner": "olafkfreund",
         "repo": "nixarchy-omatheme",
-        "rev": "d734fc3652a432e2d331d5f2a253ec0d7d498842",
+        "rev": "8e6fbcd84e3b7aecd1ec739166cc7231149520bc",
         "type": "github"
       }
     },
