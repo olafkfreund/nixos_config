@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2874
 intent: intent/2026-11-12-2874-remove-gogmail.md
 ---
