@@ -2605,6 +2605,30 @@
         "type": "github"
       }
     },
+    "nixarchy-llm-index": {
+      "inputs": {
+        "home-manager": [
+          "home-manager"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794525315,
+        "narHash": "sha256-pCxpkX+ZddP/9x1yb47u1ICN1gy/cDFeLTHPFZ103pU=",
+        "owner": "olafkfreund",
+        "repo": "nixarchy-llm-index",
+        "rev": "84fc98656c77fa56c2b00515b13db47574069695",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "repo": "nixarchy-llm-index",
+        "rev": "84fc98656c77fa56c2b00515b13db47574069695",
+        "type": "github"
+      }
+    },
     "nixarchy-meeting-mode": {
       "inputs": {
         "nixpkgs": [
@@ -3690,6 +3714,7 @@
           "nixarchy-distrobox"
         ],
         "nixarchy-flea": "nixarchy-flea",
+        "nixarchy-llm-index": "nixarchy-llm-index",
         "nixarchy-meeting-mode": "nixarchy-meeting-mode",
         "nixarchy-meetingai": "nixarchy-meetingai",
         "nixarchy-microvm": [
