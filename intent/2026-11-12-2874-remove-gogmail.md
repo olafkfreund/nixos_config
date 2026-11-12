@@ -33,13 +33,18 @@ Where it lives today (`origin/main`):
   `plan/` files for this task.
 - `gogmail` and `gogmail-tmux` are absent from every host's closure, and
   `flake.lock` has no `gogmail` node.
-- tmux no longer has `M-c` bound or a GogMail menu or palette entry.
+- tmux has no GogMail menu or palette entry, and `M-c` no longer runs
+  `gogmail-tmux`. By default it is left unbound (see open question 1).
 - All three hosts evaluate and build with no new warnings.
 
 ## Affected users and systems
 
-- p620 and razer: the developer Home Manager profile that imports
-  `home/shell/tmux`. Check p510, which may also load it.
+- All three hosts. p620 and razer enable tmux through
+  `Users/olafkfreund/profile.nix:128`; p510 imports both profiles
+  (`Users/olafkfreund/p510_home.nix:10-11`) and enables tmux at line 89.
+  p510 is built only with the owner's OK.
+- `flake.lock`: four nodes are used only by gogmail (`gogmail`,
+  `flake-utils_2`, `nixpkgs_2`, `systems_2`) and go with it.
 - The owner's tmux muscle memory: `M-c` stops doing anything.
 - `olafkfreund/gogmail#29` (the stdenv fix opened earlier today) becomes moot.
 
@@ -56,8 +61,8 @@ Where it lives today (`origin/main`):
 
 ## Open questions
 
-1. Should `M-c` be rebound to the replacement tool, or just unbound? If
-   rebound, which command?
+1. `M-c` is unbound by default. Should it instead be rebound to the
+   replacement tool in this same change? If so, which command?
 2. Should the `olafkfreund/gogmail` repo be archived on GitHub, and
    `gogmail#29` closed? (Left untouched unless you say so.)
 3. Should anything in `~/.config/gogmail` or similar user state be cleaned
