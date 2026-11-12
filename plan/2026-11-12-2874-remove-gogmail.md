@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2874
 spec: spec/2026-11-12-2874-remove-gogmail.md
 coders:
