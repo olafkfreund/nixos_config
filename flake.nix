@@ -150,6 +150,13 @@
       inputs.home-manager.follows = "home-manager";
     };
 
+    # gmessages: Google Messages as an Omarchy shell plugin (daemon + QML), on p620
+    # for testing; hosts/common/nixos/omarchy-gmessages.nix.
+    gmessages = {
+      url = "github:olafkfreund/nix-gmsg-tui";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # nixarchy-flea: Flea file manager (prebuilt upstream binaries in an FHS
     # runtime); hosts/common/nixos/omarchy-flea.nix.
     nixarchy-flea = {

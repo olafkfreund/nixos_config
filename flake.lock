@@ -701,6 +701,26 @@
         "type": "github"
       }
     },
+    "gmessages": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794526159,
+        "narHash": "sha256-6QXDNNbNzal1idMdvdu2ikLOZDooAPccgg+5oqO+4Rw=",
+        "owner": "olafkfreund",
+        "repo": "nix-gmsg-tui",
+        "rev": "e0efccd22f7e9f4873733be28ba4082f53653686",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "repo": "nix-gmsg-tui",
+        "type": "github"
+      }
+    },
     "gnome-shell": {
       "flake": false,
       "locked": {
@@ -3699,6 +3719,7 @@
         "claude-skills-borghei": "claude-skills-borghei",
         "cosmic-applet-spotify": "cosmic-applet-spotify",
         "flyline": "flyline",
+        "gmessages": "gmessages",
         "gscratch": "gscratch",
         "herdr": "herdr",
         "home-manager": "home-manager",
