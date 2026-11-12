@@ -145,7 +145,7 @@
     # gmessages: Google Messages as an Omarchy shell plugin (daemon + QML), on p620
     # for testing; hosts/common/nixos/omarchy-gmessages.nix. Local branch until it is pushed.
     gmessages = {
-      url = "git+file:///mnt/code/Source-home/GitHub/nix-gmsg-tui?ref=feat/nixos-flake";
+      url = "github:olafkfreund/nix-gmsg-tui/feat/nixos-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

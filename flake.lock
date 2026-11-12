@@ -726,18 +726,18 @@
         ]
       },
       "locked": {
-        "lastModified": 1794430863,
-        "narHash": "sha256-Q3xrR6+gYj0eZm+tWCqDa8xbVUwHdilR9NibaX4MoCM=",
-        "ref": "feat/nixos-flake",
-        "rev": "ac7e10292de03e6349c7a901b10f4159e48ae10d",
-        "revCount": 124,
-        "type": "git",
-        "url": "file:///mnt/code/Source-home/GitHub/nix-gmsg-tui"
+        "lastModified": 1794430992,
+        "narHash": "sha256-ADby1fCGZKhokXX+GTDQ/utFlfF4dwi/Y+wwmMmnc30=",
+        "owner": "olafkfreund",
+        "repo": "nix-gmsg-tui",
+        "rev": "85f6b8b929f3a550dd179e4e975bbf2e4095dc52",
+        "type": "github"
       },
       "original": {
+        "owner": "olafkfreund",
         "ref": "feat/nixos-flake",
-        "type": "git",
-        "url": "file:///mnt/code/Source-home/GitHub/nix-gmsg-tui"
+        "repo": "nix-gmsg-tui",
+        "type": "github"
       }
     },
     "gnome-shell": {
