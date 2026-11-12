@@ -30,6 +30,7 @@
     ../../common/nixos/bash-devshell-readline.nix
     ../../common/nixos/omarchy-sddm.nix
     ../../common/nixos/omarchy-gog.nix
+    ../../common/nixos/omarchy-gmessages.nix
     ../../common/nixos/omarchy-plugin-browser.nix
     ../../common/nixos/omarchy-meet-binds.nix
     ../../common/nixos/omarchy-voice-pkgs.nix
