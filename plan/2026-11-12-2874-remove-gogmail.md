@@ -129,7 +129,7 @@ Never work in `~/.config/nixos`.
 | # | Command | Expected |
 |---|---|---|
 | 1 | `git grep -n -i gogmail -- ':!intent' ':!spec' ':!plan'` | no output |
-| 2 | lock diff from step 1 | empty |
+| 2 | lock check from step 1 | `false`, `4`, `0` |
 | 3 | `nix eval --raw .#nixosConfigurations.<host>.config.system.build.toplevel.drvPath` for p620, razer, p510 | succeeds; the only warning is `sourceHighlight` |
 | 4 | gog drvPath from step 3 | equals baseline |
 | 5 | `just test-host p620`; `nix build --no-link --print-out-paths .#nixosConfigurations.razer.config.system.build.toplevel` | both build |
