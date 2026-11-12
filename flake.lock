@@ -1780,7 +1780,9 @@
           "nixpkgs"
         ],
         "pre-commit": "pre-commit",
-        "rust-overlay": "rust-overlay_3"
+        "rust-overlay": [
+          "rust-overlay"
+        ]
       },
       "locked": {
         "lastModified": 1782141370,
@@ -3765,7 +3767,7 @@
         "nixos-tfm": "nixos-tfm",
         "nixpkgs": "nixpkgs_8",
         "nur": "nur",
-        "rust-overlay": "rust-overlay_4",
+        "rust-overlay": "rust-overlay_3",
         "seance": "seance",
         "sops-nix": "sops-nix_2",
         "spicetify-nix": "spicetify-nix",
@@ -3817,27 +3819,6 @@
       }
     },
     "rust-overlay_3": {
-      "inputs": {
-        "nixpkgs": [
-          "lanzaboote",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1782012058,
-        "narHash": "sha256-9mWUnReOUXfKjZuJAL/bAFH3LUyECTRtXgSNVjRw3UY=",
-        "owner": "oxalica",
-        "repo": "rust-overlay",
-        "rev": "8534567325bd8a8d2928e6afd81e0a87d19efd3c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "oxalica",
-        "repo": "rust-overlay",
-        "type": "github"
-      }
-    },
-    "rust-overlay_4": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
