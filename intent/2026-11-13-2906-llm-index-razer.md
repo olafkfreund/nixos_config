@@ -32,23 +32,34 @@ an indexed file type, but it must never reach the public tier.
 - `/extdisk/Source/password` is excluded explicitly.
 - On razer, Claude Code, Codex and agy each find results through the
   public server; nothing from `~/Documents` is returned there.
+- razer also gets the llm-index agent instructions
+  (`~/.claude/rules/llm-index.md`, and the Codex and agy `AGENTS.md`
+  sections gated on the service), as p620 has; the stale "p620 only"
+  comment in `home/development/agent-rules.nix` is corrected.
 - p620's configuration and behaviour do not change.
 
 ## Affected users and systems
 
 - razer (laptop, owner's) and p620. Not p510.
-- The synced `~/.gemini/config/mcp_config.json`: the activation on each
-  host converges agy's entry on its own store path. Both hosts build the
-  same package from the same pinned input, so the path should be the same
-  and the synced file stops flip-flopping; to be confirmed after deploy.
+- The synced `~/.gemini/config/mcp_config.json`: at the same `flake.lock`
+  both hosts produce a byte-identical `llm-index` entry (same package, and
+  `--config` names the stable `~/.config/llm-index/config.toml`, not its
+  per-host store target). The entry differs only briefly while one host
+  runs a newer llm-index than the other. p510 stays in that sync group
+  without llm-index, harmless as since #2882.
 
 ## Constraints
 
-- Each host's source path is set in that host's config; the shared
-  module keeps no host-specific path.
+- Each host's source path and any host-specific exclusion are set in that
+  host's config; the shared module keeps no host-specific path. (An
+  exclusion must lie under one of the host's roots, so razer's `password`
+  exclusion in the shared module would fail p620's evaluation.)
 - The public tier never includes `~/Documents` or the excluded file.
-- Deploy razer with `just razer` from `main`, after announcing on the
-  agent bus; razer must be reachable.
+- Validate before deploying (test builds of both hosts and CI). Deploy
+  razer through the repo's route for heavy razer rebuilds, the
+  `deploy-via-p620` recipe (build on p620, switch on razer), from `main`
+  after announcing on the agent bus; razer must be reachable. p620 is
+  rebuilt to confirm it is unchanged.
 - The first index on razer is large; the service's memory cap (2 GB) and
   low CPU and I/O priority stay as on p620.
 
