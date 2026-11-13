@@ -694,16 +694,25 @@ fi
 #
 # Skip if `nh os switch` fell back to `nh os boot` (the new gen isn't
 # running, only staged for next boot) — detected by comparing the running
-# /run/current-system against the expected closure path.
+# /run/current-system against the system profile the deploy just installed.
+# Not against $expected: that was evaluated before the lock commit, and
+# system.configurationRevision (self.rev / dirtyRev) differs after it, so it
+# never matched a lock-changing deploy and the health check was always skipped.
 log "verifying which generation is now running on ${HOST}"
 case "$MODE" in
-  local) current_now=$(readlink /run/current-system) ;;
-  remote) current_now=$(ssh "$HOST" 'readlink /run/current-system') ;;
+  local)
+    current_now=$(readlink /run/current-system)
+    staged=$(readlink -f /nix/var/nix/profiles/system)
+    ;;
+  remote)
+    current_now=$(ssh "$HOST" 'readlink /run/current-system')
+    staged=$(ssh "$HOST" 'readlink -f /nix/var/nix/profiles/system')
+    ;;
 esac
 
 RUN_HEALTH_CHECK=1
-if [ "$current_now" != "$expected" ]; then
-  warn "running gen (${current_now##*/}) != expected (${expected##*/})"
+if [ "$current_now" != "$staged" ]; then
+  warn "running gen (${current_now##*/}) != staged (${staged##*/})"
   warn "  → switch was deferred to next boot (pre-switch inhibitor)"
   warn "  → skipping health check; PR will merge anyway because the BUILD is good"
   warn "  → reboot ${HOST} and verify manually, then run the next deploy"
