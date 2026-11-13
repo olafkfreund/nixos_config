@@ -29,7 +29,8 @@ session while system packages and udev rules are installed at the host level:
   graphical session. `DynamicUser` and `ProtectHome` would break access to the user session and `~/.local/share/flux`,
   and `ProtectSystem = "strict"` requires mount namespacing that user units lack. `NoNewPrivileges` is also omitted
   because `fluxd` runs user-defined phone commands (`commands.run`) that may invoke `sudo` or other setuid wrappers. The
-  module adds `LockPersonality = true`.
+  module sets no sandboxing at all: in a user unit systemd would turn it
+  into `NoNewPrivileges`.
 - **`flux-guard.service` and `flux-guard-sync.service` (system units on razer):** Both units omit `DynamicUser` because
   they need `CAP_NET_ADMIN` in the host network namespace to load `nftables` rules (`AF_NETLINK`) and query active
   NetworkManager connections (`AF_UNIX`). They enforce `CapabilityBoundingSet = [ "CAP_NET_ADMIN" ]`, `NoNewPrivileges =

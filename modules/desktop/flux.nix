@@ -31,7 +31,9 @@ in
 
       # Hardening exception: fluxd is a user unit, so DynamicUser, ProtectHome and
       # ProtectSystem=strict do not apply (same reason as claude-swarm-reaper.nix:25-26).
-      # No NoNewPrivileges either: fluxd runs the user's phone commands, which may use sudo.
+      # No NoNewPrivileges either: fluxd runs the user's phone commands, which may use sudo. No other
+      # sandboxing option is set: in a user unit systemd turns most of them (LockPersonality too) into
+      # NoNewPrivileges.
       home-manager.users.${username} = {
         imports = [ inputs.nixarchy-flux.homeManagerModules.default ];
         services.flux = {
@@ -39,7 +41,6 @@ in
           plugin.enable = true;
           browser.enable = false;
         };
-        systemd.user.services.fluxd.Service.LockPersonality = true;
       };
     }
     (lib.mkIf (cfg.trustedConnections != null) (
