@@ -413,7 +413,7 @@ in
       })
 
       # AI-enhanced productivity aliases
-      {
+      (mkIf cfg.tasks.taskwarrior {
         # Smart task creation
         "smart-add" = "smart-add";
         "sa" = "smart-add"; # Quick alias
@@ -423,7 +423,7 @@ in
         "dashboard" = "ai-dashboard";
         "daily" = "ai-dashboard";
         "dash" = "ai-dashboard";
-      }
+      })
 
       # Additional productivity aliases that complement existing shell setup
       (mkIf cfg.files.bat {
@@ -629,8 +629,8 @@ in
         };
       })
 
-      # AI-enhanced productivity scripts
-      {
+      # AI-enhanced productivity scripts (both call taskwarrior)
+      (mkIf cfg.tasks.taskwarrior {
         ".local/bin/smart-add" = {
           source = smartTaskAdd;
           executable = true;
@@ -640,7 +640,7 @@ in
           source = aiDashboard;
           executable = true;
         };
-      }
+      })
 
       # Productivity helper
       {
