@@ -1,5 +1,5 @@
 # Flux: connects this computer to the user's phone (Issue #2905), from the nixarchy-flux flake.
-{ config, lib, inputs, username, ... }:
+{ config, lib, pkgs, inputs, username, ... }:
 let
   cfg = config.features.flux;
 in
@@ -42,8 +42,93 @@ in
         systemd.user.services.fluxd.Service.LockPersonality = true;
       };
     }
-    (lib.mkIf (cfg.trustedConnections != null) {
-      # Step 4 (the guard) fills this.
-    })
+    (lib.mkIf (cfg.trustedConnections != null) (
+      let
+        guardFile = pkgs.writeText "flux-guard.nft" ''
+          table inet flux_guard
+          delete table inet flux_guard
+          table inet flux_guard {
+            set trusted { type ifname; elements = { "lo", "tailscale0" } }
+            chain input {
+              type filter hook input priority filter - 1; policy accept;
+              iifname @trusted accept
+              ct state new tcp dport 12070-12108 drop
+              ct state new udp dport 12100 drop
+            }
+            chain output {
+              type filter hook output priority filter - 1; policy accept;
+              oifname @trusted accept
+              udp dport 5353 drop
+              udp sport 5353 drop
+              udp dport 12100 drop
+            }
+          }
+        '';
+        reconcileScript = pkgs.writeShellScript "flux-guard-reconcile" ''
+          set -euo pipefail
+          exec 9>/run/flux-guard.lock
+          ${pkgs.util-linux}/bin/flock -x 9
+          {
+            printf 'flush set inet flux_guard trusted\n'
+            printf 'add element inet flux_guard trusted { "lo", "tailscale0" }\n'
+            while IFS=: read -r uuid device; do
+              for trusted_uuid in ${lib.escapeShellArgs cfg.trustedConnections}; do
+                if [[ $uuid == "$trusted_uuid" && $device =~ ^[a-zA-Z0-9_.:-]+$ ]]; then
+                  printf 'add element inet flux_guard trusted { "%s" }\n' "$device"
+                  break
+                fi
+              done
+            done < <(${pkgs.networkmanager}/bin/nmcli -t -f UUID,DEVICE connection show --active)
+          } | ${pkgs.nftables}/bin/nft -f -
+        '';
+        hardening = {
+          # Host network namespace CAP_NET_ADMIN requires a fixed root user, not DynamicUser.
+          CapabilityBoundingSet = [ "CAP_NET_ADMIN" ];
+          NoNewPrivileges = true;
+          ProtectSystem = "strict";
+          ProtectHome = true;
+          PrivateTmp = true;
+          ReadWritePaths = [ "/run" ];
+          RestrictAddressFamilies = [ "AF_NETLINK" "AF_UNIX" ];
+          ProtectKernelModules = true;
+        };
+      in
+      {
+        systemd.services.flux-guard = {
+          wantedBy = [ "multi-user.target" ];
+          before = [ "network-pre.target" ];
+          wants = [ "network-pre.target" ];
+          serviceConfig = hardening // {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = "${pkgs.nftables}/bin/nft -f ${guardFile}";
+            ExecReload = "${pkgs.nftables}/bin/nft -f ${guardFile}";
+            ExecStop = "${pkgs.nftables}/bin/nft delete table inet flux_guard";
+          };
+        };
+
+        systemd.services.flux-guard-sync = {
+          wantedBy = [ "multi-user.target" ];
+          after = [ "NetworkManager.service" "flux-guard.service" ];
+          bindsTo = [ "flux-guard.service" ];
+          unitConfig.ReloadPropagatedFrom = [ "flux-guard.service" ];
+          serviceConfig = hardening // {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = "${reconcileScript}";
+            ExecReload = "${reconcileScript}";
+          };
+        };
+
+        networking.networkmanager.dispatcherScripts = [{
+          type = "basic";
+          source = pkgs.writeShellScript "flux-guard-dispatcher" ''
+            case "$2" in
+              up|down|pre-down|dhcp4-change|connectivity-change) ${reconcileScript} ;;
+            esac
+          '';
+        }];
+      }
+    ))
   ]);
 }
