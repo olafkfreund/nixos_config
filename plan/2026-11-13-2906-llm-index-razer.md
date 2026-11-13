@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2906
 spec: spec/2026-11-13-2906-llm-index-razer.md
 coders:
