@@ -30,7 +30,7 @@ Flux connects the desktop session to an Android phone (`fluxd`, `flux-cli`, `flu
 When `features.flux.trustedConnections` is set to a list of NetworkManager connection UUIDs (`null` on **p620**, where no guard is loaded):
 
 - `flux-guard.service` atomically loads the `inet flux_guard` nftables table before `network-pre.target`, with `@trusted` initially holding `lo` and `tailscale0`.
-- `flux-guard-sync.service` and a NetworkManager dispatcher script (`up`, `down`, `pre-down`, `dhcp4-change`, `connectivity-change`) serialize on `/run/flux-guard.lock`, query `nmcli -t -f UUID,DEVICE connection show --active`, and atomically rebuild `@trusted` with `lo`, `tailscale0` and any active device whose connection UUID is in `trustedConnections`.
+- `flux-guard-sync.service` and a NetworkManager dispatcher script (`up`, `down`, `dhcp4-change`, `connectivity-change`) serialize on `/run/flux-guard.lock`, query `nmcli -t -f UUID,DEVICE connection show --active`, and atomically rebuild `@trusted` with `lo`, `tailscale0` and any active device whose connection UUID is in `trustedConnections`.
 
 ### What is blocked on untrusted networks
 

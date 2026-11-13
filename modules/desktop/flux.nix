@@ -68,6 +68,8 @@ in
           set -euo pipefail
           exec 9>/run/flux-guard.lock
           ${pkgs.util-linux}/bin/flock -x 9
+          # (captured first, so a failed nmcli fails the unit instead of passing silently)
+          active=$(${pkgs.networkmanager}/bin/nmcli -t -f UUID,DEVICE connection show --active)
           {
             printf 'flush set inet flux_guard trusted\n'
             printf 'add element inet flux_guard trusted { "lo", "tailscale0" }\n'
@@ -78,7 +80,7 @@ in
                   break
                 fi
               done
-            done < <(${pkgs.networkmanager}/bin/nmcli -t -f UUID,DEVICE connection show --active)
+            done <<<"$active"
           } | ${pkgs.nftables}/bin/nft -f -
         '';
         hardening = {
@@ -96,6 +98,7 @@ in
       {
         systemd.services.flux-guard = {
           wantedBy = [ "multi-user.target" ];
+          upholds = [ "flux-guard-sync.service" ]; # (a manual restart brings the trust sync back too)
           before = [ "network-pre.target" ];
           wants = [ "network-pre.target" ];
           serviceConfig = hardening // {
@@ -124,7 +127,7 @@ in
           type = "basic";
           source = pkgs.writeShellScript "flux-guard-dispatcher" ''
             case "$2" in
-              up|down|pre-down|dhcp4-change|connectivity-change) ${reconcileScript} ;;
+              up|down|dhcp4-change|connectivity-change) ${reconcileScript} ;;
             esac
           '';
         }];
