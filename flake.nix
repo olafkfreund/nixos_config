@@ -32,6 +32,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.omarchy.follows = "nixarchy/omarchy";
     };
+    # Flux: phone link (fluxd, flux-cli, shell plugin); features.flux (#2905).
+    nixarchy-flux = {
+      url = "github:olafkfreund/nixarchy-flux";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixi-companion = {
       url = "github:olafkfreund/nixoarchy-snowflake";
       inputs.nixpkgs.follows = "nixpkgs";

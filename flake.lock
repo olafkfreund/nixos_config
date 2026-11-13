@@ -2413,6 +2413,26 @@
         "type": "github"
       }
     },
+    "nixarchy-flux": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794574893,
+        "narHash": "sha256-8FvSOOzCv8IddCTS1I4q4fBSeW4fo28paULVRAwIPZY=",
+        "owner": "olafkfreund",
+        "repo": "nixarchy-flux",
+        "rev": "a24da454369fb4d028791bec9129178bc0fc701b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "repo": "nixarchy-flux",
+        "type": "github"
+      }
+    },
     "nixarchy-ghtui": {
       "inputs": {
         "nixpkgs": [
@@ -3735,6 +3755,7 @@
           "nixarchy-distrobox"
         ],
         "nixarchy-flea": "nixarchy-flea",
+        "nixarchy-flux": "nixarchy-flux",
         "nixarchy-llm-index": "nixarchy-llm-index",
         "nixarchy-meeting-mode": "nixarchy-meeting-mode",
         "nixarchy-meetingai": "nixarchy-meetingai",
