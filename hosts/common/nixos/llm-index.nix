@@ -1,9 +1,24 @@
-# nixarchy-llm-index: local document and code index served to agents over MCP
-# (#2882). ~/Source is public, ~/Documents private; only the public server is
-# registered, in Claude Code, Codex and agy, by the converging activation below.
-{ inputs, ... }:
+# nixarchy-llm-index: local document and code index on p620 and razer, served
+# to agents over MCP (#2882). Each host sets its public source path; ~/Documents
+# is private. Only the public server is registered in Claude Code, Codex and agy.
+{ config, lib, inputs, ... }:
+let
+  hostCfg = config.local.llmIndex;
+in
 {
-  home-manager.users.olafkfreund =
+  options.local.llmIndex = {
+    sourcePath = lib.mkOption {
+      type = lib.types.str;
+      description = "Real path of the public source root (no symlink component).";
+    };
+    excludePaths = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      description = "Paths under a root to leave out of the index.";
+    };
+  };
+
+  config.home-manager.users.olafkfreund =
     { config, lib, pkgs, ... }:
     let
       cfg = config.services.llm-index;
@@ -20,11 +35,12 @@
         registerPublic = false;
         roots = {
           source = {
-            path = "/mnt/code/Source-home"; # real path; ~/Source is a symlink
+            path = hostCfg.sourcePath;
             tier = "public";
           };
           docs.path = "${config.home.homeDirectory}/Documents"; # private by default
         };
+        exclude.paths = hostCfg.excludePaths;
         limits.memoryMaxMb = 2048; # the 1 GB default throttled at 768 MB in the trial
       };
 

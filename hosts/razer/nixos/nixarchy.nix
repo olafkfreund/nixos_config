@@ -49,9 +49,13 @@
     ../../common/nixos/omarchy-omamail.nix
     ../../common/nixos/omarchy-pixelbuds.nix
     ../../common/nixos/omarchy-meeting-mode.nix
+    ../../common/nixos/llm-index.nix
     ../../common/nixos/omarchy-sole-hyprland.nix
     ../../common/nixos/omarchy-stylix-theme.nix
   ];
+
+  local.llmIndex.sourcePath = "/extdisk/Source"; # real path; ~/Source is a symlink; /extdisk is the second NVMe from fstab
+  local.llmIndex.excludePaths = [ "/extdisk/Source/password" ];
 
   programs.nixarchy.enable = true;
   # Omarchy's own apps: Hype, Monologue, Signed, Disktree and the rest (nixarchy#1572).
