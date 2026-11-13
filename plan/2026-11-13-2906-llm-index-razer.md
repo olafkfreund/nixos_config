@@ -53,30 +53,40 @@ Files: `hosts/common/nixos/llm-index.nix`, `hosts/p620/nixos/nixarchy.nix`,
 - Check (implementer): `nix eval --json
   .#nixosConfigurations.razer.config.home-manager.users.olafkfreund.services.llm-index.exclude.paths`
   gives `["/extdisk/Source/password"]`; the same for p620 gives `[]`;
-  `just validate` passes.
-- Traps: never work in `~/.config/nixos` itself; no commit, deploy or
-  switch; the repo's pre-commit runs nixpkgs-fmt and deadnix.
+  `nix eval --raw .#nixosConfigurations.razer.config.home-manager.users.olafkfreund.services.llm-index.roots.source.path`
+  gives `/extdisk/Source` (and p620's gives `/mnt/code/Source-home`);
+  `nix flake check --no-build` evaluates, and `deadnix --fail` and
+  `nixpkgs-fmt --check` pass on the four files. (`just validate` runs the
+  full flake check with VM tests; the lead runs it.)
+- Traps: never work in `~/.config/nixos` itself; no stage, commit,
+  deploy or switch; keep the files nixpkgs-fmt clean (the lead's commit
+  runs the pre-commit hooks); the `local.llmIndex` settings go at the top
+  level of each host's `nixarchy.nix`, not inside `imports`.
 
 ## Tests (lead)
 
-- `nix build` of p620 and razer toplevels.
-- p620 unchanged: the store paths of
-  `.#nixosConfigurations.p620.config.home-manager.users.olafkfreund.xdg.configFile."llm-index/config.toml".source`
-  (or the module's equivalent), of the `llm-index` user unit, and of the
-  Home Manager activation package are equal on this branch and on
-  `origin/main`.
+- `just validate`, and `nix build` of p620 and razer toplevels.
+- p620 unchanged: under
+  `.#nixosConfigurations.p620.config.home-manager.users.olafkfreund`,
+  these are equal on this branch and on `origin/main`:
+  `xdg.configFile."llm-index/config.toml".source` (config),
+  `xdg.configFile."systemd/user/llm-index.service".source` (unit) and
+  `home.activation.llmIndexMcp.data` (activation text).
 - CI on the PR (p620, razer, p510).
 - Deploy (after the bus announcement, from `main`): razer with the
   `deploy-via-p620` recipe, then p620.
 - razer live checks:
   - `systemctl --user is-active llm-index`; self-test journal lines
     (sockets and signal denied, `dumpable=false`/`true`);
-  - `llm-index status`: `source` and `docs` reach `ok` (the first index
-    of `/extdisk/Source` takes a while; check progress, wait for `ok`);
+  - `llm-index status`: `source` and `docs` reach `ok` **and** show
+    `files` > 0 (a root is `ok` once its scan ends, before extraction);
+    the client and isolation checks below wait for that;
   - Claude Code, Codex and agy on razer each return a hit from
     `/extdisk/Source`;
-  - a public `search` with `folder` `/home/olafkfreund/Documents` succeeds
-    with no hits;
+  - isolation: pick a term the private server finds in `~/Documents`
+    (`llm-index mcp --tier private` search); the public server returns no
+    hit for it, and a public `search` with that `query` and `folder`
+    `/home/olafkfreund/Documents` succeeds with no hits;
   - `~/.config/llm-index/config.toml` on razer lists the exclusion.
 - p620 live check: service active, a search from the three clients works.
 
