@@ -16,6 +16,8 @@
 
       services.llm-index = {
         enable = true;
+        # the activation below registers the server itself, under the name "llm-index"
+        registerPublic = false;
         roots = {
           source = {
             path = "/mnt/code/Source-home"; # real path; ~/Source is a symlink
@@ -58,7 +60,7 @@
             echo "llm-index: could not read the $_llm_c MCP config; left unchanged"
           elif [ "$_llm_have" != "$_llm_want" ]; then
             _llm_s=""; [ "$_llm_c" = claude ] && _llm_s="-s user"
-            if [ -n "''${DRY_RUN_CMD:-}" ]; then
+            if [[ -v DRY_RUN ]]; then
               echo "llm-index: would register in $_llm_c"
             else
               # An entry is removed only when one exists; a failed add is retried next activation.
