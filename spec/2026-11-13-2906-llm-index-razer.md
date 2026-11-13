@@ -18,10 +18,15 @@ intent: intent/2026-11-13-2906-llm-index-razer.md
    - `options.local.llmIndex.excludePaths`: `types.listOf types.str`,
      default `[ ]`. Passed to `services.llm-index.exclude.paths`.
 
-   The module's `home-manager.users.olafkfreund` block reads them from the
-   NixOS `config` (the module's outer function gains `config` and `lib`)
-   and sets `roots.source.path = sourcePath` and `exclude.paths =
-   excludePaths`. Everything else (tiers, `registerPublic = false`,
+   Wiring: the module stops being shorthand. Its outer function becomes
+   `{ config, lib, inputs, ... }:` and returns `{ options.local.llmIndex =
+   …; config.home-manager.users.olafkfreund = …; }`. It binds
+   `hostCfg = config.local.llmIndex` in a `let` **outside** the inner
+   Home Manager function, because inside it `config` is the Home Manager
+   config. The inner function keeps its own `config` (for `home.*` and
+   `services.llm-index`) and its own `lib` (for `lib.hm.dag`). It sets
+   `roots.source.path = hostCfg.sourcePath` and `exclude.paths =
+   hostCfg.excludePaths`. Everything else (tiers, `registerPublic = false`,
    `memoryMaxMb = 2048`, the activation that registers Claude Code, Codex
    and agy, the Claude rules file) stays as it is.
 
@@ -62,15 +67,26 @@ intent: intent/2026-11-13-2906-llm-index-razer.md
 ## Verification
 
 - `nix build .#nixosConfigurations.p620.config.system.build.toplevel`
-  and the same for razer; `nix eval` of p620's
-  `home-manager.users.olafkfreund.services.llm-index.roots` and `.exclude`
-  equals the value on `main`.
+  and the same for razer.
+- p620 unchanged: the generated `~/.config/llm-index/config.toml`
+  (`home-manager.users.olafkfreund.xdg.configFile."llm-index/config.toml".source`
+  or the module's equivalent), the `llm-index` user unit and the
+  activation script's `llmIndexMcp` text are identical to `main` (compare
+  the store paths, or `nix eval` the values on both revisions).
+- `just validate` (deadnix, nixpkgs-fmt) passes.
+- `nix eval --json
+  .#nixosConfigurations.razer.config.home-manager.users.olafkfreund.services.llm-index.exclude.paths`
+  is `["/extdisk/Source/password"]`, and `.roots.source.path` is
+  `"/extdisk/Source"`.
 - CI on the PR (p620, razer, p510 configurations).
 - razer after deploy:
   - `systemctl --user is-active llm-index`; the self-test journal lines
     (sockets and signal denied, `dumpable=false`/`true`);
   - `llm-index status`: `source` and `docs` reach `ok`;
   - Claude Code, Codex and agy each return a hit from `/extdisk/Source`;
-  - a public `search` with `folder` set to `~/Documents` returns nothing,
-    and `get` on `/extdisk/Source/password` returns `not found`.
+  - a public `search` with `folder` set to `/home/olafkfreund/Documents`
+    (absolute; MCP does not expand `~`) succeeds with no hits;
+  - `~/.config/llm-index/config.toml` on razer lists the exclusion. (A
+    `get` on the extensionless `password` file returns `not found` even
+    without it, so that alone proves nothing.)
 - p620 after its rebuild: service unchanged and a search still works.
