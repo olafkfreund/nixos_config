@@ -887,9 +887,6 @@ in
       "python3.13-youtube-dl-2021.12.17" # newsboat (RSS reader) pulls youtube-dl for URL extraction
       "python3.14-youtube-dl-2021.12.17" # newsboat (RSS reader) pulls youtube-dl for URL extraction
       "libsoup-2.74.3" # Temporary: Required by some GNOME packages until migration to libsoup-3
-      "electron-35.7.5" # Temporary: Required until upstream packages migrate to newer electron
-      "electron-39.8.10" # Newly marked EOL after nixpkgs bump on 2026-06-01 — still pulled in by some upstream package, audit + drop later
-      "electron-40.10.5" # Newly marked insecure after nixpkgs bump on 2026-07-15 — still pulled in by some upstream package, audit + drop later
       "pnpm-10.29.2" # Newly marked insecure after nixpkgs bump on 2026-06-30 — pulled in by dev package set, audit + drop later
     ];
   };
