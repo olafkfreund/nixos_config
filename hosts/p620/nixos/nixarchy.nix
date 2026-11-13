@@ -56,6 +56,8 @@
     ../../common/nixos/omarchy-stylix-theme.nix
   ];
 
+  local.llmIndex.sourcePath = "/mnt/code/Source-home"; # real path; ~/Source is a symlink
+
   programs.nixarchy.enable = true;
   # Omarchy's own apps: Hype, Monologue, Signed, Disktree and the rest (nixarchy#1572).
   programs.nixarchy.omarchyApps.enable = true;

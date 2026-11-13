@@ -5,7 +5,7 @@
 # Policy and templates are inlined so they do not depend on skill selection.
 { config, lib, pkgs, ... }:
 let
-  # p620 only: the llm-index tool instructions (#2882); empty where the module is absent.
+  # Hosts that import hosts/common/nixos/llm-index.nix (p620, razer): tool instructions (#2882); empty elsewhere.
   llmIndex = lib.optional (lib.attrByPath [ "services" "llm-index" "enable" ] false config)
     config.services.llm-index.agentInstructions;
 
