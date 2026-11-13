@@ -115,6 +115,8 @@
   # so both are re-wired. Dropping podman's without replacing it would quietly
   # cost it the CDI spec it does want, just not at the price of the runtime.
   systemd.services.nvidia-container-toolkit-cdi-generator = {
+    # Re-running it after an nvidia bump fails until reboot; the old spec stays valid (#2891).
+    restartIfChanged = false;
     requiredBy = lib.mkForce [ ];
     wantedBy = [
       "docker.service"
