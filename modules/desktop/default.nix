@@ -8,6 +8,7 @@
     ./sunshine.nix
     ./craftapps.nix
     ./tfm.nix
+    ./flux.nix
   ];
 
   # Make sure the adwaita-qt packages are installed

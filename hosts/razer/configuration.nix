@@ -336,6 +336,11 @@ in
       wordcraft = true;
     };
   };
+  features.flux = {
+    # phone link, #2905
+    enable = true;
+    trustedConnections = [ "2480c26b-7797-49e1-8a9f-af6bccc6d77c" ]; # the home Wi-Fi
+  };
   features.tfm = {
     enable = true;
     settings.ui."preview-enabled" = true;

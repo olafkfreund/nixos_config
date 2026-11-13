@@ -515,6 +515,7 @@ in
       wordcraft = true;
     };
   };
+  features.flux.enable = true; # phone link, #2905
   features.tfm = {
     enable = true;
     settings.ui."preview-enabled" = true;
