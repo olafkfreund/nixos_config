@@ -26,7 +26,8 @@ in
         users = [ ];
         openFirewall = false;
         approve.services = [ ];
-        webcam.enable = false;
+        # v4l2loopback (devices=0) and the uaccess udev rule, for the phone webcam (#2911).
+        webcam.enable = true;
       };
 
       # Hardening exception: fluxd is a user unit, so DynamicUser, ProtectHome and
