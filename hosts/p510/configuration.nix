@@ -334,8 +334,8 @@ in
   programs.streamdeck-ui.enable = lib.mkForce false;
 
   # Login manager: Omarchy's SDDM greeter, switched on by
-  # programs.nixarchy.displayManager in ./nixos/nixarchy.nix. backend = "none"
-  # keeps GDM off; SDDM enumerates wayland-sessions, so the Omarchy Hyprland
+  # programs.nixarchy.displayManager in ./nixos/nixarchy.nix. The template's
+  # backend = "none" keeps GDM off; SDDM enumerates wayland-sessions, so the Omarchy Hyprland
   # session and GNOME both stay selectable. Same arrangement as p620 and razer.
   #
   # autoLogin, unlike on those two, stays on. Sunshine is a systemd user

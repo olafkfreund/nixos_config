@@ -590,11 +590,6 @@ in
   # Windows app integration - Re-enabled after upstream fix (v0.9.0)
   # programs.winboat.enable = true; # DISABLED: Go 1.26 cross-compilation broken with mingw32 GCC 15
 
-  # User membership in the `ydotool` group (required for
-  # /run/ydotoold/socket mode 0660 root:ydotool access) is added to the
-  # `users.users = lib.genAttrs hostUsers ...` block earlier in this file —
-  # programs.ydotool.enable does NOT auto-add users.
-
   # Package configurations
   nixpkgs.config = {
     allowBroken = true;

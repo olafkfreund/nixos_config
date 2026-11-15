@@ -74,6 +74,17 @@ changes a host's `.drv`, revert that move and leave the block per host. No order
    what stays per host. `scripts/config-snapshot.sh` gains `SNAP_NO_BUILD=1` (evaluate only), documented in
    `scripts/README.md`.
 
+## Deviations (recorded during implementation)
+
+- Imports kept per host because moving them changed a `.drv`: `modules/development/default.nix` and
+  `modules/secrets/api-keys.nix` (step 1, all hosts); `security/secrets.nix`, meeting-transcribe, agent-voice and
+  swarm-reaper (step 2, p620 and razer). The shared files therefore set options whose modules the host imports.
+- `system.stateVersion` is `lib.mkDefault "25.11"` in the template, not a plain value: same value, and it matches
+  the template's convention so a future host can set its own without `mkForce`.
+- `omarchy-desktop.nix` also holds identical non-scalar lines (`preinstallsExclude`, the HM plugin sources, the
+  companion plugin list, the `hyprland.portalPackage` force); each move kept the `.drv` identical.
+- Review follow-up (agy): load-bearing comments lost in the moves were restored in the shared files and hosts.
+
 ## Tests
 
 Final: full `scripts/config-snapshot.sh snap` (with builds) + `diff`: p620, razer, p510 `IDENTICAL`.

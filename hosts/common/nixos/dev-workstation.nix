@@ -5,6 +5,8 @@
     security.secrets.enable = true;
     hardware.ddcutil.enable = true;
     programs = {
+      # Read-only managed-settings baseline in /etc/claude-code (#398). User
+      # ~/.claude/settings.json stays writable for plugins and runtime changes.
       claude-code-managed = {
         enable = true;
         parrProtocol.enable = false;
@@ -13,6 +15,8 @@
         subagentMetadata.codex = true;
       };
       claude-code-mods.enable = true;
+      # /use-ollama, /use-claude, /use-default + an apiKeyHelper that picks the
+      # router or the Anthropic key from ANTHROPIC_BASE_URL.
       claude-router-cli.enable = true;
     };
   };
@@ -62,6 +66,8 @@
         implementation = "rest-api";
         restApi.apiKeyFile = config.age.secrets."obsidian-api-key".path;
       };
+      # Off until the secret exists (docs/LINKEDIN-MCP.md):
+      #   ./scripts/manage-secrets.sh create api-linkedin-cookie
       linkedin = {
         enable = false;
         cookieFile = config.age.secrets."api-linkedin-cookie".path;
@@ -88,6 +94,8 @@
       enablePermissionNotifications = true;
       enableReadyNotifications = true;
     };
+    # COSMIC parked (modules/desktop/cosmic.nix, pkgs/cosmic-applets/) until it
+    # is production-ready.
     desktop.cosmic.enable = false;
     intune = {
       enable = false;
@@ -125,6 +133,8 @@
   };
 
   services = {
+    # Off. Module, overlay and package are kept, but the requireFile tarball
+    # was deleted: re-enabling needs pkgs/citrix-workspace/fetch-citrix.sh first.
     citrix-workspace = {
       enable = false;
       acceptLicense = true;
@@ -140,5 +150,8 @@
   };
   # playerctl can segfault on player signals; restart its user unit.
   systemd.user.services.playerctld.serviceConfig.Restart = "on-failure";
+  # ydotoold: keystroke injection for the voice-input client on GNOME Wayland,
+  # where wtype fails (Mutter has no virtual_keyboard_v1). It does not add users
+  # to the ydotool group; each host does that in its users.users block.
   programs.ydotool.enable = true;
 }

@@ -50,7 +50,7 @@ Configuration that two or three hosts set identically lives in one file
 | ---- | ----------- | ----- |
 | `hosts/templates/desktop.nix` | all hosts | security, Syncthing, GNOME Remote Desktop, SDDM + Omarchy session, GNOME, X server, `system.stateVersion`, API keys, `features.ai`, droidcam off |
 | `hosts/common/nixos/dev-workstation.nix` | p620, razer | development, virtualization, cloud, MCP servers, desktop programs, Claude Code, agent voice, craft apps, screenshot MCP, playerctld, fwupd, ydotool |
-| `hosts/common/nixos/omarchy-desktop.nix` | `hosts/{p620,razer}/nixos/nixarchy.nix` | the identical `programs.nixarchy` settings, plugin sources and companion plugins |
+| `hosts/common/nixos/omarchy-desktop.nix` | `hosts/{p620,razer}/nixos/nixarchy.nix` | the identical `programs.nixarchy` settings, the Hyprland portal override, plugin sources and companion plugins |
 
 Stays per host, on purpose:
 

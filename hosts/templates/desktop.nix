@@ -33,7 +33,11 @@
         syncGemini = lib.mkDefault true;
       };
       features.gnome-remote-desktop.enable = lib.mkDefault true;
-      # SDDM starts Omarchy by default while GNOME remains selectable.
+      # backend = "none" keeps GDM off. Omarchy's SDDM greeter is switched on by
+      # programs.nixarchy.displayManager in each host's nixos/nixarchy.nix, and
+      # enumerates wayland-sessions, so Omarchy and GNOME both stay selectable.
+      # defaultSession is a fallback only: SDDM remembers the last session in
+      # /var/lib/sddm/state.conf and that wins after the first login.
       desktop.displayManager.backend = lib.mkDefault "none";
       services.displayManager.defaultSession = lib.mkDefault "omarchy";
       services.desktopManager.gnome.enable = lib.mkDefault true;

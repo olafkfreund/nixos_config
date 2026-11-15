@@ -155,6 +155,12 @@ in
     trustedConnections = [ "2480c26b-7797-49e1-8a9f-af6bccc6d77c" ]; # the home Wi-Fi
   };
 
+  # The template keeps GDM off (backend = "none"), and that matters here: on
+  # this Optimus PRIME-sync NVIDIA hardware a GDM greeter respawn fails
+  # ("Unable to run session", GdmLocalDisplayFactory gives up after 8 retries,
+  # black screen). For the same reason there is no autoLogin here, so a cold
+  # RDP needs a physical login first. p510 (NVIDIA without PRIME) autologins.
+
   # GDM greeter visual baseline — dark colour scheme + 24h clock so it
   # doesn't render as a near-blank Adwaita-light surface over RDP.
   programs.dconf.profiles.gdm.databases = [{
@@ -375,9 +381,6 @@ in
     "/etc/ssh/ssh_host_ed25519_key" # Host key (Ed25519)
     "/etc/ssh/ssh_host_rsa_key" # Host key (RSA fallback)
   ];
-
-  # User group membership for /run/ydotoold/socket access is added in the
-  # `users.users = lib.genAttrs hostUsers ...` block above.
 
   # Meeting transcribe — razer is client-only. Records the meeting locally,
   # then rsyncs the .opus over Tailscale to p620 and SSHes to run
