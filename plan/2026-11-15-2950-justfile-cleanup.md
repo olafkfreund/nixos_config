@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2950
 spec: spec/2026-11-15-2950-justfile-cleanup.md
 coders:
