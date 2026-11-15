@@ -39,13 +39,6 @@ in
       print.enable = cfg.programs.print;
     };
 
-    # Cloud tools (conditional enables)
-    aws.packages.enable = mkIf cfg.cloud.enable cfg.cloud.aws;
-    azure.packages.enable = mkIf cfg.cloud.enable cfg.cloud.azure;
-    google.packages.enable = mkIf cfg.cloud.enable cfg.cloud.google;
-    k8s.packages.enable = mkIf cfg.cloud.enable cfg.cloud.k8s;
-    terraform.packages.enable = mkIf cfg.cloud.enable cfg.cloud.terraform;
-
     # Security tools (conditional enables)
     security.onepassword.enable = mkIf cfg.security.enable cfg.security.onepassword;
     security.gnupg.enable = mkIf cfg.security.enable cfg.security.gnupg;

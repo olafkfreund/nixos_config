@@ -4,20 +4,12 @@
 , ...
 }:
 let
-  inherit (lib) mkEnableOption mkIf mkMerge;
+  inherit (lib) mkIf mkMerge;
+  cfg = config.features.cloud;
 in
 {
-  options = {
-    aws.packages.enable = mkEnableOption "Enable AWS packages";
-    azure.packages.enable = mkEnableOption "Enable Azure packages";
-    cloud-tools.packages.enable = mkEnableOption "Enable cloud tools";
-    google.packages.enable = mkEnableOption "Enable Google packages";
-    k8s.packages.enable = mkEnableOption "Enable k8s packages";
-    terraform.packages.enable = mkEnableOption "Enable terraform packages";
-  };
-
   config = mkMerge [
-    (mkIf config.aws.packages.enable {
+    (mkIf (cfg.enable && cfg.aws) {
       environment.systemPackages = [
         pkgs.customPkgs.awscli2 # local override disables flaky doCheck
         pkgs.ssm-session-manager-plugin # `aws ssm start-session` (binary: session-manager-plugin)
@@ -32,7 +24,7 @@ in
       ];
     })
 
-    (mkIf config.azure.packages.enable {
+    (mkIf (cfg.enable && cfg.azure) {
       environment.systemPackages = with pkgs; [
         azure-cli
         azure-storage-azcopy
@@ -98,21 +90,13 @@ in
       ];
     })
 
-    (mkIf config.cloud-tools.packages.enable {
-      environment.systemPackages = with pkgs; [
-        teller
-        yq-go
-        ytt
-      ];
-    })
-
-    (mkIf config.google.packages.enable {
+    (mkIf (cfg.enable && cfg.google) {
       environment.systemPackages = with pkgs; [
         google-cloud-sdk
       ];
     })
 
-    (mkIf config.k8s.packages.enable {
+    (mkIf (cfg.enable && cfg.k8s) {
       environment.systemPackages = with pkgs; [
         kubectl
         tubekit
@@ -128,7 +112,7 @@ in
       ];
     })
 
-    (mkIf config.terraform.packages.enable {
+    (mkIf (cfg.enable && cfg.terraform) {
       environment.systemPackages = [
         pkgs.terraform
         pkgs.terraform-providers.digitalocean_digitalocean

@@ -75,6 +75,11 @@ after each, `SNAP_NO_BUILD=1 scripts/config-snapshot.sh snap /tmp/s6-<n>` and `d
    `features.terminals = { enable = true; ghostty = true; foot = true; kitty = true; alacritty = true; }`.
 9. Docs (Claude): `docs/PATTERNS.md` and `AGENTS.md` "Module shape" say modules read `features.*` directly; no bridge.
 
+## Deviations (recorded during implementation)
+
+- Slice 3: `cloud-tools.packages.enable` had no setter and no `features.cloud` flag, so its block (teller, yq-go,
+  ytt) was never installed on any host. Deleted with the option instead of bridged; `.drv` identical.
+
 ## Tests
 
 Per slice: `IDENTICAL` on all three hosts. Final: full snapshot with builds `IDENTICAL`; `git grep` for every removed
