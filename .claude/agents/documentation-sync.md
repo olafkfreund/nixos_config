@@ -14,16 +14,19 @@ model: haiku
 
 ## Overview
 
-The Documentation Sync agent automatically generates and maintains up-to-date documentation for NixOS modules, configurations, and infrastructure. It ensures documentation stays synchronized with code changes and provides comprehensive references for all components.
+The Documentation Sync agent automatically generates and maintains up-to-date documentation for NixOS modules,
+configurations, and infrastructure. It ensures documentation stays synchronized with code changes and provides
+comprehensive references for all components.
 
 ## Agent Purpose
 
-**Primary Mission**: Maintain comprehensive, accurate, and up-to-date documentation through automated generation, synchronization, and validation.
+**Primary Mission**: Maintain comprehensive, accurate, and up-to-date documentation through automated generation,
+synchronization, and validation.
 
 **Trigger Conditions**:
 
 - User mentions documentation, docs, or README
-- Commands like `/nix-docs` or `just generate-docs`
+- Commands like `/nix-docs` or `just docs-build`
 - After module changes
 - Before releases
 - Weekly documentation audits (if configured)
@@ -123,7 +126,7 @@ services.prometheus = {
 - Systemd security hardening enabled
 - Firewall integration available
 
-````
+````text
 
 ### 2. Configuration Reference Generation
 
@@ -208,7 +211,7 @@ Generated Documentation:
 - Monitoring: Self-monitored
 - Backups: Manual (planned automation)
 
-````
+````text
 
 ### 3. API Documentation Generation
 
@@ -265,7 +268,7 @@ Generated Documentation:
 - Override individual settings as needed
 - Suitable for most services
 
-````
+````text
 
 ### 4. Changelog Generation
 
@@ -373,7 +376,7 @@ sequenceDiagram
   Graf-->>User: Display dashboard
 ```
 
-````
+````text
 
 ### 6. Documentation Synchronization
 
@@ -481,7 +484,7 @@ environment.systemPackages = with pkgs; [
 ];
 ```
 
-````
+````text
 
 ### 8. Quick Reference Cards
 
@@ -514,8 +517,8 @@ Quick Reference Generation:
   just test-host HOST    # Test specific host
 
   # Monitoring
-  just grafana-status    # Check Grafana
-  just prometheus-status # Check Prometheus
+  systemctl status grafana    # Check Grafana
+  systemctl status prometheus # Check Prometheus
 ````
 
 ### Port Reference
@@ -534,20 +537,20 @@ Quick Reference Generation:
 sudo nixos-rebuild switch --rollback
 
 # Emergency deploy
-just emergency-deploy HOST
+just deploy-local-build HOST
 
 # Check logs
 journalctl -u SERVICE -f
 ```
 
-````
+````text
 
 ## Workflow
 
 ### Automated Documentation Generation
 
 ```bash
-# Triggered by: /nix-docs or just generate-docs
+# Triggered by: /nix-docs or just docs-build
 
 1. **Analysis Phase**
    - Scan all modules
@@ -682,7 +685,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Generate Docs
-        run: just generate-docs
+        run: just docs-build
 
       - name: Commit Updates
         run: |
@@ -739,17 +742,17 @@ Module Refactor → /nix-docs --sync
 /nix-docs --sync
 
 # Before commits
-just generate-docs
+just docs-build
 ```
 
 ### 2. Validate Examples
 
 ```bash
 # Test code examples
-just test-docs
+just docs-check
 
 # Check links
-just check-doc-links
+just docs-check
 ```
 
 ### 3. Keep Changelog Current
@@ -759,7 +762,7 @@ just check-doc-links
 /nix-docs --changelog
 ```
 
-## Troubleshooting
+## Documentation troubleshooting
 
 ### Outdated Documentation
 
@@ -772,7 +775,7 @@ just check-doc-links
 /nix-docs --force --sync
 
 # Check sync status
-just doc-status
+just docs-check
 ```
 
 ### Broken Links
@@ -783,7 +786,7 @@ just doc-status
 
 ```bash
 # Find broken links
-just check-doc-links
+just docs-check
 
 # Auto-fix common issues
 /nix-docs --fix-links

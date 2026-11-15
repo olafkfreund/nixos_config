@@ -14,16 +14,19 @@ context: fork
 
 ## Overview
 
-The Performance Analyzer agent provides comprehensive performance profiling and optimization recommendations for NixOS builds, evaluations, and system operations. It identifies bottlenecks, suggests optimizations, and tracks performance improvements over time.
+The Performance Analyzer agent provides comprehensive performance profiling and optimization recommendations for NixOS
+builds, evaluations, and system operations. It identifies bottlenecks, suggests optimizations, and tracks performance
+improvements over time.
 
 ## Agent Purpose
 
-**Primary Mission**: Optimize NixOS build performance, evaluation speed, and system resource utilization through data-driven analysis and automated recommendations.
+**Primary Mission**: Optimize NixOS build performance, evaluation speed, and system resource utilization through
+data-driven analysis and automated recommendations.
 
 **Trigger Conditions**:
 
 - User mentions performance, optimization, slow builds, or evaluation time
-- Commands like `/nix-optimize` or `just perf-test`
+- Commands like `/nix-optimize` or `./scripts/performance-test.sh full`
 - After significant configuration changes
 - Monthly performance audits (if configured)
 - Build time exceeds baseline thresholds
@@ -232,7 +235,7 @@ Module Load Times (top 20):
        - Issue: Large package list evaluation
        - Fix: Split into language-specific modules
 
-    3. home/profiles/desktop-user/default.nix: 2.1s
+    3. Users/olafkfreund/profile.nix: 2.1s
        - Issue: Heavy theme configuration
        - Fix: Lazy load theme settings
 
@@ -275,7 +278,7 @@ Dependency Chain Analysis:
 ### Automated Performance Analysis
 
 ```bash
-# Triggered by: /nix-optimize or just perf-test
+# Triggered by: /nix-optimize or ./scripts/performance-test.sh full
 
 1. **Baseline Measurement**
    - Record current build time
@@ -375,7 +378,7 @@ boot.kernelPackages = pkgs.linuxPackages;  # Use cached kernels
 
 Impact: -45s (20% faster builds)
 
-**2. Use Binary Packages**
+### 2. Use Binary Packages
 
 ```nix
 # packages.nix
@@ -388,7 +391,7 @@ Impact: -45s (20% faster builds)
 
 Impact: -50s (22% faster builds)
 
-**3. Increase Parallel Jobs**
+### 3. Increase Parallel Jobs
 
 ```nix
 # configuration.nix
@@ -403,7 +406,7 @@ Impact: -20s (8.9% faster builds)
 
 #### 🟡 MEDIUM IMPACT - Implement This Week
 
-**4. Optimize Binary Caches**
+### 4. Optimize Binary Caches
 
 ```nix
 # configuration.nix
@@ -423,7 +426,7 @@ nix.settings = {
 
 Impact: -15s (6.7% faster builds)
 
-**5. Garbage Collection**
+### 5. Garbage Collection
 
 ```bash
 # Clean up old generations and unused packages
@@ -435,7 +438,7 @@ Impact: 50GB disk space recovery
 
 #### 🟢 LOW IMPACT - Nice to Have
 
-**6. Optimize Module Imports**
+### 6. Optimize Module Imports
 
 ```nix
 # Split large modules into smaller focused modules
@@ -449,13 +452,13 @@ Impact: -5s evaluation time
 
 ### Bottlenecks Detected
 
-**1. Excessive Module Imports (12s)**
+### 1. Excessive Module Imports (12s)
 
 - Issue: Loading 141+ modules sequentially
 - Fix: Implement lazy module loading
 - Impact: -8s (67% faster evaluation)
 
-**2. Home Manager Profile Composition (8s)**
+### 2. Home Manager Profile Composition (8s)
 
 - Issue: Complex profile merging
 - Fix: Optimize profile structure
@@ -542,7 +545,7 @@ Impact: -5s evaluation time
 **Performance Baseline Updated**: 2025-01-15
 **Next Analysis**: 2025-02-15 (monthly)
 
-````
+````text
 
 ## Integration with Existing Tools
 
@@ -562,10 +565,7 @@ Impact: -5s evaluation time
 
 ```bash
 # Performance testing commands
-just perf-test            # Full performance analysis
-just perf-baseline        # Establish performance baseline
-just perf-compare         # Compare with baseline
-just perf-track          # Track performance over time
+./scripts/performance-test.sh full            # Full performance analysis
 ```
 
 ### With Deployment Coordinator
@@ -669,9 +669,6 @@ just validate            # Includes both analyses
 ### 1. Establish Performance Baselines
 
 ```bash
-# Create baseline after optimization
-just perf-baseline
-
 # Store baseline metrics
 /nix-optimize --baseline
 ```
@@ -682,8 +679,6 @@ just perf-baseline
 # Monthly performance audits
 /nix-optimize
 
-# Track performance trends
-just perf-track --monthly
 ```
 
 ### 3. Optimize Before Major Changes
@@ -694,7 +689,7 @@ nix-collect-garbage -d
 nix-store --optimise
 
 # Measure before/after
-just perf-test
+./scripts/performance-test.sh full
 ```
 
 ### 4. Profile Slow Builds
@@ -804,7 +799,7 @@ dependencies:
   - binary cache access
 triggers:
   - keyword: performance, optimization, slow, build time
-  - command: /nix-optimize, just perf-test
+  - command: /nix-optimize, ./scripts/performance-test.sh full
   - threshold: build time >3 minutes
   - schedule: monthly
 outputs:

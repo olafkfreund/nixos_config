@@ -51,37 +51,6 @@ Comprehensive validation suite for NixOS configurations.
 - Checks dependencies and structure
 - Generates comprehensive reports
 
-### ci-test.sh
-
-Automated CI/CD testing pipeline for continuous integration.
-
-**Usage:**
-
-```bash
-./ci-test.sh [OPTIONS]
-```
-
-**Options:**
-
-- `-j, --jobs N`: Number of parallel jobs (default: 4)
-- `-t, --timeout N`: Timeout per test in seconds (default: 600)
-- `-q, --quick`: Quick mode (reduced test coverage)
-- `-v, --verbose`: Verbose output
-
-**Environment Variables:**
-
-- `CI_SKIP_PERFORMANCE`: Skip performance regression tests
-- `CI_SKIP_HOME_MANAGER`: Skip Home Manager tests
-- `CI_HOSTS`: Override host list (comma-separated)
-
-**Features:**
-
-- Parallel test execution
-- Performance regression testing
-- Comprehensive reporting
-- Git integration
-- Artifact generation
-
 ### test-modules.sh
 
 Test individual NixOS modules and their dependencies.

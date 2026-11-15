@@ -1330,7 +1330,7 @@ nix flake check || {
 # Pre-push hook (.git/hooks/pre-push)
 #!/usr/bin/env bash
 # Run tests before push
-just test-all || {
+just test-all-parallel || {
   echo "Tests failed!"
   exit 1
 }

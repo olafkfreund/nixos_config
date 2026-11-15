@@ -14,11 +14,13 @@ context: fork
 
 ## Overview
 
-The Package Resolver agent automatically detects and resolves package conflicts, version inconsistencies, and dependency issues in NixOS configurations. It provides intelligent resolution strategies and prevents common packaging problems.
+The Package Resolver agent automatically detects and resolves package conflicts, version inconsistencies, and dependency
+issues in NixOS configurations. It provides intelligent resolution strategies and prevents common packaging problems.
 
 ## Agent Purpose
 
-**Primary Mission**: Eliminate package conflicts and dependency issues through automated detection and intelligent resolution strategies, ensuring smooth builds and consistent environments.
+**Primary Mission**: Eliminate package conflicts and dependency issues through automated detection and intelligent
+resolution strategies, ensuring smooth builds and consistent environments.
 
 **Trigger Conditions**:
 
@@ -44,7 +46,7 @@ Conflict Detection:
    Versions requested:
      - python39 (modules/development.nix:45)
      - python310 (modules/packages/desktop.nix:78)
-     - python311 (home/profiles/developer/default.nix:23)
+     - python311 (Users/olafkfreund/profile.nix)
 
    Issue: Multiple Python versions in environment
    Impact: Path conflicts, confusion, wasted space
@@ -64,7 +66,7 @@ Conflict Detection:
 
    Requested by:
      - modules/packages/utilities.nix (python version)
-     - home/profiles/developer/default.nix (go version)
+     - Users/olafkfreund/profile.nix (go version)
 
    Resolution: Rename imports for clarity:
      pythonYq = pkgs.yq;
@@ -451,7 +453,7 @@ Manual Review Required: 4
 Versions:
   - python39 (modules/development.nix:45)
   - python310 (modules/packages/desktop.nix:78)
-  - python311 (home/profiles/developer/default.nix:23)
+  - python311 (Users/olafkfreund/profile.nix)
 
 Path conflicts:
   - /bin/python → python39
@@ -472,7 +474,7 @@ Path conflicts:
 - python = pkgs.python310;
 + python = pkgs.python311;
 
-# Already correct in home/profiles/developer/default.nix
+# Already correct in Users/olafkfreund/profile.nix
 ```
 
 **Impact**:
@@ -655,7 +657,7 @@ users.users.username.packages = [
 **Last Resolution**: 2025-01-15
 **Next Check**: On flake update or package changes
 
-````
+````text
 
 ## Integration with Existing Tools
 

@@ -2,7 +2,7 @@
 
 ## What Was Implemented
 
-You now have a comprehensive system to preview updates and track new packages before building your NixOS configurations.
+You now have a comprehensive system to preview updates and compare deployed system generations your NixOS configurations.
 
 ## The Solution
 
@@ -27,32 +27,20 @@ just preview-updates           # Current host
 just preview-updates p620      # Specific host
 ```
 
-### 2. New Package Finder (`find-new-packages.sh`)
+### 2. Deployed Generation Comparison (`system-diff.sh`)
 
-**Purpose**: Discover newly added packages in nixpkgs between revisions
+**Purpose**: Compare the two most recent system generations after deployment.
 
-**Key Features**:
-
-- Compares old and new nixpkgs commits
-- Lists all newly added packages
-- Shows package categories
-- Provides GitHub changelog link
-- Works with git history as fallback
-
-**Usage**:
-
-```bash
-just new-packages
-```
+**Usage**: `just system-diff HOST` (HOST is optional).
 
 ### 3. Integrated Justfile Commands
 
-Three new commands added to your workflow:
+Current commands in this workflow:
 
 ```bash
-just preview-updates [HOST]    # Preview package changes
-just new-packages              # Find new packages
-just update-workflow [HOST]    # Complete interactive workflow
+just preview-updates HOST    # Preview package changes
+just system-diff              # Compare the last two system generations
+just update-commit-deploy HOST    # Update, test, commit, and deploy
 ```
 
 ## How It Works
@@ -102,13 +90,13 @@ just update-workflow [HOST]    # Complete interactive workflow
 
 - `just check-updates` - Shows flake input commit changes
 - `just diff HOST` - Uses `nix store diff-closures` (built-in)
-- `just update-flake` - Updates and deploys immediately
+- `nix flake update` - Updates the lockfile only
 
 **New Enhanced Tools**:
 
 - `just preview-updates` - Uses nvd for detailed package visibility
-- `just new-packages` - Git-based package discovery
-- `just update-workflow` - Complete interactive workflow
+- `just system-diff` - compare the last two system generations
+- `just update-commit-deploy` - Update, test, commit, and deploy
 
 ## Example Outputs
 
@@ -159,8 +147,8 @@ just preview-updates p620
 # Step 3: Apply if satisfied
 just quick-deploy p620
 
-# Step 4: Discover new packages (optional)
-just new-packages
+# Step 4: Compare the last two system generations (optional)
+just system-diff
 
 # Step 5: Revert if needed
 mv flake.lock.backup flake.lock
@@ -170,10 +158,9 @@ mv flake.lock.backup flake.lock
 
 ```bash
 # One command for everything
-just update-workflow p620
+just update-commit-deploy p620
 
-# Prompts for confirmation after preview
-# Automatically deploys and shows new packages if approved
+# Updates the lockfile, tests, commits, and deploys the selected host
 ```
 
 ## Why This Matters
@@ -204,7 +191,7 @@ just preview-updates p620   # Output: detailed changes
 → firefox: 122.0 -> 123.0 (exact versions!)
 → linux: 6.6.15 -> 6.6.18 (kernel update = reboot)
 
-just new-packages          # Output: new packages list
+just system-diff          # Output: new packages list
 → 42 new packages available
 → zed-editor, netbird, dialect, ...
 
@@ -236,31 +223,15 @@ just quick-deploy p620     # Deploy with confidence
 
 ```text
 scripts/preview-updates.sh      # Main preview script (executable)
-scripts/find-new-packages.sh    # Package discovery script (executable)
 docs/UPDATE-WORKFLOW.md         # Complete usage guide
 UPDATE-TRACKING-SUMMARY.md      # This file
 ```
 
-### Justfile Changes
+### Current update commands
 
-Added three new commands in the update section:
-
-```just
-# Preview updates with detailed package changes (before building)
-preview-updates HOST="$(hostname)":
-    @echo "🔍 Previewing updates for {{HOST}}..."
-    ./scripts/preview-updates.sh {{HOST}}
-
-# Find newly added packages in nixpkgs
-new-packages:
-    @echo "🆕 Finding new packages in nixpkgs..."
-    ./scripts/find-new-packages.sh
-
-# Complete update workflow: preview → review → deploy
-update-workflow HOST="$(hostname)":
-    @echo "📦 Starting complete update workflow for {{HOST}}..."
-    # ... interactive workflow ...
-```
+Use `just preview-updates HOST` before a change, `just update-commit-deploy HOST`
+for the tested update workflow, and `just system-diff HOST` to compare the last
+two system generations after deployment.
 
 ## Advanced Features
 
@@ -353,8 +324,8 @@ just quick-deploy p620     # Still works
 
 ```bash
 just preview-updates       # Add before quick-deploy
-just new-packages         # Run after updates
-just update-workflow      # Complete workflow
+just system-diff         # Run after updates
+just update-commit-deploy      # Complete workflow
 ```
 
 ## Next Steps
@@ -373,8 +344,8 @@ just preview-updates
 # 3. Apply if satisfied
 just quick-deploy $(hostname)
 
-# 4. Discover new packages
-just new-packages
+# 4. Compare the last two system generations
+just system-diff
 ```
 
 ### Customize for Your Workflow
@@ -402,7 +373,7 @@ done
 - name: Check for updates
   run: |
     just preview-updates p620
-    just new-packages
+    just system-diff
 ```
 
 ## Summary
@@ -418,7 +389,7 @@ done
 
 - ✅ See exact package versions before building
 - ✅ Understand update impacts (size, reboot requirements)
-- ✅ Discover new packages in nixpkgs
+- ✅ Compare the last two system generations in nixpkgs
 - ✅ Make informed deployment decisions
 - ✅ Safe rollback with automatic backups
 - ✅ Zero additional installations needed
@@ -449,7 +420,7 @@ just preview-updates
 ### "How do I see newly added packages to nixpkgs?"
 
 ```bash
-just new-packages
+just system-diff
 # Lists all new packages between revisions
 ```
 

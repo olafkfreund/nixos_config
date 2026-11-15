@@ -12,7 +12,7 @@ advanced performance optimizations, parallel operations, and smart change detect
 ```bash
 just quick-test           # Test all hosts in parallel (~1 min)
 just quick-deploy HOST    # Deploy only if changed (~30 sec)
-just quick-all           # Test all + deploy all (~3 min total)
+just test-all-parallel    # Build-test all hosts in parallel
 ```
 
 ### All Available Deployment Commands
@@ -33,23 +33,15 @@ just razer    # Deploy to Razer laptop (Intel/NVIDIA)
 just p510     # Deploy to P510 media server (Intel Xeon/NVIDIA)
 ```
 
-#### Advanced Deployment Options
+#### Host deployment and testing
 
 ```bash
-just deploy-fast HOST         # Fast deployment with minimal builds
-just deploy-local-build HOST  # Build locally, deploy remotely
-just deploy-cached HOST       # Deploy with binary cache optimization
-just emergency-deploy HOST    # Emergency deployment (skip tests)
+just deploy-local-build HOST   # Build locally and deploy to HOST
+just deploy-via-p620 HOST     # Build on p620 and deploy to HOST
+just test-all-parallel        # Build-test all hosts in parallel
 ```
 
-#### Bulk Operations
-
-```bash
-just deploy-all              # Deploy to all hosts sequentially (~8 min)
-just deploy-all-parallel     # Deploy to all hosts in parallel (~2 min)
-just test-all-parallel       # Test all hosts in parallel (~1 min)
-just build-all-parallel      # Build all configs in parallel (no deploy)
-```
+Deploy one host at a time. Obtain the owner's approval before deploying p510.
 
 ## Host Configuration
 
@@ -85,7 +77,7 @@ DEX5550 is offline; Samsung and HP are decommissioned.
 
 - **Testing**: All hosts tested simultaneously
 - **Building**: All configurations built in parallel
-- **Deployment**: All hosts deployed concurrently
+- **Deployment**: Deploy one selected host at a time
 
 ### 3. Smart Change Detection
 
@@ -97,10 +89,8 @@ just quick-deploy HOST
 ### 4. Build on the target host
 
 ```bash
-# Passes --build-host HOST, so the target builds its own closure instead of
-# building here and copying it over. Despite the name, no binary cache is
-# involved — there isn't one.
-just deploy-cached HOST
+# Builds on p620; no local binary cache is involved.
+just deploy-via-p620 HOST
 ```
 
 ### 5. Network Optimizations
@@ -154,7 +144,9 @@ just quick-deploy HOST
 # Full validation pipeline
 just validate
 just test-all-parallel
-just deploy-all-parallel
+just p620
+just deploy-via-p620 razer
+# Obtain owner approval before deploying p510.
 ```
 
 ### Emergency Fixes
@@ -162,8 +154,8 @@ just deploy-all-parallel
 **Scenario**: Critical security patches or urgent fixes
 
 ```bash
-# Skip all tests for maximum speed
-just emergency-deploy HOST
+# Run required checks first; build locally for this host
+just deploy-local-build HOST
 ```
 
 ### Network Issues
@@ -180,23 +172,14 @@ just deploy-local-build HOST
 **Scenario**: First-time deployment to new hosts
 
 ```bash
-# Use binary cache for faster initial builds
-just deploy-cached HOST
+# Build on p620 for a remote host
+just deploy-via-p620 HOST
 ```
 
 ### CI/CD Pipeline
 
-**Scenario**: Automated testing and deployment
-
-```bash
-# Parallel testing for speed
-just test-all-parallel
-
-# Smart deployment to skip unchanged hosts
-for host in p620 razer p510; do
-    just quick-deploy $host
-done
-```
+Build-test all hosts in CI with `just test-all-parallel`. Deploy each approved
+host separately after review.
 
 ## Troubleshooting
 
@@ -208,10 +191,7 @@ done
 # Check host connectivity
 just ping-hosts
 
-# Try fast deployment
-just deploy-fast HOST
-
-# Use local build for network issues
+# Use a local build for network issues
 just deploy-local-build HOST
 ```
 
@@ -232,14 +212,13 @@ just diff HOST
 
 ```bash
 # Use parallel operations
-just test-all-parallel    # Instead of just test-all
-just deploy-all-parallel  # Instead of just deploy-all
+just test-all-parallel    # Build all hosts concurrently
 
 # Use smart deployment
 just quick-deploy HOST    # Only if changed
 
 # Check binary cache
-just deploy-cached HOST   # Use P620 cache
+just deploy-via-p620 HOST   # Build on P620
 ```
 
 #### No Changes but Still Deploying
@@ -258,20 +237,20 @@ just diff HOST           # Shows actual differences
 
 ```bash
 # Benchmark specific host
-just bench-host HOST 3   # Run 3 builds and average
+./scripts/performance-test.sh build-times   # Run 3 builds and average
 
 # Check parallel efficiency
-just perf-parallel       # Test parallel build performance
+./scripts/performance-test.sh parallel       # Test parallel build performance
 ```
 
 #### Monitor Resource Usage
 
 ```bash
 # Check memory usage during builds
-just perf-memory
+./scripts/performance-test.sh memory
 
 # Monitor cache performance
-just perf-cache
+./scripts/performance-test.sh cache
 ```
 
 ## Advanced Features
@@ -301,9 +280,8 @@ Run `just quick-test` before bulk deployments.
 
 Use parallel commands whenever possible:
 
-- `just test-all-parallel`
-- `just deploy-all-parallel`
-- `just build-all-parallel`
+- `just test-all-parallel` for concurrent build tests
+- A host recipe for each approved deployment
 
 ### 4. Watch the deploy
 
@@ -314,9 +292,9 @@ There is no metrics stack. Use `journalctl -f` on the target and
 
 Match deployment strategy to scenario:
 
-- Development: `just quick-deploy`
-- Production: `just quick-all`
-- Emergency: `just emergency-deploy`
+- Development: `just quick-deploy HOST`
+- Production: `just validate`, then the selected host recipe`
+- Remote host with local build: `just deploy-local-build HOST`
 
 ## Integration with Other Tools
 
@@ -339,8 +317,7 @@ Example GitHub Actions workflow:
 - name: Test NixOS configurations
   run: just test-all-parallel
 
-- name: Deploy if tests pass
-  run: just deploy-all-parallel
+# Deploy an approved host separately after review.
 ```
 
 ### Deploy failures

@@ -234,7 +234,7 @@ the `main` branch on GitHub, not the local checkout, with
 ## Related
 
 - `just update` (`nh os update`) — plain nh update, no commit
-- `just update-flake` — `nix flake update` then `just deploy`, no commit
+- `nix flake update` — update the lockfile only, with no commit or deploy
 - `just quick-deploy HOST` — smart-deploy-if-changed without touching the lock
 - `just deploy` — local-only switch via nh
 

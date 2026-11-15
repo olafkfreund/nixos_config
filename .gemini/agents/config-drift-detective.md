@@ -10,16 +10,19 @@ description: Configuration Drift Detection and Declarative State Enforcement
 
 ## Overview
 
-The Config Drift Detective agent monitors and detects configuration drift between declared NixOS configurations and actual system state. It ensures systems remain in their intended declarative state and alerts on manual changes or imperative modifications.
+The Config Drift Detective agent monitors and detects configuration drift between declared NixOS configurations and
+actual system state. It ensures systems remain in their intended declarative state and alerts on manual changes or
+imperative modifications.
 
 ## Agent Purpose
 
-**Primary Mission**: Detect and prevent configuration drift by monitoring system state changes, identifying imperative modifications, and ensuring all hosts maintain their declared configuration.
+**Primary Mission**: Detect and prevent configuration drift by monitoring system state changes, identifying imperative
+modifications, and ensuring all hosts maintain their declared configuration.
 
 **Trigger Conditions**:
 
 - User mentions drift, state changes, or configuration inconsistencies
-- Commands like `/nix-check-drift` or `just check-drift`
+- Commands like `/nix-check-drift` or `just diff p620`
 - After manual system changes
 - Daily drift detection scans (if configured)
 - Before critical deployments
@@ -603,20 +606,20 @@ networking.nameservers = [ "192.168.1.1" ];
 
 ### Today (HIGH)
 
-3. ✅ Remove imperative packages, add to config
-4. ✅ Commit or discard uncommitted changes
-5. ✅ Review untracked configuration files
+1. ✅ Remove imperative packages, add to config
+2. ✅ Commit or discard uncommitted changes
+3. ✅ Review untracked configuration files
 
 ### This Week (MEDIUM)
 
-6. ⏭️ Add video group to user declaration
-7. ⏭️ Clean up local override files
-8. ⏭️ Document acceptable drift
+1. ⏭️ Add video group to user declaration
+2. ⏭️ Clean up local override files
+3. ⏭️ Document acceptable drift
 
 ### Optional (LOW)
 
-9. ⏭️ Fix DNS configuration
-10. ⏭️ Review and update network settings
+1. ⏭️ Fix DNS configuration
+2. ⏭️ Review and update network settings
 
 ## Automated Fix Script
 
@@ -653,7 +656,7 @@ echo "Safe drift fixes applied. Review HIGH priority issues manually."
 **Last Drift Scan**: 2025-01-15 19:00:00
 **Next Scan**: 2025-01-16 19:00:00 (daily)
 
-````
+````text
 
 ## Integration with Existing Tools
 
@@ -744,7 +747,7 @@ Security Patrol checks:
 /nix-check-drift
 
 # Before critical deployments
-just check-drift
+just diff p620
 ```
 
 ### 2. Commit Configuration Changes

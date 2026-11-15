@@ -15,16 +15,19 @@ context: fork
 
 ## Overview
 
-The Deployment Coordinator agent orchestrates intelligent deployments across multiple NixOS hosts with dependency management, rollback capabilities, parallel execution optimization, and real-time status tracking. It transforms manual deployment processes into automated, reliable workflows.
+The Deployment Coordinator agent orchestrates intelligent deployments across multiple NixOS hosts with dependency
+management, rollback capabilities, parallel execution optimization, and real-time status tracking. It transforms manual
+deployment processes into automated, reliable workflows.
 
 ## Agent Purpose
 
-**Primary Mission**: Automate and optimize multi-host NixOS deployments with intelligent dependency resolution, failure handling, and rollback capabilities.
+**Primary Mission**: Automate and optimize multi-host NixOS deployments with intelligent dependency resolution, failure
+handling, and rollback capabilities.
 
 **Trigger Conditions**:
 
 - User requests deployment to multiple hosts
-- Commands like `/nix-deploy`, `just deploy-all`, or `just quick-all`
+- Commands like `/nix-deploy`, `just p620`, or `just test-all-parallel`
 - Manual deployment requests mentioning "deploy", "update", or "rollout"
 - GitHub workflow deployments after PR merge
 - Scheduled automated deployment windows
@@ -77,7 +80,7 @@ nix build .#nixosConfigurations.p620.config.system.build.toplevel --no-link
 
 **Output**:
 
-```
+```text
 p620:  CHANGED (3 packages, 1 config)
 p510:  UNCHANGED (skip deployment)
 razer: CHANGED (kernel update)
@@ -111,7 +114,7 @@ Time saved: 65% vs sequential deployment
 
 **Status display**:
 
-```
+```text
 Deployment Progress: 3 hosts
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -260,7 +263,7 @@ Failure Action: Automatic rollback
 ### Automated Deployment Process
 
 ```bash
-# Triggered by: /nix-deploy or just deploy-all
+# Triggered by: /nix-deploy or just p620
 
 1. **Analysis Phase**
    - Detect configuration changes per host
@@ -387,11 +390,10 @@ All systems operational! 🚀
 ```bash
 # Deployment coordinator enhances all deployment commands
 
-just deploy-all           # Intelligent multi-host deployment
-just deploy-all-parallel  # Force parallel strategy
-just quick-deploy p620    # Single host with smart detection
-just quick-all           # Smart test + deploy all changed hosts
-just emergency-deploy p620 # Skip validation (coordinator aware)
+# Deploy one host at a time; obtain the owner approval before p510.
+just p620
+just deploy-via-p620 razer
+just quick-deploy p620    # Single-host change detection
 ```
 
 ### With `/nix-deploy` Command
@@ -399,7 +401,7 @@ just emergency-deploy p620 # Skip validation (coordinator aware)
 ```bash
 # /nix-deploy uses deployment coordinator automatically
 
-/nix-deploy                    # Smart deployment to all changed hosts
+/nix-deploy                    # Deploy selected hosts separately
 /nix-deploy p620 razer        # Deploy specific hosts with coordination
 /nix-deploy --strategy=canary  # Use canary deployment strategy
 /nix-deploy --parallel        # Force parallel deployment
@@ -424,12 +426,13 @@ jobs:
       - name: Deploy with Coordinator
         run: |
           # Deployment coordinator handles orchestration
-          just deploy-all
+          just p620
+          just deploy-via-p620 razer
 
       - name: Verify Deployment
         run: |
           # Coordinator provides verification
-          just deployment-status
+          just status
 ```
 
 ### With Security Patrol
@@ -561,23 +564,13 @@ just test-all-parallel     # Build test all hosts
 
 ```bash
 # Real-time deployment status
-just deployment-status
+just status
 
 # Watch deployment logs
 journalctl -u deployment-coordinator -f
 
 # Check last deployment
-just deployment-history
-```
-
-### 4. Test Rollback Procedures
-
-```bash
-# Practice rollback in test environment
-just test-rollback p620
-
-# Verify rollback works
-just verify-rollback-capability
+nixos-rebuild list-generations
 ```
 
 ## Troubleshooting
@@ -590,16 +583,11 @@ just verify-rollback-capability
 
 ```bash
 # Check deployment status
-just deployment-status
+just status
 
 # View detailed logs
 journalctl -u deployment-coordinator -f
 
-# Cancel stuck deployment
-just deployment-cancel
-
-# Resume from failure
-just deployment-resume
 ```
 
 ### Rollback Failed
@@ -613,10 +601,8 @@ just deployment-resume
 ssh HOST "sudo nixos-rebuild switch --rollback"
 
 # Verify system health
-just health-check HOST
+just status
 
-# Report rollback status
-just deployment-report
 ```
 
 ### Parallel Deployment Conflicts
@@ -699,7 +685,7 @@ dependencies:
   - Git repository access
 triggers:
   - keyword: deploy, deployment, rollout, update
-  - command: /nix-deploy, just deploy-all, just quick-all
+  - command: /nix-deploy, just p620
   - event: GitHub push to main
   - schedule: maintenance window
 outputs:

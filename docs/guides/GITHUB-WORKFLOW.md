@@ -601,7 +601,7 @@ just test-host p620
 just test-all-parallel
 
 # Performance test
-just perf-test
+./scripts/performance-test.sh full
 ```
 
 ### Automated CI/CD
@@ -679,10 +679,10 @@ just quick-deploy p620
 just quick-deploy p620  # Skips if no changes
 
 # Deploy to all hosts in parallel
-just deploy-all-parallel
+just p620
 
 # Emergency deployment (skip tests)
-just emergency-deploy p620
+just deploy-local-build p620
 
 # Rollback to previous generation
 sudo nixos-rebuild switch --rollback
@@ -768,7 +768,7 @@ just test-all-parallel # Test all hosts in parallel
 
 # Deployment
 just quick-deploy HOST # Smart deployment
-just deploy-all        # Deploy all hosts
+just p620        # Deploy p620
 
 # Maintenance
 just format            # Format all Nix files

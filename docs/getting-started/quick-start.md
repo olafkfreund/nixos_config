@@ -24,7 +24,7 @@ just quick-test          # build all hosts in parallel
 ```bash
 just quick-deploy p620   # smart deploy — only if the build changed
 just p620                # optimised deploy to a specific host
-just deploy-all-parallel # deploy every host at once
+just p620 # deploy p620; deploy other hosts separately
 ```
 
 !!! tip "Routine lock bumps"
