@@ -22,11 +22,6 @@ in
     ./nixos/aqc107-link-pin.nix # Pin Aquantia AQC107 to 1G to dodge AER flapping
     ./nixos/dns-fallback.nix # systemd-resolved with public DNS fallback (issue #564)
     ./nixos/tailscale-serve.nix # Tailscale Serve for /router (LiteLLM, Phase 2)
-    ../common/nixos/i18n.nix
-    ../common/nixos/envvar.nix
-    ../common/nixos/host-class.nix
-    ../common/nixos/zfs-import.nix
-    ../common/nixos/inotify-limits.nix
     ./nixos/cpu.nix
     ./nixos/memory.nix
     ./nixos/load.nix
@@ -107,12 +102,6 @@ in
     useRoutingFeatures = "both"; # Can route and accept routes
     openFirewall = true;
   };
-
-  # Use AI provider defaults
-  aiDefaults = {
-    enable = true;
-  };
-
 
   ai.providers = {
     enable = true;
@@ -290,10 +279,6 @@ in
       precommit = true; # Activates modules/development/pre-commit.nix — installs markdownlint, statix, taplo, yamllint, ruff, etc. system-wide.
     };
 
-    gnome-remote-desktop = {
-      enable = true;
-    };
-
     virtualization = {
       enable = true;
       docker = true;
@@ -319,24 +304,7 @@ in
       terraform = true;
     };
 
-    security = {
-      enable = true;
-      onepassword = true;
-      gnupg = true;
-    };
-
-    # Syncthing for ~/.claude and ~/.gemini sync across hosts
-    syncthing = {
-      enable = true;
-      syncClaude = true;
-      syncGemini = true;
-    };
-
     ai = {
-      enable = true;
-      antigravity-cli = true;
-      claude-desktop = true;
-
       # Enable MCP (Model Context Protocol) servers for AI integration
       mcp = {
         enable = true;
@@ -392,10 +360,6 @@ in
       yt-x.enable = true; # Terminal YouTube browser
     };
 
-    media = {
-      droidcam = false; # Disabled - building custom solution
-    };
-
     # COSMIC disabled — sticking with GNOME only until COSMIC is more
     # production-ready. Module + packages parked under modules/desktop/cosmic.nix
     # and pkgs/cosmic-applets/ for easy re-enable.
@@ -408,26 +372,6 @@ in
       enableDesktopIntegration = true;
     };
   };
-
-  # Display manager: GDM (was previously delegated to cosmic-greeter by the
-  # cosmic module; the unified DM module defaults to "none" without it).
-  # NOTE: must live at top-level, NOT inside the features = {...} block above —
-  # the option path is `desktop.displayManager`, not `features.desktop.displayManager`.
-  # Login manager: Omarchy's SDDM greeter, switched on by
-  # programs.nixarchy.displayManager in ./nixos/nixarchy.nix. backend = "none"
-  # keeps GDM off; SDDM enumerates wayland-sessions, so the Omarchy Hyprland
-  # session and GNOME both stay selectable.
-  desktop.displayManager.backend = "none";
-
-  # Preselect the Omarchy session. Without this SDDM has no default and falls
-  # through to whatever /var/lib/sddm/state.conf remembers, which was
-  # gnome.desktop -- so every boot came up in GNOME rather than Omarchy.
-  #
-  # A fallback only: SDDM rewrites state.conf on every login and the remembered
-  # session wins, so the first Omarchy login is what makes it stick. GNOME
-  # stays in the session menu either way.
-  services.displayManager.defaultSession = "omarchy";
-
 
   # k3d cluster — Phase 2 of docs/plans/2026-08-20-k3d-p510-to-p620-migration.md.
   # Migrated off p510, whose 490W PSU cannot power its two GPUs (three hard
@@ -541,8 +485,6 @@ in
   # Enable encrypted API keys
 
   secrets.apiKeys = {
-    enable = true; # Re-enabled after recreating secrets with current SSH keys
-    enableUserEnvironment = true;
     braveSearch = true;
   };
 
@@ -555,8 +497,6 @@ in
     # The system.resourceManager module was removed during anti-pattern cleanup
     # Module had root services and is no longer needed
 
-    # System version
-    stateVersion = "25.11";
   };
 
   scrcpyWifi.enable = true;
@@ -648,19 +588,8 @@ in
 
     # X server configuration
     xserver = {
-      enable = true;
-      displayManager.xserverArgs = [
-        "-nolisten tcp"
-        "-dpi 96"
-      ];
       videoDrivers = [ "${vars.gpu}gpu" ]; # Correct way to set the video driver
     };
-
-    # Display manager configuration (modern syntax)
-    # GDM is enabled at line 281 until COSMIC Greeter bug is fixed
-
-    # Desktop environment
-    desktopManager.gnome.enable = true;
 
     # File systems and services
     nfs.server = lib.mkIf vars.services.nfs.enable {

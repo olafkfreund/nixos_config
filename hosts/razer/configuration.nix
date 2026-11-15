@@ -19,11 +19,6 @@ in
     ./nixos/secure-boot.nix # Secure Boot enabled with lanzaboote (issue #376)
     ./nixos/shim.nix # Microsoft-signed shim + MOK enrollment for Razer's locked PK (issue #376)
     ./nixos/nvidia.nix
-    ../common/nixos/i18n.nix
-    ../common/nixos/envvar.nix
-    ../common/nixos/host-class.nix
-    ../common/nixos/zfs-import.nix
-    ../common/nixos/inotify-limits.nix
     ./nixos/cpu.nix
     ./nixos/laptop.nix
     ./nixos/memory.nix
@@ -133,11 +128,6 @@ in
   # See: https://github.com/olafkfreund/cosmic-ext-bg/issues/32
   # services.cosmic-ext-bg.enable = true;
 
-  # Use AI provider defaults
-  aiDefaults = {
-    enable = true;
-  };
-
   # AI analysis services removed - were non-functional and consuming resources
   # ai.analysis = {
   #   enable = false;  # Removed completely - provided no meaningful analysis
@@ -175,10 +165,6 @@ in
       enableReadyNotifications = true;
     };
 
-    gnome-remote-desktop = {
-      enable = true;
-    };
-
     virtualization = {
       enable = true;
       docker = true;
@@ -203,24 +189,7 @@ in
       terraform = true;
     };
 
-    security = {
-      enable = true;
-      onepassword = true;
-      gnupg = true;
-    };
-
-    # Syncthing for ~/.claude and ~/.gemini sync across hosts
-    syncthing = {
-      enable = true;
-      syncClaude = true;
-      syncGemini = true;
-    };
-
     ai = {
-      enable = true;
-      antigravity-cli = true;
-      claude-desktop = true; # Enable Claude Desktop GUI with MCP server support
-
       # Enable MCP (Model Context Protocol) servers for AI integration
       mcp = {
         enable = true;
@@ -265,10 +234,6 @@ in
       print = true;
     };
 
-    media = {
-      droidcam = false; # Disabled - building custom solution
-    };
-
     # COSMIC disabled — GNOME only until COSMIC is more production-ready.
     # Module + packages parked under modules/desktop/cosmic.nix and
     # pkgs/cosmic-applets/ for easy re-enable.
@@ -281,37 +246,6 @@ in
       enableDesktopIntegration = true;
     };
   };
-
-  # Display manager: GDM (was previously delegated to cosmic-greeter by the
-  # cosmic module; the unified DM module defaults to "none" without it).
-  # NOTE: must live at top-level, NOT inside the features = {...} block above —
-  # the option path is `desktop.displayManager`, not `features.desktop.displayManager`.
-  # No autoLogin here — this is NVIDIA Optimus PRIME-sync hardware where any
-  # greeter respawn after first boot ("Unable to run session" → GdmLocal-
-  # DisplayFactory gives up after 8 retries → black screen) is broken.
-  # Keeping the boot-time greeter alive is the only reliable local UX, so
-  # autologin loops are off. Trade-off: cold-RDP needs a physical login
-  # first (see comment on `gnome.gnome-remote-desktop` below). p510 enables
-  # autoLogin because p510 is pure NVIDIA without PRIME — greeter respawn
-  # works there; not here.
-  # Login manager: Omarchy's SDDM greeter, switched on by
-  # programs.nixarchy.displayManager in ./nixos/nixarchy.nix. backend = "none"
-  # keeps GDM off, which still matters here: GDM's greeter respawn is broken on
-  # this Optimus PRIME-sync NVIDIA hardware (see note above), and SDDM stays on
-  # the same non-GDM path the DMS greeter used. SDDM enumerates
-  # wayland-sessions, so the Omarchy Hyprland session and GNOME both stay
-  # selectable.
-  desktop.displayManager.backend = "none";
-
-  # Preselect the Omarchy session. Without this SDDM has no default and falls
-  # through to whatever /var/lib/sddm/state.conf remembers, which was
-  # gnome.desktop -- so every boot came up in GNOME rather than Omarchy.
-  #
-  # A fallback only: SDDM rewrites state.conf on every login and the remembered
-  # session wins, so the first Omarchy login is what makes it stick. GNOME
-  # stays in the session menu either way.
-  services.displayManager.defaultSession = "omarchy";
-
 
   # Terminals follow whichever shell owns the session: DMS in the DMS sessions,
   # omarchy in the Omarchy one. See modules/desktop/theme-owner.nix.
@@ -421,8 +355,6 @@ in
 
   # Enable encrypted API keys
   secrets.apiKeys = {
-    enable = true;
-    enableUserEnvironment = true;
     braveSearch = true;
   };
 
@@ -447,17 +379,11 @@ in
 
     # X server and desktop environment
     xserver = {
-      enable = true;
-      displayManager.xserverArgs = [
-        "-nolisten tcp"
-        "-dpi 96"
-      ];
       videoDrivers = [ vars.gpu ];
     };
 
     # Desktop environments — COSMIC is the primary session; GNOME is also
     # available as a choice in the login greeter.
-    desktopManager.gnome.enable = true;
   };
 
   # playerctl 2.4.1 can segfault on a player signal (#1987); come back instead of staying failed.
@@ -657,7 +583,6 @@ in
       "libsoup-2.74.3" # Temporary: Required by some GNOME packages until migration to libsoup-3
     ];
   };
-  system.stateVersion = "25.11";
 
   # ── RDP client, for connecting OUT to the other machines ────────────────
   #
