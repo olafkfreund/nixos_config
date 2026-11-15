@@ -21,7 +21,9 @@ scripts/config-snapshot.sh snap /tmp/snap-new
 scripts/config-snapshot.sh diff /tmp/snap-base /tmp/snap-new   # IDENTICAL per host, or the differences
 ```
 
-Pass host names after the directory to snapshot only some hosts.
+Pass host names after the directory to snapshot only some hosts. `SNAP_NO_BUILD=1` evaluates without building:
+faster, and an
+identical `.drv` already proves an identical system; build once at the end of a change.
 
 ### validate-config.sh
 

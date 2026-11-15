@@ -3,6 +3,7 @@
 #
 #   config-snapshot.sh snap <outdir> [host...]   build + record the current tree (default: p620 razer p510)
 #   config-snapshot.sh diff <base-dir> <new-dir> compare two snapshots; exit 1 on any difference
+#   SNAP_NO_BUILD=1 config-snapshot.sh snap ...   evaluate only: fast, and the .drv alone proves equality
 #
 # The toplevel is evaluated with system.configurationRevision pinned to a constant, so two commits that
 # configure the same system give the same .drv. Equal .drv = identical system, file contents included.
@@ -33,6 +34,10 @@ case "${1:-}" in
       userunits = builtins.attrNames hm.systemd.user.services;
       etc = builtins.attrNames c.environment.etc;
       hmfiles = builtins.attrNames hm.home.file; }' >"$out/$h.json"
+      if [ "${SNAP_NO_BUILD:-0}" = 1 ]; then
+        echo "$h evaluated $(cat "$out/$h.drv")"
+        continue
+      fi
       nix build --no-link --print-out-paths "$(cat "$out/$h.drv")^out" >"$out/$h.out"
       echo "$h built $(cat "$out/$h.out")"
     done
@@ -56,6 +61,7 @@ case "${1:-}" in
           echo "    ${d//$'\n'/$'\n    '}"
         fi
       done
+      [ -f "$b/$h.out" ] && [ -f "$n/$h.out" ] || continue
       echo "  closure:"
       nix store diff-closures "$(cat "$b/$h.out")" "$(cat "$n/$h.out")" | sed 's/^/    /' | head -40
     done
