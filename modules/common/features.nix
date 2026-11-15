@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 let inherit (lib) mkOption mkEnableOption types; in {
   options.features = {
     development = {
@@ -73,8 +73,24 @@ let inherit (lib) mkOption mkEnableOption types; in {
     };
   };
 
-  config.programs = {
-    lazygit.enable = config.features.programs.lazygit;
-    thunderbird.enable = config.features.programs.thunderbird;
+  config = {
+    # Baseline tools available on any host enabling features.development.
+    # Without this, hosts with development features but no other package-set
+    # trigger would lack git/curl/jq at the system level.
+    environment.systemPackages = lib.mkIf config.features.development.enable [
+      pkgs.git
+      pkgs.curl
+      pkgs.jq
+    ];
+
+    # Docker keeps its own modules.containers.docker root (out of scope for #2934);
+    # this line is what makes features.virtualization.docker do anything.
+    modules.containers.docker.enable =
+      lib.mkIf config.features.virtualization.enable config.features.virtualization.docker;
+
+    programs = {
+      lazygit.enable = config.features.programs.lazygit;
+      thunderbird.enable = config.features.programs.thunderbird;
+    };
   };
 }

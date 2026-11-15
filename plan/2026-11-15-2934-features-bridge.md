@@ -79,6 +79,9 @@ after each, `SNAP_NO_BUILD=1 scripts/config-snapshot.sh snap /tmp/s6-<n>` and `d
 
 - Slice 3: `cloud-tools.packages.enable` had no setter and no `features.cloud` flag, so its block (teller, yq-go,
   ytt) was never installed on any host. Deleted with the option instead of bridged; `.drv` identical.
+- Slice 7: the bridge's last lines (the git/curl/jq baseline and the `modules.containers.docker.enable` line that
+  reads `features.virtualization.docker`) move unchanged into `modules/common/features.nix`, like slice 5's
+  lazygit/thunderbird lines. Docker itself stays out of scope.
 
 ## Tests
 
