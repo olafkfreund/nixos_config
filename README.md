@@ -241,7 +241,7 @@ single generation rather than failing its own threshold.
 - COSMIC: a writer derivation produces the full RON palette (30
   fields) from the base16 scheme. COSMIC itself is parked
   (`desktop.cosmic.enable = false` everywhere); the writer stays wired.
-- GNOME profile: shared `home/profiles/desktop-user/profile.nix` and
+- GNOME profile: shared home profile and
   the `desktop.gnome.profile` module unify the wiring; the
   `desktop.displayManager` module unifies display-manager selection.
 - `host.class` (enum) is used to gate desktop-only Stylix targets so

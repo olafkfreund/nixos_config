@@ -1054,7 +1054,7 @@ programs.zsh.shellAliases = { ll = "ls -alF"; la = "ls -A"; /* ... */ };
 services.qemuGuest.enable = cfg.type == "qemu" || cfg.type == "auto";
 programs.dconf.enable = cfg.applications.gnome-boxes;
 
-# Shared aliases in a profile under home/profiles/
+# Shared aliases in a shared home module
 let
   commonAliases = {
     ll = "ls -alF";

@@ -25,16 +25,13 @@ activation step.
 flowchart LR
     F[flake.nix] --> HM[home-manager.nixosModules]
     HM --> U[Users/olafkfreund]
-    U --> P[home/profiles/*]
-    P --> PROG[home/ programs &amp; dotfiles]
+    U --> PROG[home/ programs &amp; dotfiles]
     style F fill:#5e35b1,color:#fff
     style PROG fill:#00897b,color:#fff
 ```
 
-- **`home/profiles/`** holds role-based profiles (e.g. `developer`,
-  `server-admin`) that bundle related programs.
-- **`Users/<name>/`** composes the profiles a given user wants, optionally with
-  host-specific home files.
+- **`Users/<name>/`** composes the home configuration for each host from the
+  program modules under `home/`.
 - **`home/`** contains the actual program configurations (shell, browsers,
   desktop, media, development tooling).
 
@@ -50,7 +47,6 @@ flowchart LR
 
 ## Adding user configuration
 
-1. Put the program config under `home/` (or a profile under
-   `home/profiles/`).
+1. Put the program config under `home/`.
 2. Compose it for the user in `Users/<name>/`.
 3. Rebuild the host — the home generation is activated automatically.
