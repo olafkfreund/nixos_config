@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2935
 spec: spec/2026-11-15-2935-storage-tuning.md
 coders:
