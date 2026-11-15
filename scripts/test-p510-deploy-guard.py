@@ -70,6 +70,19 @@ CASES = [
     ),
     ("anVzdCBib290LXNwYWNlLWNsZWFuIHJhemVy", 0, "free: boot pruning on another host"),
     ("anVzdCBib290LXNwYWNlIHA1MTA=", 0, "free: read-only boot-space on p510"),
+    (
+        "anVzdCBmaXgtYWdlbml4LXJlbW90ZSBvbGFma2ZyZXVuZEBwNTEw",
+        2,
+        "denied: agenix reset, user@p510",
+    ),
+    (
+        "anVzdCBib290LXNwYWNlLWNsZWFuICJwNTEwIg==",
+        2,
+        "denied: boot pruning, quoted p510",
+    ),
+    ("anVzdCBwNTEwLWNsZWFyLXNlc3Npb25zOyB0cnVl", 2, "denied: session clearing then ;"),
+    ("anVzdCAtLWp1c3RmaWxlPUp1c3RmaWxlIHA1MTA=", 2, "denied: --justfile=X then p510"),
+    ("anVzdCAtZCAuIHF1aWNrLWRlcGxveSBwNTEw", 2, "denied: -d X then deploy p510"),
 ]
 
 fail = 0

@@ -117,6 +117,14 @@ CASES = [
     ("anVzdCBzdGF0dXM=", 0, "free: status"),
     ("anVzdCB0ZXN0LWhvc3QgcDYyMA==", 0, "free: test-host"),
     ("anVzdCAtLWxpc3Q=", 0, "free: --list"),
+    ("anVzdCBnYzsgZWNobyBvaw==", 2, "denied: name then ;"),
+    ("KGp1c3QgdXBkYXRlKQ==", 2, "denied: in a subshell"),
+    ("anVzdCBnY3x0ZWUgeA==", 2, "denied: name then |"),
+    ("anVzdCAtLWp1c3RmaWxlPUp1c3RmaWxlIGdj", 2, "denied: --justfile=X"),
+    ("anVzdCAtcSBnYw==", 2, "denied: -q flag"),
+    ("anVzdCAtZCAuIGdj", 2, "denied: -d X"),
+    ("anVzdCBwNjIwOyB0cnVl", 2, "denied: host recipe then ;"),
+    ("anVzdCB1cGRhdGUtY29tbWl0OyB0cnVl", 0, "free: update-commit then ;"),
 ]
 
 fail = 0

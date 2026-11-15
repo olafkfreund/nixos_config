@@ -75,6 +75,11 @@ while IFS= read -r seg; do
             shift
             [ $# -gt 0 ] && shift
             ;;
+          --set)
+            shift
+            [ $# -gt 0 ] && shift
+            [ $# -gt 0 ] && shift
+            ;;
           -* | *=*) shift ;;
           *)
             recipe="$1"

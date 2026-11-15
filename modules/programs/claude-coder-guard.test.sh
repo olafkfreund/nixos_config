@@ -42,6 +42,9 @@ just update-commit
 just build-on-p620 razer
 just _sign-drv razer
 AGENT_BUS_ANNOUNCED=1 just gc
+just --set GENERATIONS 3 cleanup
+just --justfile=Justfile gc
+just -q gc
 nix-collect-garbage -d
 nix store gc
 nix store optimise

@@ -366,10 +366,11 @@ let
     # match `\b(switch|boot|test)\b[^|;]*\bp510\b` against
     # "nixos-rebuild switch --flake .#p510". Verified against 13 cases.
     # `just` options and NAME=value words before the recipe must not hide it (#2951).
-    just='just([[:space:]]+(-f|--justfile|-d|--working-directory)[[:space:]]+[^[:space:]]+|[[:space:]]+[A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*)*[[:space:]]+'
+    just='just([[:space:]]+(-f|--justfile|-d|--working-directory)[[:space:]]+[^[:space:]]+|[[:space:]]+-[^[:space:]]+|[[:space:]]+[A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*)*[[:space:]]+'
+    end='([[:space:];|&)]|$)'
     deploy_verb="nixos-rebuild[[:space:]]+[^|;]*(switch|boot|test)|nh[[:space:]]+os[[:space:]]+(switch|boot|test)|(^|[[:space:]])nhs([[:space:]]|$)|$just[a-z-]*deploy"
     # Also p510-only recipes that change it without "deploy" in the name.
-    p510_recipe="$just(p510|p510-clear-sessions)([[:space:]]|$)|$just(boot-space-clean|fix-agenix-remote)[[:space:]]+p510([[:space:]]|$)"
+    p510_recipe="$just(p510|p510-clear-sessions)$end|$just(boot-space-clean|fix-agenix-remote)[[:space:]]+[^[:space:]]*p510"
     if printf '%s' "$cmd" | ${pkgs.gnugrep}/bin/grep -qE "$p510_recipe|($deploy_verb)[^|;]*p510|p510[^|;]*($deploy_verb)"; then
       echo "BLOCKED by managed-settings deploy guard: this command would activate a new generation on p510." >&2
       echo "p510 is the headless media server (Plex, *arr, k3d, cloudflared). Deploying it requires the user's explicit approval." >&2
@@ -541,12 +542,13 @@ let
     # the most common way anyone actually deploys.
     # `just` may carry -f/--justfile/-d/--working-directory X or NAME=value
     # words before the recipe; they must not hide it.
-    just='just([[:space:]]+(-f|--justfile|-d|--working-directory)[[:space:]]+[^[:space:]]+|[[:space:]]+[A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*)*[[:space:]]+'
+    just='just([[:space:]]+(-f|--justfile|-d|--working-directory)[[:space:]]+[^[:space:]]+|[[:space:]]+-[^[:space:]]+|[[:space:]]+[A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*)*[[:space:]]+'
+    end='([[:space:];|&)]|$)'
     disruptive="$disruptive|$just"'[a-z-]*deploy'
-    disruptive="$disruptive|$just"'(p510|p620|razer)([[:space:]]|$)'
+    disruptive="$disruptive|$just"'(p510|p620|razer)'"$end"
     # Recipes that GC, prune boot entries, touch agenix, end sessions or
     # switch under other names (#2951). Keep in sync with the Justfile.
-    disruptive="$disruptive|$just"'(gc|cleanup|boot-space-clean|fix-agenix-remote|p510-clear-sessions|update)([[:space:]]|$)'
+    disruptive="$disruptive|$just"'(gc|cleanup|boot-space-clean|fix-agenix-remote|p510-clear-sessions|update)'"$end"
     disruptive="$disruptive"'|nix-collect-garbage|nix[[:space:]]+store[[:space:]]+optimise'
     disruptive="$disruptive"'|systemctl[[:space:]]+[^|;]*(restart|stop)'
     disruptive="$disruptive"'|(^|[[:space:]])(reboot|poweroff|shutdown)([[:space:]]|$)'
