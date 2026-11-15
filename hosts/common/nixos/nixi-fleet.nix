@@ -8,20 +8,21 @@
 , ...
 }:
 let
+  fleet = import ../fleet.nix;
   nixiFleet = [
     {
       name = "p620";
-      address = "100.69.100.115";
+      address = fleet.p620.tailnet;
       companion = true;
     }
     {
       name = "p510";
-      address = "100.118.96.32";
+      address = fleet.p510.tailnet;
       companion = false;
     }
     {
       name = "razer";
-      address = "100.90.72.124";
+      address = fleet.razer.tailnet;
       companion = true;
     }
   ];

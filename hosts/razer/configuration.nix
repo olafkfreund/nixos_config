@@ -7,6 +7,7 @@
 }:
 let
   vars = import ./variables.nix { };
+  fleet = import ../common/fleet.nix;
 in
 {
   # Use laptop template and add Razer-specific modules
@@ -258,8 +259,8 @@ in
   # `just deploy-via-p620 razer` (Could not resolve hostname p620.lan).
   # Tailscale is always up, so these names are always routable.
   networking.hosts = {
-    "100.69.100.115" = [ "p620" "p620.lan" ];
-    "100.118.96.32" = [ "p510" "p510.lan" ];
+    "${fleet.p620.tailnet}" = [ "p620" "p620.lan" ];
+    "${fleet.p510.tailnet}" = [ "p510" "p510.lan" ];
   };
 
   environment.sessionVariables = vars.environmentVariables // {
@@ -394,7 +395,6 @@ in
   };
 
   nixpkgs.config = {
-    allowBroken = true;
     permittedInsecurePackages = [
       "olm-3.2.16"
       "python3.12-youtube-dl-2021.12.17"

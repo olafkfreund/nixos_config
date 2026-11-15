@@ -52,6 +52,8 @@ Each host typically contains:
 - `common/hardware-profiles/` — GPU profiles (`amd-gpu.nix`,
   `nvidia-gpu.nix`).
 - `common/shared-variables.nix` — User mappings imported by host `variables.nix`.
+- `common/fleet.nix` — Tailnet and LAN addresses of the hosts; plain data, imported
+  with `import ../common/fleet.nix` from a host and `import ../fleet.nix` from `common/nixos/`.
 
 Settings all hosts share live in `templates/desktop.nix`, scalars at `mkDefault`
 (lists stay plain, so a host adds to them).
