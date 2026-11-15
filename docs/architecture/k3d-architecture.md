@@ -13,7 +13,7 @@ media stack, has spare CPU and RAM, and lives on a stable LAN.
 | Option | Decision | Why |
 |---|---|---|
 | **k3d (chosen)** | ✅ | k3s inside the host Docker daemon. Zero extra hypervisor. Cluster lifecycle is one `k3d` command. Persistent state via Docker volumes. |
-| k3s in MicroVMs | ❌ | The repo already has dormant MicroVM k3s files (`hosts/p510/nixos/microvm/k3s-*.nix`) that were never wired up. Heavier (KVM + dedicated kernels) for no isolation win on a single-tenant host. |
+| k3s in MicroVMs | ❌ | The repo had dormant MicroVM k3s files (`hosts/p510/nixos/microvm/k3s-*.nix`) that were never wired up; they were removed in #2931. Heavier (KVM + dedicated kernels) for no isolation win on a single-tenant host. |
 | kind | ❌ | Effectively equivalent to k3d in mechanics. k3d wins on first-class k3s features (servicelb, traefik on/off flags, embedded registry support). |
 | k0s / k8s upstream | ❌ | Overkill for a homelab — k3s ships everything we need (containerd, CoreDNS, local-path-provisioner) at a fraction of the surface area. |
 | Plain Docker Compose | ❌ | Doesn't match the Factory project's intended target environment, and ArgoCD-based GitOps is the requirement. |

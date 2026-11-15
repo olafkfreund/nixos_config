@@ -9,8 +9,7 @@ parameterised desktop template (`templates/desktop.nix`) via
 - `p620/` — AMD RX 7900 workstation, primary development and AI host.
   Workstation template; full COSMIC/GNOME desktop.
 - `p510/` — Intel Xeon system, headless media server (Plex, NZBGet,
-  FlareSolverr). Workstation template; no display manager. MicroVM
-  guest config lives in `p510/microvm.nix`.
+  FlareSolverr). Workstation template; no display manager.
 - `razer/` — Intel + NVIDIA laptop. Laptop template; lanzaboote Secure
   Boot with shim+MOK.
 
@@ -38,7 +37,7 @@ Each host typically contains:
   - `boot.nix`, `power.nix`, `cpu.nix`, `memory.nix`, etc.
   - GPU vendor file (`amd.nix`, `nvidia.nix`, ...).
 - `themes/stylix.nix` — Host theme wiring (Stylix + base16 + wallpaper).
-- Optional host-only modules (e.g. `microvm.nix`, `flaresolverr.nix`).
+- Optional host-only modules (e.g. `flaresolverr.nix`).
 
 ## Common Layer
 
@@ -47,5 +46,5 @@ Each host typically contains:
 - `common/nixos/` — `i18n.nix`, `hosts.nix`, `envvar.nix`,
   `host-class.nix`.
 - `common/hardware-profiles/` — GPU profiles (`amd-gpu.nix`,
-  `nvidia-gpu.nix`, `intel-integrated.nix`).
-- `common/shared-variables.nix` — User mappings consumed by `flake.nix`.
+  `nvidia-gpu.nix`).
+- `common/shared-variables.nix` — User mappings imported by host `variables.nix`.

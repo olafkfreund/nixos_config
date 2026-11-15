@@ -14,7 +14,6 @@ This directory contains the NixOS configuration for the P620 workstation, which 
   - `envvar.nix` - Environment variables
   - `mpd.nix` - Music Player Daemon configuration
   - `screens.nix` - Display configuration
-  - `syncthing.nix` - Syncthing file synchronization configuration
   - `env.nix` - Environment variables for Hyprland/Wayland
 - `themes/` - Theme configurations
 

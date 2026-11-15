@@ -296,18 +296,10 @@ systemd.services.myservice = {
   };
 };
 
-# GOOD - Dedicated user with hardening
-users.users.myservice = {
-  isSystemUser = true;
-  group = "myservice";
-};
-users.groups.myservice = {};
-
+# GOOD - Dynamic user with hardening
 systemd.services.myservice = {
   serviceConfig = {
     ExecStart = "${pkgs.myapp}/bin/myapp";
-    User = "myservice";
-    Group = "myservice";
 
     # Process isolation
     DynamicUser = true;

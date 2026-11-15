@@ -1,6 +1,8 @@
 # 🖥️✨ Desktop Environment Configuration
 
-This directory contains declarative, modular configurations for desktop environments, window managers, and related utilities managed through Home Manager. All modules follow the NixOS and Home Manager best practices for reproducibility and maintainability.
+This directory contains declarative, modular configurations for desktop environments, window managers, and related
+utilities managed through Home Manager. All modules follow the NixOS and Home Manager best practices for
+reproducibility and maintainability.
 
 ## 🧩 Components
 
@@ -27,13 +29,13 @@ This directory contains declarative, modular configurations for desktop environm
 - `sound/` — 🔊 Audio configuration utilities
 - `terminals/` — 🖥️ Terminal emulator configurations
 - `theme/` — 🎨 Desktop theme configurations
-- `thunderbird/` — 🦅 Email client configuration
 - `waypipe/` — 🛤️ Remote application forwarding
 - `zathura/` — 📚 Document viewer configuration
 
 ## 🚀 Usage
 
-These modules are imported by the main desktop configuration file (`default.nix`) and then included in the user's Home Manager configuration. Each component typically provides:
+These modules are imported by the main desktop configuration file (`default.nix`) and then included in the user's
+Home Manager configuration. Each component typically provides:
 
 - 📦 Package installation (using flakes and overlays where appropriate)
 - ⚙️ Configuration files (declarative, reproducible)
@@ -51,4 +53,3 @@ These modules are imported by the main desktop configuration file (`default.nix`
 ---
 
 For more details, see the main repository [README.md](../README.md) and individual module documentation.
-

@@ -20,7 +20,7 @@ This repository uses a **unified multi-host flake** architecture.
 - **Inputs**: Defined in `flake.nix` (nixpkgs, home-manager, stylix, agenix, etc.).
 - **Outputs**: Generates `nixosConfigurations` for all hosts.
 - **`makeNixosSystem`**: A helper function in `flake.nix` that standardizes host creation:
-  - Injects `specialArgs`: `host`, `username`, `sharedVariables`, `hardwareProfiles`.
+  - Injects `specialArgs`: `host`, `username`.
   - Sets up **Overlays**: Custom packages and fixes.
   - Configures **Home Manager**: Integrated directly into the NixOS system.
 
