@@ -24,13 +24,10 @@ in
     ];
 
     # Development tools (conditional enables)
-    development.copilot-cli.enable = mkIf cfg.development.enable cfg.development.copilot-cli;
 
     # Modules configuration
     modules = {
-      development.python.enable = mkIf cfg.development.enable cfg.development.python;
       containers.docker.enable = mkIf cfg.virtualization.enable cfg.virtualization.docker;
-      ai.antigravity-cli.enable = mkIf cfg.ai.enable cfg.ai.antigravity-cli;
     };
 
     # Services configuration
