@@ -235,8 +235,9 @@ Run it inside a live session; `hyprctl` is not useful outside one.
 
 `omarchy theme set X` retints the 24 files Omarchy owns **immediately** and
 writes `X` into `nixarchy-theme.nix`. `modules/desktop/stylix-theme.nix` reads
-that name, loads the theme's `colors.toml` out of the Nixarchy package, maps its
-named roles onto base16 and hands the result to Stylix.
+that name, loads the theme's `colors.toml` from the pinned omarchy source
+(`inputs.nixarchy.inputs.omarchy`; only `osaka-jade` comes from the package), maps
+its named roles onto base16 and hands the result to Stylix.
 
 Everything Omarchy cannot reach at runtime — Plymouth, GRUB, the console, fonts
 and the remaining Home Manager targets — follows at the **next rebuild**, not

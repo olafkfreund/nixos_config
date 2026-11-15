@@ -39,7 +39,9 @@ path-scoped rule in `.claude/rules/desktop.md`.
   overwrite it (#2370). Two consequences: switching a theme leaves the tree
   dirty and `nhs` refuses a dirty tree (same as `nixarchy-apply` with
   `apps.nix`), and p510 follows the same palette because `inputs.nixarchy` is
-  flake-wide. Reach the package through `inputs.nixarchy`, never
+  flake-wide. Theme palettes and the fastfetch config are read from the pinned
+  omarchy source (`inputs.nixarchy.inputs.omarchy`), not the package, so
+  evaluation never builds it (#2930). Reach the package through `inputs.nixarchy`, never
   `config.programs.nixarchy.package` — nixarchy consumes Stylix, so that closes
   the module fixpoint and evaluation dies with infinite recursion.
 - **p510 runs the Omarchy session for real** (#1585, superseding the

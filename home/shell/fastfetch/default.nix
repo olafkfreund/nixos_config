@@ -1,12 +1,11 @@
 # fastfetch — Omarchy's own readout.
 #
-# The config is taken verbatim from the nixarchy package
-# ($OMARCHY_PATH/etc/fastfetch/config.jsonc) rather than rebuilt here, so the
-# branding tracks whatever upstream ships and needs no maintenance of ours. It
-# is strict JSON despite the .jsonc name, so fromJSON reads it directly.
+# The config is read from the pinned omarchy source, with nixarchy's one
+# branding patch (pkgs/omarchy/default.nix:659 in nixarchy) reapplied here.
+# If nixarchy adds another patch to this file, mirror it here. The file is
+# strict JSON despite the .jsonc name, so fromJSON reads it directly.
 #
-# The package is reached through `inputs.nixarchy`, never a literal store path:
-# that path changes on every omarchy or nixpkgs bump.
+# The source is reached through inputs.nixarchy, never a literal store path.
 #
 # Its logo comes from ~/.config/omarchy/branding/about.txt, which Omarchy owns
 # and retints with the theme -- nothing to declare here.
@@ -19,10 +18,11 @@
 # size and that query fails under tmux and herdr, silently falling back to the
 # stock NixOS logo. Omarchy's config uses a plain text logo, so that trap does
 # not apply to it.
-{ pkgs, inputs, ... }:
+{ pkgs, lib, inputs, ... }:
 let
-  omarchy = inputs.nixarchy.packages.${pkgs.stdenv.hostPlatform.system}.omarchy;
-  omarchyFastfetch = "${omarchy}/share/omarchy/etc/fastfetch/config.jsonc";
+  src = builtins.readFile "${inputs.nixarchy.inputs.omarchy}/etc/fastfetch/config.jsonc";
+  old = ''version=$(omarchy-version) && echo \"Omarchy $version\"'';
+  new = ''version=$(omarchy-version) && echo \"Nixarchy (Omarchy $version)\"'';
 
   # Standalone `tracker` command -- the animated motion tracker on its own,
   # unrelated to the fastfetch config, so the branding swap does not remove it.
@@ -37,6 +37,9 @@ in
 
   programs.fastfetch = {
     enable = true;
-    settings = builtins.fromJSON (builtins.readFile omarchyFastfetch);
+    settings =
+      assert lib.assertMsg (lib.hasInfix old src)
+        "omarchy fastfetch config changed; update the Nixarchy patch (#2930)";
+      builtins.fromJSON (lib.replaceStrings [ old ] [ new ] src);
   };
 }
