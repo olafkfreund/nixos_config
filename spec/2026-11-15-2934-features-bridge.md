@@ -19,9 +19,8 @@ the same slice. Slices (map: Fable review on `40559a899`, `modules/common/featur
 2. Python `modules.development.python` (:40), copilot-cli (:28), antigravity-cli (:42); their `package` options move
    under `features.development.<x>.package` / `features.ai.<x>.package` only if a host sets them, else `let`.
 3. Cloud `<x>.packages` (:55-59); drop the unbridged, unset `cloud-tools.packages`.
-4. Virtualisation `services.{podman,incus,libvirt,spice}` (:47-50) and docker: drop `features.virtualization.docker`
-   and :41; `modules.containers.docker` (set directly by all hosts with `users`/`dataRoot`) becomes
-   `features.virtualization.docker` with the same sub-options (host edit).
+4. Virtualisation `services.{podman,incus,libvirt,spice}` (:47-50). Docker is out of scope: `modules.containers.docker`
+   is a custom root, not upstream, is read by `modules/containers/k3d.nix:894`, and hosts set it directly.
 5. Security `security.{gnupg,onepassword}` (:62-63); programs `services.print`, `programs.{obsidian,office,webcam}`
    (:51, :71-73), `media.droidcam` (:77), and the upstream `programs.{lazygit,thunderbird}` lines (:69-70) move into
    a small module unchanged.

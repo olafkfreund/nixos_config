@@ -21,8 +21,10 @@ imported twice on the Home Manager side.
 
 ## Proposed outcome
 
-Each module reads its `features.*` switch directly; the bridge files are gone; no custom option lives under an
-upstream root. Every host builds exactly the same system.
+Each bridged module reads its `features.*` switch directly; the bridge files are gone; the custom options found
+under upstream roots in these modules (`services.{podman,incus,libvirt,spice,print}`, `programs.{obsidian,office,webcam,winboat,aerion}`,
+`security.{gnupg,onepassword}`, `nix.development`, `system.logging`, `networking.{profile,stableConnection}`) move to
+`features.*`. Docker and unbridged modules are out of scope. Every host builds exactly the same system.
 
 ## Affected users and systems
 
