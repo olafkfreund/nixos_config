@@ -7,7 +7,6 @@ _: {
     ./nix/flake-settings.nix
     ./security/default.nix
     ./pkgs/default.nix
-    ./overlays/default.nix
     ./scripts/temp-dashboard.nix
 
     # System utilities - always useful

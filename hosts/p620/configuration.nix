@@ -8,6 +8,7 @@
 }:
 let
   vars = import ./variables.nix { };
+  fleet = import ../common/fleet.nix;
 in
 {
   # Use workstation template and add P620-specific modules
@@ -90,7 +91,7 @@ in
     # nixos-rebuild switch). Local dev tools whose auth callbacks redirect to
     # the tailnet hostname would otherwise time out.
     extraHosts = ''
-      100.69.100.115 p620.tail833f7.ts.net
+      ${fleet.p620.tailnet} p620.tail833f7.ts.net
     '';
 
     # Firewall disabled - P620 is inside a secure network
@@ -308,7 +309,7 @@ in
     #
     # 6443 is free here: the hecate-dev / hecate-remote demo clusters that used
     # ephemeral ports were deleted 2026-08-20.
-    apiHostBind = "100.69.100.115";
+    apiHostBind = fleet.p620.tailnet;
     apiPort = 6443;
   };
 
@@ -517,7 +518,7 @@ in
     # LAN IP, not p510.lan: the router change dropped the .lan search domain,
     # so the name no longer resolves and the automount hangs. Keep a DHCP
     # reservation for 192.168.1.65 on the router to stop this drifting again.
-    device = "192.168.1.65:/mnt/media";
+    device = "${fleet.p510.lan}:/mnt/media";
     fsType = "nfs";
     options = [
       "noauto"
@@ -592,7 +593,6 @@ in
 
   # Package configurations
   nixpkgs.config = {
-    allowBroken = true;
     permittedInsecurePackages = [
       "olm-3.2.16"
       "python3.12-youtube-dl-2021.12.17"

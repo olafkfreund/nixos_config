@@ -7,6 +7,7 @@
 }:
 let
   vars = import ./variables.nix { };
+  fleet = import ../common/fleet.nix;
 in
 {
   # Use workstation template for desktop environment with media server modules
@@ -307,7 +308,7 @@ in
       wakeDisplay = true;
 
       webOrigins = [
-        "https://192.168.1.65:47990"
+        "https://${fleet.p510.lan}:47990"
         "https://p510:47990"
         "https://p510.local:47990"
       ];
@@ -470,7 +471,6 @@ in
 
   nixpkgs.config = {
     allowUnfree = true; # Required for NVIDIA drivers
-    allowBroken = true;
     permittedInsecurePackages = [ "olm-3.2.16" "dotnet-sdk-6.0.428" "python3.12-youtube-dl-2021.12.17" "python3.14-youtube-dl-2021.12.17" ];
   };
 
@@ -683,7 +683,7 @@ in
     enable = true;
     # p620's ollama by tailnet IP: stable per-device, and does not depend on
     # MagicDNS resolving for a headless service at boot.
-    ollamaUrl = "http://100.69.100.115:11434";
+    ollamaUrl = "http://${fleet.p620.tailnet}:11434";
     # ABB torrents land here; SABnzbd (audiobook-only on p510 — the *arr stack
     # uses NZBGet/Transmission) completes Usenet grabs here. Both are watched
     # so NZBGeek audiobooks import too.
@@ -698,7 +698,7 @@ in
   # Audiobookshelf library lookups for an LLM/Claude agent over the tailnet.
   features.audiobook-mcp = {
     enable = true;
-    ollamaUrl = "http://100.69.100.115:11434";
+    ollamaUrl = "http://${fleet.p620.tailnet}:11434";
     listenLanInterface = "eno1";
   };
 

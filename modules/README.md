@@ -33,7 +33,6 @@ category modules (`core.nix`, `desktop.nix`, `development.nix`,
 - `helpers/` — Internal helper functions (entry: `helpers/default.nix`).
 - `installer/` — Live ISO support modules.
 - `nix/` — Nix daemon and binary cache configuration.
-- `overlays/` — Module-side overlay registration.
 - `pkgs/` — Custom package derivations.
 - `programs/` — Per-program modules (terminals, browsers, utilities).
 - `scrcpy/`, `webcam/`, `windows/`, `scripts/` — Discrete utilities.
