@@ -34,7 +34,7 @@ deploy: _require-main
 
 # Update local system using nh
 [group('update')]
-update:
+update: _require-main
     nh os switch --update
 
 # Idiot-proof update + commit + deploy (local OR remote). Does:

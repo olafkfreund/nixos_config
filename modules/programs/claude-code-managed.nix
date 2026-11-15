@@ -371,6 +371,10 @@ let
     deploy_verb="nixos-rebuild[[:space:]]+[^|;]*(switch|boot|test)|nh[[:space:]]+os[[:space:]]+(switch|boot|test)|(^|[[:space:]])nhs([[:space:]]|$)|$just[a-z-]*deploy"
     # Also p510-only recipes that change it without "deploy" in the name.
     p510_recipe="$just(p510|p510-clear-sessions)$end|$just(boot-space-clean|fix-agenix-remote)[[:space:]]+[^[:space:]]*p510"
+    # Running on p510 itself, a local switch names no host (Codex review, #2951).
+    if [ "$(cat /proc/sys/kernel/hostname)" = p510 ]; then
+      p510_recipe="$p510_recipe|$just(update|deploy|cleanup|gc|boot-space-clean)$end|$deploy_verb"
+    fi
     if printf '%s' "$cmd" | ${pkgs.gnugrep}/bin/grep -qE "$p510_recipe|($deploy_verb)[^|;]*p510|p510[^|;]*($deploy_verb)"; then
       echo "BLOCKED by managed-settings deploy guard: this command would activate a new generation on p510." >&2
       echo "p510 is the headless media server (Plex, *arr, k3d, cloudflared). Deploying it requires the user's explicit approval." >&2

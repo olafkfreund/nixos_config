@@ -35,6 +35,19 @@ os.write(fd, ("#!/usr/bin/env bash\n" + body + "\n").encode())
 os.close(fd)
 os.chmod(guard, 0o755)
 
+# The same guard as it behaves when the hook runs on p510 itself.
+fd, guard_p510 = tempfile.mkstemp(suffix=".sh")
+os.write(
+    fd,
+    (
+        "#!/usr/bin/env bash\n"
+        + body.replace("cat /proc/sys/kernel/hostname", "echo p510")
+        + "\n"
+    ).encode(),
+)
+os.close(fd)
+os.chmod(guard_p510, 0o755)
+
 CASES = [
     ("anVzdCBxdWljay1kZXBsb3kgcDUxMA==", 2, "denied: task runner, p510"),
     (
@@ -85,11 +98,36 @@ CASES = [
     ("anVzdCAtZCAuIHF1aWNrLWRlcGxveSBwNTEw", 2, "denied: -d X then deploy p510"),
 ]
 
+CASES += [
+    ("anVzdCB1cGRhdGU=", 0, "off p510: local update not a p510 deploy"),
+]
+
+LOCAL_P510 = [
+    ("anVzdCB1cGRhdGU=", 2, "on p510: local update denied"),
+    (
+        "QUdFTlRfQlVTX0FOTk9VTkNFRD0xIGp1c3QgdXBkYXRl",
+        2,
+        "on p510: announcing is not approval",
+    ),
+    ("anVzdCBkZXBsb3k=", 2, "on p510: local deploy denied"),
+    ("anVzdCBnYw==", 2, "on p510: local GC denied"),
+    ("bmggb3Mgc3dpdGNoIC4=", 2, "on p510: nh switch with no host denied"),
+    (
+        "UDUxMF9ERVBMT1lfQVBQUk9WRUQ9MSBqdXN0IHVwZGF0ZQ==",
+        0,
+        "on p510: ESCAPE with approval",
+    ),
+    ("anVzdCBzdGF0dXM=", 0, "on p510: status free"),
+    ("anVzdCB0ZXN0LWhvc3QgcDYyMA==", 0, "on p510: building another host free"),
+]
+
 fail = 0
-for b64, want, label in CASES:
+for g, b64, want, label in [(guard, *c) for c in CASES] + [
+    (guard_p510, *c) for c in LOCAL_P510
+]:
     cmd = base64.b64decode(b64).decode()
     p = subprocess.run(
-        [guard],
+        [g],
         input=json.dumps({"tool_input": {"command": cmd}}),
         capture_output=True,
         text=True,
@@ -99,5 +137,6 @@ for b64, want, label in CASES:
     print(f"{'ok  ' if ok else 'FAIL'} exit={p.returncode} want={want}  {label}")
 
 os.unlink(guard)
+os.unlink(guard_p510)
 print("\nALL PASS" if not fail else f"\n{fail} FAILED")
 sys.exit(1 if fail else 0)
