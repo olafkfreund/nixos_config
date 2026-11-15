@@ -50,10 +50,10 @@ case "${1:-}" in
       rc=1
       echo "$h: CHANGED"
       for k in syspkgs hmpkgs units userunits etc hmfiles; do
-        d=$(diff <(jq -r ".$k[]" "$b/$h.json" | sort) <(jq -r ".$k[]" "$n/$h.json" | sort) | grep '^[<>]' || true)
+        d=$(diff <(jq -r ".${k}[]" "$b/$h.json" | sort) <(jq -r ".${k}[]" "$n/$h.json" | sort) | grep '^[<>]' || true)
         if [ -n "$d" ]; then
           echo "  $k:"
-          echo "$d" | sed 's/^/    /'
+          echo "    ${d//$'\n'/$'\n    '}"
         fi
       done
       echo "  closure:"
