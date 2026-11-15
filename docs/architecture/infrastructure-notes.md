@@ -92,3 +92,7 @@ path-scoped rule in `.claude/rules/desktop.md`.
 - Fleet addresses live in `hosts/common/fleet.nix` (tailnet IPs of p620, p510 and razer, and p510's LAN
   `192.168.1.65`, which needs a DHCP reservation on the router). Hosts read it with
   `import ../common/fleet.nix`; change an address there, not in a host file (#2936).
+- Every herdr pane's shell runs in its own `herdr-pane-<pid>.scope` (`home/development/herdr.nix`, #2959). Before,
+  all panes shared the cgroup of the terminal that started herdr, so when p620 ran out of memory systemd-oomd killed
+  that cgroup and with it the herdr server and every agent (2026-11-15). Panes opened before a deploy keep the old
+  cgroup until reopened.
