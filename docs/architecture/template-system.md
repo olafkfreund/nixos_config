@@ -13,41 +13,64 @@ through `lib/hostTypes.nix` as two entry points:
 - `hostTypes.workstation` — used by **p620** and **p510**
 - `hostTypes.laptop` — used by **razer**
 
-The template takes one argument, `profile`, and imports the entire module tree.
-Profile-specific behaviour is applied with `lib.mkIf`.
+The template takes one argument, `profile`, and imports the entire module tree
+plus the five `hosts/common/nixos` fragments every host needs (`i18n`, `envvar`,
+`host-class`, `zfs-import`, `inotify-limits`). Profile-specific behaviour is
+applied with `lib.mkIf`.
 
 ```nix
 { profile ? "workstation" }:
 { lib, ... }:
 {
   imports = [
-    ../../modules/core.nix
-    ../../modules/development.nix
-    ../../modules/desktop.nix
-    ../../modules/virtualization.nix
-    ../../modules/performance.nix
-    ../../modules/email.nix
-    ../../modules/cloud.nix
-    ../../modules/programs.nix
-    ../../modules/common/ai-defaults.nix
-    ../../modules/windows/winboat.nix
+    ../common/nixos/i18n.nix
+    # ... the other four common fragments and ../../modules/*.nix
   ];
 
   config = lib.mkMerge [
     {
-      aiDefaults.enable = lib.mkDefault true;
-      services.openssh.enable = lib.mkDefault true;
+      features.security.enable = lib.mkDefault true;
+      services.displayManager.defaultSession = lib.mkDefault "omarchy";
+      system.stateVersion = lib.mkDefault "25.11";
+      # ... every setting the three hosts share, each at mkDefault
     }
     (lib.mkIf (profile == "laptop") {
       services.thermald.enable = lib.mkDefault true;
-      powerManagement = {
-        enable = lib.mkDefault true;
-        cpuFreqGovernor = lib.mkDefault "powersave";
-      };
     })
   ];
 }
 ```
+
+## Three shared places
+
+Configuration that two or three hosts set identically lives in one file
+(Issue #2932). A host file lists only what is its own.
+
+| File | Imported by | Holds |
+| ---- | ----------- | ----- |
+| `hosts/templates/desktop.nix` | all hosts | security, Syncthing, GNOME Remote Desktop, SDDM + Omarchy session, GNOME, X server, `system.stateVersion`, API keys, `features.ai`, droidcam off |
+| `hosts/common/nixos/dev-workstation.nix` | p620, razer | development, virtualization, cloud, MCP servers, desktop programs, Claude Code, agent voice, craft apps, screenshot MCP, playerctld, fwupd, ydotool |
+| `hosts/common/nixos/omarchy-desktop.nix` | `hosts/{p620,razer}/nixos/nixarchy.nix` | the identical `programs.nixarchy` settings, plugin sources and companion plugins |
+
+Stays per host, on purpose:
+
+- Every `environment.systemPackages` list and other list values whose order
+  matters: a list moved into another file merges at that file's position and
+  can change the system.
+- Module imports whose move changed a host's derivation:
+  `modules/development/default.nix`, `modules/secrets/api-keys.nix`, and on
+  p620/razer the secrets, meeting-transcribe, agent-voice and swarm-reaper
+  imports.
+- Hardware, GPU, network, firewall, NFS, users, `age.identityPaths`, signing
+  keys, `nixpkgs.config`, the `omarchy-*` import lists, and anything only one
+  host sets (all of p510's service selection).
+- A host that differs from a shared value overrides it in its own file
+  (the template uses `mkDefault`; `dev-workstation.nix` leaves differing
+  options out).
+
+Every move was proven with `scripts/config-snapshot.sh` (see
+`scripts/README.md`): the revision-pinned system `.drv` of each host was
+identical before and after.
 
 ## How a host wires in
 
@@ -88,6 +111,8 @@ template system exists to prevent.
 2. Import the appropriate host type (`hostTypes.workstation` or
    `hostTypes.laptop`).
 3. Declare host-unique bits (GPU profile, monitors, host-specific features).
+   A development desktop like p620 or razer also imports
+   `hosts/common/nixos/dev-workstation.nix`.
 4. Register it in `flake.nix` (`hostUsers`).
 5. Add the host SSH key to `secrets.nix` and rekey.
 

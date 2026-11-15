@@ -44,7 +44,14 @@ Each host typically contains:
 `common/` holds fragments shared across hosts:
 
 - `common/nixos/` — `i18n.nix`, `hosts.nix`, `envvar.nix`,
-  `host-class.nix`.
+  `host-class.nix`, and the shared fragments:
+  - `dev-workstation.nix` — everything p620 and razer configure identically
+    (development, virtualization, cloud, MCP, Claude Code, desktop programs).
+  - `omarchy-desktop.nix` — the identical `programs.nixarchy` settings,
+    imported from `hosts/{p620,razer}/nixos/nixarchy.nix`.
 - `common/hardware-profiles/` — GPU profiles (`amd-gpu.nix`,
   `nvidia-gpu.nix`).
 - `common/shared-variables.nix` — User mappings imported by host `variables.nix`.
+
+Settings all hosts share live in `templates/desktop.nix` at `mkDefault`.
+What stays per host and why: `docs/architecture/template-system.md`.
