@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2962
 spec: spec/2026-11-15-2962-llm-index-plugin.md
 coders:
