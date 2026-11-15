@@ -57,7 +57,6 @@
   ];
 
   local.llmIndex.sourcePath = "/mnt/code/Source-home"; # real path; ~/Source is a symlink
-  local.llmIndex.sourceAdoptUuid = "bdd8461e-7d6c-42b6-9cfe-39967825dd42"; # one-off #2962; remove once source is ok
 
   # Claude Code is this machine's agent, and saying so here is what pins nixi's
   # ACP adapter. nixarchy only adds claude to `services.nixi.agents` when
