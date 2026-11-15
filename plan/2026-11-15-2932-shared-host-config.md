@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2932
 spec: spec/2026-11-15-2932-shared-host-config.md
 coders:
