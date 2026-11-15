@@ -11,7 +11,7 @@ in
   options.go.development = {
     enable = mkEnableOption "Enable Go development environment";
     packages = mkOption {
-      type = with types; listOf str;
+      type = with types; listOf package;
       default = [
       ];
       description = "Packages to install for Go development";

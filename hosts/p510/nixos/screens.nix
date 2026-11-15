@@ -1,6 +1,6 @@
 _:
 let
-  vars = import ../variables.nix;
+  vars = import ../variables.nix { };
 in
 {
   home-manager.extraSpecialArgs = {

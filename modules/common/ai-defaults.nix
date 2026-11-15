@@ -1,15 +1,9 @@
 # AI Provider Default Configuration Module
 # Provides sensible defaults for AI provider configuration to eliminate duplication
 { config, lib, ... }:
-let inherit (lib) mkOption mkIf mkEnableOption mkDefault types; in {
+let inherit (lib) mkIf mkEnableOption mkDefault; in {
   options.aiDefaults = {
     enable = mkEnableOption "Default AI provider configuration";
-
-    profile = mkOption {
-      type = types.enum [ "workstation" "server" "laptop" ];
-      default = "workstation";
-      description = "AI provider profile for different host types";
-    };
   };
 
   config = mkIf config.aiDefaults.enable {

@@ -1,6 +1,7 @@
 # Enhanced Terminal Configuration with Unified Theming and Feature Flags
 { lib
 , pkgs
+, config
 , ...
 }:
 let
@@ -10,9 +11,9 @@ let
   cfg = {
     # Available terminals
     terminals = {
-      foot = true; # Lightweight Wayland terminal
-      kitty = true; # GPU-accelerated terminal
-      alacritty = true; # Cross-platform terminal
+      foot = config.foot.enable; # Lightweight Wayland terminal
+      kitty = config.kitty.enable; # GPU-accelerated terminal
+      alacritty = config.alacritty.enable; # Cross-platform terminal
       wezterm = false; # Rust-based terminal
       ghostty = false; # Fast terminal emulator
     };
@@ -336,16 +337,14 @@ in
     };
 
     # Set default terminal
-    xdg.mimeApps = {
+    xdg.mimeApps = mkIf (cfg.terminals.kitty || cfg.terminals.foot || cfg.terminals.alacritty) {
       associations.added = {
         "x-scheme-handler/terminal" =
           if cfg.terminals.kitty
           then "kitty.desktop"
           else if cfg.terminals.foot
           then "foot.desktop"
-          else if cfg.terminals.alacritty
-          then "Alacritty.desktop"
-          else "foot.desktop";
+          else "Alacritty.desktop";
       };
       defaultApplications = {
         "x-scheme-handler/terminal" =
@@ -353,9 +352,7 @@ in
           then "kitty.desktop"
           else if cfg.terminals.foot
           then "foot.desktop"
-          else if cfg.terminals.alacritty
-          then "Alacritty.desktop"
-          else "foot.desktop";
+          else "Alacritty.desktop";
       };
     };
 

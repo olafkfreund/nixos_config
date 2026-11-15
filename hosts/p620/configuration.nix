@@ -108,10 +108,9 @@ in
     openFirewall = true;
   };
 
-  # Use AI provider defaults with workstation profile
+  # Use AI provider defaults
   aiDefaults = {
     enable = true;
-    profile = "workstation";
   };
 
 
@@ -331,7 +330,6 @@ in
       enable = true;
       syncClaude = true;
       syncGemini = true;
-      masterHost = "p620"; # This host is the primary
     };
 
     ai = {

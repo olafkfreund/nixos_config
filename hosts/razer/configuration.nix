@@ -133,10 +133,9 @@ in
   # See: https://github.com/olafkfreund/cosmic-ext-bg/issues/32
   # services.cosmic-ext-bg.enable = true;
 
-  # Use AI provider defaults with laptop profile (disables Ollama for battery life)
+  # Use AI provider defaults
   aiDefaults = {
     enable = true;
-    profile = "laptop";
   };
 
   # AI analysis services removed - were non-functional and consuming resources
@@ -215,7 +214,6 @@ in
       enable = true;
       syncClaude = true;
       syncGemini = true;
-      masterHost = "p620";
     };
 
     ai = {

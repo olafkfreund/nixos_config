@@ -11,7 +11,7 @@ in
   options.java.development = {
     enable = mkEnableOption "Enable Java development environment";
     packages = mkOption {
-      type = with types; listOf str;
+      type = with types; listOf package;
       default = [ ];
       description = "Packages to install for Java development";
     };

@@ -8,7 +8,7 @@
 
   desktop.gnome.profile = "workstation";
 
-  # Workstation-only terminal emulators
+  # Workstation terminal preferences
   features.terminals.kitty = true;
   features.terminals.ghostty = true;
 

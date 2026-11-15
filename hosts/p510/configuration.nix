@@ -97,10 +97,9 @@ in
     ];
   };
 
-  # Use AI provider defaults with workstation profile (now with desktop environment)
+  # Use AI provider defaults
   aiDefaults = {
     enable = true;
-    profile = lib.mkForce "workstation"; # Force workstation profile for desktop environment
   };
 
   # Use the new features system instead of multiple lib.mkForce calls
@@ -148,7 +147,6 @@ in
       enable = true;
       syncClaude = true;
       syncGemini = true;
-      masterHost = "p620";
     };
 
     homeAssistant = {
