@@ -22,7 +22,7 @@ imports one plus its own hardware config.
 | razer | `laptop`      | Hybrid Intel/NVIDIA (Optimus). Heavy rebuilds: build on p620 via `just deploy-via-p620 razer`. |
 | p510  | `workstation` | Media server (Plex, NZBGet, k3s microvms) **and desktop** since 2026-08-31: Omarchy session, Sunshine streaming. Its nixarchy CI runners were removed in #1738. **Never build or deploy without asking first.** |
 
-Home Manager profiles live in `home/profiles/{developer,server-admin}`. Home Manager is a
+Per-host user files in `Users/<user>/` compose the Home Manager config. Home Manager is a
 **flake module** — never run `home-manager switch`.
 
 ## Non-negotiable
