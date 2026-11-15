@@ -71,8 +71,8 @@ in
       alacritty = true;
       foot = true;
       wezterm = true;
-      # kitty/ghostty: workstation (p620) only — defaults off; stub overrides
-      kitty = mkDefault false;
+      # Kitty was already present on every host; its flag now controls it (#2929).
+      kitty = true;
       ghostty = mkDefault false;
       warp = true;
       wave = true;

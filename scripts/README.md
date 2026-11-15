@@ -4,6 +4,25 @@ This directory contains utility scripts for managing, testing, and working with 
 
 ## 🧪 Testing and Validation Scripts
 
+### config-snapshot.sh
+
+Proves a refactor changes nothing (Issue #2929). It evaluates each host's toplevel with
+`system.configurationRevision` pinned to a constant, so two commits that configure the same system produce the same
+`.drv`, builds it locally (p510's configuration too; nothing is copied to or activated on any host), and records the
+package, unit, `/etc` and Home Manager file names.
+
+**Usage:**
+
+```bash
+# in a worktree at main: the baseline
+scripts/config-snapshot.sh snap /tmp/snap-base
+# in the task worktree: after the change
+scripts/config-snapshot.sh snap /tmp/snap-new
+scripts/config-snapshot.sh diff /tmp/snap-base /tmp/snap-new   # IDENTICAL per host, or the differences
+```
+
+Pass host names after the directory to snapshot only some hosts.
+
 ### validate-config.sh
 
 Comprehensive validation suite for NixOS configurations.
@@ -154,7 +173,7 @@ Checks for updates to your NixOS flake inputs and displays them in a table forma
 
 **Example output:**
 
-```
+```text
 Input                    Current        Latest         URL
 ======================== =============== =============== ==================================================
 nixpkgs                  83d4771af0c    91b9335eadb    github:nixos/nixpkgs/nixos-unstable

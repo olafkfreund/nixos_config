@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 
 let
-  inherit (lib) mkOption mkIf mkEnableOption mkDefault types;
+  inherit (lib) mkOption mkIf mkEnableOption mkDefault optional types;
   cfg = config.features.claude-hooks;
 
   # Hook script bodies. Kept as plain strings: building them with
@@ -63,10 +63,9 @@ in
       programs.tmux.enable = mkDefault true;
 
       # Make notification scripts available in the user environment
-      home.packages = mkIf (cfg.enablePermissionNotifications || cfg.enableReadyNotifications) [
-        (pkgs.writeScriptBin "claude-notify-permissions" needsPermissionsText)
-        (pkgs.writeScriptBin "claude-notify-ready" notifyReadyText)
-      ];
+      home.packages =
+        optional cfg.enablePermissionNotifications (pkgs.writeScriptBin "claude-notify-permissions" needsPermissionsText)
+        ++ optional cfg.enableReadyNotifications (pkgs.writeScriptBin "claude-notify-ready" notifyReadyText);
     }];
   };
 }

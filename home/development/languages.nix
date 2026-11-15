@@ -2,6 +2,7 @@
 # Unified language server, formatter, and development tool configuration
 { pkgs
 , lib
+, config
 , ...
 }:
 let
@@ -208,149 +209,151 @@ let
   aiPackages = [ ];
 in
 {
-  # Git configuration enhancement
-  programs.git = mkIf cfg.utilities.vcs.git {
-    enable = true;
-    settings = {
-      init.defaultBranch = "main";
-      pull.rebase = true;
-      push.autoSetupRemote = true;
-      core.editor = "nvim";
-      merge.tool = "vimdiff";
-      diff.tool = "vimdiff";
+  config = lib.mkIf (config.features.development.enable && config.features.development.languages) {
+    # Git configuration enhancement
+    programs.git = mkIf cfg.utilities.vcs.git {
+      enable = true;
+      settings = {
+        init.defaultBranch = "main";
+        pull.rebase = true;
+        push.autoSetupRemote = true;
+        core.editor = "nvim";
+        merge.tool = "vimdiff";
+        diff.tool = "vimdiff";
+      };
     };
-  };
 
-  # Direnv for project environment management
-  programs.direnv = {
-    enable = true;
-    enableBashIntegration = true;
-    enableZshIntegration = true;
-    nix-direnv.enable = true;
-  };
+    # Direnv for project environment management
+    programs.direnv = {
+      enable = true;
+      enableBashIntegration = true;
+      enableZshIntegration = true;
+      nix-direnv.enable = true;
+    };
 
-  # Combined home configuration
-  home = {
-    # Language support packages
-    packages = languagePackages ++ utilityPackages ++ aiPackages;
+    # Combined home configuration
+    home = {
+      # Language support packages
+      packages = languagePackages ++ utilityPackages ++ aiPackages;
 
-    # Development shell aliases
-    shellAliases = mkMerge [
-      # Nix development
-      (mkIf cfg.languages.nix.enable {
-        nix-build-test = "nix-build --dry-run";
-        nix-shell-pure = "nix-shell --pure";
-        nix-fmt = "alejandra";
-        nix-check = "statix check && deadnix check";
-      })
+      # Development shell aliases
+      shellAliases = mkMerge [
+        # Nix development
+        (mkIf cfg.languages.nix.enable {
+          nix-build-test = "nix-build --dry-run";
+          nix-shell-pure = "nix-shell --pure";
+          nix-fmt = "alejandra";
+          nix-check = "statix check && deadnix check";
+        })
 
-      # Python development
-      (mkIf cfg.languages.python.enable {
-        py = "python3";
-        pip-upgrade = "pip install --upgrade pip";
-        pytest-watch = "ptw";
-        py-format = "black . && isort .";
-      })
+        # Python development
+        (mkIf cfg.languages.python.enable {
+          py = "python3";
+          pip-upgrade = "pip install --upgrade pip";
+          pytest-watch = "ptw";
+          py-format = "black . && isort .";
+        })
 
-      # JavaScript/TypeScript development
-      (mkIf cfg.languages.javascript.enable {
-        npm-ls = "npm list --depth=0";
-        npm-outdated = "npm outdated";
-        yarn-upgrade = "yarn upgrade-interactive";
-        js-format = "prettier --write .";
-      })
+        # JavaScript/TypeScript development
+        (mkIf cfg.languages.javascript.enable {
+          npm-ls = "npm list --depth=0";
+          npm-outdated = "npm outdated";
+          yarn-upgrade = "yarn upgrade-interactive";
+          js-format = "prettier --write .";
+        })
 
-      # Go development
-      (mkIf cfg.languages.go.enable {
-        go-mod-tidy = "go mod tidy";
-        go-test-verbose = "go test -v";
-        go-build-all = "go build ./...";
-        go-format = "gofmt -w .";
-      })
+        # Go development
+        (mkIf cfg.languages.go.enable {
+          go-mod-tidy = "go mod tidy";
+          go-test-verbose = "go test -v";
+          go-build-all = "go build ./...";
+          go-format = "gofmt -w .";
+        })
 
-      # Rust development
-      (mkIf cfg.languages.rust.enable {
-        cargo-check-all = "cargo check --all-targets";
-        cargo-test-all = "cargo test --all";
-        cargo-clippy-all = "cargo clippy --all-targets";
-        rust-format = "cargo fmt";
-      })
+        # Rust development
+        (mkIf cfg.languages.rust.enable {
+          cargo-check-all = "cargo check --all-targets";
+          cargo-test-all = "cargo test --all";
+          cargo-clippy-all = "cargo clippy --all-targets";
+          rust-format = "cargo fmt";
+        })
 
-      # Git shortcuts
-      (mkIf cfg.utilities.vcs.git {
-        gs = "git status";
-        ga = "git add";
-        gc = "git commit";
-        gp = "git push";
-        gl = "git log --oneline";
-        gd = "git diff";
-        # Note: lg function defined in shell config for advanced lazygit integration
-      })
+        # Git shortcuts
+        (mkIf cfg.utilities.vcs.git {
+          gs = "git status";
+          ga = "git add";
+          gc = "git commit";
+          gp = "git push";
+          gl = "git log --oneline";
+          gd = "git diff";
+          # Note: lg function defined in shell config for advanced lazygit integration
+        })
 
-      # Container shortcuts
-      (mkIf cfg.utilities.containers.docker {
-        d = "docker";
-        dc = "docker-compose";
-        k = "kubectl";
-      })
-    ];
+        # Container shortcuts
+        (mkIf cfg.utilities.containers.docker {
+          d = "docker";
+          dc = "docker-compose";
+          k = "kubectl";
+        })
+      ];
 
-    # Environment variables for development
-    sessionVariables = mkMerge [
-      # General development
-      {
-        EDITOR = "nvim";
-        TERM = "foot";
-      }
+      # Environment variables for development
+      sessionVariables = mkMerge [
+        # General development
+        {
+          EDITOR = "nvim";
+          TERM = "foot";
+        }
 
-      # Language-specific
-      (mkIf cfg.languages.go.enable {
-        GOPATH = "$HOME/go";
-        GOBIN = "$HOME/go/bin";
-      })
+        # Language-specific
+        (mkIf cfg.languages.go.enable {
+          GOPATH = "$HOME/go";
+          GOBIN = "$HOME/go/bin";
+        })
 
-      (mkIf cfg.languages.rust.enable {
-        CARGO_HOME = "$HOME/.cargo";
-      })
+        (mkIf cfg.languages.rust.enable {
+          CARGO_HOME = "$HOME/.cargo";
+        })
 
-      (mkIf cfg.languages.python.enable {
-        PYTHONDONTWRITEBYTECODE = "1";
-        PYTHONUNBUFFERED = "1";
-      })
-    ];
+        (mkIf cfg.languages.python.enable {
+          PYTHONDONTWRITEBYTECODE = "1";
+          PYTHONUNBUFFERED = "1";
+        })
+      ];
 
-    # `go install` and `cargo install` write here. Appended, never prepended:
-    # a tool installed by a language package manager must not shadow the Nix
-    # command of the same name (#1835). The guard keeps one entry when both
-    # this and bash.nix's bashrcExtra run.
-    sessionVariablesExtra = mkMerge [
-      (mkIf cfg.languages.go.enable ''
-        case ":$PATH:" in *":$HOME/go/bin:"*) ;; *) export PATH="$PATH:$HOME/go/bin" ;; esac
-      '')
+      # `go install` and `cargo install` write here. Appended, never prepended:
+      # a tool installed by a language package manager must not shadow the Nix
+      # command of the same name (#1835). The guard keeps one entry when both
+      # this and bash.nix's bashrcExtra run.
+      sessionVariablesExtra = mkMerge [
+        (mkIf cfg.languages.go.enable ''
+          case ":$PATH:" in *":$HOME/go/bin:"*) ;; *) export PATH="$PATH:$HOME/go/bin" ;; esac
+        '')
 
-      (mkIf cfg.languages.rust.enable ''
-        case ":$PATH:" in *":$HOME/.cargo/bin:"*) ;; *) export PATH="$PATH:$HOME/.cargo/bin" ;; esac
-      '')
-    ];
+        (mkIf cfg.languages.rust.enable ''
+          case ":$PATH:" in *":$HOME/.cargo/bin:"*) ;; *) export PATH="$PATH:$HOME/.cargo/bin" ;; esac
+        '')
+      ];
 
-    # Language server configurations export for editors
-    file.".config/development/lsp-config.json".text = builtins.toJSON {
-      languages =
-        mapAttrs
-          (_name: lang: {
-            inherit (lang) lsp;
-            inherit (lang) formatters;
-            enabled = lang.enable;
-          })
-          cfg.languages;
+      # Language server configurations export for editors
+      file.".config/development/lsp-config.json".text = builtins.toJSON {
+        languages =
+          mapAttrs
+            (_name: lang: {
+              inherit (lang) lsp;
+              inherit (lang) formatters;
+              enabled = lang.enable;
+            })
+            cfg.languages;
 
-      paths = {
-        nixd = "${pkgs.nixd}/bin/nixd";
-        pylsp = "${pkgs.python313Packages.python-lsp-server}/bin/pylsp";
-        typescript-language-server = "${pkgs.typescript-language-server}/bin/typescript-language-server";
-        gopls = "${pkgs.gopls}/bin/gopls";
-        rust-analyzer = "${pkgs.rust-analyzer}/bin/rust-analyzer";
-        clangd = "${pkgs.clang-tools}/bin/clangd";
+        paths = {
+          nixd = "${pkgs.nixd}/bin/nixd";
+          pylsp = "${pkgs.python313Packages.python-lsp-server}/bin/pylsp";
+          typescript-language-server = "${pkgs.typescript-language-server}/bin/typescript-language-server";
+          gopls = "${pkgs.gopls}/bin/gopls";
+          rust-analyzer = "${pkgs.rust-analyzer}/bin/rust-analyzer";
+          clangd = "${pkgs.clang-tools}/bin/clangd";
+        };
       };
     };
   };

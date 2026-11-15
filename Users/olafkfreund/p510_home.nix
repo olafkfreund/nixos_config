@@ -66,7 +66,7 @@
       enable = true;
       languages = true; # Full language support for development
       workflow = true; # Development workflow tools
-      productivity = lib.mkForce false; # No GUI productivity tools - override profile conflicts
+      productivity = lib.mkForce true; # Was never honoured; keeps today's apps (#2929)
     };
 
     # Enhanced CLI tools for server development
@@ -95,6 +95,11 @@
   # X11-forwarding, and for shipping the same primary terminal across
   # every host without flipping the whole headless-mode posture.
   ghostty.enable = lib.mkForce true;
+
+  # Preserve the terminal programs already installed on p510 (#2929).
+  foot.enable = lib.mkForce true;
+  kitty.enable = lib.mkForce true;
+  alacritty.enable = lib.mkForce true;
 
   # P510 development server specific packages
   home.packages = with pkgs; [

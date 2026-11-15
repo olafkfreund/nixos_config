@@ -11,7 +11,7 @@ in
   options.github.development = {
     enable = mkEnableOption "Enable GitHub development environment";
     packages = mkOption {
-      type = with types; listOf str;
+      type = with types; listOf package;
       default = [ ];
       description = "Packages to install for GitHub development";
     };

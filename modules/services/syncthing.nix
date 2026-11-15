@@ -59,12 +59,6 @@ in
       };
     };
 
-    masterHost = mkOption {
-      type = types.str;
-      default = "p620";
-      description = "Primary host for conflict resolution (introducer)";
-    };
-
     syncClaude = mkOption {
       type = types.bool;
       default = true;
