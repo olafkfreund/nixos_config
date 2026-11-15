@@ -89,3 +89,6 @@ path-scoped rule in `.claude/rules/desktop.md`.
 - DEX5550 is offline; Samsung and HP are decommissioned.
 - MicroVMs come from nixarchy's templates (`hosts/common/nixos/omarchy-microvm.nix`); the dormant p510
   guest files under `hosts/p510/nixos/microvm/` were never wired up and were removed in #2931.
+- Fleet addresses live in `hosts/common/fleet.nix` (tailnet IPs of p620, p510 and razer, and p510's LAN
+  `192.168.1.65`, which needs a DHCP reservation on the router). Hosts read it with
+  `import ../common/fleet.nix`; change an address there, not in a host file (#2936).
