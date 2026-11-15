@@ -4,17 +4,11 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.cli.versioncontrol.gh;
+  inherit (lib) mkIf;
+  cfg = config.features.cli;
 in
 {
-  options.cli.versioncontrol.gh = {
-    enable = mkEnableOption {
-      default = false;
-      description = "Enable GH cli";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.gh) {
     programs.gh = {
       enable = true;
       extensions = with pkgs; [

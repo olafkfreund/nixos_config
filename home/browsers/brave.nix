@@ -4,15 +4,12 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.browsers.brave;
+  inherit (lib) mkIf;
+  cfg = config.features.browsers;
 in
 {
-  options.browsers.brave = {
-    enable = mkEnableOption "Brave browser";
-  };
 
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.brave) {
     programs.chromium = {
       enable = true;
       package = pkgs.brave;

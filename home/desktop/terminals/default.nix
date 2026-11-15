@@ -5,15 +5,15 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption mkDefault optionals optionalString;
+  inherit (lib) mkIf mkDefault optionals optionalString;
 
   # Terminal feature flags
   cfg = {
     # Available terminals
     terminals = {
-      foot = config.foot.enable; # Lightweight Wayland terminal
-      kitty = config.kitty.enable; # GPU-accelerated terminal
-      alacritty = config.alacritty.enable; # Cross-platform terminal
+      foot = config.features.terminals.enable && config.features.terminals.foot; # Lightweight Wayland terminal
+      kitty = config.features.terminals.enable && config.features.terminals.kitty; # GPU-accelerated terminal
+      alacritty = config.features.terminals.enable && config.features.terminals.alacritty; # Cross-platform terminal
       wezterm = false; # Rust-based terminal
       ghostty = false; # Fast terminal emulator
     };
@@ -77,14 +77,6 @@ in
     ./warp
     ./wave
   ];
-
-  # Backward compatibility options for individual terminals
-  options = {
-    alacritty.enable = mkEnableOption "Alacritty terminal (legacy compatibility)";
-    foot.enable = mkEnableOption "Foot terminal (legacy compatibility)";
-    kitty.enable = mkEnableOption "Kitty terminal (legacy compatibility)";
-    # wezterm and ghostty options are defined in their respective imported modules
-  };
 
   config = {
     programs = {

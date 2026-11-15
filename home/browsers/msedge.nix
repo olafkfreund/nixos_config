@@ -4,17 +4,11 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.browsers.edge;
+  inherit (lib) mkIf;
+  cfg = config.features.browsers;
 in
 {
-  options.browsers.edge = {
-    enable = mkEnableOption {
-      default = false;
-      description = "Microsoft Edge";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.edge) {
     home.packages = with pkgs; [
       microsoft-edge
       # microsoft-edge-dev

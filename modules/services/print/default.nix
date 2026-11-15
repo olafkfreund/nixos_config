@@ -4,15 +4,12 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
+  inherit (lib) mkIf;
   username = "olafkfreund";
-  cfg = config.services.print;
+  cfg = config.features.programs;
 in
 {
-  options.services.print = {
-    enable = mkEnableOption "the HP print service";
-  };
-  config = mkIf cfg.enable {
+  config = mkIf cfg.print {
     services = {
       printing.enable = true;
       avahi = {

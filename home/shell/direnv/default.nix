@@ -3,17 +3,11 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.cli.direnv;
+  inherit (lib) mkIf;
+  cfg = config.features.cli;
 in
 {
-  options.cli.direnv = {
-    enable = mkEnableOption {
-      default = true;
-      description = "direnv";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.direnv) {
     programs.direnv = {
       enable = true;
       enableBashIntegration = true;

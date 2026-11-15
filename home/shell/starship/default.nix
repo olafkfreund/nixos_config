@@ -3,18 +3,12 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.cli.starship;
+  inherit (lib) mkIf;
+  cfg = config.features.cli;
   inherit (config.lib.stylix) colors;
 in
 {
-  options.cli.starship = {
-    enable = mkEnableOption {
-      default = true;
-      description = "starship";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.starship) {
     # starship - an customizable prompt for any shell
     programs.starship = {
       enable = true;

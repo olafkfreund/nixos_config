@@ -4,8 +4,8 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.programs.kdeconnect;
+  inherit (lib) mkIf;
+  cfg = config.features.desktop;
   kdeconnect-cli = "${pkgs.kdePackages.kdeconnect-kde}/bin/kdeconnect-cli";
   fortune = "${pkgs.fortune}/bin/fortune";
   script-fortune = pkgs.writeShellScriptBin "fortune" ''
@@ -13,10 +13,7 @@ let
   '';
 in
 {
-  options.programs.kdeconnect = {
-    enable = mkEnableOption "KDE Connect";
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.kdeconnect) {
     xdg.desktopEntries = {
       "org.kde.kdeconnect.sms" = {
         exec = "";

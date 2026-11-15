@@ -6,19 +6,13 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.multiplexer.tmux;
+  inherit (lib) mkIf;
+  cfg = config.features.multiplexers;
   inherit (config.lib.stylix) colors;
 
 in
 {
-  options.multiplexer.tmux = {
-    enable = mkEnableOption {
-      default = true;
-      description = "tmux";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.tmux) {
     programs.tmux = {
       enable = true;
       clock24 = true;

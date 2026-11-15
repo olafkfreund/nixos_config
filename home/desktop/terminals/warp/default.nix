@@ -4,15 +4,12 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.warp;
+  inherit (lib) mkIf;
+  cfg = config.features.terminals;
 in
 {
-  options.warp = {
-    enable = mkEnableOption "Warp terminal emulator";
-  };
 
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.warp) {
     home.packages = [ pkgs.warp-terminal ];
 
     # Register Warp's .desktop as an associated terminal handler. We deliberately

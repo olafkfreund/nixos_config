@@ -5,10 +5,10 @@
 }:
 let
   inherit (lib) mkIf mkEnableOption;
-  cfg = config.system.logging;
+  cfg = config.features.logging;
 in
 {
-  options.system.logging = {
+  options.features.logging = {
     enableFiltering = mkEnableOption "Enable log filtering for noise reduction";
   };
 

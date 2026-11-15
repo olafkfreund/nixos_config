@@ -4,19 +4,11 @@
 , ...
 }:
 let
-  inherit (lib) mkOption mkIf mkEnableOption types;
-  cfg = config.modules.development.python;
+  inherit (lib) mkIf;
+  cfg = config.features.development;
 in
 {
-  options.modules.development.python = {
-    enable = mkEnableOption "Enable Python development environment";
-    packages = mkOption {
-      type = with types; listOf package;
-      default = [ ];
-      description = "Packages to install for Python development";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.python) {
     environment.systemPackages =
       [
         pkgs.python3
@@ -38,7 +30,6 @@ in
         pkgs.python3Packages.requests
         pkgs.python3Packages.mcp
 
-      ]
-      ++ cfg.packages;
+      ];
   };
 }

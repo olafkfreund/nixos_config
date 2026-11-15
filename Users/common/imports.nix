@@ -6,7 +6,6 @@
     # Internal modules
     ./base-home.nix
     ./features.nix
-    ./features-impl.nix
 
     # Desktop modules (options always available, enabled via features)
     ../../home/desktop/default.nix

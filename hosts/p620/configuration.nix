@@ -72,13 +72,13 @@ in
     instances = 4;
   };
 
+  # Choose networking profile: "desktop", "server", or "minimal"
+  features.networking.profile = "desktop"; # Switch to desktop profile for GNOME NetworkManager integration
+
   # Consolidated networking configuration
   networking = {
     # Set hostname from variables
     inherit (vars) hostName;
-
-    # Choose networking profile: "desktop", "server", or "minimal"
-    profile = "desktop"; # Switch to desktop profile for GNOME NetworkManager integration
 
     # Note: Tailscale is enabled via services.tailscale (built-in NixOS module)
     # Custom networking.tailscale module was removed during anti-pattern cleanup
@@ -314,17 +314,7 @@ in
   };
 
   features.flux.enable = true; # phone link, #2905
-
-  # Consolidated system configuration
-  system = {
-    # Enable logging configuration for noise reduction
-    logging.enableFiltering = true;
-
-    # Performance Optimization Configuration - REMOVED
-    # The system.resourceManager module was removed during anti-pattern cleanup
-    # Module had root services and is no longer needed
-
-  };
+  features.logging.enableFiltering = true; # Enable logging configuration for noise reduction
 
   scrcpyWifi.enable = true;
 
@@ -589,7 +579,7 @@ in
   ];
 
   # Windows app integration - Re-enabled after upstream fix (v0.9.0)
-  # programs.winboat.enable = true; # DISABLED: Go 1.26 cross-compilation broken with mingw32 GCC 15
+  # features.winboat.enable = true; # DISABLED: Go 1.26 cross-compilation broken with mingw32 GCC 15
 
   # Package configurations
   nixpkgs.config = {

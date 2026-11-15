@@ -4,17 +4,11 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.programs.evince;
+  inherit (lib) mkIf;
+  cfg = config.features.desktop;
 in
 {
-  options.programs.evince = {
-    enable = mkEnableOption {
-      default = false;
-      description = "Enable evince.";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.evince) {
     home.packages = [ pkgs.evince ];
     xdg.mimeApps = {
       enable = true;

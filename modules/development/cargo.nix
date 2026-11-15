@@ -4,19 +4,11 @@
 , ...
 }:
 let
-  inherit (lib) mkOption mkIf mkEnableOption types;
-  cfg = config.cargo.development;
+  inherit (lib) mkIf;
+  cfg = config.features.development;
 in
 {
-  options.cargo.development = {
-    enable = mkEnableOption "Enable Cargo development environment";
-    packages = mkOption {
-      type = with types; listOf package;
-      default = [ ];
-      description = "Packages to install for Cargo development";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.cargo) {
     environment.systemPackages =
       [
         pkgs.cargo
@@ -29,7 +21,6 @@ in
         pkgs.systemctl-tui
         pkgs.rustfmt
         pkgs.rustc
-      ]
-      ++ cfg.packages;
+      ];
   };
 }

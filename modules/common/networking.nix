@@ -5,21 +5,27 @@
 , pkgs
 , ...
 }:
-let inherit (lib) mkOption mkIf mkEnableOption mkForce mkMerge types; in {
-  options.networking.profile = mkOption {
-    type = types.enum [ "desktop" "server" "minimal" ];
-    default = "desktop";
-    description = "Network profile to use";
-  };
+let
+  inherit (lib) mkOption mkIf mkEnableOption mkForce mkMerge types;
+  cfg = config.features.networking;
+in
+{
+  options.features.networking = {
+    profile = mkOption {
+      type = types.enum [ "desktop" "server" "minimal" ];
+      default = "desktop";
+      description = "Network profile to use";
+    };
 
-  options.networking.stableConnection = {
-    enable = mkEnableOption "Network stability enhancements to prevent connection changes";
+    stableConnection = {
+      enable = mkEnableOption "Network stability enhancements to prevent connection changes";
 
-    interfaceSwitchDelayMs = mkOption {
-      type = types.int;
-      default = 5000;
-      description = "Delay in milliseconds before switching network interfaces";
-      example = 3000;
+      interfaceSwitchDelayMs = mkOption {
+        type = types.int;
+        default = 5000;
+        description = "Delay in milliseconds before switching network interfaces";
+        example = 3000;
+      };
     };
   };
 
@@ -59,20 +65,20 @@ let inherit (lib) mkOption mkIf mkEnableOption mkForce mkMerge types; in {
       };
     }
 
-    (mkIf (config.networking.profile == "desktop") {
+    (mkIf (cfg.profile == "desktop") {
       # Desktop networking configuration with NetworkManager
       networking = {
         networkmanager = {
           enable = true;
           dns = "default"; # Use NetworkManager's built-in DNS instead of systemd-resolved
           # Add connection configuration for stability
-          settings = mkIf config.networking.stableConnection.enable {
+          settings = mkIf cfg.stableConnection.enable {
             main = {
               dns = "default";
             };
             connection = {
               stable-id = "\${CONNECTION}/\${BOOT}";
-              wait-device-timeout = toString config.networking.stableConnection.interfaceSwitchDelayMs;
+              wait-device-timeout = toString cfg.stableConnection.interfaceSwitchDelayMs;
             };
           };
         };
@@ -92,7 +98,7 @@ let inherit (lib) mkOption mkIf mkEnableOption mkForce mkMerge types; in {
       };
     })
 
-    (mkIf (config.networking.profile == "server") {
+    (mkIf (cfg.profile == "server") {
       # Server networking with systemd-networkd
       networking = {
         networkmanager.enable = false;
@@ -128,7 +134,7 @@ let inherit (lib) mkOption mkIf mkEnableOption mkForce mkMerge types; in {
       };
     })
 
-    (mkIf (config.networking.profile == "minimal") {
+    (mkIf (cfg.profile == "minimal") {
       # Minimal networking configuration with just DHCP
       networking = {
         useDHCP = true;
@@ -139,7 +145,7 @@ let inherit (lib) mkOption mkIf mkEnableOption mkForce mkMerge types; in {
 
     # Fix for duplicate systemd.network: Only add link configuration enhancements,
     # don't override existing network configurations
-    (mkIf (config.networking.stableConnection.enable && config.systemd.network.enable) {
+    (mkIf (cfg.stableConnection.enable && config.systemd.network.enable) {
       # Directly define network configurations for wired and wireless interfaces
       # without depending on existing values
       systemd.network.networks = {

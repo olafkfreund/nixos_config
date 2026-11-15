@@ -4,18 +4,12 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
+  inherit (lib) mkIf;
   inherit (config.lib.stylix) colors;
-  cfg = config.desktop.screenshots.flameshot;
+  cfg = config.features.desktop;
 in
 {
-  options.desktop.screenshots.flameshot = {
-    enable = mkEnableOption {
-      default = false;
-      description = "Enable FlameShot screenshots";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.flameshot) {
     # Ensure screenshots directory exists
     home.file."Pictures/screenshots/.keep".text = "";
 

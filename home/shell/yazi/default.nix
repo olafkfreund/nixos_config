@@ -4,17 +4,11 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.cli.yazi;
+  inherit (lib) mkIf;
+  cfg = config.features.cli;
 in
 {
-  options.cli.yazi = {
-    enable = mkEnableOption {
-      default = true;
-      description = "yazi";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.yazi) {
     programs.yazi = {
       enable = true;
       shellWrapperName = "y";

@@ -4,17 +4,11 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.editor.cursor;
+  inherit (lib) mkIf;
+  cfg = config.features.editors;
 in
 {
-  options.editor.cursor = {
-    enable = mkEnableOption {
-      default = false;
-      description = "Enable Cursor AI editor";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.cursor) {
     home.packages = with pkgs-unstable; [
       code-cursor
     ];

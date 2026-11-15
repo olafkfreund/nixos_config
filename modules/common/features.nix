@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ config, lib, pkgs, ... }:
 let inherit (lib) mkOption mkEnableOption types; in {
   options.features = {
     development = {
@@ -25,6 +25,12 @@ let inherit (lib) mkOption mkEnableOption types; in {
       podman = mkEnableOption "Enable Podman";
       incus = mkEnableOption "Enable Incus containers";
       spice = mkEnableOption "Enable SPICE";
+      spiceGuestAgent = mkEnableOption ''
+        the spice-vdagent guest daemon. Only meaningful when THIS machine is
+        itself a SPICE/VM guest. On a physical host it has no SPICE session
+        and logs "Error getting active session: No data available" on a
+        tight loop, so it stays off even when SPICE (USB redirection / client
+        tools for running VMs locally) is enabled'';
       libvirt = mkEnableOption "Enable libvirt";
     };
 
@@ -64,6 +70,27 @@ let inherit (lib) mkOption mkEnableOption types; in {
 
     media = {
       droidcam = mkEnableOption "Enable DroidCam";
+    };
+  };
+
+  config = {
+    # Baseline tools available on any host enabling features.development.
+    # Without this, hosts with development features but no other package-set
+    # trigger would lack git/curl/jq at the system level.
+    environment.systemPackages = lib.mkIf config.features.development.enable [
+      pkgs.git
+      pkgs.curl
+      pkgs.jq
+    ];
+
+    # Docker keeps its own modules.containers.docker root (out of scope for #2934);
+    # this line is what makes features.virtualization.docker do anything.
+    modules.containers.docker.enable =
+      lib.mkIf config.features.virtualization.enable config.features.virtualization.docker;
+
+    programs = {
+      lazygit.enable = config.features.programs.lazygit;
+      thunderbird.enable = config.features.programs.thunderbird;
     };
   };
 }

@@ -4,25 +4,15 @@
 , ...
 }:
 let
-  inherit (lib) mkOption mkIf mkEnableOption types;
-  cfg = config.development.copilot-cli;
+  inherit (lib) mkIf;
+  cfg = config.features.development;
 
   # Import the copilot-cli package derivation
   copilot-cli = pkgs.callPackage ../../home/development/copilot-cli { };
 in
 {
-  options.development.copilot-cli = {
-    enable = mkEnableOption "Enable GitHub Copilot CLI";
-
-    package = mkOption {
-      type = types.package;
-      default = copilot-cli;
-      description = "GitHub Copilot CLI package to use";
-    };
-  };
-
-  config = mkIf cfg.enable {
-    environment.systemPackages = [ cfg.package ];
+  config = mkIf (cfg.enable && cfg.copilot-cli) {
+    environment.systemPackages = [ copilot-cli ];
 
     # Add shell aliases for convenience
     programs.bash.shellAliases = {

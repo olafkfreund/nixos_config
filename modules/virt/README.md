@@ -16,7 +16,8 @@ This directory contains NixOS modules for virtualization technologies and contai
 
 ## Usage
 
-These modules can be enabled selectively in host configurations to provide virtualization capabilities. Each module typically defines:
+These modules provide virtualization capabilities, each behind a `features.virtualization` flag.
+Each module typically defines:
 
 - Service configuration
 - Required packages
@@ -28,11 +29,14 @@ Enable these modules in your host's configuration.nix file:
 
 ```nix
 {
-  services.docker.enable = true;
-  services.libvirt.enable = true;
-  services.podman.enable = true;
-  # ... other virtualization modules
+  features.virtualization = {
+    enable = true;
+    docker = true;
+    libvirt = true;
+    podman = true;
+    # incus, spice, spiceGuestAgent, waydroid
+  };
 }
 ```
 
-For more complex setups like MicroVMs, refer to the specific module implementations and the host configurations where they are used (e.g., in the p510 host configuration).
+MicroVMs come from nixarchy's templates (`hosts/common/nixos/omarchy-microvm.nix`), not from this directory.

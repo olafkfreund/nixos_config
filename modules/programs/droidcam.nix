@@ -5,17 +5,11 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.media.droidcam;
+  inherit (lib) mkIf;
+  cfg = config.features.media;
 in
 {
-  options.media.droidcam = {
-    enable = mkEnableOption {
-      description = "Enable Droicam";
-      default = false;
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf cfg.droidcam {
     programs.droidcam.enable = true;
     services.usbmuxd.enable = true;
     environment.shellAliases = {

@@ -4,8 +4,8 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.browsers.chrome;
+  inherit (lib) mkIf;
+  cfg = config.features.browsers;
 
   # Omarchy's web apps run `omarchy-launch-webapp <url>` with no profile, so
   # Chrome opens them in whichever profile was used last (#1839). This stand-in
@@ -48,11 +48,8 @@ let
   };
 in
 {
-  options.browsers.chrome = {
-    enable = mkEnableOption "Google Chrome";
-  };
 
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.chrome) {
     # Set environment variables for the user session
     # home.sessionVariables = {
     #   # Set GTK theme

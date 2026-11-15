@@ -3,8 +3,8 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.desktop.zathura;
+  inherit (lib) mkIf;
+  cfg = config.features.desktop;
   inherit (config.lib.stylix) colors;
 
   theme = {
@@ -21,11 +21,8 @@ let
   };
 in
 {
-  options.desktop.zathura = {
-    enable = mkEnableOption "zathura document viewer";
-  };
 
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.zathura) {
     programs.zathura = {
       enable = true;
       extraConfig = ''

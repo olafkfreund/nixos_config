@@ -24,6 +24,13 @@
   ];
 
   features = {
+    terminals = {
+      enable = true;
+      ghostty = true;
+      foot = true;
+      kitty = true;
+      alacritty = true;
+    };
     editors = {
       enable = true;
       neovim = true;
@@ -51,11 +58,6 @@
       tmux = true;
     };
   };
-
-  ghostty.enable = true;
-  foot.enable = true;
-  kitty.enable = true;
-  alacritty.enable = true;
 
   home.packages = with pkgs; [
     # Server development essentials

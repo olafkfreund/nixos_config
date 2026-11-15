@@ -24,8 +24,11 @@ These modules can be enabled selectively in host configurations:
 
 ```nix
 {
-  security.onepassword.enable = true;
-  security.gnupg.enable = true;
+  features.security = {
+    enable = true;
+    onepassword = true;
+    gnupg = true;
+  };
   # Other security modules
 }
 ```

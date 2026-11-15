@@ -4,14 +4,10 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.programs.obsidian.enable;
+  inherit (lib) mkIf;
+  cfg = config.features.programs.obsidian;
 in
 {
-  options.programs.obsidian = {
-    enable = mkEnableOption "Obsidian markdown editor";
-  };
-
   config = mkIf cfg {
     environment.systemPackages = with pkgs; [
       (pkgs.writeShellScriptBin "obsidian-wayland" ''

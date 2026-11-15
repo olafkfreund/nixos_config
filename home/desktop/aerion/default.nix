@@ -4,16 +4,13 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption mkPackageOption;
-  cfg = config.programs.aerion;
+  inherit (lib) mkIf mkPackageOption;
+  cfg = config.features.desktop;
 in
 {
-  options.programs.aerion = {
-    enable = mkEnableOption "Aerion lightweight email client";
-    package = mkPackageOption pkgs "aerion" { };
-  };
+  options.features.desktop.aerionPackage = mkPackageOption pkgs "aerion" { };
 
-  config = mkIf cfg.enable {
-    home.packages = [ cfg.package ];
+  config = mkIf (cfg.enable && cfg.aerion) {
+    home.packages = [ cfg.aerionPackage ];
   };
 }
