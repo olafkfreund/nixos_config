@@ -31,26 +31,7 @@ in
     };
 
     # Services configuration
-    services = {
-      print.enable = cfg.programs.print;
-    };
-
-    # Security tools (conditional enables)
-    security.onepassword.enable = mkIf cfg.security.enable cfg.security.onepassword;
-    security.gnupg.enable = mkIf cfg.security.enable cfg.security.gnupg;
-
     # Networking (conditional enables)
 
-    # Programs (conditional enables)
-    programs = {
-      lazygit.enable = cfg.programs.lazygit;
-      thunderbird.enable = cfg.programs.thunderbird;
-      obsidian.enable = cfg.programs.obsidian;
-      office.enable = cfg.programs.office;
-      webcam.enable = cfg.programs.webcam;
-    };
-
-    # Media tools (conditional enables)
-    media.droidcam.enable = cfg.media.droidcam;
   };
 }

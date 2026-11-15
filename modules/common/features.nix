@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ config, lib, ... }:
 let inherit (lib) mkOption mkEnableOption types; in {
   options.features = {
     development = {
@@ -71,5 +71,10 @@ let inherit (lib) mkOption mkEnableOption types; in {
     media = {
       droidcam = mkEnableOption "Enable DroidCam";
     };
+  };
+
+  config.programs = {
+    lazygit.enable = config.features.programs.lazygit;
+    thunderbird.enable = config.features.programs.thunderbird;
   };
 }

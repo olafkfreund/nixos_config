@@ -4,17 +4,11 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.security.gnupg;
+  inherit (lib) mkIf;
+  cfg = config.features.security;
 in
 {
-  options.security.gnupg = {
-    enable = mkEnableOption {
-      default = false;
-      description = "Enable GnuPG";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.gnupg) {
     programs.gnupg.agent = {
       enable = true;
       enableSSHSupport = true;

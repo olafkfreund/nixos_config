@@ -4,17 +4,11 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.programs.office;
+  inherit (lib) mkIf;
+  cfg = config.features.programs;
 in
 {
-  options.programs.office = {
-    enable = mkEnableOption {
-      default = false;
-      description = "Office suite";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf cfg.office {
     environment.systemPackages = with pkgs; [
       libreoffice-stable
     ];
