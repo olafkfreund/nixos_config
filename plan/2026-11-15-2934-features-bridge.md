@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2934
 spec: spec/2026-11-15-2934-features-bridge.md
 coders:
