@@ -26,8 +26,10 @@ Approved decisions (spec):
   - docs: `docs-build docs-serve docs-check`
 - Every other recipe is deleted (78; list in the spec), including `deploy-all` (implicit p510 deploy that bypasses
   the p510 guard).
-- Kept recipes keep name, parameters, dependencies and body. Only `quick-deploy` changes: it takes over
-  `deploy-smart`'s body, including the `just {{ HOST }}` dispatch.
+- Kept recipes keep name, parameters, dependencies and body, with two exceptions:
+  - `quick-deploy HOST: _require-main` takes over `deploy-smart`'s body, including the `{{ HOST }}` dispatch.
+  - `test-all-parallel` exits non-zero when any host build fails (today it always succeeds: `|| echo` plus a bare
+    `wait`). Keep its output lines; collect each background build's status and `exit 1` if any failed.
 - Delete `scripts/ci-test.sh`, `scripts/find-new-packages.sh`, `scripts/generate-topology.sh`; keep all other
   scripts.
 - p510 routes, `nh os boot` in `scripts/update-commit-deploy.sh`, `_require-main`, `_sign-drv`, guard patterns and
@@ -40,14 +42,18 @@ Approved decisions (spec):
    `set`/variable lines at the top.
    Check:
    - `just --summary | tr ' ' '\n' | sort` equals the keep list.
-   - For each kept recipe except `quick-deploy`: `diff <(git show main:Justfile | just --justfile /dev/stdin --show r)
-     <(just --show r | grep -v '^\[group')` is empty. (Write main's Justfile to a temp file for `--justfile`.)
-   - `just --dry-run quick-deploy p620`, `just --dry-run p510` and `just --dry-run deploy-via-p620 razer` print the
-     commands without error. `just test-guards` passes.
-   Traps:
-   - `just --dry-run` still runs dependencies' `@`-silenced shell and `#!` recipes. Do not dry-run recipes with
-     shebang bodies or `_sign-drv` (it evaluates).
-   - Never run a real deploy, gc or cleanup.
+   - For each kept recipe except `quick-deploy` and `test-all-parallel`: `git show main:Justfile > /tmp/jf-main` and
+     `diff <(just --justfile /tmp/jf-main --working-directory . --show r) <(just --show r | grep -v '^\[group')` is
+     empty.
+   - Call graph: every `just <name>` inside a kept recipe body names a kept recipe:
+     `grep -o -E 'just [a-z][a-z0-9-]*' Justfile` against `just --summary`. `--dry-run` does not prove this, because
+     nested `just` calls are only printed.
+   - `just --dry-run quick-deploy p620`, `p510`, `deploy-via-p620 razer` and `update-commit-deploy p620` print their
+     commands without error (just 1.59 prints, never runs, dependencies and shebang bodies under `--dry-run`).
+   - `test-all-parallel` failure path: run its body with each `nix build` swapped for `false`, in a temp copy, and see
+     exit 1. Do not run real builds of all hosts here.
+   - `just test-guards` passes.
+   Traps: never run a real deploy, gc or cleanup.
 2. Callers and docs:
    - `scripts/ci-test.sh`, `scripts/find-new-packages.sh`, `scripts/generate-topology.sh`: `git rm`; fix
      `scripts/README.md`.
@@ -55,8 +61,8 @@ Approved decisions (spec):
      `emergency-deploy`, `test-all`) and their usage lines.
    - `.claude/agents/deployment-coordinator.md` and the `.gemini` copy: multi-host deploys run one host recipe per
      host (p620 local, razer via p620, p510 only with the owner's OK); no `deploy-all`.
-   - Live docs: every `just <name>` in `docs/`, `AGENTS.md`, `README*`, `*/README.md`, `.claude/{agents,commands}`,
-     `.gemini/{agents,commands}`, `home/development/{agent-rules,claude-code-output-styles.nix,claude-desktop}`,
+   - Live docs: every `just <name>` in `docs/`, `AGENTS.md`, `README*`, `*/README.md`, `.claude/{agents,commands,skills}`,
+     `.gemini/{agents,commands,skills}`, `home/development/{agent-rules,claude-code-output-styles.nix,claude-desktop}`,
      `hosts`, `scripts`, `.github`, `tools`, `UPDATE-TRACKING-SUMMARY.md` that names a recipe not in the keep list
      is rewritten to the kept equivalent (`emergency-deploy`/`deploy-fast`/`deploy-cached` → the host recipe or
      `deploy-local-build`, `test-all`/`quick-all`/`test-build-all*` → `test-all-parallel`, `check` → `validate`) or
@@ -67,7 +73,9 @@ Approved decisions (spec):
      `home/profiles/...` examples with `Users/olafkfreund/...` paths that exist.
    - Not in scope: `intent/`, `spec/`, `plan/`, and skills about other projects
      (`home/development/claude-code-skills/cosmic-ui-design-skill/`).
-   Check: the reference loop below prints nothing; `markdownlint-cli2` on changed `.md` files passes;
+   - Arguments: a reference must match the recipe's parameters (`just --show <r>`), e.g. `deploy` takes none, so
+     `just deploy HOST` becomes the host recipe.
+   Check: the reference loop below exits 0; `markdownlint-cli2` on changed `.md` files passes;
    `bash modules/programs/claude-coder-guard.test.sh` and the `test-guards` recipe pass.
    Traps:
    - The pre-push hook lints whole changed Markdown files, so fix pre-existing long lines in files you touch.
@@ -83,24 +91,33 @@ Reference loop (step 2 check, run from the worktree):
 
 ```bash
 keep=$(just --summary)
-git grep -h -o -E '\bjust [a-z][a-z0-9-]*' -- docs AGENTS.md README.md '*/README.md' .claude/agents .claude/commands \
-  .gemini/agents .gemini/commands home/development/agent-rules home/development/claude-code-output-styles.nix \
-  home/development/claude-desktop hosts scripts .github tools UPDATE-TRACKING-SUMMARY.md \
-  | awk '{print $2}' | sort -u | while read -r r; do
-  case " $keep " in *" $r "*) ;; *) echo "unresolved: just $r" ;; esac
-done
+bad=$(git grep -h -o -E '`just [a-z][a-z0-9-]*|^\s*just [a-z][a-z0-9-]*|run: just [a-z][a-z0-9-]*' -- docs AGENTS.md \
+  README.md '*/README.md' .claude/agents .claude/commands .claude/skills .gemini/agents .gemini/commands .gemini/skills \
+  home/development/agent-rules home/development/claude-code-output-styles.nix home/development/claude-desktop \
+  hosts scripts .github tools UPDATE-TRACKING-SUMMARY.md \
+  | grep -o -E 'just [a-z][a-z0-9-]*' | awk '{print $2}' | sort -u | while read -r r; do
+    case " $keep " in *" $r "*) ;; *) echo "$r" ;; esac
+  done)
+[ -z "$bad" ] || { echo "unresolved: $bad"; exit 1; }
 ```
 
-It may print English false positives (`just the`, `just a`). Each remaining name is checked by hand.
+It matches commands (in backticks, at line start in code blocks, after `run:`), not prose, so English words like
+"just the" do not count. Arguments are checked by hand per the rule above.
 
 ## Tests
 
 - Step checks above.
 - `just validate` and `just check-syntax`.
-- `SNAP_NO_BUILD=1 scripts/config-snapshot.sh snap` against a fresh main snapshot. Changed hosts may differ only in
-  shipped doc text (`syspkgs`/`units` lists identical).
+- Snapshot proof that only shipped doc text changed:
+  - In a worktree at `origin/main`: `SNAP_NO_BUILD=1 scripts/config-snapshot.sh snap /tmp/s50-base`.
+  - In this worktree, with every changed file under `home/` restored from main
+    (`git diff --name-only origin/main -- home | xargs git checkout origin/main --`):
+    `SNAP_NO_BUILD=1 scripts/config-snapshot.sh snap /tmp/s50-nohome` and
+    `scripts/config-snapshot.sh diff /tmp/s50-base /tmp/s50-nohome` prints IDENTICAL for p620, razer and p510.
+    Then restore the branch's files with `git checkout HEAD -- home`.
+  - This proves the only system difference is the text of the shipped `home/` docs.
 - CI green, `@codex review`.
-- The PR lists recipe counts (122 → 45) and line counts.
+- The PR lists recipe counts (122 → 44) and line counts.
 
 ## Rollback
 

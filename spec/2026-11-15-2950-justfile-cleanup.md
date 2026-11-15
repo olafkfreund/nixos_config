@@ -23,8 +23,14 @@ intent: intent/2026-11-15-2950-justfile-cleanup.md
 | private | `_require-main`, `_sign-drv` |
 
 Rule: shell-history use, plus every executable caller and dependency (Codex review). Kept recipes keep their name,
-body and flags. The one exception: `deploy-smart`'s body moves into `quick-deploy`, which only called it. Its
-`just {{HOST}}` dispatch stays, so `quick-deploy p620` still runs `just p620`.
+body and flags. Two exceptions:
+
+- `deploy-smart`'s body moves into `quick-deploy`, which only called it, and `quick-deploy` takes its
+  `_require-main` dependency. Its `{{HOST}}` dispatch stays: `quick-deploy p620` still runs the p620 recipe.
+- `test-all-parallel` (and so `quick-test`, `jqt`) exits non-zero when any host build fails. Today each build is
+  `… && echo ok || echo fail` and the recipe ends in a bare `wait`, so it reports success when every build fails
+  (Codex review). This is the one intended behaviour change, and it makes the recipe a valid replacement for
+  `test-all`/`test-build-all` wherever a doc uses it as a gate.
 
 ### Drop (78)
 
@@ -74,7 +80,8 @@ Stale or unsafe: `test-nixpkgs-stable` (pins nixos-24.05), `test-kernel-version`
   survives. `test-all-parallel` survives, so it stays. No guard pattern changes.
 - Live docs: every `just <recipe>` that targets this Justfile names a kept recipe with valid arguments, or becomes
   the plain command. Scope: `docs/`, `AGENTS.md`, root and module `README*`, `.claude/{agents,commands}`,
-  `.gemini/{agents,commands}`, `home/development` (agent rules, output styles, mcp-config), `hosts`, `scripts`,
+  `.gemini/{agents,commands}`, `.claude/skills`, `.gemini/skills`, `home/development` (agent rules, output styles,
+  mcp-config), `hosts`, `scripts`,
   `.github`, `tools`. This includes references that were already broken (`deployment-status`, `perf-baseline`,
   `test-coverage`, ...). Out of scope: `intent/`, `spec/`, `plan/` (history), and skills that describe other
   projects' Justfiles (e.g. `cosmic-ui-design-skill`).
