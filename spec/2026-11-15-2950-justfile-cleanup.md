@@ -37,7 +37,8 @@ body and flags. Two exceptions:
 Duplicates and unused variants:
 
 - Deploy and test duplicates: `deploy-fast`, `deploy-cached`, `deploy-smart` (folded into `quick-deploy`),
-  `emergency-deploy`, `pre-deploy`, `deploy-interactive`, `deploy-all`, `deploy-all-parallel`, `quick-all`, `test-all`, `test-build-all`,
+  `emergency-deploy`, `pre-deploy`, `deploy-interactive`, `deploy-all`, `deploy-all-parallel`, `quick-all`,
+  `test-all`, `test-build-all`,
   `test-build-all-parallel`, `build-all-parallel`, `test-build`, `test-build-verbose`.
 - Garbage collection and store: `gc-aggressive`, `optimize`, `full-cleanup`, `clean-all`.
 - Validation, pre-commit and formatting: `validate-quality`, `validate-full`, `pre-commit-install`,
