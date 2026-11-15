@@ -2827,17 +2827,17 @@
         "omarchroma": "omarchroma"
       },
       "locked": {
-        "lastModified": 1794504360,
-        "narHash": "sha256-gmVO5379WI7+WkVWTVSZ7XawWIgzQohaCLm1u51uLP0=",
+        "lastModified": 1794750272,
+        "narHash": "sha256-9pHOo+P036UeHL9iBZXMzZC+i9WfTN4O1MbOSuJpxV0=",
         "owner": "olafkfreund",
         "repo": "nixarchy-omatheme",
-        "rev": "8e6fbcd84e3b7aecd1ec739166cc7231149520bc",
+        "rev": "f1e93d76e37c186a05e79db94a5d0e6549ea6723",
         "type": "github"
       },
       "original": {
         "owner": "olafkfreund",
         "repo": "nixarchy-omatheme",
-        "rev": "8e6fbcd84e3b7aecd1ec739166cc7231149520bc",
+        "rev": "f1e93d76e37c186a05e79db94a5d0e6549ea6723",
         "type": "github"
       }
     },
@@ -3596,11 +3596,11 @@
     "omarchroma": {
       "flake": false,
       "locked": {
-        "lastModified": 1790565012,
-        "narHash": "sha256-fpKmUgyt67sUOszi4EgiSj9Hr2115dQFaHXHzTv7yes=",
+        "lastModified": 1794695776,
+        "narHash": "sha256-jSt/bZatO2mEpYZjGCNnafwpU+11jH4G9qLUM/lV/nM=",
         "owner": "NobleDoodle",
         "repo": "omarchroma",
-        "rev": "7048180b8c7261a6057d5218bd297f0d5ada24d0",
+        "rev": "594bdf260c0c0d89adc760a73c9091494d52c8e0",
         "type": "github"
       },
       "original": {
