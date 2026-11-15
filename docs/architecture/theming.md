@@ -18,9 +18,12 @@ hard-coding hex values.
 
 The **active Omarchy theme is the source of truth for colours.**
 `modules/desktop/stylix-theme.nix` reads the theme name from
-`nixarchy-theme.nix` at the flake root, loads that theme's `colors.toml` out of
-the Nixarchy package, maps its named roles onto the sixteen base16 slots and
-hands the result to Stylix.
+`nixarchy-theme.nix` at the flake root, loads that theme's `colors.toml` from
+the pinned omarchy source (`inputs.nixarchy.inputs.omarchy`, so evaluation
+never builds the package, #2930), maps its named roles onto the sixteen base16
+slots and hands the result to Stylix. `osaka-jade`, which only the Nixarchy
+package carries, is still read from the package; a user theme falls back to the
+checked-in yaml.
 
 ```text
 omarchy theme set X

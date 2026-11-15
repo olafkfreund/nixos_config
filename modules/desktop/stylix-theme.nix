@@ -11,8 +11,10 @@ let
   #
   # `omarchy theme set X` retints the 24 files Omarchy owns immediately and its
   # hook rewrites nixarchy-theme.nix at the flake root; this reads that name,
-  # loads the theme's colors.toml out of the nixarchy package and hands Stylix
-  # the same colours. So the next rebuild carries the Omarchy theme into
+  # loads the theme's colors.toml out of the pinned omarchy source
+  # (inputs.nixarchy.inputs.omarchy), so evaluation does not build the package
+  # (#2930). osaka-jade, which only the package carries, still comes from the
+  # package. The next rebuild carries the Omarchy theme into
   # everything Omarchy cannot reach at runtime: Plymouth, GRUB, the console,
   # GTK, Qt, fonts, and the home-manager targets.
   #
@@ -25,8 +27,14 @@ let
   # with "infinite recursion". The flake input has no such loop.
   omarchyThemeName = import ../../nixarchy-theme.nix;
   omarchyPkg = inputs.nixarchy.packages.${pkgs.stdenv.hostPlatform.system}.omarchy or null;
-  omarchyThemeDir = "${omarchyPkg}/share/omarchy/themes/${omarchyThemeName}";
-  omarchyColorsPath = "${omarchyThemeDir}/colors.toml";
+  omarchySrc = inputs.nixarchy.inputs.omarchy;
+  srcColors = "${omarchySrc}/themes/${omarchyThemeName}/colors.toml";
+  pkgColors = "${omarchyPkg}/share/omarchy/themes/${omarchyThemeName}/colors.toml";
+  omarchyColorsPath =
+    if builtins.pathExists srcColors then srcColors
+    else if omarchyThemeName == "osaka-jade" && omarchyPkg != null && builtins.pathExists pkgColors
+    then pkgColors
+    else null;
 
   # Omarchy's colors.toml is a named-role palette, not base16, but its roles
   # cover all sixteen slots one-for-one. Three stock themes (last-horizon,
@@ -56,14 +64,9 @@ let
   # Stylix wants "rrggbb" with no leading '#'; Omarchy writes "#rrggbb".
   stripHash = v: lib.removePrefix "#" v;
 
-  # A theme name that is not in the package -- a user theme under
-  # ~/.config/omarchy/themes, which the flake cannot see -- would be a dead
-  # path, and so would a host without nixarchy importing this module. Both fall
-  # back to the checked-in yaml rather than failing the build.
-  #
-  # (All three hosts carry nixarchy now. p510 did not until #1585, which is
-  # what the second half of this guard was originally written for.)
-  useOmarchyTheme = omarchyPkg != null && builtins.pathExists omarchyColorsPath;
+  # An unknown or user theme under ~/.config/omarchy/themes, which the flake
+  # cannot see, falls back to the checked-in yaml.
+  useOmarchyTheme = omarchyColorsPath != null;
 
   omarchyScheme =
     lib.mapAttrs (_: stripHash)
