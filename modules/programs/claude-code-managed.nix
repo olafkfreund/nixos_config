@@ -365,8 +365,17 @@ let
     # No \b adjacent to the alternation group: GNU grep -E silently fails to
     # match `\b(switch|boot|test)\b[^|;]*\bp510\b` against
     # "nixos-rebuild switch --flake .#p510". Verified against 13 cases.
-    deploy_verb='nixos-rebuild[[:space:]]+[^|;]*(switch|boot|test)|nh[[:space:]]+os[[:space:]]+(switch|boot|test)|(^|[[:space:]])nhs([[:space:]]|$)|just[[:space:]]+[a-z-]*deploy'
-    if printf '%s' "$cmd" | ${pkgs.gnugrep}/bin/grep -qE "just[[:space:]]+p510([[:space:]]|$)|($deploy_verb)[^|;]*p510|p510[^|;]*($deploy_verb)"; then
+    # `just` options and NAME=value words before the recipe must not hide it (#2951).
+    just='just([[:space:]]+(-f|--justfile|-d|--working-directory)[[:space:]]+[^[:space:]]+|[[:space:]]+-[^[:space:]]+|[[:space:]]+[A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*)*[[:space:]]+'
+    end='([[:space:];|&)]|$)'
+    deploy_verb="nixos-rebuild[[:space:]]+[^|;]*(switch|boot|test)|nh[[:space:]]+os[[:space:]]+(switch|boot|test)|(^|[[:space:]])nhs([[:space:]]|$)|$just[a-z-]*deploy"
+    # Also p510-only recipes that change it without "deploy" in the name.
+    p510_recipe="$just(p510|p510-clear-sessions)$end|$just(boot-space-clean|fix-agenix-remote)[[:space:]]+[^[:space:]]*p510"
+    # Running on p510 itself, a local switch names no host (Codex review, #2951).
+    if [ "$(cat /proc/sys/kernel/hostname)" = p510 ]; then
+      p510_recipe="$p510_recipe|$just(update|deploy|cleanup|gc|boot-space-clean)$end|$deploy_verb"
+    fi
+    if printf '%s' "$cmd" | ${pkgs.gnugrep}/bin/grep -qE "$p510_recipe|($deploy_verb)[^|;]*p510|p510[^|;]*($deploy_verb)"; then
       echo "BLOCKED by managed-settings deploy guard: this command would activate a new generation on p510." >&2
       echo "p510 is the headless media server (Plex, *arr, k3d, cloudflared). Deploying it requires the user's explicit approval." >&2
       echo "Ask the user first. Building (nix build .#nixosConfigurations.p510...) and read-only ssh are allowed." >&2
@@ -535,8 +544,15 @@ let
     # `just deploy-*` and also `just <host>`: the deploy recipes here are
     # named after the machine (`just p510`), so a deploy-only pattern misses
     # the most common way anyone actually deploys.
-    disruptive="$disruptive"'|just[[:space:]]+[a-z-]*deploy'
-    disruptive="$disruptive"'|just[[:space:]]+(p510|p620|razer)([[:space:]]|$)'
+    # `just` may carry -f/--justfile/-d/--working-directory X or NAME=value
+    # words before the recipe; they must not hide it.
+    just='just([[:space:]]+(-f|--justfile|-d|--working-directory)[[:space:]]+[^[:space:]]+|[[:space:]]+-[^[:space:]]+|[[:space:]]+[A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*)*[[:space:]]+'
+    end='([[:space:];|&)]|$)'
+    disruptive="$disruptive|$just"'[a-z-]*deploy'
+    disruptive="$disruptive|$just"'(p510|p620|razer)'"$end"
+    # Recipes that GC, prune boot entries, touch agenix, end sessions or
+    # switch under other names (#2951). Keep in sync with the Justfile.
+    disruptive="$disruptive|$just"'(gc|cleanup|boot-space-clean|fix-agenix-remote|p510-clear-sessions|update)'"$end"
     disruptive="$disruptive"'|nix-collect-garbage|nix[[:space:]]+store[[:space:]]+optimise'
     disruptive="$disruptive"'|systemctl[[:space:]]+[^|;]*(restart|stop)'
     disruptive="$disruptive"'|(^|[[:space:]])(reboot|poweroff|shutdown)([[:space:]]|$)'

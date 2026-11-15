@@ -30,10 +30,12 @@ _require-main:
 deploy: _require-main
     nh os switch
 
+# Guarded by name (#2951): bus hook (announce), coder guard (blocked). Rename it in the guards too.
+
 # Update local system using nh
 [group('update')]
-update:
-    nh os update
+update: _require-main
+    nh os switch --update
 
 # Idiot-proof update + commit + deploy (local OR remote). Does:
 #   1. nix flake update (scope = 'all' by default; pass 'nixpkgs' or any input name to scope down)
@@ -56,6 +58,8 @@ update:
 [group('update')]
 update-commit-deploy HOST="$(hostname)" SCOPE="all":
     ./scripts/update-commit-deploy.sh {{HOST}} {{SCOPE}}
+
+# Guarded by name (#2951): coder guard (blocked: it commits and pushes). Rename it in the guards too.
 
 # Stage 1 of split deploy: bump lock + build + commit + PR-merge, no switch.
 # Use when you want to update + build + commit but defer the actual switch
@@ -136,6 +140,8 @@ test-host HOST:
 boot-space HOST="$(hostname)":
     ./scripts/check-boot-space.sh {{HOST}}
 
+# Guarded by name (#2951): bus hook (announce), coder guard (blocked), p510 guard when HOST is p510. Rename it in the guards too.
+
 # Same check, but reclaim space when it is short (prunes old generations and
 # lets the bootloader installer garbage-collect the ESP entries).
 [group('maintenance')]
@@ -157,6 +163,7 @@ boot-space-all:
 [group('test')]
 test-guards:
     @python3 ./scripts/test-p510-deploy-guard.py
+    @python3 ./scripts/test-bus-guard.py
 
 # Check for available updates
 [group('update')]
@@ -281,6 +288,8 @@ p510: _require-main
     just p510-clear-sessions
     nixos-rebuild switch --flake .#p510 --target-host p510 --build-host p510 --sudo --no-reexec --keep-going
 
+# Guarded by name (#2951): bus hook (announce), coder guard (blocked), p510 guard. Rename it in the guards too.
+
 # p510 runs GNOME for gnome-remote-desktop, so a leftover session keeps a
 # systemd --user manager alive with ~47 GUI units that can't start without a
 # display. switch-to-configuration then tries to start them, reloads the user
@@ -326,6 +335,8 @@ diff HOST:
     @echo "📊 Showing configuration diff for {{HOST}}..."
     @current=$(readlink -f /run/current-system 2>/dev/null || echo "no-current") && new=$(nix build .#nixosConfigurations.{{HOST}}.config.system.build.toplevel --no-link --print-out-paths) && if [ "$current" != "no-current" ]; then nix store diff-closures $current $new; else echo "No current system configuration found"; fi
 
+# Guarded by name (#2951): bus hook (announce), coder guard (blocked). Rename it in the guards too.
+
 # Clean up old generations and garbage collect
 [group('maintenance')]
 cleanup GENERATIONS="7":
@@ -349,6 +360,8 @@ status:
     sudo nix-env --list-generations --profile /nix/var/nix/profiles/system | wc -l
     @echo "⚡ Last Update:"
     stat -c %y /run/current-system 2>/dev/null || echo "Unknown"
+
+# Guarded by name (#2951): bus hook (announce), coder guard (blocked). Rename it in the guards too.
 
 # Garbage collect old generations
 [group('maintenance')]
@@ -397,6 +410,8 @@ secrets-status-host HOST:
     ssh {{HOST}} "sudo ls -la /run/agenix/ || echo 'Agenix directory not found'"
     ssh {{HOST}} "sudo systemctl status agenix --no-pager || echo 'Agenix service not running'"
 
+# Guarded by name (#2951): bus hook (announce), coder guard (blocked), p510 guard when HOST is p510. Rename it in the guards too.
+
 # Fix agenix issues on remote host
 [group('secrets')]
 fix-agenix-remote HOST:
@@ -411,6 +426,8 @@ fix-agenix-remote HOST:
 deploy-local-build HOST: _require-main
     @echo "🏗️ Building {{HOST}} locally, deploying remotely..."
     nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --sudo --no-reexec --keep-going
+
+# Guarded by name (#2951): coder guard (blocked: signs with the host key). Rename it in the guards too.
 
 # Sign the .drv closure so an untrusted --build-host accepts the upload (#2758).
 [group('private')]
@@ -444,6 +461,8 @@ deploy-via-p620 HOST: _require-main (_sign-drv HOST)
         nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --sudo --no-reexec --keep-going; \
     fi
     @echo "✅ Deployment complete! {{HOST}} is using P620's cache."
+
+# Guarded by name (#2951): coder guard (blocked: signs with the host key). Rename it in the guards too.
 
 # Build on P620 for target host (build only, no deployment)
 [group('deploy')]

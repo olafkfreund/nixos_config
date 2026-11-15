@@ -30,6 +30,21 @@ just deploy-via-p620 razer
 just p510
 just --justfile Justfile p620
 just update-commit-deploy
+just gc
+just cleanup
+just GENERATIONS=3 cleanup
+just -f Justfile gc
+just boot-space-clean razer
+just fix-agenix-remote razer
+just p510-clear-sessions
+just update
+just update-commit
+just build-on-p620 razer
+just _sign-drv razer
+AGENT_BUS_ANNOUNCED=1 just gc
+just --set GENERATIONS 3 cleanup
+just --justfile=Justfile gc
+just -q gc
 nix-collect-garbage -d
 nix store gc
 nix store optimise
@@ -80,6 +95,10 @@ just check-syntax
 just test-host razer
 just test-host p620
 just validate
+just boot-space
+just check-updates
+just status
+just --list
 nix build .#x
 nix eval --raw .#x
 nix flake check
