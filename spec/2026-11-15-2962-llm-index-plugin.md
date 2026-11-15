@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2962
 intent: intent/2026-11-15-2962-llm-index-plugin.md
 ---
