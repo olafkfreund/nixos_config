@@ -17,6 +17,8 @@ let
       config.programs.vscode.profiles.default.userSettings;
 in
 {
+  # Default-on: VS Code stays installed unless the editors group is enabled
+  # without it (the old editor.vscode.enable defaulted to true, #2934).
   config = mkIf (!cfg.enable || cfg.vscode) {
     # Stop Home Manager (and therefore Stylix) from owning settings.json as a
     # read-only store symlink. The activation script below renders the same

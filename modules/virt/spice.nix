@@ -12,8 +12,8 @@ in
     virtualisation = {
       spiceUSBRedirection.enable = true;
     };
-    # Guest agent only — pointless and log-spammy on a physical host, so
-    # it tracks guestAgent (default off) rather than cfg.enable.
+    # Guest agent only, pointless and log-spammy on a physical host, so it
+    # tracks spiceGuestAgent (default off). Like before #2934 it needs spice on too.
     services.spice-vdagentd.enable = cfg.spiceGuestAgent;
     environment.systemPackages = with pkgs; [
       spice
