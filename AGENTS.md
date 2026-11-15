@@ -125,6 +125,10 @@ in {
 }
 ```
 
+A flag in a shared group (`features.development.go`, `features.terminals.kitty`) is declared in
+`modules/common/features.nix` or `Users/common/features.nix`, and the implementing module reads it directly:
+`mkIf (cfg.enable && cfg.go)`. No bridge file, no private `options.<x>.enable` (#2934).
+
 Import the file by path in the host that needs it (`hosts/<host>/configuration.nix`
 or a file it imports), then enable it there. There is no `modules/default.nix`
 and no auto-discovery — every import is explicit.

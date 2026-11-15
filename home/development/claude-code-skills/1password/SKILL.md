@@ -12,7 +12,7 @@ platforms:
 
 # 1password — secrets from the terminal with `op`
 
-`op` 2.x, installed system-wide by `security.onepassword.enable` (see
+`op` 2.x, installed system-wide by `features.security.onepassword` (see
 `modules/programs/1password.nix`). Binary is `/run/wrappers/bin/op`.
 Available on **p620** and **razer**.
 
@@ -184,5 +184,5 @@ prompt, it's in 1Password.
 - `--account` / `OP_ACCOUNT` selects the account if more than one is added.
 - Service accounts (`OP_SERVICE_ACCOUNT_TOKEN`) are the headless path — no
   desktop app needed, but scoped to specific vaults. Not currently set up here.
-- p510 also has `security.onepassword.enable`, which drags the Electron GUI
+- p510 also has `features.security.onepassword`, which drags the Electron GUI
   into a headless server's closure. Cosmetic, but worth cleaning up sometime.

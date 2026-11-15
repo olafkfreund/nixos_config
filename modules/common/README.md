@@ -6,10 +6,9 @@ selectively enabled across different host machines.
 
 ## Feature Flag System
 
-The feature flag system is implemented through two main files:
-
-- `features.nix`: Defines the options/flags that can be enabled
-- `features-impl.nix`: Implements the actual configurations when features are enabled
+`features.nix` declares the grouped flags. Each implementing module reads its flag directly, e.g.
+`modules/development/go.nix` gates on `config.features.development.enable && config.features.development.go`.
+There is no separate implementation file (#2934). The Home Manager flags live in `Users/common/features.nix`.
 
 ### How It Works
 
@@ -117,8 +116,8 @@ To use these common modules, simply import the directory in your configuration:
 
 To add new features:
 
-1. Add new options in `features.nix`
-2. Implement the corresponding configurations in `features-impl.nix`
-3. Create necessary module files for the actual implementation
+1. Add the flag in `features.nix` (or declare `features.<name>.enable` in the new module itself)
+2. In the module that implements it, gate `config` on the flag directly
+3. Import the module by path where it is needed
 
 This modular approach allows for an easily extensible system that grows with your needs.

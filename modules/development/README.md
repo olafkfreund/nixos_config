@@ -19,7 +19,8 @@ This directory contains NixOS modules for various development environments and t
 
 ## Usage
 
-These modules can be enabled selectively in host configurations to provide development tools for specific languages or environments. Each module typically defines:
+These modules provide development tools for specific languages or environments, each behind a
+`features.development` flag. Each module typically defines:
 
 - Required packages
 - Language servers
@@ -31,8 +32,11 @@ Enable these modules in your host's configuration.nix file:
 
 ```nix
 {
-  python.development.enable = true;
-  nodejs.development.enable = true;
-  # ... other development modules
+  features.development = {
+    enable = true;
+    python = true;
+    nodejs = true;
+    # ... other languages and tools
+  };
 }
 ```

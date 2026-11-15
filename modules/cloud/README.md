@@ -7,7 +7,6 @@ This directory contains NixOS modules for various cloud provider tools and SDKs.
 - `default.nix` - Main entry point that imports all cloud provider modules
 - `aws.nix` - Amazon Web Services (AWS) tools and SDK
 - `azure.nix` - Microsoft Azure tools and SDK
-- `cloud-tools.nix` - General cloud management tools
 - `google.nix` - Google Cloud Platform tools and SDK
 - `terraform.nix` - Terraform infrastructure as code tools
 
@@ -26,10 +25,13 @@ These modules can be enabled selectively in host configurations to provide cloud
 
 ```nix
 {
-  aws.packages.enable = true;
-  azure.packages.enable = true;
-  cloud-tools.packages.enable = true;
-  google.packages.enable = true;
-  terraform.packages.enable = true;
+  features.cloud = {
+    enable = true;
+    aws = true;
+    azure = true;
+    google = true;
+    k8s = true;
+    terraform = true;
+  };
 }
 ```

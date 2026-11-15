@@ -1028,6 +1028,21 @@ Two host types exist, `workstation` and `laptop`. Each module declares its own
 flag with `mkEnableOption` and gates its config on it, so a flag never needs a
 central registry.
 
+Grouped flags (`features.development.go`, `features.cloud.aws`, `features.terminals.kitty`, …) are declared in
+`modules/common/features.nix` (NixOS) and `Users/common/features.nix` (Home Manager). The module that implements a
+flag reads it directly; there is no bridge file that copies flags into private options (#2934):
+
+```nix
+# modules/development/go.nix
+let cfg = config.features.development; in {
+  config = lib.mkIf (cfg.enable && cfg.go) { environment.systemPackages = [ pkgs.go ]; };
+}
+```
+
+Groups without an `enable` (`features.programs`, `features.media`) gate on the flag alone. Do not add a private
+`options.<name>.enable` beside a `features.*` flag, and do not put custom options under upstream roots
+(`services.*`, `programs.*`, `networking.*`, `system.*`): use `features.*`.
+
 ---
 
 ## Security Patterns
