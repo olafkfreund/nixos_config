@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2950
 author: olafkfreund
 ---
@@ -74,3 +74,6 @@ Evidence (shell history and repository callers, 2026-11-15):
 3. Should the unused scripts the dropped recipes call (`scripts/performance-test.sh`, `ci-test.sh`,
    `test-modules.sh`, `network-monitor.sh`) be deleted in the same change, or left for a separate cleanup?
    Recommendation: delete each one that nothing else calls.
+
+Owner decision (2026-11-15): approved with the recommendations: short menu, drop the diagnostics and document the
+plain commands, delete scripts nothing else calls. The owner's "finish this" covers the spec and plan.
