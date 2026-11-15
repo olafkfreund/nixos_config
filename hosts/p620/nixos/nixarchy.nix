@@ -9,7 +9,6 @@
 # describe are all gone.
 { config
 , inputs
-, lib
 , pkgs
 , ...
 }:
@@ -54,57 +53,10 @@
     ../../common/nixos/llm-index.nix
     ../../common/nixos/omarchy-sole-hyprland.nix
     ../../common/nixos/omarchy-stylix-theme.nix
+    ../../common/nixos/omarchy-desktop.nix
   ];
 
   local.llmIndex.sourcePath = "/mnt/code/Source-home"; # real path; ~/Source is a symlink
-
-  programs.nixarchy.enable = true;
-  # Omarchy's own apps: Hype, Monologue, Signed, Disktree and the rest (nixarchy#1572).
-  programs.nixarchy.omarchyApps.enable = true;
-
-  # Puts this user in the input group. Omarchy's shell reads the keyboard
-  # device directly for its own key handling, which the group grants; without
-  # it the session starts but never sees a keypress.
-  programs.nixarchy.user = "olafkfreund";
-  # Stock Omarchy menu (#2325): nixarchy turns nixarchy-menu on by default.
-  home-manager.users.olafkfreund.programs.nixarchy.defaultPlugins.menu = false;
-  # Unused preinstalls (#2133); screen recording is Omareel.
-  programs.nixarchy.preinstallsExclude = [ "obs-studio" "kdenlive" ];
-
-  # Let theme switches tint Chrome/Chromium/Edge/Brave with the theme's accent
-  # colour. Light and dark already follow the theme through the settings
-  # portal without this; what it adds is the accent alone.
-  #
-  # The cost, stated upstream and worth keeping in view: Chromium reads policy
-  # only from /etc/<browser>/policies/managed, with no per-user equivalent, so
-  # this hands those directories to this user -- and whoever can write there
-  # sets policy for the whole machine, forced extensions and proxies included.
-  # On a single-user desktop that is moot. It does mean any process running as
-  # olafkfreund can write Chrome policy, which now includes agents with shell
-  # access (omarchy-voice's allow_shell on p620). Deliberately not on p510,
-  # which also runs Omarchy.
-  programs.nixarchy.browserThemeUser = "olafkfreund";
-
-  # nixarchy pins its own Hyprland and does not defer -- nixpkgs defines
-  # programs.hyprland.portalPackage at mkDefault priority, so matching it would
-  # tie rather than yield, hence the force.
-  #
-  # There is no matching .package force: omarchy-sole-hyprland.nix turns
-  # programs.hyprland off outright and restates what Nixarchy needs from it,
-  # which is what stops a second Hyprland entry appearing at login.
-  programs.hyprland.portalPackage = lib.mkForce pkgs.xdg-desktop-portal-hyprland;
-
-  # Omarchy's SDDM greeter is the login manager. It replaced the
-  # DankMaterialShell greetd greeter, which ran inside niri and went away
-  # with niri and DMS. SDDM enumerates wayland-sessions, so GNOME stays
-  # selectable alongside the Omarchy session.
-  programs.nixarchy.displayManager = true;
-
-  # Boot to Omarchy's splash, not stylix's. The option forces
-  # boot.plymouth.theme and themePackages together on purpose: forcing the
-  # name alone leaves NixOS asserting a theme that is not in the package list,
-  # which fails the build.
-  programs.nixarchy.bootSplash = "force";
 
   # Claude Code is this machine's agent, and saying so here is what pins nixi's
   # ACP adapter. nixarchy only adds claude to `services.nixi.agents` when
@@ -157,27 +109,6 @@
       # evaluating. Re-add the explicit import only if nixarchy drops it again.
       inputs.nixarchy.homeManagerModules.nixarchy
     ];
-    programs.nixarchy.enable = true;
-
-    # nixarchy packages: search nixpkgs, turn curated apps and services on,
-    # set NixOS options, queue and apply -- from the Omarchy shell rather
-    # than a terminal. A front-end only: every write goes through the
-    # nixarchy writers this module already installs.
-    #
-    # Installed, not enabled. Enabling a plugin is runtime state in
-    # shell.json, which nixarchy leaves alone on purpose, so once per machine:
-    #   omarchy plugin enable nixarchy.pkg
-    # A chord is yours to choose too; SUPER+ALT+N is free in Omarchy's set.
-    programs.nixarchy.plugins."nixarchy.pkg".src =
-      inputs.nixarchy-pkg.packages.${pkgs.stdenv.hostPlatform.system}.default;
-
-    # nixarchy-distrobox: the Omarchy panel for distrobox boxes. Installed,
-    # not enabled -- once per machine:
-    #   omarchy plugin enable nixarchy.distrobox
-    # SUPER+ALT+D is free in Omarchy's set, if you want it on a key:
-    #   omarchy-shell shell toggle nixarchy.distrobox '{}'
-    programs.nixarchy.plugins."nixarchy.distrobox".src =
-      inputs.nixarchy-distrobox.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
     # nixi's optional integrations, from its own module rather than the 0.9
     # install.py copies they replace: the coaching watcher (at most one tip a
@@ -186,15 +117,6 @@
     services.nixi = {
       watcher.enable = true;
       omarchyHooks.enable = true;
-      # Companion plugins (nixi-nixarchy#149): the three examples, for the
-      # slice A live check. Installed means listed in Settings → Plugins, and
-      # each stays off until switched on there.
-      companion.plugins =
-        with inputs.nixi-companion.legacyPackages.${pkgs.stdenv.hostPlatform.system}.examples; [
-          pirate-quips
-          element-chat
-          party-hat-plus
-        ];
     };
 
     # Oma: speech to speech against the OpenAI Realtime API, driving Hyprland.

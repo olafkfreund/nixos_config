@@ -27,6 +27,7 @@ in
     ./nixos/load.nix
     ./themes/stylix.nix # Re-enabled after upstream cache fix
     ./nixos/nixarchy.nix # Omarchy desktop, as an extra session
+    ../common/nixos/dev-workstation.nix
 
     # P620-specific additional modules
     ../../modules/development/default.nix
@@ -110,13 +111,6 @@ in
     openai.enable = true;
     anthropic.enable = true;
     gemini.enable = true;
-  };
-
-  # Enable Claude Code hooks for desktop notifications
-  features.claude-hooks = {
-    enable = true;
-    enablePermissionNotifications = true;
-    enableReadyNotifications = true;
   };
 
   # Local Ollama coding-model server on RX 7900 XTX (ROCm).
@@ -234,23 +228,6 @@ in
   # One-time setup after deploy: `audible quickstart`, then `audible-sync`.
   features.audibleSync.enable = true;
 
-  # Claude Code managed-settings baseline (read-only at /etc/claude-code).
-  # Enables PARR hook + lets the router CLI inject apiKeyHelper (Phase 3).
-  modules.programs.claude-code-managed = {
-    enable = true;
-    parrProtocol.enable = false;
-    # Notifications are handled by the tmux-ccm plugin (status-bar
-    # attention flag + rate-limited completion ping). Our claude-notify
-    # hooks stay OFF to avoid a duplicate, un-throttled toaster firing
-    # "Claude needs your permission" on the same Notification events.
-    notifications.enable = false;
-  };
-  modules.programs.claude-code-mods.enable = true; # fleet-guard + nix-flavour (#2218)
-
-  # /use-ollama, /use-claude, /use-default slash commands + apiKeyHelper
-  # that auto-selects router or Anthropic key based on ANTHROPIC_BASE_URL.
-  modules.programs.claude-router-cli.enable = true;
-
   # AI production dashboard and load testing removed - were non-functional services consuming resources
 
   # AI alerting removed - was non-functional, handled by DEX5550 monitoring server via Prometheus/Grafana/Alertmanager
@@ -262,84 +239,13 @@ in
 
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
-    development = {
-      enable = true;
-      cargo = true;
-      copilot-cli = true; # GitHub Copilot CLI
-      spec-kit = true; # GitHub spec-kit for Spec-Driven Development
-      github = true;
-      go = true;
-      java = true;
-      lua = true;
-      nix = true;
-      shell = true;
-      devshell = true; # Temporarily disabled due to patch issue
-      python = true;
-      nodejs = true;
-      precommit = true; # Activates modules/development/pre-commit.nix — installs markdownlint, statix, taplo, yamllint, ruff, etc. system-wide.
-    };
+    development.precommit = true; # Activates modules/development/pre-commit.nix.
 
-    virtualization = {
-      enable = true;
-      docker = true;
-      incus = false;
-      podman = true;
-      spice = true;
-      libvirt = true;
+    virtualization.waydroid.disableGbm = false;
 
-      # Waydroid Android emulation (AMD GPU - standard configuration)
-      waydroid = {
-        enable = true;
-        disableGbm = false; # AMD GPU - standard config
-        enableWaydroidHelper = true;
-      };
-    };
+    cloud.azure = true;
 
-    cloud = {
-      enable = true;
-      aws = true;
-      azure = true; # Temporarily disabled due to msgraph-core build failure
-      google = true;
-      k8s = true;
-      terraform = true;
-    };
-
-    ai = {
-      # Enable MCP (Model Context Protocol) servers for AI integration
-      mcp = {
-        enable = true;
-        # NotebookLM research notebooks as agent tools (49 of them), via the
-        # packaged notebooklm-mcp-cli. Gated per host rather than defaulted on:
-        # the package ships with Users/olafkfreund/profile.nix, which only p620
-        # and razer import, while the MCP modules are evaluated for every host.
-        # Needs a one-time interactive `nlm auth` here — the credential is a
-        # Google session cookie and cannot be declared.
-        notebooklm.enable = true;
-        obsidian = {
-          enable = true;
-          implementation = "rest-api";
-          restApi.apiKeyFile = config.age.secrets."obsidian-api-key".path;
-        };
-        # Enable LinkedIn MCP server for professional networking
-        # NOTE: Disabled until secret is created (see docs/LINKEDIN-MCP.md)
-        # To enable: ./scripts/manage-secrets.sh create api-linkedin-cookie
-        linkedin = {
-          enable = false; # TODO: Enable after creating secret
-          cookieFile = config.age.secrets."api-linkedin-cookie".path;
-        };
-        # Enable WhatsApp MCP server for AI-assisted messaging
-        whatsapp = {
-          enable = false; # Disabled - not working
-          enableVoiceMessages = false;
-        };
-        # Enable additional MCP servers
-        servers = {
-          browsermcp = true; # Browser automation with privacy
-          grafana = true; # Integration with monitoring stack
-          terraform = true; # Infrastructure as Code support
-        };
-      };
-    };
+    ai.mcp.servers.grafana = true;
 
     email = {
       enable = true;
@@ -350,27 +256,8 @@ in
       notifications.highPriorityOnly = true;
     };
 
-    programs = {
-      lazygit = true;
-      thunderbird = false;
-      obsidian = true;
-      office = true;
-      webcam = true;
-      print = true;
-      yt-x.enable = true; # Terminal YouTube browser
-    };
+    programs.yt-x.enable = true; # Terminal YouTube browser
 
-    # COSMIC disabled — sticking with GNOME only until COSMIC is more
-    # production-ready. Module + packages parked under modules/desktop/cosmic.nix
-    # and pkgs/cosmic-applets/ for easy re-enable.
-    desktop.cosmic.enable = false;
-
-    # Microsoft Intune Company Portal (custom package with version control)
-    intune = {
-      enable = false; # Disabled - no longer needed
-      autoStart = false; # Manual launch - start from application menu as needed
-      enableDesktopIntegration = true;
-    };
   };
 
   # k3d cluster — Phase 2 of docs/plans/2026-08-20-k3d-p510-to-p620-migration.md.
@@ -425,68 +312,7 @@ in
     apiPort = 6443;
   };
 
-  # Reap orphaned/idle swarm tmux servers; dryRun first (#2616).
-  features.claudeSwarmReaper = { enable = true; dryRun = false; };
-  modules.programs.claude-code-managed.subagentMetadata.codex = true;
-
-  features.agentVoice = {
-    enable = true;
-    speaker = "nixi";
-    voice.elevenLabsKeyFile = config.age.secrets."api-elevenlabs".path;
-  };
-
-  # Terminals follow whichever shell owns the session: DMS in the DMS sessions,
-  # omarchy in the Omarchy one. p620 only for now — razer and p510 stay on
-  # stylix until this has been lived in. See modules/desktop/theme-owner.nix.
-  features.themeOwner.enable = true;
-
-  features.craftapps = {
-    enable = true;
-    apps = {
-      cadcraft = true;
-      deckcraft = true;
-      designcraft = true;
-      effectcraft = true;
-      filmcraft = true;
-      gridcraft = true;
-      lightcraft = true;
-      pdfcraft = true;
-      photocraft = true;
-      soundcraft = true;
-      vectorcraft = true;
-      wordcraft = true;
-    };
-  };
   features.flux.enable = true; # phone link, #2905
-  features.tfm = {
-    enable = true;
-    settings.ui."preview-enabled" = true;
-  };
-
-  # ddcutil: software brightness/contrast control of external monitors (DDC/CI).
-  modules.hardware.ddcutil.enable = true;
-
-  # Citrix Workspace for client project remote access
-  # Disabled — no longer needed. Module + overlay + package retained so this
-  # can be flipped back to true without re-installing anything.
-  services.citrix-workspace = {
-    enable = false;
-    acceptLicense = true;
-  };
-
-  # MCP screenshot server for Claude Desktop
-  services.rescreenshot-mcp = {
-    enable = true;
-    user = vars.username;
-    logLevel = "info";
-    autoConfigureClaudeDesktop = true;
-  };
-
-  # Enable encrypted API keys
-
-  secrets.apiKeys = {
-    braveSearch = true;
-  };
 
   # Consolidated system configuration
   system = {
@@ -524,11 +350,6 @@ in
   };
   # Docker uses containerd's image store, which ignores dataRoot (Issue #2182).
   virtualisation.containerd.settings.root = "/mnt/img_pool/containerd";
-
-  # Enable secrets management
-  modules.security.secrets = {
-    enable = true;
-  };
 
   # Create system users for all host users
   users.users = lib.genAttrs hostUsers (username: {
@@ -596,10 +417,6 @@ in
       enable = true;
       inherit (vars.services.nfs) exports;
     };
-
-    # Other services
-    playerctld.enable = true;
-    fwupd.enable = true;
 
     # ClamAV configuration
     clamav = {
@@ -730,9 +547,6 @@ in
       containerd.unitConfig.RequiresMountsFor = [ "/mnt/img_pool" ];
     };
 
-    # User services
-    # playerctl 2.4.1 can segfault on a player signal (upstream bug); come back instead of staying failed.
-    user.services.playerctld.serviceConfig.Restart = "on-failure";
   };
 
   # Storage performance optimization
@@ -776,11 +590,6 @@ in
   # Windows app integration - Re-enabled after upstream fix (v0.9.0)
   # programs.winboat.enable = true; # DISABLED: Go 1.26 cross-compilation broken with mingw32 GCC 15
 
-  # ydotoold — kernel-level keystroke injection daemon. Used by the
-  # voice-input client to type transcripts into focused windows on GNOME
-  # Wayland (Mutter doesn't implement the virtual_keyboard_v1 protocol that
-  # wtype needs).
-  programs.ydotool.enable = true;
   # User membership in the `ydotool` group (required for
   # /run/ydotoold/socket mode 0660 root:ydotool access) is added to the
   # `users.users = lib.genAttrs hostUsers ...` block earlier in this file —

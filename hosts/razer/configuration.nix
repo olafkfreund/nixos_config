@@ -24,6 +24,7 @@ in
     ./nixos/memory.nix
     ./themes/stylix.nix # Re-enabled after upstream cache fix
     ./nixos/nixarchy.nix # Omarchy desktop, as an extra session
+    ../common/nixos/dev-workstation.nix
 
     # Razer-specific additional modules
     ../../modules/development/default.nix
@@ -142,144 +143,17 @@ in
 
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
-    development = {
-      enable = true;
-      cargo = true;
-      copilot-cli = true; # GitHub Copilot CLI
-      spec-kit = true; # GitHub spec-kit for Spec-Driven Development
-      github = true;
-      go = true;
-      java = true;
-      lua = true;
-      nix = true;
-      shell = true;
-      devshell = true; # Temporarily disabled due to patch issue
-      python = true;
-      nodejs = true;
-    };
+    virtualization.waydroid.disableGbm = true;
 
-    # Enable Claude Code hooks for desktop notifications
-    claude-hooks = {
-      enable = true;
-      enablePermissionNotifications = true;
-      enableReadyNotifications = true;
-    };
+    cloud.azure = false;
 
-    virtualization = {
-      enable = true;
-      docker = true;
-      incus = false;
-      podman = true;
-      spice = true;
-      libvirt = true;
-      # Waydroid Android emulation (NVIDIA GPU - requires GBM disable)
-      waydroid = {
-        enable = true;
-        disableGbm = true; # Required for NVIDIA hybrid graphics
-        enableWaydroidHelper = true;
-      };
-    };
-
-    cloud = {
-      enable = true;
-      aws = true;
-      azure = false; # Temporarily disabled due to msgraph-core build failure
-      google = true;
-      k8s = true;
-      terraform = true;
-    };
-
-    ai = {
-      # Enable MCP (Model Context Protocol) servers for AI integration
-      mcp = {
-        enable = true;
-        # NotebookLM research notebooks as agent tools (49 of them), via the
-        # packaged notebooklm-mcp-cli. Gated per host rather than defaulted on:
-        # the package ships with Users/olafkfreund/profile.nix, which only p620
-        # and razer import, while the MCP modules are evaluated for every host.
-        # Needs a one-time interactive `nlm auth` here — the credential is a
-        # Google session cookie and cannot be declared.
-        notebooklm.enable = true;
-        obsidian = {
-          enable = true;
-          implementation = "rest-api";
-          restApi.apiKeyFile = config.age.secrets."obsidian-api-key".path;
-        };
-        # Enable LinkedIn MCP server for professional networking
-        # NOTE: Disabled until secret is created (see docs/LINKEDIN-MCP.md)
-        # To enable: ./scripts/manage-secrets.sh create api-linkedin-cookie
-        linkedin = {
-          enable = false; # TODO: Enable after creating secret
-          cookieFile = config.age.secrets."api-linkedin-cookie".path;
-        };
-        # Enable WhatsApp MCP server for AI-assisted messaging
-        whatsapp = {
-          enable = false; # Disabled - not working
-          enableVoiceMessages = false;
-        };
-        # Enable additional MCP servers
-        servers = {
-          browsermcp = true; # Browser automation with privacy
-          terraform = true; # Infrastructure as Code support
-        };
-      };
-    };
-
-    programs = {
-      lazygit = true;
-      thunderbird = false;
-      obsidian = true;
-      office = true;
-      webcam = true;
-      print = true;
-    };
-
-    # COSMIC disabled — GNOME only until COSMIC is more production-ready.
-    # Module + packages parked under modules/desktop/cosmic.nix and
-    # pkgs/cosmic-applets/ for easy re-enable.
-    desktop.cosmic.enable = false;
-
-    # Microsoft Intune Company Portal (custom package with version control)
-    intune = {
-      enable = false; # Disabled - no longer needed
-      autoStart = false; # Manual launch - start from application menu as needed
-      enableDesktopIntegration = true;
-    };
   };
 
-  # Terminals follow whichever shell owns the session: DMS in the DMS sessions,
-  # omarchy in the Omarchy one. See modules/desktop/theme-owner.nix.
-  features.themeOwner.enable = true;
-
-  features.craftapps = {
-    enable = true;
-    apps = {
-      cadcraft = true;
-      deckcraft = true;
-      designcraft = true;
-      effectcraft = true;
-      filmcraft = true;
-      gridcraft = true;
-      lightcraft = true;
-      pdfcraft = true;
-      photocraft = true;
-      soundcraft = true;
-      vectorcraft = true;
-      wordcraft = true;
-    };
-  };
   features.flux = {
     # phone link, #2905
     enable = true;
     trustedConnections = [ "2480c26b-7797-49e1-8a9f-af6bccc6d77c" ]; # the home Wi-Fi
   };
-  features.tfm = {
-    enable = true;
-    settings.ui."preview-enabled" = true;
-  };
-
-  # ddcutil: software brightness/contrast control of external monitors (DDC/CI).
-  modules.hardware.ddcutil.enable = true;
 
   # GDM greeter visual baseline — dark colour scheme + 24h clock so it
   # doesn't render as a near-blank Adwaita-light surface over RDP.
@@ -308,54 +182,12 @@ in
   # file setting"). Clear it.
   systemd.services.gnome-remote-desktop.wantedBy = lib.mkForce [ ];
 
-  # Citrix Workspace for client project remote access
-  # Disabled — no longer needed. Module + overlay + package retained, but the
-  # requireFile tarball was deleted: re-enabling needs a fresh manual download
-  # via pkgs/citrix-workspace/fetch-citrix.sh first.
-  services.citrix-workspace = {
-    enable = false;
-    acceptLicense = true;
-  };
-
-  # MCP screenshot server for Claude Desktop
-  services.rescreenshot-mcp = {
-    enable = true;
-    user = vars.username;
-    logLevel = "info";
-    autoConfigureClaudeDesktop = true;
-  };
-
   # Auto-sync Chrome PWA icons into the XDG hicolor tree (issue #397).
   # Chrome stores PWA PNG files inside its profile dir, which no launcher indexes;
   # this module symlinks them where COSMIC/GNOME can find them.
   modules.programs.chrome-pwa-icons = {
     enable = true;
     user = vars.username;
-  };
-
-  # Claude Code managed-settings.json — read-only baseline (issue #398).
-  # PARR hook lives here (highest precedence, cannot be disabled by the
-  # user via `claude` CLI). User-scope ~/.claude/settings.json remains
-  # writable for plugin installs and runtime mutations.
-  modules.programs.claude-code-managed = {
-    enable = true;
-    parrProtocol.enable = false;
-    # Notifications are handled by the tmux-ccm plugin (status-bar
-    # attention flag + rate-limited completion ping). Our claude-notify
-    # hooks stay OFF to avoid a duplicate, un-throttled toaster on the
-    # same Notification events. Same rationale as p620.
-    notifications.enable = false;
-  };
-  modules.programs.claude-code-mods.enable = true; # fleet-guard + nix-flavour (#2218)
-
-  # /use-ollama, /use-claude, /use-default slash commands + apiKeyHelper
-  # that auto-selects router (p620 over Tailscale) or Anthropic cloud key
-  # based on ANTHROPIC_BASE_URL. Phase 3 of Ollama+LiteLLM design.
-  modules.programs.claude-router-cli.enable = true;
-
-  # Enable encrypted API keys
-  secrets.apiKeys = {
-    braveSearch = true;
   };
 
   # Nix build optimizations
@@ -382,17 +214,10 @@ in
       videoDrivers = [ vars.gpu ];
     };
 
-    # Desktop environments — COSMIC is the primary session; GNOME is also
-    # available as a choice in the login greeter.
   };
-
-  # playerctl 2.4.1 can segfault on a player signal (#1987); come back instead of staying failed.
-  systemd.user.services.playerctld.serviceConfig.Restart = "on-failure";
 
   # Hardware and service specific configurations
   services = {
-    playerctld.enable = true;
-    fwupd.enable = true;
     # Quiet sshd preauth-reset spam from Odin's :22 liveness probes (p510).
     openssh.settings.LogLevel = "ERROR";
     nfs.server = lib.mkIf vars.services.nfs.enable {
@@ -433,11 +258,6 @@ in
 
   environment.sessionVariables = vars.environmentVariables // {
     NH_FLAKE = vars.paths.flakeDir;
-  };
-
-  # Enable secrets management
-  modules.security.secrets = {
-    enable = true;
   };
 
   users.users = lib.genAttrs hostUsers (username: {
@@ -556,10 +376,6 @@ in
     "/etc/ssh/ssh_host_rsa_key" # Host key (RSA fallback)
   ];
 
-  # ydotoold — kernel-level keystroke injection daemon. Used by the
-  # voice-input client to type transcripts on GNOME Wayland where wtype
-  # fails (Mutter doesn't implement virtual_keyboard_v1).
-  programs.ydotool.enable = true;
   # User group membership for /run/ydotoold/socket access is added in the
   # `users.users = lib.genAttrs hostUsers ...` block above.
 
@@ -596,16 +412,6 @@ in
   # forwards a free local port over SSH and opens no port anywhere.
   programs.nixarchy.apps.freerdp.enable = true;
 
-  # No Ollama here: Haiku writes the summary, and the ElevenLabs key comes from
-  # agenix (the keyring has none on this host).
-  # Reap orphaned/idle swarm tmux servers; dryRun first (#2616).
-  features.claudeSwarmReaper = { enable = true; dryRun = false; };
-  modules.programs.claude-code-managed.subagentMetadata.codex = true;
-
-  features.agentVoice = {
-    enable = true;
-    speaker = "nixi";
-    summary.backend = "claude";
-    voice.elevenLabsKeyFile = config.age.secrets."api-elevenlabs".path;
-  };
+  # Haiku writes summaries here; the ElevenLabs key comes from agenix.
+  features.agentVoice.summary.backend = "claude";
 }
