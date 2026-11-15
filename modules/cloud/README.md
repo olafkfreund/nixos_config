@@ -21,7 +21,8 @@ Each module provides:
 
 ## Usage
 
-These modules can be enabled selectively in host configurations to provide cloud development and management capabilities. Enable them in your host's configuration.nix file:
+These modules provide cloud development and management tools, each behind a `features.cloud` flag. Enable them
+in the host (or a shared host file):
 
 ```nix
 {
