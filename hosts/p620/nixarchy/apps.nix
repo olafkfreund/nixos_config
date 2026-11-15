@@ -36,7 +36,7 @@
     # kitty.enable = true;  #@ kitty
 
   # ── Browser ─────────────────────────────────────────────────────
-    # brave.enable = true;  #@ brave
+    brave.enable = true;  #@ brave
     # chrome.enable = true;  #@ chrome  # unfree
     # edge.enable = true;  #@ edge  # unfree
     # firefox.enable = true;  #@ firefox  # A NixOS module, so policies and extensions are declarative too.
@@ -65,7 +65,7 @@
     dictation.enable = true;  #@ dictation
     # grok-bot.enable = true;  #@ grok-bot  # unfree
     # lm-studio.enable = true;  #@ lm-studio  # unfree
-    # t3-code.enable = true;  #@ t3-code
+    t3-code.enable = true;  #@ t3-code
 
   # ── Editor ──────────────────────────────────────────────────────
     # cursor.enable = true;  #@ cursor  # unfree
@@ -112,7 +112,7 @@
     # programs.nixarchy.apps.hey-cli.enable = true;  #@ hey-cli
     # programs.nixarchy.apps.omacalc.enable = true;  #@ omacalc
     # programs.nixarchy.apps.omacut.enable = true;  #@ omacut
-    programs.nixarchy.apps.omawrite.enable = true;  #@ omawrite
+    # programs.nixarchy.apps.omawrite.enable = true;  #@ omawrite
     # programs.nixarchy.apps.openclaw.enable = true;  #@ openclaw
     # programs.nixarchy.apps.opencode.enable = true;  #@ opencode
     # programs.nixarchy.apps.scrcpy.enable = true;  #@ scrcpy
