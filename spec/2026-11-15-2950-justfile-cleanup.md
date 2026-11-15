@@ -8,12 +8,12 @@ intent: intent/2026-11-15-2950-justfile-cleanup.md
 
 ## Design
 
-### Keep (45 public recipes + 2 private), grouped with `[group('...')]` (just 1.59)
+### Keep (44 public recipes + 2 private), grouped with `[group('...')]` (just 1.59)
 
 | Group | Recipes |
 |---|---|
 | (none) | `default` |
-| deploy | `deploy`, `p620`, `razer`, `p510`, `p510-clear-sessions`, `deploy-local-build`, `deploy-via-p620`, `build-on-p620`, `quick-deploy`, `deploy-all` |
+| deploy | `deploy`, `p620`, `razer`, `p510`, `p510-clear-sessions`, `deploy-local-build`, `deploy-via-p620`, `build-on-p620`, `quick-deploy` |
 | update | `update-commit-deploy`, `update-commit`, `update`, `preview-updates`, `system-diff`, `check-updates` |
 | test | `test-host`, `test-all-parallel`, `quick-test`, `check-syntax`, `validate`, `validate-quick`, `dry-run`, `diff`, `test-guards`, `check-mcp` |
 | maintenance | `status`, `cleanup`, `gc`, `boot-space`, `boot-space-clean`, `boot-space-all`, `ping-hosts` |
@@ -26,12 +26,12 @@ Rule: shell-history use, plus every executable caller and dependency (Codex revi
 body and flags. The one exception: `deploy-smart`'s body moves into `quick-deploy`, which only called it. Its
 `just {{HOST}}` dispatch stays, so `quick-deploy p620` still runs `just p620`.
 
-### Drop (77)
+### Drop (78)
 
 Duplicates and unused variants:
 
 - Deploy and test duplicates: `deploy-fast`, `deploy-cached`, `deploy-smart` (folded into `quick-deploy`),
-  `emergency-deploy`, `pre-deploy`, `deploy-interactive`, `deploy-all-parallel`, `quick-all`, `test-all`, `test-build-all`,
+  `emergency-deploy`, `pre-deploy`, `deploy-interactive`, `deploy-all`, `deploy-all-parallel`, `quick-all`, `test-all`, `test-build-all`,
   `test-build-all-parallel`, `build-all-parallel`, `test-build`, `test-build-verbose`.
 - Garbage collection and store: `gc-aggressive`, `optimize`, `full-cleanup`, `clean-all`.
 - Validation, pre-commit and formatting: `validate-quality`, `validate-full`, `pre-commit-install`,
@@ -53,16 +53,22 @@ Stale or unsafe: `test-nixpkgs-stable` (pins nixos-24.05), `test-kernel-version`
 
 ### Scripts
 
-- Delete `scripts/ci-test.sh` and `scripts/find-new-packages.sh`. After the cut, nothing calls them except docs that
-  get updated. (The `ci-test` key in `home/development/gitlab/default.nix` is an unrelated shell alias.)
+- Delete `scripts/ci-test.sh`, `scripts/find-new-packages.sh` and `scripts/generate-topology.sh` (only `deploy-all`
+  called it). After the cut, nothing calls them except docs that get updated. (The `ci-test` key in
+  `home/development/gitlab/default.nix` is an unrelated shell alias.)
+- `deploy-all` goes (agy review): it deploys p510 by calling the p510 recipe without p510 on the command line, so
+  the p510 deploy guard never sees it; it has no `_require-main` and deploys p620 twice. Multi-host deploys are one
+  host recipe per host. The `deployment-coordinator` agent prompt (`.claude` and `.gemini`) says so.
 - Keep every other script. `performance-test.sh`, `network-monitor.sh`, `test-modules.sh` and
   `validate-quality.sh` are called by `.claude`/`.gemini` slash commands and agents, and `check-boot-space.sh` by
   `scripts/update-commit-deploy.sh`.
 
 ### Callers
 
-- `tools/default.nix` (`nixos-deploy`, `nixos-test` flake apps): drop the `deploy-all-parallel`, `emergency` and
-  `all` (`test-all`) subcommands; the rest point at kept recipes.
+- `tools/default.nix` (`nixos-deploy`, `nixos-test` flake apps): drop the subcommands calling `deploy-all`,
+  `deploy-all-parallel`, `emergency-deploy` and `test-all`; the rest point at kept recipes.
+- `.pre-commit-config.yaml` calls `validate-quick` and `--list` (kept). Shell helpers `nhs`, `nhsb`, `fj`,
+  `sysdiff`, `j`/`jl`/`jr` and the `jv`/`jth`/`jqt`/`jqd` abbreviations target kept recipes or scripts.
 - Shell aliases `jv`, `jth`, `jqt`, `jqd`, and `nhs`: unchanged (all targets kept).
 - `modules/programs/claude-code-managed.nix` permission list: drop `just test-all:*` only if nothing it matches
   survives. `test-all-parallel` survives, so it stays. No guard pattern changes.
@@ -80,7 +86,10 @@ Stale or unsafe: `test-nixpkgs-stable` (pins nixos-24.05), `test-kernel-version`
 - p510 routes stay as they are. `just p510` switches in place; `update-commit-deploy p510` keeps `nh os boot` and its
   own branch check (`scripts/update-commit-deploy.sh:105`, `:482-488`). `deploy-local-build`/`deploy-via-p620` still
   accept p510. Owner approval and `P510_DEPLOY_APPROVED` are untouched, and nothing builds or deploys p510 in this
-  work.
+  work: nothing builds on or deploys to p510 (evaluating or building p510's config on p620, as `validate` and
+  `quick-test` do, is allowed).
+- Guard tests stay green: `test-guards`, `modules/programs/claude-coder-guard.test.sh`,
+  `pkgs/claude-code-mods/fleet-guard/hooks/classify.test.ts`.
 - Deploy recipe names still match the guards (`*deploy*`, `p620|p510|razer`) in
   `modules/programs/claude-code-managed.nix:538` and `claude-coder-guard.sh:86`.
 

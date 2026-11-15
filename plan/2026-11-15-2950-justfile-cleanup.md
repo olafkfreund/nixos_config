@@ -14,10 +14,9 @@ reviewers:
 
 Approved decisions (spec):
 
-- Keep exactly these 45 public recipes plus `_require-main` and `_sign-drv`, each with `[group('<g>')]`:
+- Keep exactly these 44 public recipes plus `_require-main` and `_sign-drv`, each with `[group('<g>')]`:
   - (no group) `default`
-  - deploy: `deploy p620 razer p510 p510-clear-sessions deploy-local-build deploy-via-p620 build-on-p620 quick-deploy
-    deploy-all`
+  - deploy: `deploy p620 razer p510 p510-clear-sessions deploy-local-build deploy-via-p620 build-on-p620 quick-deploy`
   - update: `update-commit-deploy update-commit update preview-updates system-diff check-updates`
   - test: `test-host test-all-parallel quick-test check-syntax validate validate-quick dry-run diff test-guards
     check-mcp`
@@ -25,16 +24,18 @@ Approved decisions (spec):
   - secrets: `secrets secrets-status secrets-status-host test-secrets fix-agenix-remote`
   - lint: `format lint-all pre-commit-run`
   - docs: `docs-build docs-serve docs-check`
-- Every other recipe is deleted (77; list in the spec).
+- Every other recipe is deleted (78; list in the spec), including `deploy-all` (implicit p510 deploy that bypasses
+  the p510 guard).
 - Kept recipes keep name, parameters, dependencies and body. Only `quick-deploy` changes: it takes over
   `deploy-smart`'s body, including the `just {{ HOST }}` dispatch.
-- Delete `scripts/ci-test.sh` and `scripts/find-new-packages.sh`; keep all other scripts.
+- Delete `scripts/ci-test.sh`, `scripts/find-new-packages.sh`, `scripts/generate-topology.sh`; keep all other
+  scripts.
 - p510 routes, `nh os boot` in `scripts/update-commit-deploy.sh`, `_require-main`, `_sign-drv`, guard patterns and
   `P510_DEPLOY_APPROVED` are untouched. Nothing builds or deploys p510.
 
 ## Steps
 
-1. `Justfile`: delete the 77 recipes with their leading comment blocks; add `[group('<g>')]` above each kept recipe;
+1. `Justfile`: delete the 78 recipes with their leading comment blocks; add `[group('<g>')]` above each kept recipe;
    move `deploy-smart`'s body into `quick-deploy`; drop section banners that now head nothing. Keep
    `set`/variable lines at the top.
    Check:
@@ -48,9 +49,12 @@ Approved decisions (spec):
      shebang bodies or `_sign-drv` (it evaluates).
    - Never run a real deploy, gc or cleanup.
 2. Callers and docs:
-   - `scripts/ci-test.sh`, `scripts/find-new-packages.sh`: `git rm`; fix `scripts/README.md`.
-   - `tools/default.nix`: remove the subcommands that call dropped recipes (`deploy-all-parallel`, `emergency-deploy`,
-     `test-all`) and their usage lines.
+   - `scripts/ci-test.sh`, `scripts/find-new-packages.sh`, `scripts/generate-topology.sh`: `git rm`; fix
+     `scripts/README.md`.
+   - `tools/default.nix`: remove the subcommands that call dropped recipes (`deploy-all`, `deploy-all-parallel`,
+     `emergency-deploy`, `test-all`) and their usage lines.
+   - `.claude/agents/deployment-coordinator.md` and the `.gemini` copy: multi-host deploys run one host recipe per
+     host (p620 local, razer via p620, p510 only with the owner's OK); no `deploy-all`.
    - Live docs: every `just <name>` in `docs/`, `AGENTS.md`, `README*`, `*/README.md`, `.claude/{agents,commands}`,
      `.gemini/{agents,commands}`, `home/development/{agent-rules,claude-code-output-styles.nix,claude-desktop}`,
      `hosts`, `scripts`, `.github`, `tools`, `UPDATE-TRACKING-SUMMARY.md` that names a recipe not in the keep list
@@ -63,7 +67,8 @@ Approved decisions (spec):
      `home/profiles/...` examples with `Users/olafkfreund/...` paths that exist.
    - Not in scope: `intent/`, `spec/`, `plan/`, and skills about other projects
      (`home/development/claude-code-skills/cosmic-ui-design-skill/`).
-   Check: the reference loop below prints nothing; `markdownlint-cli2` on changed `.md` files passes.
+   Check: the reference loop below prints nothing; `markdownlint-cli2` on changed `.md` files passes;
+   `bash modules/programs/claude-coder-guard.test.sh` and the `test-guards` recipe pass.
    Traps:
    - The pre-push hook lints whole changed Markdown files, so fix pre-existing long lines in files you touch.
    - Write prose to files (bus hook matches command text).
