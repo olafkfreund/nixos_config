@@ -26,6 +26,18 @@ hosts, (2) a new `hosts/common/nixos/dev-workstation.nix` imported by p620 and r
 changes a host's `.drv`, revert that move and leave the block per host. No order-only exception. Baseline: `main`
 @ the commit this branch is based on (`git merge-base HEAD origin/main`), snapshot directory given by the lead.
 
+## Merge-order facts (agy review)
+
+- `listOf` options merge in module **key** order (lexicographic), not import position. A path import keeps its key
+  wherever it is imported from, so moving `imports` lines is `.drv`-safe. Inline values moved into another file get
+  that file's key (the template is keyed `hosts/<host>/configuration.nix:anon-1`), so moved **list** values can
+  reorder. Scalars and bools are order-free.
+- Stay per host for that reason: every `environment.systemPackages` list, `pkgs.psmisc` and the
+  `inputs.nixarchy.nixosModules.nixarchy`/`homeManagerModules.nixarchy` imports in `nixarchy.nix`, `../nixarchy-apps.nix`.
+- New leaves in the template use `lib.mkDefault`, matching its convention. In `dev-workstation.nix` differing leaves
+  are simply omitted (the module default applies) and stay in the host; no `mkDefault` needed there.
+- `dev-workstation.nix` is three levels deep: `../../../modules/...`.
+
 ## Block map (re-check line numbers before editing; taken on `5a01ce4c8`)
 
 | Block | p620 | razer | p510 | Target |
@@ -37,11 +49,15 @@ changes a host's `.drv`, revert that move and leave the block per host. No order
 | `features.gnome-remote-desktop.enable` | 293-295 | 178-180 | 325-327 | 1 |
 | `desktop.displayManager.backend`, `defaultSession`, `desktopManager.gnome.enable` | 420, 429, 663 | 304, 313, 460 | 401-422 | 1 (p510 keeps `autoLogin`) |
 | `system.stateVersion` | 559 | 660 | 548 | 1 |
+| `services.xserver = { enable; displayManager.xserverArgs }` (identical; `videoDrivers` stays) | 650-655 | 449-454 | 383-389 | 1 (try; revert if `.drv` changes) |
+| `secrets.apiKeys = { enable; enableUserEnvironment; }` | 543-545 | 423-425 | 358-361 | 1 |
+| `features.ai = { enable; antigravity-cli; claude-desktop; }`, `features.media.droidcam = false` | 335-338, 395-397 | 219-222, 268-270 | 303-310, 321-323 | 1 |
+| `secrets.apiKeys.braveSearch` | 546 | 426 | — | 2 |
 | `security/secrets.nix`, meeting-transcribe, agent-voice, swarm-reaper imports | 38, 46, 49, 50 | 35, 38-40 | — | 2 |
 | `modules.security.secrets.enable`, `secrets.apiKeys` | 589-591, 543-547 | 513-515, 423-427 | — | 2 |
 | `features.development`/`virtualization`/`cloud`/`ai.mcp`/`programs` | 276-397 | 155-270 | — | 2, host keeps `precommit`, `azure`, `grafana`, `yt-x`, waydroid `disableGbm` |
 | claude-hooks, cosmic off, intune, themeOwner, craftapps, tfm, ddcutil, citrix, rescreenshot | 127-131, 402-409, 497-539 | 172-176, 275-282, 318-392 | — | 2 (rescreenshot `user` from the `username` module arg) |
-| claude-code-managed/mods/router-cli, swarm reaper, agentVoice common part | 250-263, 485-492 | 406-420, 677-685 | — | 2, razer keeps `summary.backend` |
+| claude-code-managed (two sites: base block and `subagentMetadata.codex`)/mods/router-cli, swarm reaper, agentVoice common part | 250-263, 486, 485-492 | 406-420, 678, 677-685 | — | 2, razer keeps `summary.backend` |
 | playerctld + user-unit restart, fwupd, ydotool | 672, 806, 673, 874 | 468, 464, 469, 636 | — | 2 (p620 keeps fwupd `LimitNOFILE`) |
 | identical `programs.nixarchy` scalars | nixarchy.nix | nixarchy.nix | — | 3 |
 
