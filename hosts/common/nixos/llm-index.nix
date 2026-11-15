@@ -1,11 +1,14 @@
 # nixarchy-llm-index: local document and code index on p620 and razer, served
 # to agents over MCP (#2882). Each host sets its public source path; ~/Documents
 # is private. Only the public server is registered in Claude Code, Codex and agy.
+# The shell plugin (Super+Ctrl+Alt+I, menu entry) comes from the same flake input.
 { config, lib, inputs, ... }:
 let
   hostCfg = config.local.llmIndex;
 in
 {
+  imports = [ ./omarchy-enable-once.nix ];
+
   options.local.llmIndex = {
     sourcePath = lib.mkOption {
       type = lib.types.str;
@@ -16,6 +19,21 @@ in
       default = [ ];
       description = "Paths under a root to leave out of the index.";
     };
+  };
+
+  config.local.omarchy.keys.extra = [
+    {
+      key = "SUPER + CTRL + ALT + I";
+      description = "llm-index";
+      action = "omarchy-shell shell toggle olafkfreund.llm-index '{}'";
+    }
+  ];
+  config.programs.nixarchy.menu.extraEntries."apps.llm-index" = {
+    icon = "";
+    label = "llm-index";
+    description = "Index status and settings · Super+Ctrl+Alt+I";
+    aliases = [ "llm-index" "index" "search index" ];
+    action = "omarchy-shell shell toggle olafkfreund.llm-index '{}'";
   };
 
   config.home-manager.users.olafkfreund =
@@ -45,6 +63,9 @@ in
       };
 
       home.packages = [ cfg.package ];
+      programs.nixarchy.plugins."olafkfreund.llm-index".src =
+        inputs.nixarchy-llm-index.packages.${pkgs.stdenv.hostPlatform.system}.plugin;
+      local.omarchy.enableOnce = [ "olafkfreund.llm-index" ];
       home.file.".claude/rules/llm-index.md".text = cfg.agentInstructions;
 
       # Converge each client's `llm-index` entry on the current store path; write only
