@@ -1,7 +1,5 @@
 #!/usr/bin/env just --justfile
 
-#!/usr/bin/env just --justfile
-
 # Default recipe to display available commands
 default:
     @just --list
@@ -123,7 +121,7 @@ test-all-parallel:
     ( nix build .#nixosConfigurations.razer.config.system.build.toplevel --no-link --show-trace && echo "✅ Razer" || { echo "❌ Razer"; exit 1; } ) & razer_pid=$!; \
     ( nix build .#nixosConfigurations.p510.config.system.build.toplevel --no-link --show-trace && echo "✅ P510" || { echo "❌ P510"; exit 1; } ) & p510_pid=$!; \
     failed=0; wait "$p620_pid" || failed=1; wait "$razer_pid" || failed=1; wait "$p510_pid" || failed=1; \
-    [ "$failed" -eq 0 ] && echo "✅ All parallel tests completed!"
+    [ "$failed" -eq 0 ] || exit 1; echo "✅ All parallel tests completed!"
 
 # Test specific host configuration
 [group('test')]
@@ -372,13 +370,14 @@ quick-test:
 # Smart deploy only if configuration changed
 [group('deploy')]
 quick-deploy HOST: _require-main
-    @echo "🧠 Smart deployment to {{HOST}}..."
-    @if nix build .#nixosConfigurations.{{HOST}}.config.system.build.toplevel --no-link --print-out-paths | \
-     grep -q "$(ssh {{HOST}} readlink /run/current-system 2>/dev/null || echo 'no-current')"; then \
-        echo "🔄 No changes detected for {{HOST}}, skipping deployment"; \
+    @echo "🧠 Smart deployment to {{ HOST }}..."
+    @new=$(nix build .#nixosConfigurations.{{ HOST }}.config.system.build.toplevel --no-link --print-out-paths) \
+        || { echo "❌ Build failed for {{ HOST }}, not deploying"; exit 1; }; \
+    if [ "$(ssh {{ HOST }} readlink /run/current-system 2>/dev/null)" = "$new" ]; then \
+        echo "🔄 No changes detected for {{ HOST }}, skipping deployment"; \
     else \
-        echo "📝 Changes detected, deploying to {{HOST}}..."; \
-        just {{HOST}}; \
+        echo "📝 Changes detected, deploying to {{ HOST }}..."; \
+        just {{ HOST }}; \
     fi
 
 # Manage secrets interactively

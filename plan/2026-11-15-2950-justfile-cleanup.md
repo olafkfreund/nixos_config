@@ -104,6 +104,13 @@ bad=$(git grep -h -o -E '`just [a-z][a-z0-9-]*|^\s*just [a-z][a-z0-9-]*|run: jus
 It matches commands (in backticks, at line start in code blocks, after `run:`), not prose, so English words like
 "just the" do not count. Arguments are checked by hand per the rule above.
 
+## Deviations (recorded during implementation)
+
+- agy review of PR 2952: `quick-deploy` inherited `deploy-smart`'s pipe, which treated a failed build as "changes
+  detected" and ran the host recipe (on p510 that clears sessions first). It now stops on a failed build and compares
+  the built path with the target's `/run/current-system` exactly. `test-all-parallel` ends in an explicit
+  `|| exit 1`. The duplicate shebang line goes.
+
 ## Tests
 
 - Step checks above.

@@ -22,7 +22,7 @@ handling, and rollback capabilities.
 **Trigger Conditions**:
 
 - User requests deployment to multiple hosts
-- Commands like `/nix-deploy`, `just p620`, or `just test-all-parallel`
+- Commands like `/nix-deploy` or a host deploy recipe (`just p620`)
 - Manual deployment requests mentioning "deploy", "update", or "rollout"
 - GitHub workflow deployments after PR merge
 - Scheduled automated deployment windows
@@ -595,8 +595,8 @@ journalctl -u deployment-coordinator -f
 # Manual rollback on affected host
 ssh HOST "sudo nixos-rebuild switch --rollback"
 
-# Verify system health
-just status
+# Verify system health on that host (just status only checks the local machine)
+ssh HOST "systemctl --failed --no-legend; readlink /run/current-system"
 
 ```
 
