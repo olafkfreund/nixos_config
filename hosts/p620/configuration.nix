@@ -811,29 +811,9 @@ in
     enable = true;
     profile = "performance";
 
-    ioSchedulerOptimization = {
-      enable = true;
-      dynamicScheduling = true;
-      ssdOptimization = true;
-      hddOptimization = true;
-    };
-
     filesystemOptimization = {
       enable = true;
-      readaheadOptimization = true;
       cacheOptimization = true;
-    };
-
-    nvmeOptimization = {
-      enable = true;
-      polling = true;
-      multiQueue = true;
-    };
-
-    diskCacheOptimization = {
-      enable = true;
-      writeCache = true;
-      readCache = true;
     };
 
     tmpfsOptimization = {
