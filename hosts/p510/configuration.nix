@@ -23,11 +23,6 @@ in
       ./nixos/network.nix # Network configuration with dual-port Intel card
       ./nixos/tailscale-serve.nix # Tailscale Serve for media services
       ../../modules/services/recyclarr.nix # Recyclarr Trash Guides sync
-      ../common/nixos/i18n.nix
-      ../common/nixos/envvar.nix
-      ../common/nixos/host-class.nix
-      ../common/nixos/zfs-import.nix
-      ../common/nixos/inotify-limits.nix
       ./nixos/cpu.nix
       ./nixos/memory.nix
       ./nixos/resilience.nix # Watchdog + sshd limits + oomd (post-2026-07-08 freeze)
@@ -97,11 +92,6 @@ in
     ];
   };
 
-  # Use AI provider defaults
-  aiDefaults = {
-    enable = true;
-  };
-
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
     development = {
@@ -134,19 +124,6 @@ in
       google = false;
       k8s = false;
       terraform = false;
-    };
-
-    security = {
-      enable = true;
-      onepassword = true;
-      gnupg = true;
-    };
-
-    # Syncthing for ~/.claude and ~/.gemini sync across hosts
-    syncthing = {
-      enable = true;
-      syncClaude = true;
-      syncGemini = true;
     };
 
     homeAssistant = {
@@ -300,15 +277,6 @@ in
       };
     };
 
-    ai = {
-      enable = true;
-      antigravity-cli = true;
-      # claude-desktop is a GUI app, and this host has a monitor and an
-      # Omarchy session now, so it runs on the desktop directly as well as
-      # over Sunshine or an RDP'd GNOME session.
-      claude-desktop = true;
-    };
-
     programs = {
       lazygit = true;
       thunderbird = false;
@@ -318,16 +286,8 @@ in
       print = false;
     };
 
-    media = {
-      droidcam = false; # Disabled due to v4l2loopback build failures on P510
-    };
-
-    gnome-remote-desktop = {
-      enable = true;
-    };
-
     # Sunshine: the remote path to the Omarchy session. gnome-remote-desktop
-    # above cannot serve it -- it is a GNOME Shell component and renders GNOME
+    # cannot serve it -- it is a GNOME Shell component and renders GNOME
     # -- so with Hyprland as this host's session, RDP reaches a desktop nobody
     # is using. Sunshine captures the compositor's own output and encodes it on
     # the RTX 3070 Ti. Connect with any Moonlight client.
@@ -354,12 +314,6 @@ in
     };
   };
 
-  # Enable encrypted API keys
-  secrets.apiKeys = {
-    enable = true;
-    enableUserEnvironment = true;
-  };
-
   services.fstrim = {
     enable = true;
     interval = "weekly";
@@ -379,18 +333,9 @@ in
   # StreamDeck UI disabled for headless operation
   programs.streamdeck-ui.enable = lib.mkForce false;
 
-  # Enable X server (NVIDIA drivers configured in nvidia.nix)
-  services.xserver = {
-    enable = true;
-    displayManager.xserverArgs = [
-      "-nolisten tcp"
-      "-dpi 96"
-    ];
-  };
-
   # Login manager: Omarchy's SDDM greeter, switched on by
-  # programs.nixarchy.displayManager in ./nixos/nixarchy.nix. backend = "none"
-  # keeps GDM off; SDDM enumerates wayland-sessions, so the Omarchy Hyprland
+  # programs.nixarchy.displayManager in ./nixos/nixarchy.nix. The template's
+  # backend = "none" keeps GDM off; SDDM enumerates wayland-sessions, so the Omarchy Hyprland
   # session and GNOME both stay selectable. Same arrangement as p620 and razer.
   #
   # autoLogin, unlike on those two, stays on. Sunshine is a systemd user
@@ -399,31 +344,14 @@ in
   # and no remote desktop until someone walks over to it. See the divergence
   # note in ./nixos/nixarchy.nix.
   desktop.displayManager = {
-    backend = "none";
     autoLogin = {
       enable = true;
       user = "olafkfreund";
     };
   };
 
-  # Preselect the Omarchy session. Without this SDDM has no default and falls
-  # through to whatever /var/lib/sddm/state.conf remembers -- which on this
-  # host is gnome.desktop, the session it has been logging into all along.
-  #
-  # A fallback only: SDDM rewrites state.conf on every login and the remembered
-  # session wins, so the first Omarchy login is what makes it stick. GNOME stays
-  # in the session menu either way.
-  services.displayManager.defaultSession = "omarchy";
-
-  # GNOME stays installed and selectable at the SDDM greeter; it is no longer
-  # the session this host boots into. It is also what features.gnome-remote-
-  # desktop can still serve over RDP, now that GDM is gone and that daemon is
-  # tied to a live GNOME session rather than a remote-login one.
-  services.desktopManager.gnome.enable = true;
-
   # GNOME services for full desktop functionality.
-  # Note: gnome-remote-desktop is enabled (with the headless-listener wiring
-  # fix) by features.gnome-remote-desktop above — no need to repeat it here.
+  # The template enables gnome-remote-desktop with headless-listener wiring.
   services.gnome = {
     gnome-settings-daemon.enable = true;
     gnome-keyring.enable = true;
@@ -545,7 +473,6 @@ in
     allowBroken = true;
     permittedInsecurePackages = [ "olm-3.2.16" "dotnet-sdk-6.0.428" "python3.12-youtube-dl-2021.12.17" "python3.14-youtube-dl-2021.12.17" ];
   };
-  system.stateVersion = "25.11";
 
   # p510 is a headless media server (Plex, NZBGet, k3s microvms) and is only
   # ever deployed on explicit request — never unattended. The global
