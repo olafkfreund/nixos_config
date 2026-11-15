@@ -4,14 +4,11 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.services.incus;
+  inherit (lib) mkIf;
+  cfg = config.features.virtualization;
 in
 {
-  options.services.incus = {
-    enable = mkEnableOption "the Incus service";
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.incus) {
     virtualisation = {
       incus = {
         package = pkgs.incus;

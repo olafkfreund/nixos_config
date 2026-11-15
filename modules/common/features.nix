@@ -25,6 +25,12 @@ let inherit (lib) mkOption mkEnableOption types; in {
       podman = mkEnableOption "Enable Podman";
       incus = mkEnableOption "Enable Incus containers";
       spice = mkEnableOption "Enable SPICE";
+      spiceGuestAgent = mkEnableOption ''
+        the spice-vdagent guest daemon. Only meaningful when THIS machine is
+        itself a SPICE/VM guest. On a physical host it has no SPICE session
+        and logs "Error getting active session: No data available" on a
+        tight loop, so it stays off even when SPICE (USB redirection / client
+        tools for running VMs locally) is enabled'';
       libvirt = mkEnableOption "Enable libvirt";
     };
 

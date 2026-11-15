@@ -32,10 +32,6 @@ in
 
     # Services configuration
     services = {
-      incus.enable = mkIf cfg.virtualization.enable cfg.virtualization.incus;
-      podman.enable = mkIf cfg.virtualization.enable cfg.virtualization.podman;
-      spice.enable = mkIf cfg.virtualization.enable cfg.virtualization.spice;
-      libvirt.enable = mkIf cfg.virtualization.enable cfg.virtualization.libvirt;
       print.enable = cfg.programs.print;
     };
 

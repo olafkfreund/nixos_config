@@ -4,14 +4,11 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.services.libvirt;
+  inherit (lib) mkIf;
+  cfg = config.features.virtualization;
 in
 {
-  options.services.libvirt = {
-    enable = mkEnableOption "libvirt";
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.libvirt) {
     virtualisation = {
       libvirtd = {
         enable = true;
