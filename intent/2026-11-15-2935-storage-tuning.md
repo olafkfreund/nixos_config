@@ -8,7 +8,8 @@ author: olafkfreund
 
 ## Problem
 
-`modules/storage/performance-optimization.nix` (enabled only on p620) runs a `storage-optimizer` service that is
+`modules/storage/performance-optimization.nix` (enabled only on p620) runs a `storage-performance-optimizer` service
+that is
 supposed to tune every disk (scheduler, `nr_requests`, read-ahead, NVMe polling, write-back throttling, hdparm
 caches). The unit has no `path`, so `lsblk` and `awk` fail with "command not found" on every run
 (`/var/log/storage-tuning/optimizer.log`, July 2025 to now), and the per-device part has never run. Its failures
