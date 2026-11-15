@@ -4,27 +4,17 @@
 , ...
 }:
 let
-  inherit (lib) mkOption mkIf mkEnableOption types;
-  cfg = config.go.development;
+  inherit (lib) mkIf;
+  cfg = config.features.development;
 in
 {
-  options.go.development = {
-    enable = mkEnableOption "Enable Go development environment";
-    packages = mkOption {
-      type = with types; listOf package;
-      default = [
-      ];
-      description = "Packages to install for Go development";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.go) {
     environment.systemPackages =
       [
         pkgs-unstable.go
         pkgs-unstable.gopls
         pkgs-unstable.gore
         pkgs-unstable.go-task
-      ]
-      ++ cfg.packages;
+      ];
   };
 }

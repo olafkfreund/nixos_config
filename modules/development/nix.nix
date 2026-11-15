@@ -4,19 +4,11 @@
 , ...
 }:
 let
-  inherit (lib) mkOption mkIf mkEnableOption types;
-  cfg = config.nix.development;
+  inherit (lib) mkIf;
+  cfg = config.features.development;
 in
 {
-  options.nix.development = {
-    enable = mkEnableOption "Enable Nix development environment";
-    packages = mkOption {
-      type = with types; listOf package;
-      default = [ ];
-      description = "Packages to install for Nix development";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.nix) {
     environment.systemPackages =
       [
         pkgs.nurl
@@ -39,7 +31,6 @@ in
         pkgs.sops
         pkgs.ssh-to-age
         pkgs.age
-      ]
-      ++ cfg.packages;
+      ];
   };
 }

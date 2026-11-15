@@ -4,25 +4,16 @@
 , ...
 }:
 let
-  inherit (lib) mkOption mkIf mkEnableOption types;
-  cfg = config.lua.development;
+  inherit (lib) mkIf;
+  cfg = config.features.development;
 in
 {
-  options.lua.development = {
-    enable = mkEnableOption "Enable Lua development environment";
-    packages = mkOption {
-      type = with types; listOf package;
-      default = [ ];
-      description = "Packages to install for Lua development";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.lua) {
     environment.systemPackages =
       [
         pkgs.lua
         pkgs.stylua
         pkgs.lua-language-server
-      ]
-      ++ cfg.packages;
+      ];
   };
 }

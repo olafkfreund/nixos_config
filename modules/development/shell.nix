@@ -4,19 +4,11 @@
 , ...
 }:
 let
-  inherit (lib) mkOption mkIf mkEnableOption types;
-  cfg = config.shell.development;
+  inherit (lib) mkIf;
+  cfg = config.features.development;
 in
 {
-  options.shell.development = {
-    enable = mkEnableOption "Enable Shell development environment";
-    packages = mkOption {
-      type = with types; listOf package;
-      default = [ ];
-      description = "Packages to install for Shell development";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.shell) {
     environment.systemPackages =
       [
         pkgs.shellcheck
@@ -26,7 +18,6 @@ in
         pkgs.cmakeCurses
         pkgs.just
         pkgs.atac
-      ]
-      ++ cfg.packages;
+      ];
   };
 }

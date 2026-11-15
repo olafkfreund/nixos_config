@@ -4,19 +4,11 @@
 , ...
 }:
 let
-  inherit (lib) mkOption mkIf mkEnableOption types;
-  cfg = config.github.development;
+  inherit (lib) mkIf;
+  cfg = config.features.development;
 in
 {
-  options.github.development = {
-    enable = mkEnableOption "Enable GitHub development environment";
-    packages = mkOption {
-      type = with types; listOf package;
-      default = [ ];
-      description = "Packages to install for GitHub development";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.github) {
     environment.systemPackages =
       [
         pkgs.act # actionlint
@@ -30,7 +22,6 @@ in
         pkgs.gh-markdown-preview
         pkgs.github-cli
         pkgs.github-mcp-server
-      ]
-      ++ cfg.packages;
+      ];
   };
 }

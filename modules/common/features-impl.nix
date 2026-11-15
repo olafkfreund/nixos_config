@@ -24,16 +24,7 @@ in
     ];
 
     # Development tools (conditional enables)
-    cargo.development.enable = mkIf cfg.development.enable cfg.development.cargo;
     development.copilot-cli.enable = mkIf cfg.development.enable cfg.development.copilot-cli;
-    github.development.enable = mkIf cfg.development.enable cfg.development.github;
-    go.development.enable = mkIf cfg.development.enable cfg.development.go;
-    java.development.enable = mkIf cfg.development.enable cfg.development.java;
-    lua.development.enable = mkIf cfg.development.enable cfg.development.lua;
-    nix.development.enable = mkIf cfg.development.enable cfg.development.nix;
-    shell.development.enable = mkIf cfg.development.enable cfg.development.shell;
-    devshell.development.enable = mkIf cfg.development.enable cfg.development.devshell;
-    nodejs.development.enable = mkIf cfg.development.enable cfg.development.nodejs;
 
     # Modules configuration
     modules = {

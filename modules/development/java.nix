@@ -4,26 +4,17 @@
 , ...
 }:
 let
-  inherit (lib) mkOption mkIf mkEnableOption types;
-  cfg = config.java.development;
+  inherit (lib) mkIf;
+  cfg = config.features.development;
 in
 {
-  options.java.development = {
-    enable = mkEnableOption "Enable Java development environment";
-    packages = mkOption {
-      type = with types; listOf package;
-      default = [ ];
-      description = "Packages to install for Java development";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.java) {
     environment.systemPackages =
       [
         pkgs.zulu25
         pkgs.gradle
         pkgs.maven
         # pkgs.jetbrains.idea-community-bin
-      ]
-      ++ cfg.packages;
+      ];
   };
 }
