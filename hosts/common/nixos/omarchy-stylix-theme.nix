@@ -1,4 +1,4 @@
-{ config, inputs, pkgs, ... }:
+{ config, pkgs, ... }:
 # Close the loop: `omarchy theme set X` -> stylix builds against X.
 #
 # omarchy-theme-set calls `omarchy-hook theme-set "$THEME_NAME"`, which runs
@@ -22,29 +22,6 @@ let
   user = config.programs.nixarchy.user;
   flakeDir = "${config.users.users.${user}.home}/.config/nixos";
 
-  hyprchroma =
-    inputs.nixarchy.inputs.nixarchy-omatheme.packages.${pkgs.stdenv.hostPlatform.system}.hyprchroma.overrideAttrs (old: {
-      # shortcut: NixOS fixes for hyprchroma; drop once olafkfreund/nixarchy-omatheme#58 lands
-      postFixup = (old.postFixup or "") + ''
-            for f in $out/lib/hyprchroma/sync-gtk-theme $out/lib/hyprchroma/sync-qt-kde-theme; do
-              substituteInPlace "$f" --replace-fail \
-                '-d "/usr/share/icons/$value"' \
-                '-d "/usr/share/icons/$value" || -d "/run/current-system/sw/share/icons/$value" || -d "/etc/profiles/per-user/''${USER:-}/share/icons/$value"'
-            done
-        # kitten is not on hyprchroma's pinned PATH and has no --to socket, so kitty never
-          # took the new runtime/kitty.conf; signal it to reload after the file is written.
-          substituteInPlace $out/lib/hyprchroma/hyprchroma-terminals \
-            --replace-fail 'if command -v kitten >/dev/null 2>&1 && \' \
-                           "if ${pkgs.procps}/bin/pkill -USR1 -x '[.]?kitty(-wrapped)?'; then" \
-            --replace-fail '    kitten @ set-colors --all --configured "$RUNTIME_DIR/kitty.conf" >/dev/null 2>&1; then' ""
-          # NixOS runs kitty as .kitty-wrapped, so a reloaded kitty was still reported stale.
-            substituteInPlace $out/lib/hyprchroma/hyprchroma-state \
-              --replace-fail 'names.add(os.path.basename(os.readlink(entry / "exe")))' \
-                             'names.add(re.sub(r"^\.(.+)-wrapped$", r"\1", os.path.basename(os.readlink(entry / "exe"))))' \
-              --replace-fail 'return os.path.basename(os.readlink(f"/proc/{pid}/exe"))' \
-                             'return re.sub(r"^\.(.+)-wrapped$", r"\1", os.path.basename(os.readlink(f"/proc/{pid}/exe")))'
-      '';
-    });
 
   hook = pkgs.writeShellScript "stylix-follow-omarchy-theme" ''
     set -euo pipefail
@@ -92,5 +69,4 @@ in
   # hyprchroma sets gtk-theme to adw-gtk3(-dark); Stylix's HM gtk target used to supply it (#2370).
   environment.systemPackages = [ pkgs.adw-gtk3 ];
 
-  programs.nixarchyThemeEngine.package = hyprchroma;
 }
