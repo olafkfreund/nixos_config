@@ -16,7 +16,6 @@ GPU stacks are abstracted into reusable **hardware profiles** under
 | --- | --- | --- |
 | AMD | `amd-gpu.nix` | p620 (Radeon RX 7900, ROCm) |
 | NVIDIA | `nvidia-gpu.nix` | p510, razer |
-| Intel integrated | `intel-integrated.nix` | hybrid-graphics hosts |
 
 A host's `variables.nix` imports the right profile and inherits its `gpu`,
 `acceleration`, `videoDrivers`, extra user groups, and environment variables:

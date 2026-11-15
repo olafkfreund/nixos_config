@@ -4,10 +4,10 @@
 
 let
   inherit (lib) mkOption mkIf mkEnableOption mkPackageOption types optionals;
-  cfg = config.modules.category.module-name;
+  cfg = config.features.module-name;
 in
 {
-  options.modules.category.module-name = {
+  options.features.module-name = {
     enable = mkEnableOption "module functionality";
 
     package = mkPackageOption pkgs "package-name" {
@@ -15,7 +15,7 @@ in
     };
 
     settings = mkOption {
-      type = with types; attrsOf anything;
+      type = types.attrsOf types.anything;
       default = { };
       description = "Configuration settings for the module";
     };
@@ -35,9 +35,7 @@ in
     };
 
     # System packages if needed
-    environment.systemPackages = with pkgs; [
-      cfg.package
-    ];
+    environment.systemPackages = [ cfg.package ];
 
     # Assertions for validation
     assertions = [

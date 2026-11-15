@@ -87,5 +87,5 @@ path-scoped rule in `.claude/rules/desktop.md`.
   activation rolls back. `nhs` detects this and falls back to `boot` mode; the
   reboot is still yours.
 - DEX5550 is offline; Samsung and HP are decommissioned.
-- MicroVMs are per-host files (`hosts/p510/microvm.nix`, with the guests under
-  `hosts/p510/nixos/microvm/`), not a shared module.
+- MicroVMs come from nixarchy's templates (`hosts/common/nixos/omarchy-microvm.nix`); the dormant p510
+  guest files under `hosts/p510/nixos/microvm/` were never wired up and were removed in #2931.

@@ -3,61 +3,37 @@
 { config, lib, pkgs, ... }:
 
 let
-  inherit (lib) mkOption mkIf mkEnableOption mkPackageOption types concatStringsSep generators;
-  cfg = config.modules.services.service-name;
+  inherit (lib) mkOption mkIf mkEnableOption mkPackageOption types;
+  cfg = config.features.service-name;
 in
 {
-  options.modules.services.service-name = {
+  options.features.service-name = {
     enable = mkEnableOption "service-name service";
 
     package = mkPackageOption pkgs "service-package" {
       description = "Package providing the service binary";
     };
 
-    user = mkOption {
-      type = types.str;
-      default = "service-name";
-      description = "User account under which the service runs";
-    };
-
-    group = mkOption {
-      type = types.str;
-      default = "service-name";
-      description = "Group account under which the service runs";
-    };
-
     dataDir = mkOption {
-      type = types.path;
-      default = "/var/lib/service-name";
-      description = "Directory for storing service data";
+      type = types.str;
+      default = "service-name";
+      description = "State directory name under /var/lib";
     };
 
     settings = mkOption {
-      type = with types; attrsOf anything;
+      type = types.attrsOf types.anything;
       default = { };
       description = "Service configuration settings";
     };
 
     extraArgs = mkOption {
-      type = with types; listOf str;
+      type = types.listOf types.str;
       default = [ ];
       description = "Additional command-line arguments";
     };
   };
 
   config = mkIf cfg.enable {
-    # Create system user and group
-    users = {
-      users.${cfg.user} = {
-        isSystemUser = true;
-        inherit (cfg) group;
-        home = cfg.dataDir;
-        createHome = true;
-      };
-
-      groups.${cfg.group} = { };
-    };
-
     # Systemd service definition
     systemd.services.service-name = {
       description = "Service Name daemon";
@@ -66,10 +42,8 @@ in
 
       serviceConfig = {
         Type = "simple";
-        User = cfg.user;
-        Group = cfg.group;
-
         # Security hardening
+        DynamicUser = true;
         NoNewPrivileges = true;
         ProtectSystem = "strict";
         ProtectHome = true;
@@ -84,11 +58,12 @@ in
         TasksMax = 1000;
 
         # Working directory and data
-        WorkingDirectory = cfg.dataDir;
-        ReadWritePaths = [ cfg.dataDir ];
+        StateDirectory = cfg.dataDir;
+        LogsDirectory = "service-name";
+        WorkingDirectory = "/var/lib/${cfg.dataDir}";
 
         # Command
-        ExecStart = "${cfg.package}/bin/service-binary ${concatStringsSep " " cfg.extraArgs}";
+        ExecStart = "${cfg.package}/bin/service-binary ${lib.escapeShellArgs cfg.extraArgs}";
 
         # Restart policy
         Restart = "on-failure";
@@ -98,17 +73,9 @@ in
 
     # Configuration file generation (if needed)
     environment.etc."service-name/config.toml" = mkIf (cfg.settings != { }) {
-      text = generators.toTOML { } cfg.settings;
+      source = (pkgs.formats.toml { }).generate "config.toml" cfg.settings;
       mode = "0644";
-      inherit (cfg) user;
-      inherit (cfg) group;
     };
-
-    # Systemd tmpfiles for directory creation
-    systemd.tmpfiles.rules = [
-      "d ${cfg.dataDir} 0750 ${cfg.user} ${cfg.group} -"
-      "d /var/log/service-name 0755 ${cfg.user} ${cfg.group} -"
-    ];
 
     # Network access if needed
     networking.firewall.allowedTCPPorts = mkIf (cfg.settings ? port) [

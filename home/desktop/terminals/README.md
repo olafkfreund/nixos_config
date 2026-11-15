@@ -5,7 +5,6 @@ This directory contains configurations for various terminal emulators used in th
 ## Terminal Emulators
 
 - `default.nix` - Main entry point that imports all terminal configurations
-- `alacritty.nix` - Configuration for Alacritty, a GPU-accelerated terminal emulator
 - `foot.nix` - Configuration for Foot, a lightweight Wayland terminal emulator
 - `kitty.nix` - Configuration for Kitty, a feature-rich GPU-accelerated terminal
 - `wezterm.nix` - Configuration for WezTerm, a GPU-accelerated cross-platform terminal

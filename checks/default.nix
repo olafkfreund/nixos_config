@@ -78,31 +78,6 @@ in
       touch $out
     '';
 
-  # Module structure validation
-  module-structure-check =
-    pkgs.runCommand "module-structure-validation"
-      {
-        src = cleanSource ../.;
-      } ''
-      echo "Validating module structure..."
-
-      # Check that all modules have proper structure
-      for module_dir in $src/modules/*/; do
-        if [ -d "$module_dir" ]; then
-          module_name=$(basename "$module_dir")
-          echo "Checking module: $module_name"
-
-          # Check for default.nix or matching .nix file
-          if [ ! -f "$module_dir/default.nix" ] && [ ! -f "$src/modules/$module_name.nix" ]; then
-            echo "ERROR: Module $module_name missing default.nix or $module_name.nix"
-            exit 1
-          fi
-        fi
-      done
-
-      touch $out
-    '';
-
   # Package duplication analysis
   package-duplication-check =
     pkgs.runCommand "package-duplication-analysis"

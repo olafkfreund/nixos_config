@@ -303,14 +303,14 @@ gh pr create --fill
 
 # Or create with custom title and body
 gh pr create \
-  --title "feat(services): add FlareSolverr module (#123)" \
+  --title "feat(services): add MyService module (#123)" \
   --body "$(cat <<'EOF'
 ## Summary
-Adds a FlareSolverr module behind `features.flaresolverr`.
+Adds a MyService module behind `features.myservice`.
 
 ## Changes
-- Add `modules/services/flaresolverr/default.nix`
-- Gate it on `features.flaresolverr.enable`
+- Add `modules/services/myservice.nix`
+- Gate it on `features.myservice.enable`
 - Enable it on p510
 - Add documentation
 

@@ -348,8 +348,6 @@
       # ========================================
       # SHARED ARCHITECTURE COMPONENTS
       # ========================================
-      # Import centralized user mappings from shared variables
-      sharedVariables = import ./hosts/common/shared-variables.nix;
 
       # Define users per host (can be customized per host if needed)
       hostUsers = {
@@ -375,12 +373,6 @@
       # Host type templates for configuration reduction (workstation, laptop, server, hybrid)
       hostTypes = import ./lib/hostTypes.nix;
 
-      # Hardware profiles for GPU-specific configurations
-      hardwareProfiles = {
-        amd = import ./hosts/common/hardware-profiles/amd-gpu.nix;
-        nvidia = import ./hosts/common/hardware-profiles/nvidia-gpu.nix;
-        intel = import ./hosts/common/hardware-profiles/intel-integrated.nix;
-      };
 
       # ========================================
       # PACKAGE CONFIGURATION
@@ -403,7 +395,6 @@
             username = primaryUser; # Primary user for backward compatibility
             hostUsers = allUsers; # All users for this host
             # Shared variables and hardware profiles for explicit tracking
-            inherit sharedVariables hardwareProfiles;
             # MCP servers from flakes
             # mcp-nixarchy is mcp-nixos's fork and ships the same `mcp-nixos` binary;
             # upstream mcp-nixos recurses on nixpkgs' mcp-types since 3ec636 (#2475).
@@ -464,7 +455,6 @@
                     username = primaryUser;
                     hostUsers = allUsers;
                     # Shared variables and hardware profiles for home-manager
-                    inherit sharedVariables hardwareProfiles;
                   };
                   users = builtins.listToAttrs (map
                     (user: {

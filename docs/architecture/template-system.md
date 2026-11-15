@@ -88,7 +88,7 @@ template system exists to prevent.
 2. Import the appropriate host type (`hostTypes.workstation` or
    `hostTypes.laptop`).
 3. Declare host-unique bits (GPU profile, monitors, host-specific features).
-4. Register it in `flake.nix` (`hostUsers`, `hardwareProfiles`).
+4. Register it in `flake.nix` (`hostUsers`).
 5. Add the host SSH key to `secrets.nix` and rekey.
 
 Full procedure: [Adding a Host](../guides/HOST_SETUP.md).

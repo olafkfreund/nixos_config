@@ -31,7 +31,7 @@ docs are stale.
   `server`/`hybrid`/`base` templates were removed; p510 also uses the
   workstation template, overriding only what genuinely differs.
 - Hardware GPU profiles in `hosts/common/hardware-profiles/` (`amd`,
-  `nvidia`, `intel-integrated`).
+  `nvidia`).
 - Feature flags drive module enablement (see `lib/features.nix`).
 - Module tree under `modules/` is imported explicitly by the template;
   there is no auto-discovery.
