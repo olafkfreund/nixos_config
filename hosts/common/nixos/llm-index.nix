@@ -16,6 +16,11 @@ in
       default = [ ];
       description = "Paths under a root to leave out of the index.";
     };
+    sourceAdoptUuid = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "One-off: accept this filesystem UUID for the source root (nixarchy-llm-index #14).";
+    };
   };
 
   config.home-manager.users.olafkfreund =
@@ -37,6 +42,7 @@ in
           source = {
             path = hostCfg.sourcePath;
             tier = "public";
+            adoptUuid = hostCfg.sourceAdoptUuid;
           };
           docs.path = "${config.home.homeDirectory}/Documents"; # private by default
         };
