@@ -17,7 +17,6 @@ _: {
     ./appimage/default.nix
     ./home-assistant.nix
     ./libinput/default.nix
-    # ./flaresolverr/default.nix  # Commented out - NixOS has built-in FlareSolverr module
 
     # HTTPS time-sync fallback for networks that block NTP (UDP 123)
     ./http-time-fallback.nix

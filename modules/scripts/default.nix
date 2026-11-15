@@ -1,6 +1,0 @@
-{ ... }:
-{
-  imports = [
-    ./temp-dashboard.nix
-  ];
-}
