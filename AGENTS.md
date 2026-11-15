@@ -43,6 +43,9 @@ Per-host user files in `Users/<user>/` compose the Home Manager config. Home Man
    roughly how long it will take, then rerun with `AGENT_BUS_ANNOUNCED=1`.
    Claude Code enforces this with a PreToolUse hook
    (`modules/programs/claude-code-managed.nix`); other agents must do it themselves.
+   The hook matches command text, including the Justfile recipes that act under
+   other names (`gc`, `cleanup`, `boot-space-clean`, `fix-agenix-remote`,
+   `p510-clear-sessions`, `update`); `just test-guards` tests it (#2951).
    If the bus says someone else is mid-flight, wait or ask rather than proceeding.
 
 ## Delegating to other models

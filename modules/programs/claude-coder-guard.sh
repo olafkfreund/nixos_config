@@ -75,7 +75,7 @@ while IFS= read -r seg; do
             shift
             [ $# -gt 0 ] && shift
             ;;
-          -*) shift ;;
+          -* | *=*) shift ;;
           *)
             recipe="$1"
             break
@@ -84,6 +84,11 @@ while IFS= read -r seg; do
       done
       case "$recipe" in
         *deploy* | p620 | p510 | razer | nhs) block "just $recipe deploys a host" ;;
+        # GC, boot pruning, agenix, sessions, switch, push or signing under other names (#2951).
+        gc | cleanup | boot-space-clean | fix-agenix-remote | p510-clear-sessions | update | update-commit | \
+          build-on-p620 | _sign-drv)
+          block "just $recipe changes a host, its history or its signing key"
+          ;;
       esac
       ;;
     systemctl)

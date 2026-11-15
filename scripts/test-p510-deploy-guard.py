@@ -55,6 +55,21 @@ CASES = [
     ),
     ("c3NoIHA1MTAgJ3N5c3RlbWN0bCBzdGF0dXMgcGxleCc=", 0, "free: read-only ssh"),
     ("anVzdCBxdWljay1kZXBsb3kgcDYyMA==", 0, "free: a different host"),
+    ("anVzdCBwNTEwLWNsZWFyLXNlc3Npb25z", 2, "denied: p510 session clearing"),
+    ("anVzdCBib290LXNwYWNlLWNsZWFuIHA1MTA=", 2, "denied: boot pruning on p510"),
+    ("anVzdCBmaXgtYWdlbml4LXJlbW90ZSBwNTEw", 2, "denied: agenix reset on p510"),
+    (
+        "anVzdCAtZiBKdXN0ZmlsZSBHRU5FUkFUSU9OUz0xIGJvb3Qtc3BhY2UtY2xlYW4gcDUxMA==",
+        2,
+        "denied: same behind options",
+    ),
+    (
+        "UDUxMF9ERVBMT1lfQVBQUk9WRUQ9MSBqdXN0IGJvb3Qtc3BhY2UtY2xlYW4gcDUxMA==",
+        0,
+        "ESCAPE: boot pruning with approval",
+    ),
+    ("anVzdCBib290LXNwYWNlLWNsZWFuIHJhemVy", 0, "free: boot pruning on another host"),
+    ("anVzdCBib290LXNwYWNlIHA1MTA=", 0, "free: read-only boot-space on p510"),
 ]
 
 fail = 0

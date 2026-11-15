@@ -37,6 +37,7 @@ while IFS= read -r c; do t 1 "$(payload "$c")" deny; done <<'DENY'
 git commit -m x
 sudo reboot
 just quick-deploy p620
+just gc
 DENY
 
 while IFS= read -r c; do t 1 "$(payload "$c")" allow; done <<'ALLOW'
