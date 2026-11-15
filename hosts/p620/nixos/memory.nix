@@ -12,8 +12,7 @@
 
     # Memory management for high-core count Threadripper
     "vm.swappiness" = 10;
-    "vm.dirty_ratio" = 3;
-    "vm.dirty_background_ratio" = 2;
+    # vm.dirty_ratio/background_ratio: set by storage.performanceOptimization (10/5, the live values; #2935)
     "vm.vfs_cache_pressure" = 50;
 
     # NUMA optimizations (enabled for Threadripper PRO performance)
