@@ -3,10 +3,24 @@
   imports = [
     ../common/default.nix
     ./private.nix
-    ../../home/browsers/default.nix
-    ../../home/shell/default.nix
-    ../../home/media/music.nix
-    ../../home/files.nix
+    {
+      imports = [
+        ../../home/browsers/default.nix
+        ../../home/desktop/terminals/default.nix
+        ../../home/shell/default.nix
+        ../../home/development/default.nix
+        ../../home/media/music.nix
+        ../../home/files.nix
+        ../../home/desktop/zathura/default.nix
+        ../../home/desktop/obsidian/default.nix
+        ../../home/desktop/flameshot/default.nix
+        ../../home/desktop/omareel/default.nix
+        ../../home/desktop/remotedesktop/default.nix
+        ../../home/desktop/evince/default.nix
+        ../../home/desktop/kdeconnect/default.nix
+        ../../home/desktop/slack/default.nix
+      ];
+    }
   ];
 
   features = {
