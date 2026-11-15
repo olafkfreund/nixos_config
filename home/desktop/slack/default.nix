@@ -4,15 +4,12 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.programs.slack;
+  inherit (lib) mkIf;
+  cfg = config.features.desktop;
 in
 {
-  options.programs.slack = {
-    enable = mkEnableOption "Slack";
-  };
 
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.slack) {
     # Ensure PipeWire and portal dependencies are available
     home.packages = [
       pkgs.slack

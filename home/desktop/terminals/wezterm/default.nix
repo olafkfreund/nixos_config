@@ -4,15 +4,12 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.wezterm;
+  inherit (lib) mkIf;
+  cfg = config.features.terminals;
 in
 {
-  options.wezterm = {
-    enable = mkEnableOption "WezTerm terminal emulator";
-  };
 
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.wezterm) {
     xdg.mimeApps = {
       associations.added = {
         "x-scheme-handler/terminal" = "org.wezfurlong.wezterm.desktop";

@@ -16,15 +16,12 @@
 # Zed's *built-in* Anthropic provider instead, but that key must be delivered
 # at runtime via the environment — never written into userSettings.
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.editor.zed;
+  inherit (lib) mkIf;
+  cfg = config.features.editors;
 in
 {
-  options.editor.zed = {
-    enable = mkEnableOption "Zed editor with Nix + LLM tooling";
-  };
 
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.zed) {
     programs.zed-editor = {
       enable = true;
       package = pkgs.zed-editor;

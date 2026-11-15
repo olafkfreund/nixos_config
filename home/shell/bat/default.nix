@@ -4,17 +4,11 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.cli.bat;
+  inherit (lib) mkIf;
+  cfg = config.features.cli;
 in
 {
-  options.cli.bat = {
-    enable = mkEnableOption {
-      default = true;
-      description = "bat";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.bat) {
     programs.bat = {
       enable = true;
       config = {

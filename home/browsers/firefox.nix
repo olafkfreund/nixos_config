@@ -4,19 +4,13 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
+  inherit (lib) mkIf;
   inherit (config.lib.stylix) colors;
   c = colors.withHashtag;
-  cfg = config.browsers.firefox;
+  cfg = config.features.browsers;
 in
 {
-  options.browsers.firefox = {
-    enable = mkEnableOption {
-      default = true;
-      description = "Enable Firefox support.";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.firefox) {
     programs = {
       firefox = {
         enable = true;

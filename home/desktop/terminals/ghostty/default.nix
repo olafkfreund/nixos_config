@@ -4,15 +4,12 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.ghostty;
+  inherit (lib) mkIf;
+  cfg = config.features.terminals;
 in
 {
-  options.ghostty = {
-    enable = mkEnableOption "Ghostty terminal emulator";
-  };
 
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.ghostty) {
     programs.ghostty = {
       enable = true;
       package = pkgs.ghostty;

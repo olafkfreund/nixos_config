@@ -6,8 +6,8 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption flatten;
-  cfg = config.editor.neovim;
+  inherit (lib) mkIf flatten;
+  cfg = config.features.editors;
 
   # Enhanced package support for LazyVim
   languageSupport = {
@@ -67,13 +67,7 @@ let
   };
 in
 {
-  options.editor.neovim = {
-    enable = mkEnableOption {
-      default = false;
-      description = "neovim";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.neovim) {
     # Home configuration block
     home = {
       # LazyVim-compatible system package support

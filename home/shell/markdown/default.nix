@@ -4,17 +4,11 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption types;
-  cfg = config.cli.markdown;
+  inherit (lib) mkIf;
+  cfg = config.features.cli;
 in
 {
-  options.cli.markdown = with types; {
-    enable = mkEnableOption {
-      default = false;
-      description = "Include markdown syntax highlighting";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.markdown) {
     home.packages = with pkgs; [
       mdr
       slippy

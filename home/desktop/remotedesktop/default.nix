@@ -4,17 +4,11 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.desktop.remotedesktop;
+  inherit (lib) mkIf;
+  cfg = config.features.desktop;
 in
 {
-  options.desktop.remotedesktop = {
-    enable = mkEnableOption {
-      default = false;
-      description = "Enable Remote Desktop";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.remotedesktop) {
     home.packages = [
       pkgs.remmina
       pkgs.freerdp

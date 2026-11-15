@@ -3,18 +3,12 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.cli.fzf;
+  inherit (lib) mkIf;
+  cfg = config.features.cli;
   inherit (config.lib.stylix) colors;
 in
 {
-  options.cli.fzf = {
-    enable = mkEnableOption {
-      default = true;
-      description = "Enable fuzzy finder";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.fzf) {
     programs.fzf = {
       enable = true;
       enableBashIntegration = true;

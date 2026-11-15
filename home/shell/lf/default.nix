@@ -4,17 +4,11 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.cli.lf;
+  inherit (lib) mkIf;
+  cfg = config.features.cli;
 in
 {
-  options.cli.lf = {
-    enable = mkEnableOption {
-      default = false;
-      description = "Enable lf";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.lf) {
     xdg.configFile."lf/icons".source = ./icons;
 
     programs.lf = {

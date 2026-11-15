@@ -3,17 +3,11 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption mkAfter;
-  cfg = config.cli.zoxide;
+  inherit (lib) mkIf mkAfter;
+  cfg = config.features.cli;
 in
 {
-  options.cli.zoxide = {
-    enable = mkEnableOption {
-      default = true;
-      description = "Enable zoxide";
-    };
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.zoxide) {
     programs.zoxide = {
       enable = true;
       enableBashIntegration = true;

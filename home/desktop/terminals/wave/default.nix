@@ -3,10 +3,10 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
+  inherit (lib) mkIf;
   inherit (config.lib.stylix) colors;
   c = colors.withHashtag;
-  cfg = config.wave;
+  cfg = config.features.terminals;
 
   # Stylix has no waveterm target, so the 16 ANSI slots are wired from the
   # active base16 scheme by hand. Trade-off (same as the GNOME Terminal
@@ -40,11 +40,8 @@ let
   };
 in
 {
-  options.wave = {
-    enable = mkEnableOption "Wave terminal emulator";
-  };
 
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.wave) {
     programs.waveterm.enable = true;
 
     xdg.configFile."waveterm/termthemes.json".text =

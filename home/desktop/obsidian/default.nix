@@ -3,18 +3,12 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.desktop.obsidian;
+  inherit (lib) mkIf;
+  cfg = config.features.desktop;
 in
 {
-  options.desktop.obsidian = {
-    enable = mkEnableOption {
-      default = false;
-      description = "Obsidian markdown editor with Wayland optimizations";
-    };
-  };
 
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.obsidian) {
     # Create a desktop entry that uses our optimized launcher
     xdg.desktopEntries.obsidian-wayland = {
       name = "Obsidian (Wayland)";

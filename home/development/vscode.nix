@@ -5,8 +5,8 @@
   ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.editor.vscode;
+  inherit (lib) mkIf;
+  cfg = config.features.editors;
 
   # Stylix's theming and our own keys both land in programs.vscode userSettings.
   # Rendered to a store file so the activation script can merge them into a
@@ -17,11 +17,7 @@ let
       config.programs.vscode.profiles.default.userSettings;
 in
 {
-  options.editor.vscode = {
-    enable = mkEnableOption "Visual Studio Code editor" // { default = true; };
-  };
-
-  config = mkIf cfg.enable {
+  config = mkIf (!cfg.enable || cfg.vscode) {
     # Stop Home Manager (and therefore Stylix) from owning settings.json as a
     # read-only store symlink. The activation script below renders the same
     # declarative settings into a mutable, hand-editable file instead.

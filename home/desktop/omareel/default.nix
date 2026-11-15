@@ -4,14 +4,11 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
-  cfg = config.desktop.screenshots.omareel;
+  inherit (lib) mkIf;
+  cfg = config.features.desktop;
 in
 {
-  options.desktop.screenshots.omareel = {
-    enable = mkEnableOption "Omareel screen recorder";
-  };
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.omareel) {
     home.packages = [
       pkgs.customPkgs.omareel
     ];
