@@ -24,6 +24,19 @@ let
     mkdir -p $out
     ${pkgs.herdr}/bin/herdr --skill > $out/SKILL.md
   '';
+  # Each pane's shell runs in its own transient systemd scope (#2959). Without
+  # it every pane shares the cgroup of the terminal that started herdr, so when
+  # one pane runs away systemd-oomd kills that whole cgroup: the herdr server
+  # and every other agent with it. systemd-run --scope execs the shell in
+  # place, so herdr still sees the same process. No user bus (SSH, remote):
+  # plain shell.
+  paneShell = pkgs.writeShellScript "herdr-pane-shell" ''
+    if [ -S "''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/bus" ]; then
+      exec ${pkgs.systemd}/bin/systemd-run --user --scope --quiet --collect \
+        --unit="herdr-pane-$$" -- ${pkgs.bashInteractive}/bin/bash "$@"
+    fi
+    exec ${pkgs.bashInteractive}/bin/bash "$@"
+  '';
   claudeLauncher = ''
     claude() {
       if [[ ''${HERDR_ENV:-} == 1 && -n ''${HERDR_SOCKET_PATH:-} ]]; then
@@ -75,6 +88,11 @@ in
       # Agent-detection manifest only; writes no binary, keeps Claude/codex
       # state detection current between herdr releases.
       manifest_check = true
+
+      # One systemd scope per pane, so systemd-oomd can kill a runaway pane
+      # alone instead of the terminal that holds the whole session (#2959).
+      [terminal]
+      default_shell = "${paneShell}"
 
       # The built-in "terminal" theme draws herdr's chrome in the host terminal's
       # own colours, so it follows `omarchy theme set` live once kitty reloads.
