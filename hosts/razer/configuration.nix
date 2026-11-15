@@ -52,13 +52,13 @@ in
   # trade-off for a clean idempotent deploy.
   security.sudo.wheelNeedsPassword = false;
 
+  # Choose networking profile: "desktop", "server", or "minimal"
+  features.networking.profile = "desktop";
+
   # Consolidated networking configuration
   networking = {
     # Set hostname from variables
     inherit (vars) hostName;
-
-    # Choose networking profile: "desktop", "server", or "minimal"
-    profile = "desktop";
 
     # Note: Tailscale is enabled via services.tailscale (built-in NixOS module)
     # Custom networking.tailscale module was removed during anti-pattern cleanup
@@ -367,7 +367,7 @@ in
   hardware.keyboard.zsa.enable = true;
 
   # Windows app integration
-  # programs.winboat.enable = true; # DISABLED: npm dependency error in nixpkgs (@electron/windows-sign)
+  # features.winboat.enable = true; # DISABLED: npm dependency error in nixpkgs (@electron/windows-sign)
 
   age.secrets.nix-signing-key = {
     file = ../../secrets/nix-signing-key-razer.age;

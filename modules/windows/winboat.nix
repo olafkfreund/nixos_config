@@ -1,10 +1,10 @@
 { config, lib, pkgs, ... }:
 let
   inherit (lib) mkIf mkEnableOption;
-  cfg = config.programs.winboat;
+  cfg = config.features.winboat;
 in
 {
-  options.programs.winboat = {
+  options.features.winboat = {
     enable = mkEnableOption "Winboat - Run Windows apps on Linux with seamless integration";
   };
 
