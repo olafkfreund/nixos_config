@@ -1,75 +1,25 @@
-# P510 Home Configuration - Development Server Profile
-# Uses dev-server composition (server-admin + developer)
+# P510 is a desktop and media server; state its Home Manager choices directly.
 { lib, pkgs, ... }: {
   imports = [
-    # Import common user configuration
     ../common/default.nix
     ./private.nix
-
-    # Import server-admin and developer profiles
-    ../../home/profiles/server-admin/default.nix
-    ../../home/profiles/developer/default.nix
-
-    # Host-specific configurations
-    # ../../hosts/p510/nixos/env.nix  # File doesn't exist - removed
+    ../../home/browsers/default.nix
+    ../../home/shell/default.nix
+    ../../home/media/music.nix
+    ../../home/files.nix
   ];
 
-  # Profile metadata (comments only - not valid Home Manager options)
-  # name = "dev-server";
-  # type = "composition";
-  # description = "Server with development capabilities for remote work";
-  # combines = [ "server-admin" "developer" ];
-  # host = "p510";
-
-  # P510-specific feature overrides for server + development
   features = {
-    # Force headless operation - completely disable desktop
-    desktop = {
-      enable = lib.mkForce false; # Completely disable desktop framework for headless server
-    };
-
-    # Disable GUI terminals for headless operation - override profile conflicts.
-    # Ghostty is kept available below (via direct ghostty.enable) so SSH'd
-    # users that occasionally open a graphical session over RDP / X11
-    # forwarding have a modern terminal; the feature gate stays off so we
-    # don't drag in the full GUI terminal stack.
-    terminals = {
-      enable = lib.mkForce false;
-      alacritty = lib.mkForce false;
-      foot = lib.mkForce false;
-      wezterm = lib.mkForce false;
-      kitty = lib.mkForce false;
-      ghostty = lib.mkForce false;
-    };
-
-    # CLI-only editors for server development
     editors = {
-      enable = lib.mkForce true;
-      cursor = lib.mkForce false; # No GUI editors
-      neovim = lib.mkForce true; # Primary editor for server development
-      vscode = lib.mkForce false; # No GUI editors
-      zed = lib.mkForce false; # No GUI editors
+      enable = true;
+      neovim = true;
     };
-
-    # No browsers on headless server
-    browsers = {
-      enable = lib.mkForce false;
-      chrome = lib.mkForce false;
-      firefox = lib.mkForce false;
-      edge = lib.mkForce false;
-      brave = lib.mkForce false;
-      opera = lib.mkForce false;
-    };
-
-    # Full development capabilities but CLI-focused
     development = {
       enable = true;
-      languages = true; # Full language support for development
-      workflow = true; # Development workflow tools
-      productivity = lib.mkForce true; # Was never honoured; keeps today's apps (#2929)
+      languages = true;
+      workflow = true;
+      productivity = true;
     };
-
-    # Enhanced CLI tools for server development
     cli = {
       enable = true;
       bat = true;
@@ -82,26 +32,17 @@
       gh = true;
       markdown = true;
     };
-
-    # Session management essential for remote development
     multiplexers = {
       enable = true;
       tmux = true;
     };
   };
 
-  # Ghostty: bypass the disabled terminals feature gate above to install
-  # ghostty directly. Useful for occasional graphical sessions over RDP /
-  # X11-forwarding, and for shipping the same primary terminal across
-  # every host without flipping the whole headless-mode posture.
-  ghostty.enable = lib.mkForce true;
+  ghostty.enable = true;
+  foot.enable = true;
+  kitty.enable = true;
+  alacritty.enable = true;
 
-  # Preserve the terminal programs already installed on p510 (#2929).
-  foot.enable = lib.mkForce true;
-  kitty.enable = lib.mkForce true;
-  alacritty.enable = lib.mkForce true;
-
-  # P510 development server specific packages
   home.packages = with pkgs; [
     # Server development essentials
     # docker, docker-compose, kubectl, k9s: installed system-wide.
@@ -153,9 +94,26 @@
     # Disk and storage tools
     ncdu
     rsync
+
+    # Developer and server-admin packages formerly supplied by profiles.
+    git-lfs
+    delta
+    difftastic
+    nodejs_24
+    python3
+    rustc
+    postman
+    insomnia
+    xmlstarlet
+    pandoc
+    graphviz
+    buildah
+    terraform
+    ansible
+    dig
+    whois
   ];
 
-  # Enhanced git configuration for server development
   programs.git = {
     enable = true;
     settings = {
@@ -163,31 +121,22 @@
       push.autoSetupRemote = true;
       pull.rebase = true;
       rebase.autoStash = true;
-      # Server-specific settings
       core.autocrlf = "input";
       merge.tool = "vimdiff";
       status.showUntrackedFiles = "all";
     };
   };
 
-  # Delta (diff viewer) integration with Git
   programs.delta = {
     enable = lib.mkForce true;
     enableGitIntegration = true;
   };
-
-  # Development environment for server
   programs.direnv = {
     enable = true;
     nix-direnv.enable = true;
   };
-
-  # splashboard — renders on SSH shell startup. Headless server still benefits
-  # from the agenda panels when the admin logs in.
+  programs.claude-powerline.enable = true;
   programs.splashboard.enable = true;
-
-  # gogcli-fed splashboard panels: Gmail unread, Google Tasks, Calendar events.
-  # Token provisioned headless via agenix (gog auth keyring=file import).
   programs.gogDashboard = {
     enable = true;
     account = "olaf@freundcloud.com";
