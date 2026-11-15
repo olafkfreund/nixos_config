@@ -14,7 +14,8 @@ Recipe per slice: the implementing module reads `config.features.<group>` with
 (go keeps its default list). Where a host or user file sets the old path, that line moves to the `features.*` path in
 the same slice. Slices (map: Fable review on `40559a899`, `modules/common/features-impl.nix` line numbers):
 
-1. Dev languages: `{cargo,github,go,java,lua,nix,shell,nodejs,devshell}.development` (impl :27-36).
+1. Dev languages: impl lines :27, :29-36 exactly (`cargo,github,go,java,lua,nix,shell,nodejs,devshell`); **not** :28
+   (copilot-cli, slice 2). `nix.development` is migrated here and only here.
 2. Python `modules.development.python` (:40), copilot-cli (:28), antigravity-cli (:42); their `package` options move
    under `features.development.<x>.package` / `features.ai.<x>.package` only if a host sets them, else `let`.
 3. Cloud `<x>.packages` (:55-59); drop the unbridged, unset `cloud-tools.packages`.
@@ -24,12 +25,24 @@ the same slice. Slices (map: Fable review on `40559a899`, `modules/common/featur
 5. Security `security.{gnupg,onepassword}` (:62-63); programs `services.print`, `programs.{obsidian,office,webcam}`
    (:51, :71-73), `media.droidcam` (:77), and the upstream `programs.{lazygit,thunderbird}` lines (:69-70) move into
    a small module unchanged.
-6. Remaining custom roots: `nix.development`, `system.logging` → `features.logging`, `networking.profile` →
+6. Remaining custom roots: `system.logging` → `features.logging`, `networking.profile` →
    `features.networking.profile`, `programs.winboat` → `features.winboat` (host edits on p620/razer).
 7. Delete `modules/common/features-impl.nix`; its git/curl/jq block (:20-24) moves into `modules/common/features.nix`.
 8. Home Manager, same recipe: terminals (`alacritty/foot/kitty/wezterm/ghostty/warp/wave`), editors (keep VS Code's
    default-true semantics: it is only false when `editors.enable` is on and `vscode` off), browsers, desktop, cli,
    multiplexers; then delete `Users/common/features-impl.nix` and its double import.
+
+Groups without an `enable` (`features.programs`, `features.media`) keep their direct per-flag condition
+(`mkIf cfg.programs.obsidian`), exactly as the bridge applied them ungated. Every other option a touched module
+declares under an upstream root moves with it in the same slice: `networking.stableConnection.{enable,interfaceSwitchDelayMs}`
+→ `features.networking.stableConnection` (slice 6), `services.spice.guestAgent` → `features.virtualization.spiceGuestAgent`
+(slice 4), `programs.aerion.package` → `features.desktop.aerionPackage` (slice 8), each reader updated.
+
+Slice 8 details: VS Code keeps `enable = !f.editors.enable || f.editors.vscode` (its option defaulted true and the
+bridge only set it while `editors.enable` was on). `home/desktop/screenshots/wayland-native.nix:8` reads an old
+option and is migrated in this slice. p510 (after #2933) enables ghostty/foot/kitty/alacritty directly with the
+terminals group off; those four setters become `features.terminals = { enable = true; ghostty = true; foot = true;
+kitty = true; alacritty = true; };` (wezterm/warp/wave stay false), which is the same set.
 
 Each slice is one commit.
 
