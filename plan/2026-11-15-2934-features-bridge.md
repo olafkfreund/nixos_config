@@ -22,9 +22,10 @@ Approved decisions: every module reads `config.features.<group>` directly with `
 `options.<old>.enable` and the bridge lines go; hosts/users that set an old path are moved in the same slice; custom
 options under upstream roots move to `features.*`; both `features-impl.nix` files are deleted. One commit per slice;
 after each, `SNAP_NO_BUILD=1 scripts/config-snapshot.sh snap /tmp/s6-<n>` and `diff <baseline> /tmp/s6-<n>` must be
-`IDENTICAL` for p620, razer and p510, else revert the slice and report. Baseline: `main` at this branch's merge base,
-taken by the lead after #2932 and #2933 merge (rebase first). `SNAP_NO_BUILD=1` arrives with #2932's
-`scripts/config-snapshot.sh`; until it is on this branch, evaluate with that branch's copy of the script.
+`IDENTICAL` for p620, razer and p510, else revert the slice and report. Baseline: `main` at this branch's merge base
+(`85d619f50`, after #2932 and #2933), snapshot directory given by the lead. Since #2932, p620 and razer set most
+`features.*` values in `hosts/common/nixos/dev-workstation.nix` and all hosts get defaults from
+`hosts/templates/desktop.nix`: "host setters" below includes those two files.
 
 ## Traps per slice (Codex and agy reviews; read before each slice)
 
