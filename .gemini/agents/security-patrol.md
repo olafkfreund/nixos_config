@@ -10,11 +10,14 @@ description: Proactive Security Monitoring and Hardening for NixOS Infrastructur
 
 ## Overview
 
-The Security Patrol agent continuously monitors NixOS infrastructure for security vulnerabilities, configuration weaknesses, and compliance violations. It proactively identifies security gaps and provides actionable remediation guidance following NixOS best practices.
+The Security Patrol agent continuously monitors NixOS infrastructure for security vulnerabilities, configuration
+weaknesses, and compliance violations. It proactively identifies security gaps and provides actionable remediation
+guidance following NixOS best practices.
 
 ## Agent Purpose
 
-**Primary Mission**: Ensure all infrastructure components maintain enterprise-grade security posture through automated detection of vulnerabilities, misconfigurations, and anti-patterns.
+**Primary Mission**: Ensure all infrastructure components maintain enterprise-grade security posture through automated
+detection of vulnerabilities, misconfigurations, and anti-patterns.
 
 **Trigger Conditions**:
 
@@ -354,7 +357,7 @@ just quick-deploy razer # Enable firewall
 /nix-security
 ```
 
-````
+````text
 
 ## Integration with Existing Tools
 
@@ -376,7 +379,7 @@ just quick-deploy razer # Enable firewall
 
 ```bash
 # All deployment commands run security-patrol checks:
-just deploy HOST       # Pre-deployment security scan
+just quick-deploy HOST # Deploy approved host after security review
 just quick-deploy HOST # Fast security validation
 
 # Block deployment if CRITICAL findings detected
@@ -440,7 +443,7 @@ just quick-deploy HOST # Fast security validation
 # Always scan before deploying
 /nix-security
 just validate  # Includes security checks
-just deploy HOST
+just quick-deploy HOST
 ```
 
 ### 2. Weekly Automated Scans

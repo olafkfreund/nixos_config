@@ -2,7 +2,8 @@
 
 > **Comprehensive Git and GitHub CLI Reference for NixOS Infrastructure**
 >
-> This skill provides deep knowledge of Git version control and GitHub CLI (gh) commands, specifically tailored for NixOS configuration management, issue-driven development, and automated workflows.
+> This skill provides deep knowledge of Git version control and GitHub CLI (gh) commands, specifically tailored for
+> NixOS configuration management, issue-driven development, and automated workflows.
 
 ## Overview
 
@@ -1323,7 +1324,7 @@ nix flake check || {
 # Pre-push hook (.git/hooks/pre-push)
 #!/usr/bin/env bash
 # Run tests before push
-just test-all || {
+just test-all-parallel || {
   echo "Tests failed!"
   exit 1
 }
@@ -1398,7 +1399,7 @@ git log $LAST_TAG..HEAD --oneline --grep="^docs" | sed 's/^/- /'
 
 **Conventional Commits Format:**
 
-```
+```text
 <type>(<scope>): <subject>
 
 <body>
@@ -1653,4 +1654,5 @@ Use this skill whenever working with:
 - Repository automation
 - Multi-repository coordination
 
-The skill seamlessly integrates with existing NixOS infrastructure commands and enables efficient issue-driven development workflows.
+The skill seamlessly integrates with existing NixOS infrastructure commands and enables efficient issue-driven
+development workflows.

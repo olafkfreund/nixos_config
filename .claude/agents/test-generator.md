@@ -14,16 +14,19 @@ context: fork
 
 ## Overview
 
-The Test Generator agent automatically creates comprehensive test suites for NixOS modules, configurations, and deployments. It generates unit tests, integration tests, and smoke tests to ensure configuration reliability and prevent regressions.
+The Test Generator agent automatically creates comprehensive test suites for NixOS modules, configurations, and
+deployments. It generates unit tests, integration tests, and smoke tests to ensure configuration reliability and prevent
+regressions.
 
 ## Agent Purpose
 
-**Primary Mission**: Increase test coverage and configuration reliability through automated test generation, ensuring all modules and configurations have appropriate validation.
+**Primary Mission**: Increase test coverage and configuration reliability through automated test generation, ensuring
+all modules and configurations have appropriate validation.
 
 **Trigger Conditions**:
 
 - User mentions testing, test coverage, or validation
-- Commands like `/nix-test` or `just generate-tests`
+- Commands like `/nix-test` or `just validate`
 - After creating new modules
 - Before major deployments
 - When test coverage is below threshold
@@ -306,7 +309,7 @@ NixOS VM Tests:
    })
    ```
 
-````
+````text
 
 ### 7. Test Coverage Analysis
 
@@ -361,8 +364,8 @@ Test Execution Strategy:
    - ~30 seconds total
 
    Commands:
-     just test-modules          # Test all modules
-     just test-module MODULE    # Test specific module
+     ./scripts/test-modules.sh modules          # Test all modules
+     ./scripts/test-modules.sh specific modules/path/to/module.nix    # Test specific module
 
 2. Integration Tests (Medium):
    - Run before deployment
@@ -370,7 +373,7 @@ Test Execution Strategy:
    - ~5 minutes total
 
    Commands:
-     just test-integration      # All integration tests
+     ./scripts/integration-test.sh      # All integration tests
      just test-host HOST        # Test specific host
 
 3. VM Tests (Slow):
@@ -379,8 +382,6 @@ Test Execution Strategy:
    - ~15 minutes total
 
    Commands:
-     just test-vm               # All VM tests
-     just test-vm-parallel      # Parallel execution
 
 4. Smoke Tests (Very Fast):
    - Run after deployment
@@ -388,7 +389,7 @@ Test Execution Strategy:
    - ~1 minute total
 
    Commands:
-     just smoke-test HOST       # Post-deployment validation
+     just status       # Post-deployment validation
 ```
 
 ## Workflow
@@ -396,7 +397,7 @@ Test Execution Strategy:
 ### Automated Test Generation
 
 ```bash
-# Triggered by: /nix-test or just generate-tests
+# Triggered by: /nix-test or just validate
 
 1. **Analysis Phase**
    - Scan all modules
@@ -603,30 +604,22 @@ echo "✅ Smoke tests passed for $HOST"
 ### Run All Tests
 
 ```bash
-just test                # Run all test suites
-just test-parallel       # Run tests in parallel
+just validate                # Run flake checks
+just test-all-parallel       # Run tests in parallel
 ```
 
 ### Run Specific Tests
 
 ```bash
-just test-modules        # Unit tests only
-just test-integration    # Integration tests
-just test-vm            # VM tests
-just smoke-test p620     # Smoke test specific host
-```
-
-### Coverage Analysis
-
-```bash
-just test-coverage       # Show coverage report
-just test-coverage-html  # Generate HTML report
+./scripts/test-modules.sh modules        # Unit tests only
+./scripts/integration-test.sh    # Integration tests
+just status          # Check local host health
 ```
 
 ## Next Steps
 
 1. ✅ Review generated tests
-2. ⏭️ Run test suites: `just test`
+2. ⏭️ Run test suites: `just validate`
 3. ⏭️ Fix any failing tests
 4. ⏭️ Add to CI/CD pipeline
 5. ⏭️ Set up automated test runs
@@ -636,7 +629,7 @@ just test-coverage-html  # Generate HTML report
 **Tests Generated**: 2025-01-15 20:00:00
 **Next Generation**: On module addition
 
-````
+````text
 
 ## Integration with Existing Tools
 
@@ -680,19 +673,14 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Generate Tests
-        run: just generate-tests
+        run: just validate
 
       - name: Run Unit Tests
-        run: just test-modules
+        run: ./scripts/test-modules.sh modules
 
       - name: Run Integration Tests
-        run: just test-integration
+        run: ./scripts/integration-test.sh
 
-      - name: Run VM Tests
-        run: just test-vm
-
-      - name: Report Coverage
-        run: just test-coverage
 ```
 
 ## Configuration
@@ -736,14 +724,13 @@ jobs:
 /nix-test --module new-module
 
 # Generate and run tests
-just test-module new-module
+./scripts/test-modules.sh specific modules/path/to/new-module.nix
 ```
 
 ### 2. Maintain High Coverage
 
 ```bash
 # Check coverage regularly
-just test-coverage
 
 # Generate tests for gaps
 /nix-test --coverage-analysis
@@ -753,10 +740,10 @@ just test-coverage
 
 ```bash
 # Full test suite
-just test
+just validate
 
 # Quick smoke test
-just smoke-test HOST
+just status
 ```
 
 ## Troubleshooting
@@ -769,7 +756,7 @@ just smoke-test HOST
 
 ```bash
 # Review failing tests
-just test --verbose
+just validate
 
 # Fix issues
 # Re-generate if needed
@@ -783,9 +770,6 @@ just test --verbose
 **Solution**:
 
 ```bash
-# Analyze uncovered code
-just test-coverage --detailed
-
 # Generate missing tests
 /nix-test --fill-gaps
 ```

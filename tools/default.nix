@@ -14,14 +14,10 @@
         echo ""
         echo "Commands:"
         echo "  host <name>     Deploy to specific host (p620, p510, razer)"
-        echo "  all             Deploy to all hosts sequentially"
-        echo "  parallel        Deploy to all hosts in parallel"
         echo "  quick <host>    Quick deploy (only if configuration changed)"
-        echo "  emergency <host> Emergency deploy (skip tests)"
         echo ""
         echo "Examples:"
         echo "  nix run .#deploy host p620"
-        echo "  nix run .#deploy parallel"
         echo "  nix run .#deploy quick razer"
         echo ""
       }
@@ -45,14 +41,6 @@
               ;;
           esac
           ;;
-        all)
-          echo "Deploying to all hosts sequentially..."
-          just deploy-all
-          ;;
-        parallel)
-          echo "Deploying to all hosts in parallel..."
-          just deploy-all-parallel
-          ;;
         quick)
           if [ -z "''${2:-}" ]; then
             echo "Error: Host name required for quick deploy"
@@ -60,14 +48,6 @@
           fi
           echo "Quick deploying to host: $2"
           just quick-deploy "$2"
-          ;;
-        emergency)
-          if [ -z "''${2:-}" ]; then
-            echo "Error: Host name required for emergency deploy"
-            exit 1
-          fi
-          echo "Emergency deploying to host: $2"
-          just emergency-deploy "$2"
           ;;
         help|--help|-h)
           show_help
@@ -100,7 +80,6 @@
         echo ""
         echo "Commands:"
         echo "  host <name>     Test specific host configuration"
-        echo "  all             Test all host configurations sequentially"
         echo "  parallel        Test all hosts in parallel (faster)"
         echo "  quick           Quick test of all configurations"
         echo "  validate        Run comprehensive validation suite"
@@ -122,10 +101,6 @@
           fi
           echo "Testing host configuration: $2"
           just test-host "$2"
-          ;;
-        all)
-          echo "Testing all host configurations sequentially..."
-          just test-all
           ;;
         parallel)
           echo "Testing all hosts in parallel..."

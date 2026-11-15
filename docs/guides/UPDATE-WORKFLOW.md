@@ -4,13 +4,14 @@
 
 ## Overview
 
-This guide covers the enhanced update workflow using **nvd** (Nix Version Diff) to preview changes before building and deploying. The workflow provides detailed visibility into package updates, newly added packages, and system changes.
+This guide covers the enhanced update workflow using **nvd** (Nix Version Diff) to preview changes before building and
+deploying. The workflow provides detailed visibility into package updates, newly added packages, and system changes.
 
 ## Tools Used
 
 - **nvd** - Human-readable package version diff tool
 - **preview-updates.sh** - Preview system updates with detailed package changes
-- **find-new-packages.sh** - Discover newly added packages in nixpkgs
+- **system-diff.sh** - Compare the two most recent deployed system generations
 - **Justfile commands** - Integrated workflow automation
 
 ## Quick Start
@@ -26,21 +27,18 @@ just preview-updates p620
 just preview-updates razer
 ```
 
-### Find New Packages
+### Compare Deployed Generations
 
-```bash
-# Find newly added packages (after preview-updates)
-just new-packages
-```
+After deployment, run `just system-diff` to compare the two most recent system generations.
 
 ### Complete Workflow
 
 ```bash
-# Interactive workflow: preview → approve → deploy → discover new packages
-just update-workflow
+# Update, test, commit, and deploy
+just update-commit-deploy
 
 # For specific host
-just update-workflow p620
+just update-commit-deploy p620
 ```
 
 ## Detailed Workflow
@@ -61,7 +59,7 @@ just preview-updates p620
 
 **Example Output:**
 
-```
+```text
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   NixOS Update Preview for: p620
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -102,56 +100,11 @@ Next steps:
 - `+` - Size increase
 - `-` - Size decrease
 
-### Step 2: Find New Packages (Optional)
+### Step 2: Compare Deployed Generations (Optional)
 
-After previewing updates, discover what's new in nixpkgs:
-
-```bash
-just new-packages
-```
-
-**What This Does:**
-
-1. **Compares** old and new nixpkgs revisions
-2. **Finds** newly added package files
-3. **Lists** new packages by category
-4. **Shows** top categories with package counts
-
-**Example Output:**
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Finding New Packages in nixpkgs
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Previous revision: 7e9b0dff974c
-Current revision:  8a3354191c6e
-
-[1/4]  Fetching nixpkgs repository...
-[2/4]  Fetching specific commits...
-[3/4] 🆕 Finding new packages...
-[4/4]  Analyzing results...
-
-Found 42 new packages:
-
-  1. applications/editors/zed-editor
-  2. development/python-modules/fastapi-slim
-  3. tools/networking/netbird
-  4. applications/misc/dialect
-  ... and 38 more packages
-
-Top Categories:
-  applications          12 packages
-  development            8 packages
-  tools                  6 packages
-  servers                4 packages
-  python-modules         3 packages
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-View full changelog:
-  https://github.com/NixOS/nixpkgs/compare/7e9b0dff...8a3354191c6e
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+After the update has been deployed, `just system-diff` compares the two most
+recent system generations. It reports added, removed, and upgraded packages in
+your system closure. It does not list packages newly added to nixpkgs.
 
 ### Step 3: Apply Updates
 
@@ -182,7 +135,7 @@ nvd diff /run/booted-system /run/current-system | grep -E 'linux-|systemd'
 For maximum convenience, use the combined workflow:
 
 ```bash
-just update-workflow p620
+just update-commit-deploy p620
 ```
 
 **What This Does:**
@@ -200,7 +153,7 @@ just update-workflow p620
 
 ### Version Changes
 
-```
+```text
 [U.]  #1 firefox: 122.0 -> 123.0, +45.2 MiB
 ```
 
@@ -210,7 +163,7 @@ just update-workflow p620
 
 ### New Packages
 
-```
+```text
 [A.]  #4 neovim-plugin-copilot: ∅ -> unstable-2024-02-01, +6.5 MiB
 ```
 
@@ -220,7 +173,7 @@ just update-workflow p620
 
 ### Removed Packages
 
-```
+```text
 [R.]  #8 old-package: 1.0.0 -> ∅, -2.3 MiB
 ```
 
@@ -274,8 +227,8 @@ just check-updates
 # Show diff using built-in tool
 just diff p620
 
-# Update and deploy immediately (skip preview)
-just update-flake
+# Update the lockfile only
+nix flake update
 ```
 
 ### New Commands (Enhanced Visibility)
@@ -284,11 +237,11 @@ just update-flake
 # Preview before building
 just preview-updates p620
 
-# Discover new packages
-just new-packages
+# Compare the last two system generations
+just system-diff
 
-# Complete interactive workflow
-just update-workflow p620
+# Update, test, commit, and deploy
+just update-commit-deploy p620
 ```
 
 ## Troubleshooting
@@ -362,11 +315,11 @@ just preview-updates
 # Review changes, check release notes
 
 # Wednesday: Deploy to non-critical host
-just update-workflow p620
+just update-commit-deploy p620
 
 # Friday: Deploy to remaining hosts
-just update-workflow razer
-just update-workflow p510
+just update-commit-deploy razer
+just update-commit-deploy p510   # owner only; agents ask first
 ```
 
 ## Comparison: Old vs New Workflow
@@ -385,17 +338,17 @@ just quick-deploy p620     # Deploy without detailed preview
 ```bash
 # New method (detailed visibility)
 just preview-updates p620   # Shows exact package changes with nvd
-just new-packages          # Discover new packages
+just system-diff          # Compare the last two system generations
 just quick-deploy p620     # Deploy after informed review
 ```
 
 **Benefits:**
 
--  See exact package versions before building
--  Understand size impacts
--  Identify new packages added to your system
--  Discover new packages available in nixpkgs
--  Make informed deployment decisions
+- See exact package versions before building
+- Understand size impacts
+- Identify new packages added to your system
+- Compare the last two system generations available in nixpkgs
+- Make informed deployment decisions
 
 ## Additional Resources
 

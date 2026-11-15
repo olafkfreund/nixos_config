@@ -8,7 +8,7 @@ Run NixOS Tests.
 *   **Host**: `just test-host <host>`.
 *   **Parallel**: `just test-all-parallel`.
 *   **Quick**: `just validate-quick` (No build).
-*   **CI**: `just ci` (Detailed logs).
+*   **CI**: `just validate` (Detailed logs).
 
 Execute the appropriate `just` command and report success/failure.
 """

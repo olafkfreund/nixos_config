@@ -135,7 +135,8 @@ and no auto-discovery — every import is explicit.
 
 ## Commands
 
-`just --list` covers everything. The non-obvious ones:
+`just --list` shows the 44 recipes, grouped (deploy, update, test, maintenance, secrets, lint, docs). One-off
+diagnostics are plain `nix` commands: `docs/guides/plain-nix-commands.md`. The non-obvious recipes:
 
 - `nhs [HOST] [SCOPE]` (or `just update-commit-deploy`) — flake update → test build →
   commit + push → switch, atomically, local or remote. Refuses a dirty tree.

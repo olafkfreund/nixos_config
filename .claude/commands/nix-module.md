@@ -90,7 +90,7 @@ Add to `modules/default.nix` in appropriate section.
 
 ### 4. Validate Automatically
 
-Run: `just check-syntax` and `just test-modules`
+Run: `just check-syntax` and `./scripts/test-modules.sh modules`
 
 ### 5. Provide Usage Example
 

@@ -64,7 +64,7 @@ modes, build-locally-deploy-remotely, emergency deploy.
 
 `guides/UPDATE-WORKFLOW.md`
 Update preview workflow with `nvd` (Nix Version Diff): preview-updates,
-new-package discovery, integrated `just update-workflow`.
+generation comparison, integrated `just update-commit-deploy`.
 
 `guides/GITHUB-WORKFLOW.md`
 Issue-driven development workflow: branch naming, conventional commits,

@@ -4,12 +4,9 @@
 default:
     @just --list
 
-# =============================================================================
-# DEPLOYMENT COMMANDS
-# =============================================================================
-
 # Refuse to activate anything built from a branch other than main (#2052).
 # /etc/nixos is this checkout, so deploying a branch ships it to the host.
+[group('private')]
 _require-main:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -29,17 +26,14 @@ _require-main:
     echo ">> deploying ${branch:-detached HEAD} @ $rev"
 
 # Deploy to local system using nh
+[group('deploy')]
 deploy: _require-main
     nh os switch
 
 # Update local system using nh
+[group('update')]
 update:
     nh os update
-
-# Update flake inputs and deploy
-update-flake:
-    nix flake update
-    just deploy
 
 # Idiot-proof update + commit + deploy (local OR remote). Does:
 #   1. nix flake update (scope = 'all' by default; pass 'nixpkgs' or any input name to scope down)
@@ -59,6 +53,7 @@ update-flake:
 #   just update-commit-deploy razer               # remote via SSH, all inputs
 #   just update-commit-deploy p510 nixpkgs        # remote, nixpkgs only
 #   just update-commit-deploy razer home-manager  # remote, single input
+[group('update')]
 update-commit-deploy HOST="$(hostname)" SCOPE="all":
     ./scripts/update-commit-deploy.sh {{HOST}} {{SCOPE}}
 
@@ -67,10 +62,12 @@ update-commit-deploy HOST="$(hostname)" SCOPE="all":
 # (e.g. target host is offline, or you want to switch on your own schedule
 # with `nhs HOST` later). SCOPE defaults to 'all'; pass 'nixpkgs' or an input
 # name to scope it down.
+[group('update')]
 update-commit HOST="$(hostname)" SCOPE="all":
     ./scripts/update-commit-deploy.sh {{HOST}} {{SCOPE}} --no-deploy
 
 # Preview updates with detailed package changes (before building)
+[group('update')]
 preview-updates HOST="$(hostname)":
     @echo "🔍 Previewing updates for {{HOST}}..."
     ./scripts/preview-updates.sh {{HOST}}
@@ -81,34 +78,12 @@ preview-updates HOST="$(hostname)":
 # --target-host deploys.
 #   just system-diff            # this host, last two generations
 #   just system-diff razer      # remote host over SSH
+[group('update')]
 system-diff HOST="-":
     ./scripts/system-diff.sh {{HOST}}
 
-# Find newly added packages in nixpkgs
-new-packages:
-    @echo "🆕 Finding new packages in nixpkgs..."
-    ./scripts/find-new-packages.sh
-
-# Complete update workflow: preview → review → deploy
-update-workflow HOST="$(hostname)":
-    @echo "📦 Starting complete update workflow for {{HOST}}..."
-    @echo ""
-    just preview-updates {{HOST}}
-    @echo ""
-    @read -p "Apply these updates? [y/N] " -n 1 -r; echo; \
-    if [[ $REPLY =~ ^[Yy]$ ]]; then \
-        just quick-deploy {{HOST}}; \
-        echo ""; \
-        just new-packages; \
-    else \
-        echo "Updates cancelled. Run 'mv flake.lock.backup flake.lock' to revert."; \
-    fi
-
-# =============================================================================
-# TESTING AND VALIDATION
-# =============================================================================
-
 # Run comprehensive validation suite
+[group('test')]
 validate:
     @echo "🧪 Running comprehensive validation..."
     @echo "📝 Full flake check (includes all hosts, modules, and derivations)..."
@@ -117,67 +92,19 @@ validate:
     @echo "✅ All validations complete!"
 
 # Quick validation (faster, less comprehensive)
+[group('test')]
 validate-quick:
     @echo "⚡ Running quick validation..."
     ./scripts/validate-config.sh --quick
 
-# Quality validation - check documentation and patterns
-validate-quality:
-    @echo "📋 Running quality validation..."
-    ./scripts/validate-quality.sh
-
-# Full validation - includes quality checks
-validate-full:
-    @echo "🔍 Running full validation with quality checks..."
-    ./scripts/validate-config.sh
-    ./scripts/validate-quality.sh
-
-# =============================================================================
-# PRE-COMMIT HOOKS
-# =============================================================================
-
-# Install pre-commit hooks
-pre-commit-install:
-    @echo "🔨 Installing pre-commit hooks..."
-    pre-commit install
-    @echo "✅ Pre-commit hooks installed!"
-
 # Run all pre-commit hooks
+[group('lint')]
 pre-commit-run:
     @echo "🧪 Running all pre-commit hooks..."
     pre-commit run --all-files
 
-# Run pre-commit hooks on staged files only
-pre-commit-staged:
-    @echo "🧪 Running pre-commit hooks on staged files..."
-    pre-commit run
-
-# Update pre-commit hook versions
-pre-commit-update:
-    @echo "⬆️ Updating pre-commit hooks..."
-    pre-commit autoupdate
-    @echo "✅ Pre-commit hooks updated!"
-
-# Clean pre-commit cache
-pre-commit-clean:
-    @echo "🧹 Cleaning pre-commit cache..."
-    pre-commit clean
-    @echo "✅ Pre-commit cache cleaned!"
-
-# Run specific pre-commit hook
-pre-commit-hook HOOK:
-    @echo "🧪 Running pre-commit hook: {{HOOK}}..."
-    pre-commit run {{HOOK}} --all-files
-
-# Format all files using pre-commit
-format-all:
-    @echo "🎨 Formatting all files..."
-    pre-commit run nixpkgs-fmt --all-files || true
-    pre-commit run shfmt --all-files || true
-    pre-commit run prettier --all-files || true
-    @echo "✅ All files formatted!"
-
 # Lint all files (whole-tree nixpkgs-lint-community + per-file deadnix)
+[group('lint')]
 lint-all:
     @echo "🔍 Linting all files..."
     nixpkgs-lint . || true
@@ -186,122 +113,18 @@ lint-all:
     pre-commit run markdownlint --all-files || true
     @echo "✅ All files linted!"
 
-# Test all configurations build successfully
-test-all:
-    @echo "🧪 Testing all NixOS configurations..."
-    @for host in p620 razer p510; do \
-        echo "Testing $host..."; \
-        nix build .#nixosConfigurations.$host.config.system.build.toplevel --show-trace || exit 1; \
-    done
-    @echo "✅ All configurations build successfully!"
-
 # Test all configurations in parallel (FASTER)
+[group('test')]
 test-all-parallel:
     @echo "🧪 Testing all NixOS configurations in parallel..."
-    @( nix build .#nixosConfigurations.p620.config.system.build.toplevel --no-link --show-trace && echo "✅ P620" || echo "❌ P620" ) & \
-    ( nix build .#nixosConfigurations.razer.config.system.build.toplevel --no-link --show-trace && echo "✅ Razer" || echo "❌ Razer" ) & \
-    ( nix build .#nixosConfigurations.p510.config.system.build.toplevel --no-link --show-trace && echo "✅ P510" || echo "❌ P510" ) & \
-    wait && echo "✅ All parallel tests completed!"
-
-# Test build all hosts with detailed error reporting
-test-build-all:
-    #!/usr/bin/env bash
-    set -uo pipefail
-    echo "🔨 Test building all host configurations with detailed reporting..."
-    failed_hosts=()
-    success_count=0
-    total_hosts=3
-
-    for host in p620 razer p510; do
-        echo ""
-        echo "🔨 Building $host..."
-        start_time=$(date +%s)
-
-        if nixos-rebuild build --flake .#$host --show-trace 2>&1 | tee /tmp/build-$host.log; then
-            build_time=$(($(date +%s) - start_time))
-            echo "✅ $host: Build successful (${build_time}s)"
-            success_count=$((success_count + 1))
-        else
-            build_time=$(($(date +%s) - start_time))
-            echo "❌ $host: Build failed (${build_time}s)"
-            echo "   📋 Error log saved to: /tmp/build-$host.log"
-            failed_hosts+=("$host")
-        fi
-    done
-
-    echo ""
-    echo "📊 Build Summary:"
-    echo "================="
-    echo "✅ Successful: $success_count/$total_hosts"
-    echo "❌ Failed: ${#failed_hosts[@]}/$total_hosts"
-
-    if [ ${#failed_hosts[@]} -gt 0 ]; then
-        echo ""
-        echo "❌ Failed hosts: ${failed_hosts[*]}"
-        echo "📋 Check error logs in /tmp/build-*.log"
-        echo ""
-        echo "🔧 To view specific errors:"
-        for host in "${failed_hosts[@]}"; do
-            echo "   tail -50 /tmp/build-$host.log"
-        done
-        exit 1
-    else
-        echo ""
-        echo "🎉 All host configurations built successfully!"
-        echo "✅ Safe to proceed with deployment"
-    fi
-
-# Test build all hosts in parallel (FASTEST)
-test-build-all-parallel:
-    #!/usr/bin/env bash
-    set -uo pipefail
-    echo "🚀 Test building all host configurations in parallel..."
-
-    # Start all builds in parallel and capture their PIDs
-    (nixos-rebuild build --flake .#p620 --show-trace > /tmp/build-p620.log 2>&1 && echo "✅ P620: Build successful" || echo "❌ P620: Build failed") &
-    p620_pid=$!
-
-    (nixos-rebuild build --flake .#razer --show-trace > /tmp/build-razer.log 2>&1 && echo "✅ Razer: Build successful" || echo "❌ Razer: Build failed") &
-    razer_pid=$!
-
-    (nixos-rebuild build --flake .#p510 --show-trace > /tmp/build-p510.log 2>&1 && echo "✅ P510: Build successful" || echo "❌ P510: Build failed") &
-    p510_pid=$!
-
-    # Wait for all builds to complete
-    echo "⏳ Waiting for all builds to complete..."
-    wait $p620_pid; p620_result=$?
-    wait $razer_pid; razer_result=$?
-    wait $p510_pid; p510_result=$?
-
-    # Count results
-    failed_hosts=()
-    success_count=0
-
-    if [ $p620_result -eq 0 ]; then success_count=$((success_count + 1)); else failed_hosts+=("p620"); fi
-    if [ $razer_result -eq 0 ]; then success_count=$((success_count + 1)); else failed_hosts+=("razer"); fi
-    if [ $p510_result -eq 0 ]; then success_count=$((success_count + 1)); else failed_hosts+=("p510"); fi
-
-    echo ""
-    echo "📊 Parallel Build Summary:"
-    echo "========================="
-    echo "✅ Successful: $success_count/3"
-    echo "❌ Failed: ${#failed_hosts[@]}/3"
-
-    if [ ${#failed_hosts[@]} -gt 0 ]; then
-        echo ""
-        echo "❌ Failed hosts: ${failed_hosts[*]}"
-        echo "📋 Check error logs:"
-        for host in "${failed_hosts[@]}"; do
-            echo "   tail -50 /tmp/build-$host.log"
-        done
-        exit 1
-    else
-        echo ""
-        echo "🎉 All host configurations built successfully in parallel!"
-        echo "✅ Safe to proceed with deployment"
-    fi
+    @( nix build .#nixosConfigurations.p620.config.system.build.toplevel --no-link --show-trace && echo "✅ P620" || { echo "❌ P620"; exit 1; } ) & p620_pid=$!; \
+    ( nix build .#nixosConfigurations.razer.config.system.build.toplevel --no-link --show-trace && echo "✅ Razer" || { echo "❌ Razer"; exit 1; } ) & razer_pid=$!; \
+    ( nix build .#nixosConfigurations.p510.config.system.build.toplevel --no-link --show-trace && echo "✅ P510" || { echo "❌ P510"; exit 1; } ) & p510_pid=$!; \
+    failed=0; wait "$p620_pid" || failed=1; wait "$razer_pid" || failed=1; wait "$p510_pid" || failed=1; \
+    [ "$failed" -eq 0 ] || exit 1; echo "✅ All parallel tests completed!"
 
 # Test specific host configuration
+[group('test')]
 test-host HOST:
     @echo "🧪 Testing {{HOST}} configuration..."
     nix build .#nixosConfigurations.{{HOST}}.config.system.build.toplevel --show-trace
@@ -309,22 +132,20 @@ test-host HOST:
 # Check a host's EFI System Partition has room for another generation.
 # The bootloader writes the new kernel+initrd BEFORE pruning the old ones, so
 # "not full" is not the same as "can deploy". Read-only by default.
+[group('maintenance')]
 boot-space HOST="$(hostname)":
     ./scripts/check-boot-space.sh {{HOST}}
 
 # Same check, but reclaim space when it is short (prunes old generations and
 # lets the bootloader installer garbage-collect the ESP entries).
+[group('maintenance')]
 boot-space-clean HOST="$(hostname)":
     ./scripts/check-boot-space.sh {{HOST}} --clean
 
 # ESP headroom across every host, at a glance.
+[group('maintenance')]
 boot-space-all:
     @for h in p620 razer p510; do ./scripts/check-boot-space.sh "$h" || true; done
-
-# Validate flake syntax and inputs
-check:
-    @echo "🔍 Validating flake configuration..."
-    nix flake check --show-trace
 
 # The p510 activation guard: blocks, opens on an explicit approval, leaves reads
 # alone. Fast and offline -- it extracts the shell out of the module and runs it.
@@ -333,30 +154,24 @@ check:
 # matches `just [a-z-]*deploy`, so a read-only target with "deploy" in its name
 # is refused as though it were a deployment. Over-blocking on that pattern is
 # the right default; the cheap fix is the name.
+[group('test')]
 test-guards:
     @python3 ./scripts/test-p510-deploy-guard.py
 
 # Check for available updates
+[group('update')]
 check-updates:
     @echo "📦 Checking for available updates..."
     ./scripts/check-nixos-updates.sh
 
 # Dry-run rebuild to see what would change
+[group('test')]
 dry-run HOST="p620":
     @echo "🔍 Dry-run for {{HOST}}..."
     nixos-rebuild dry-activate --flake .#{{HOST}} --show-trace
 
-# Test build without switching
-test-build HOST="p620":
-    @echo "🔨 Test building {{HOST}}..."
-    nixos-rebuild build --flake .#{{HOST}} --show-trace
-
-# Test build with trace and verbose output
-test-build-verbose HOST:
-    @echo "🔨 Test building {{HOST}} with verbose output..."
-    nixos-rebuild build --flake .#{{HOST}} --show-trace --verbose
-
 # Test secrets decryption
+[group('secrets')]
 test-secrets:
     @echo "🔐 Testing secrets decryption..."
     @if [ -f "secrets/user-password-olafkfreund.age" ]; then \
@@ -365,43 +180,8 @@ test-secrets:
         echo "⚠️  No secrets found to test"; \
     fi
 
-# Test all secrets in secrets directory
-test-all-secrets:
-    @echo "🔐 Testing all secrets decryption..."
-    @for secret in secrets/*.age; do \
-        if [ -f "$secret" ]; then \
-            echo "Testing $secret..."; \
-            agenix -d "$secret" > /dev/null && echo "✅ $secret decrypts successfully" || echo "❌ $secret failed to decrypt"; \
-        fi; \
-    done
-
-# Run comprehensive pre-deploy checks
-pre-deploy HOST:
-    @echo "🔍 Running pre-deployment checks for {{HOST}}..."
-    just check
-    just test-host {{HOST}}
-    just test-secrets
-    @echo "✅ Pre-deployment checks passed for {{HOST}}!"
-
-# Test package builds
-test-packages:
-    @echo "📦 Testing custom package builds..."
-    @packages=$(nix flake show --json 2>/dev/null | jq -r '.packages."x86_64-linux" | keys[]' 2>/dev/null || echo ""); \
-    if [ -n "$packages" ]; then \
-        for package in $packages; do \
-            echo "Testing package: $package"; \
-            nix build .#$package --show-trace || echo "⚠️  Package $package failed to build"; \
-        done; \
-    else \
-        echo "No custom packages found to test"; \
-    fi
-
-# Test specific package
-test-package PACKAGE:
-    @echo "📦 Testing package {{PACKAGE}}..."
-    nix build .#{{PACKAGE}} --show-trace
-
 # Compare registered MCP servers against what this configuration builds (#1933)
+[group('test')]
 check-mcp:
     #!/usr/bin/env bash
     # Reports; never rewrites. ~/.claude.json belongs to Claude Code.
@@ -470,6 +250,7 @@ check-mcp:
     [ "$drifted" -eq 0 ] && echo "✅ no drift" || echo "⚠️  $drifted drifted; switch to reconcile"
 
 # Check Nix file syntax across the entire configuration
+[group('test')]
 check-syntax:
     #!/usr/bin/env bash
     echo "🔍 Checking Nix file syntax..."
@@ -484,19 +265,18 @@ check-syntax:
         echo "✅ All Nix files have valid syntax"
     fi
 
-# =============================================================================
-# REMOTE DEPLOYMENT
-# =============================================================================
-
 # Deploy to razer laptop (Intel/NVIDIA) - OPTIMIZED
+[group('deploy')]
 razer: _require-main (_sign-drv "razer")
     nixos-rebuild switch --flake .#razer --target-host razer --build-host razer --sudo --no-reexec --keep-going
 
 # Deploy to p620 workstation (AMD) - OPTIMIZED
+[group('deploy')]
 p620: _require-main
     sudo nixos-rebuild switch --flake .#p620
 
 # Deploy to p510 workstation (Intel Xeon/NVIDIA) - OPTIMIZED
+[group('deploy')]
 p510: _require-main
     just p510-clear-sessions
     nixos-rebuild switch --flake .#p510 --target-host p510 --build-host p510 --sudo --no-reexec --keep-going
@@ -509,6 +289,7 @@ p510: _require-main
 # guarantee exit 0 — verify the end state, not the exit code:
 #   readlink -f /run/current-system && systemctl --failed
 # Drop stale olafkfreund sessions on p510 before a switch
+[group('deploy')]
 p510-clear-sessions:
     #!/usr/bin/env bash
     set -uo pipefail
@@ -539,25 +320,14 @@ p510-clear-sessions:
     echo "  terminated $killed stale session(s); user manager: $(systemctl --user is-system-running 2>&1)"
     REMOTE
 
-
-# =============================================================================
-# MODERN CONFIGURATION MANAGEMENT
-# =============================================================================
-
 # Show configuration diff between current and new build
+[group('test')]
 diff HOST:
     @echo "📊 Showing configuration diff for {{HOST}}..."
     @current=$(readlink -f /run/current-system 2>/dev/null || echo "no-current") && new=$(nix build .#nixosConfigurations.{{HOST}}.config.system.build.toplevel --no-link --print-out-paths) && if [ "$current" != "no-current" ]; then nix store diff-closures $current $new; else echo "No current system configuration found"; fi
 
-# Analyze configuration size and dependencies
-analyze HOST:
-    @echo "📈 Analyzing configuration for {{HOST}}..."
-    @echo "🔍 Configuration size:"
-    nix path-info -rsSh .#nixosConfigurations.{{HOST}}.config.system.build.toplevel | tail -1
-    @echo "📦 Top 10 largest dependencies:"
-    nix path-info -rsSh .#nixosConfigurations.{{HOST}}.config.system.build.toplevel | sort -k2 -h | tail -10
-
 # Clean up old generations and garbage collect
+[group('maintenance')]
 cleanup GENERATIONS="7":
     @echo "🧹 Cleaning up old generations (keeping {{GENERATIONS}})..."
     sudo nix-collect-garbage --delete-older-than {{GENERATIONS}}d
@@ -565,6 +335,7 @@ cleanup GENERATIONS="7":
     nix store optimise
 
 # Show system health and status
+[group('maintenance')]
 status:
     @echo "🏥 System Health Status"
     @echo "======================="
@@ -579,369 +350,55 @@ status:
     @echo "⚡ Last Update:"
     stat -c %y /run/current-system 2>/dev/null || echo "Unknown"
 
-# View system generation history
-history:
-    sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
-
-# =============================================================================
-# CONFIGURATION OPTIMIZATION
-# =============================================================================
-
-# Show configuration efficiency metrics
-efficiency-report:
-    @echo "📊 Configuration Efficiency Report"
-    @echo "=================================="
-    @echo "📁 Total .nix files: $(find . -name '*.nix' | wc -l)"
-    @echo "📄 Default.nix files: $(find . -name 'default.nix' | wc -l)"
-    @echo "🔄 Potential duplicates:"
-    @find . -name "*.nix" -exec md5sum {} \; | sort | uniq -d -w32 | wc -l
-    @echo "💀 Commented code blocks:"
-    @rg -c "^\s*#" --type nix . | awk -F: '{sum += $2} END {print sum " lines"}'
-    @echo "🏗️  Feature flag usage:"
-    @rg -c "enable.*=.*true" --type nix . | awk -F: '{sum += $2} END {print sum " explicit enables"}'
-    @echo "📦 Host configurations: $(ls hosts/ | grep -v backup | wc -l)"
-    @echo "👤 User configurations: $(find Users/ -name "*_home.nix" | wc -l)"
-
-# Open Nix REPL with current flake
-repl:
-    nix repl
-
-# Open Nix REPL with nixpkgs
-repl-nixpkgs:
-    nix repl '<nixpkgs>'
-
 # Garbage collect old generations
+[group('maintenance')]
 gc:
     @echo "🗑️ Collecting garbage (keeping current generation)..."
     sudo nix-collect-garbage --delete-old
     @echo "✅ Garbage collection complete!"
 
-# Aggressive garbage collection (remove all non-current generations)
-gc-aggressive:
-    @echo "🚨 WARNING: This will remove ALL previous generations!"
-    @read -p "Are you sure? (y/N): " confirm && [ "$confirm" = "y" ] || exit 1
-    sudo nix-collect-garbage -d
-    @echo "✅ Aggressive garbage collection complete!"
-
-# Optimize nix store (deduplicate identical files)
-optimize:
-    @echo "♾️ Optimizing nix store..."
-    sudo nix-store --optimize
-    @echo "✅ Store optimization complete!"
-
-# Full cleanup: garbage collect, optimize, and show savings
-full-cleanup:
-    @echo "🧹 Starting full system cleanup..."
-    @echo "Before cleanup:"
-    @du -sh /nix/store 2>/dev/null || echo "Cannot access /nix/store"
-    sudo nix-collect-garbage --delete-old
-    sudo nix-store --optimize
-    @echo "After cleanup:"
-    @du -sh /nix/store 2>/dev/null || echo "Cannot access /nix/store"
-    @echo "✅ Full cleanup complete!"
-
-
-# =============================================================================
-# MODULE AND COMPONENT TESTING
-# =============================================================================
-
-# Test all modules in the modules directory
-test-modules:
-    @echo "🧩 Testing all modules..."
-    ./scripts/test-modules.sh modules
-
-# Test Home Manager modules
-test-home-modules:
-    @echo "🏠 Testing Home Manager modules..."
-    ./scripts/test-modules.sh home
-
-# Test a specific module
-test-module MODULE:
-    @echo "🧩 Testing specific module: {{MODULE}}..."
-    ./scripts/test-modules.sh specific {{MODULE}}
-
-# Check module documentation
-check-module-docs:
-    @echo "📚 Checking module documentation..."
-    ./scripts/test-modules.sh docs
-
-# =============================================================================
-# PERFORMANCE TESTING AND BENCHMARKING
-# =============================================================================
-
-# Run comprehensive performance tests
-perf-test:
-    @echo "⚡ Running comprehensive performance tests..."
-    ./scripts/performance-test.sh full
-
-# Test build times for all hosts
-perf-build-times:
-    @echo "⏱️  Measuring build times..."
-    ./scripts/performance-test.sh build-times
-
-# Test memory usage during builds
-perf-memory:
-    @echo "🧠 Measuring memory usage..."
-    ./scripts/performance-test.sh memory
-
-# Test flake evaluation performance
-perf-eval:
-    @echo "🔍 Measuring evaluation performance..."
-    ./scripts/performance-test.sh eval
-
-# Test parallel build efficiency
-perf-parallel:
-    @echo "⚡ Testing parallel build efficiency..."
-    ./scripts/performance-test.sh parallel
-
-# Test cache performance
-perf-cache:
-    @echo "💾 Testing cache performance..."
-    ./scripts/performance-test.sh cache
-
-# Benchmark specific host build time
-bench-host HOST RUNS="3":
-    @echo "⏱️  Benchmarking {{HOST}} ({{RUNS}} runs)..."
-    @total=0; for i in $(seq 1 {{RUNS}}); do \
-        echo "Run $i/{{RUNS}}..."; \
-        start=$(date +%s.%N); \
-        nix build .#nixosConfigurations.{{HOST}}.config.system.build.toplevel --no-link; \
-        end=$(date +%s.%N); \
-        runtime=$(echo "$end - $start" | bc); \
-        total=$(echo "$total + $runtime" | bc); \
-        echo "Run $i: ${runtime}s"; \
-    done; \
-    avg=$(echo "scale=2; $total / {{RUNS}}" | bc); \
-    echo "Average time for {{HOST}}: ${avg}s"
-
-# =============================================================================
-# DEVELOPMENT AND DEBUGGING
-# =============================================================================
-
-# Show flake info
-info:
-    nix flake show
-
-# Show flake metadata
-metadata:
-    nix flake metadata
-
-# Update specific input
-update-input INPUT:
-    nix flake lock --update-input {{INPUT}}
-
-# Check specific module syntax
-check-module MODULE:
-    nix-instantiate --parse {{MODULE}} > /dev/null && echo "✅ {{MODULE}} syntax is valid" || echo "❌ {{MODULE}} has syntax errors"
-
 # Format all Nix files using nixpkgs-fmt (preferred over alejandra)
+[group('lint')]
 format:
     find . -name "*.nix" -not -path "./result*" -not -path "./.git/*" -exec nixpkgs-fmt {} +
 
-# Format specific file or directory
-format-path PATH:
-    nixpkgs-fmt {{PATH}}
-
-# Show package derivation
-show-drv PACKAGE:
-    nix show-derivation .#{{PACKAGE}}
-
-# Enter development shell for testing
-dev-shell:
-    nix develop
-
-# Show what would be built for a configuration
-show-build HOST:
-    @echo "📋 Showing what would be built for {{HOST}}..."
-    nix build .#nixosConfigurations.{{HOST}}.config.system.build.toplevel --dry-run
-
-# Show build diff between current and new configuration
-show-diff HOST:
-    @echo "🔄 Showing configuration differences for {{HOST}}..."
-    nixos-rebuild dry-activate --flake .#{{HOST}} --show-trace
-
-# Trace evaluation of a specific option
-trace-option HOST OPTION:
-    @echo "🔍 Tracing option {{OPTION}} for {{HOST}}..."
-    nix eval .#nixosConfigurations.{{HOST}}.config.{{OPTION}} --show-trace
-
-# Debug specific module evaluation
-debug-module HOST MODULE:
-    @echo "🐛 Debugging module {{MODULE}} for {{HOST}}..."
-    nix eval .#nixosConfigurations.{{HOST}}.config.modules.{{MODULE}} --show-trace
-
-# Show configuration diff between two hosts
-diff-hosts HOST1 HOST2:
-    @echo "🔄 Comparing configurations between {{HOST1}} and {{HOST2}}..."
-    @diff <(nix eval .#nixosConfigurations.{{HOST1}}.config --json | jq 'keys' | sort) \
-          <(nix eval .#nixosConfigurations.{{HOST2}}.config --json | jq 'keys' | sort) || true
-
-# =============================================================================
-# CONTINUOUS INTEGRATION AND AUTOMATED TESTING
-# =============================================================================
-
-# Run full CI/CD testing pipeline
-ci:
-    @echo "🚀 Running CI/CD testing pipeline..."
-    ./scripts/ci-test.sh
-
-# Run quick CI tests (reduced scope)
-ci-quick:
-    @echo "⚡ Running quick CI tests..."
-    ./scripts/ci-test.sh --quick
-
-# Run CI with custom settings
-ci-custom JOBS="4" TIMEOUT="600":
-    @echo "🔧 Running CI with {{JOBS}} jobs and {{TIMEOUT}}s timeout..."
-    ./scripts/ci-test.sh --jobs {{JOBS}} --timeout {{TIMEOUT}}
-
-# Test only specific hosts in CI
-ci-hosts HOSTS:
-    @echo "🎯 Running CI for specific hosts: {{HOSTS}}..."
-    CI_HOSTS={{HOSTS}} ./scripts/ci-test.sh
-
-# =============================================================================
-# ADVANCED TESTING AND UTILITIES
-# =============================================================================
-
-# Test configuration rollback capability
-test-rollback:
-    @echo "🔄 Testing configuration rollback..."
-    @echo "Current generation: $(nixos-rebuild list-generations | tail -n1)"
-    @echo "Available generations:"
-    nixos-rebuild list-generations | tail -n5
-
-# Test configuration on a specific kernel version
-test-kernel-version VERSION:
-    @echo "🐧 Testing with kernel version {{VERSION}}..."
-    nix build .#nixosConfigurations.$(hostname).config.system.build.toplevel \
-        --override-input nixpkgs github:nixos/nixpkgs/{{VERSION}} \
-        --no-link --show-trace
-
-# Test with different nixpkgs channels
-test-nixpkgs-stable:
-    @echo "📦 Testing with nixpkgs stable..."
-    nix build .#nixosConfigurations.$(hostname).config.system.build.toplevel \
-        --override-input nixpkgs github:nixos/nixpkgs/nixos-24.05 \
-        --no-link --show-trace
-
-# Check for deprecated options and patterns
-check-deprecated:
-    @echo "⚠️  Checking for deprecated options..."
-    @echo "Checking for deprecated mkDefault/mkForce patterns..."
-    @grep -r "mkDefault\|mkForce\|mkOverride" . --include="*.nix" | head -10 || echo "No deprecated patterns found"
-    @echo "Checking for old nixpkgs references..."
-    @grep -r "nixpkgs-unstable\|nixpkgs-stable" . --include="*.nix" | head -5 || echo "No old nixpkgs references found"
-
-# Check for security issues
-security-scan:
-    @echo "🔒 Running security scan..."
-    @echo "Checking for hardcoded secrets..."
-    @grep -r -i "password\|secret\|key" . --include="*.nix" --exclude-dir=secrets | grep -v "passwordFile\|secretFile\|keyFile" | head -10 || echo "No obvious hardcoded secrets found"
-    @echo "Checking for overly permissive settings..."
-    @grep -r "allowUnfree.*true\|permittedInsecurePackages" . --include="*.nix" | head -5 || echo "No overly permissive settings found"
-
-# =============================================================================
-# QUICK DEPLOYMENT SHORTCUTS (OPTIMIZED WORKFLOWS)
-# =============================================================================
-
 # Quick commands for common operations
+[group('test')]
 quick-test:
     just test-all-parallel
 
 # Smart deploy only if configuration changed
-quick-deploy HOST:
-    just deploy-smart {{HOST}}
-
-# Complete workflow: test all hosts then optionally deploy all
-quick-all:
-    @echo "🚀 Quick test and deploy all hosts..."
-    just test-all-parallel
-    @read -p "Tests passed! Deploy all? (y/N): " confirm && [ "$confirm" = "y" ] || exit 1
-    just deploy-all-parallel
-
-# Emergency deployment (skip tests) - USE WITH CAUTION
-emergency-deploy HOST: _require-main (_sign-drv HOST)
-    @echo "🚨 EMERGENCY deployment to {{HOST}} (skipping tests)..."
-    @echo "This will skip ALL safety checks and validation!"
-    @read -p "Are you absolutely sure? (type 'emergency'): " confirm && [ "$confirm" = "emergency" ] || exit 1
-    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo --no-reexec --keep-going
-
-# =============================================================================
-# UTILITIES AND HELPERS
-# =============================================================================
-
-# Clean up all build artifacts and caches (DESTRUCTIVE)
-clean-all:
-    @echo "🧹 DESTRUCTIVE: Cleaning up everything..."
-    @echo "This will remove ALL previous generations and build artifacts!"
-    @read -p "Are you absolutely sure? (type 'clean-all'): " confirm && [ "$confirm" = "clean-all" ] || exit 1
-    rm -rf result*
-    sudo nix-collect-garbage -d
-    sudo nix-store --gc
-    sudo nix-store --optimize
-    @echo "✅ Complete cleanup finished!"
-
-# Create backup of current configuration
-backup:
-    @echo "💾 Creating configuration backup..."
-    @timestamp=$(date +%Y%m%d-%H%M%S); \
-    backup_dir="${HOME}/nixos-backup-$timestamp"; \
-    cp -r . "$backup_dir"; \
-    echo "✅ Backup created: $backup_dir"
-
-# Restore from backup
-restore BACKUP_PATH:
-    @echo "🔄 Restoring from backup: {{BACKUP_PATH}}..."
-    @if [ -d "{{BACKUP_PATH}}" ]; then \
-        cp -r {{BACKUP_PATH}}/* .; \
-        echo "✅ Restore complete"; \
+[group('deploy')]
+quick-deploy HOST: _require-main
+    @echo "🧠 Smart deployment to {{ HOST }}..."
+    @new=$(nix build .#nixosConfigurations.{{ HOST }}.config.system.build.toplevel --no-link --print-out-paths) \
+        || { echo "❌ Build failed for {{ HOST }}, not deploying"; exit 1; }; \
+    if [ "$(ssh {{ HOST }} readlink /run/current-system 2>/dev/null)" = "$new" ]; then \
+        echo "🔄 No changes detected for {{ HOST }}, skipping deployment"; \
     else \
-        echo "❌ Backup path not found: {{BACKUP_PATH}}"; \
+        echo "📝 Changes detected, deploying to {{ HOST }}..."; \
+        just {{ HOST }}; \
     fi
 
-
-# Interactive host selector for deployment
-deploy-interactive:
-    @echo "🎯 Interactive deployment"
-    @echo "Available hosts:"
-    @select host in razer p510 p620 "Cancel"; do \
-        case $host in \
-            "Cancel") echo "Deployment cancelled"; break ;; \
-            "") echo "Invalid selection" ;; \
-            *) echo "Deploying to $host..."; just $host; break ;; \
-        esac; \
-    done
-
-# Watch for changes and auto-test
-watch:
-    @echo "👀 Watching for changes..."
-    @echo "Will run 'just check' when .nix files change"
-    @while inotifywait -r -e modify,create,delete --include='.*\.nix$' . 2>/dev/null; do \
-        echo "Change detected, running checks..."; \
-        just check || true; \
-        echo "Waiting for next change..."; \
-    done
-
-# =============================================================================
-# SECRETS MANAGEMENT
-# =============================================================================
-
 # Manage secrets interactively
+[group('secrets')]
 secrets:
     ./scripts/manage-secrets.sh
 
 # Check secrets status
+[group('secrets')]
 secrets-status:
     ./scripts/manage-secrets.sh status
 
 # Check secrets status on specific host
+[group('secrets')]
 secrets-status-host HOST:
     @echo "🔑 Checking secrets status on {{HOST}}..."
     ssh {{HOST}} "sudo ls -la /run/agenix/ || echo 'Agenix directory not found'"
     ssh {{HOST}} "sudo systemctl status agenix --no-pager || echo 'Agenix service not running'"
 
 # Fix agenix issues on remote host
+[group('secrets')]
 fix-agenix-remote HOST:
     @echo "🔧 Attempting to fix agenix issues on {{HOST}}..."
     ssh {{HOST}} "sudo systemctl stop agenix || true"
@@ -949,64 +406,14 @@ fix-agenix-remote HOST:
     ssh {{HOST}} "sudo systemctl start agenix || echo 'Agenix service failed to start'"
     ssh {{HOST}} "sudo systemctl status agenix --no-pager"
 
-# =============================================================================
-# NETWORKING AND MONITORING
-# =============================================================================
-
-# Monitor network stability
-network-monitor:
-    ./scripts/network-monitor.sh
-
-# =============================================================================
-# HOST MANAGEMENT
-# =============================================================================
-
-
-# Deploy to all hosts in parallel (FASTEST)
-deploy-all-parallel:
-    @echo "🚀 Deploying to ALL hosts in parallel..."
-    @read -p "Are you sure? This will max out resources! (y/N): " confirm && [ "$confirm" = "y" ] || exit 1
-    @echo "Starting parallel deployments..."
-    just p620 & \
-    just razer & \
-    just p510 & \
-    wait && echo "✅ All deployments completed!"
-
-# Fast deployment with minimal builds
-deploy-fast HOST: _require-main (_sign-drv HOST)
-    @echo "⚡ Fast deployment to {{HOST}}..."
-    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo --no-reexec --keep-going --no-build-nix
-
 # Build locally, deploy remotely (for slow remote hosts)
+[group('deploy')]
 deploy-local-build HOST: _require-main
     @echo "🏗️ Building {{HOST}} locally, deploying remotely..."
     nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --sudo --no-reexec --keep-going
 
-# Deploy only if changed (smart deployment)
-deploy-smart HOST: _require-main
-    @echo "🧠 Smart deployment to {{HOST}}..."
-    @if nix build .#nixosConfigurations.{{HOST}}.config.system.build.toplevel --no-link --print-out-paths | \
-     grep -q "$(ssh {{HOST}} readlink /run/current-system 2>/dev/null || echo 'no-current')"; then \
-        echo "🔄 No changes detected for {{HOST}}, skipping deployment"; \
-    else \
-        echo "📝 Changes detected, deploying to {{HOST}}..."; \
-        just {{HOST}}; \
-    fi
-
-# Parallel build for all hosts (build only, no deployment)
-build-all-parallel:
-    @echo "🔨 Building all configurations in parallel..."
-    ( nix build .#nixosConfigurations.p620.config.system.build.toplevel --no-link & echo "Building P620..." ) & \
-    ( nix build .#nixosConfigurations.razer.config.system.build.toplevel --no-link & echo "Building Razer..." ) & \
-    ( nix build .#nixosConfigurations.p510.config.system.build.toplevel --no-link & echo "Building P510..." ) & \
-    wait && echo "✅ All builds completed!"
-
-# Deploy with binary cache optimization
-deploy-cached HOST: _require-main (_sign-drv HOST)
-    @echo "💾 Deploying {{HOST}} with cache optimization..."
-    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo --no-reexec --keep-going
-
 # Sign the .drv closure so an untrusted --build-host accepts the upload (#2758).
+[group('private')]
 _sign-drv HOST:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -1016,6 +423,7 @@ _sign-drv HOST:
     sudo nix store sign -r --key-file /run/agenix/nix-signing-key "$drv"
 
 # Build on P620, deploy to target host
+[group('deploy')]
 deploy-via-p620 HOST: _require-main (_sign-drv HOST)
     @echo "🏗️ Building {{HOST}} on P620 cache server, deploying to {{HOST}}..."
     @echo "📡 Step 1: Building on P620..."
@@ -1038,12 +446,14 @@ deploy-via-p620 HOST: _require-main (_sign-drv HOST)
     @echo "✅ Deployment complete! {{HOST}} is using P620's cache."
 
 # Build on P620 for target host (build only, no deployment)
+[group('deploy')]
 build-on-p620 HOST: (_sign-drv HOST)
     @echo "🏗️ Building {{HOST}} on P620 (build only)..."
     nixos-rebuild build --flake .#{{HOST}} --build-host p620
     @echo "✅ Build complete! Deploy with: just deploy-via-p620 {{HOST}}"
 
 # Test all hosts can be reached
+[group('maintenance')]
 ping-hosts:
     @echo "🏓 Pinging all hosts..."
     @# ssh, not ping: the hostnames only resolve through ~/.ssh/config (Tailscale
@@ -1056,105 +466,23 @@ ping-hosts:
         ssh -o ConnectTimeout=5 -o BatchMode=yes $host true >/dev/null 2>&1 && echo "✅ reachable" || echo "❌ unreachable"; \
     done
 
-# Show status of all hosts
-status-all:
-    @echo "📊 Checking status of all hosts..."
-    just ping-hosts
-
-# =============================================================================
-# HELP AND INFORMATION
-# =============================================================================
-
-# Show extended help with examples
-help-extended:
-    @echo "🔧 NixOS Configuration Management - Extended Help"
-    @echo ""
-    @echo "🚀 QUICK START:"
-    @echo "  just validate          # Run all validation tests"
-    @echo "  just test-host p620    # Test specific host"
-    @echo "  just deploy            # Deploy to local system"
-    @echo "  just p620              # Deploy to p620 host"
-    @echo ""
-    @echo "⚡ FAST DEPLOYMENT:"
-    @echo "  just quick-test        # Parallel test all hosts"
-    @echo "  just quick-deploy p620 # Smart deploy (only if changed)"
-    @echo "  just quick-all         # Test all, then deploy all"
-    @echo "  just deploy-fast p620  # Fast deploy with minimal builds"
-    @echo "  just deploy-all-parallel # Deploy all hosts in parallel"
-    @echo ""
-    @echo "🧪 TESTING:"
-    @echo "  just test-all-parallel     # Test all hosts in parallel"
-    @echo "  just test-build-all        # Test build all hosts (sequential)"
-    @echo "  just test-build-all-parallel # Test build all hosts (parallel)"
-    @echo "  just ci                    # Full CI pipeline"
-    @echo "  just ci-quick              # Quick CI tests"
-    @echo "  just test-all              # Test all configurations"
-    @echo "  just perf-test             # Performance benchmarks"
-    @echo ""
-    @echo "🔧 DEVELOPMENT:"
-    @echo "  just format            # Format all Nix files"
-    @echo "  just check-syntax      # Check syntax"
-    @echo "  just test-modules      # Test module structure"
-    @echo ""
-    @echo "📦 MAINTENANCE:"
-    @echo "  just update            # Update system"
-    @echo "  just gc                # Garbage collect"
-    @echo "  just clean-all         # Deep clean"
-    @echo ""
-    @echo "For full command list: just --list"
-
-# Show configuration summary
-summary:
-    #!/usr/bin/env bash
-    echo "📋 NixOS Configuration Summary"
-    echo "=============================="
-    echo "Active hosts: p620 (AMD workstation), razer (Intel/NVIDIA laptop), p510 (Intel Xeon server)"
-    echo "Users: $(ls Users/ | grep -v README | tr '\n' ' ')"
-    echo "Modules: $(find modules -name '*.nix' -not -name 'default.nix' | wc -l) modules"
-    echo "Last update: $(stat -c %y flake.lock | cut -d' ' -f1)"
-    echo "Git status: $(git status --porcelain | wc -l) changed files"
-    echo ""
-    echo "Recent commands to try:"
-    echo "  just validate         # Validate everything"
-    echo "  just test-host p620   # Test single host"
-    echo "  just ci-quick         # Quick tests"
-
-# =============================================================================
-# AGENT-INTEGRATED DEPLOYMENT
-# =============================================================================
-
-# Deployment orchestration used by the 'deployment-coordinator' agent
-deploy-all:
-    @echo "🤖 Starting Agent-Integrated Deployment..."
-    @./scripts/generate-topology.sh
-    @./scripts/issue-checker.sh
-    @if [ -f .gemini/state/issues.json ]; then \
-        if grep -q '"status": "critical"' .gemini/state/issues.json; then \
-            echo "❌ CRITICAL ISSUES DETECTED. Aborting deployment."; \
-            exit 1; \
-        fi; \
-    fi
-    @echo "🚀 Proceeding with deployment sequence..."
-    @echo "🔹 Phase 1: Infrastructure (P620)"
-    @just p620
-    @echo "🔹 Phase 2: Clients (Razer, P510)"
-    @just deploy-all-parallel
-    @echo "✅ Deployment Coordinator finished successfully."
-
 # === Documentation site (MkDocs Material) ===
 
 # Build the documentation site reproducibly with Nix (-> ./result)
+[group('docs')]
 docs-build:
     @echo "📚 Building documentation site with Nix..."
     nix build .#docs --print-build-logs
     @echo "✅ Site built. Open: file://$(readlink -f result)/index.html"
 
 # Serve the docs locally with live reload (requires: nix develop .#docs)
+[group('docs')]
 docs-serve:
     @echo "📚 Serving docs at http://127.0.0.1:8000 (Ctrl+C to stop)..."
     nix develop .#docs --command mkdocs serve
 
 # Strict build to catch broken links / nav issues (used as a quality gate)
+[group('docs')]
 docs-check:
     @echo "🔍 Strict documentation build (fails on warnings)..."
     nix develop .#docs --command mkdocs build --strict --site-dir /tmp/nixos-docs-check

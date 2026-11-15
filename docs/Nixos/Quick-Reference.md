@@ -114,7 +114,7 @@ just test-host HOST   # Test specific host
 
 ```bash
 just quick-deploy HOST      # Smart deploy (if changed)
-just deploy-all-parallel    # Deploy all (parallel)
+just p620    # Deploy p620
 just p620                   # Deploy to p620
 just razer                  # Deploy to razer
 just p510                   # Deploy to p510
@@ -164,7 +164,7 @@ ssh HOST "readlink /nix/var/nix/profiles/system"
 
 ```bash
 # Skip tests (use cautiously)
-just emergency-deploy HOST
+just deploy-local-build HOST
 ```
 
 ## Service Web Interfaces
@@ -335,7 +335,7 @@ ssh HOST "sudo nixos-rebuild switch --rollback"
 just quick-test
 
 # Instead of sequential:
-just test-all
+just test-all-parallel
 ```
 
 ### Smart Deployment

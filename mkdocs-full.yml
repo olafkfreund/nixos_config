@@ -167,6 +167,7 @@ nav:
       - Deployment: guides/deployment-guide.md
       - Update & Deploy: UPDATE-DEPLOY.md
       - Update Workflow: guides/UPDATE-WORKFLOW.md
+      - Plain nix Commands: guides/plain-nix-commands.md
       - Adding a Host: guides/HOST_SETUP.md
       - GitHub Workflow: guides/GITHUB-WORKFLOW.md
       - Cache Strategy: guides/CACHE-STRATEGY.md

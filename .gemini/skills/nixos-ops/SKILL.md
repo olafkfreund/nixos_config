@@ -81,11 +81,11 @@ just p510
 To update `flake.lock` (nixpkgs versions) and deploy:
 
 ```bash
-# Update inputs and deploy locally
-just update-flake
+# Update flake inputs only
+nix flake update
 
-# Interactive workflow (Preview -> Review -> Deploy)
-just update-workflow <host>
+# Update, test, commit, and deploy
+just update-commit-deploy <host>
 ```
 
 ### Emergency Recovery
@@ -93,8 +93,8 @@ just update-workflow <host>
 If tests fail but deployment is critical:
 
 ```bash
-# Skip all checks and force deploy
-just emergency-deploy <host>
+# Deploy a host with a local build after the required checks
+just deploy-local-build <host>
 ```
 
 ## 🧪 Testing & Validation
@@ -108,7 +108,7 @@ Always validate before deploying to production hosts.
 just check-syntax
 
 # Fast validation (eval only)
-just check
+just validate
 
 # Build config without switching (ensure it compiles)
 just test-host <host>
@@ -133,7 +133,7 @@ Packages are managed via **Overlays** defined in `flake.nix` and `pkgs/`.
 
 - **Add new package**: Create `pkgs/<package-name>/default.nix`.
 - **Register**: Add to `overlays` list in `flake.nix`.
-- **Test**: `just test-package <package-name>`.
+- **Test**: `just test-host <host>`.
 
 ### Finding Packages
 

@@ -156,7 +156,7 @@ nhs [host] [scope]              # zsh shortcut for the above
 
 # Maintenance
 just cleanup                    # GC old generations
-just update-flake               # nix flake update (no commit)
+nix flake update               # Update flake inputs (no commit)
 just secrets                    # Interactive secrets manager
 just --list                     # All recipes
 ```
