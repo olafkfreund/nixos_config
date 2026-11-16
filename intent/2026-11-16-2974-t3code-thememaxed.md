@@ -155,3 +155,10 @@ and once open question 0 is resolved:
 4. **Bar icon.** Place it on the right of the bar once, so that dragging it off
    sticks, or leave it to `omarchy bar put`? Proposed: once, using the same
    once-per-host marker as `omarchy-enable-once.nix`.
+
+## Owner decision (2026-11-16)
+
+Open question 0: **(b) park.** The intent stays a draft. Resume when T3 Code
+0.1.10 is tagged stable and nixpkgs `t3code` reaches it. Then re-check
+upstream Thememaxed for changes since `38ca154`, refresh this intent, and ask
+for approval. #2974 and nixarchy#1803 stay open.
