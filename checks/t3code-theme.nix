@@ -28,8 +28,8 @@ let
     ${if withT3 then "ln -s ${t3} $out/t3" else ""}
   '';
 
-  full = mkScript { binPath = "${stubs true}:${tools}:"; timeoutSecs = 2; killSecs = 1; };
-  noT3 = mkScript { binPath = "${stubs false}:${tools}:"; timeoutSecs = 2; killSecs = 1; };
+  full = mkScript { binPath = "${stubs true}:${tools}"; timeoutSecs = 2; killSecs = 1; };
+  noT3 = mkScript { binPath = "${stubs false}:${tools}"; timeoutSecs = 2; killSecs = 1; };
 in
 pkgs.runCommand "t3code-theme"
 {
@@ -41,7 +41,7 @@ pkgs.runCommand "t3code-theme"
   has() { grep -qF -- "$2" "$1" || fail "$1 lacks '$2'"; }
   lacks() { ! grep -qF -- "$2" "$1" || fail "$1 has '$2'"; }
 
-  # run_case NAME SCRIPT: $CASE/cfg and any fixtures are set up by the caller.
+  # new_case NAME, then fixtures, then run SCRIPT.
   new_case() {
     CASE_NAME=$1
     export CASE=$PWD/case-$1
@@ -64,9 +64,9 @@ pkgs.runCommand "t3code-theme"
   }
 
   new_case 1; run ${full}
-  has $CASE/err "no Omarchy palette"; lacks $CASE/calls "t3 "
+  has $CASE/err "no Omarchy palette"; lacks $CASE/calls "publisher"; lacks $CASE/calls "t3 "
 
-  new_case 2; stage '{}'; echo 'PUB_EXIT=1' > $CASE/cfg; run ${full}
+  new_case 2; stage '{}'; fixture_theme; echo 'PUB_EXIT=1' > $CASE/cfg; run ${full}
   has $CASE/err "publisher exited 1"; lacks $CASE/calls "t3 "
 
   new_case 3; stage '{"a":"{{ x }}"}'; fixture_theme; run ${full}

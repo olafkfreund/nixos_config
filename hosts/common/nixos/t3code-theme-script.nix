@@ -1,5 +1,7 @@
 { pkgs }:
 { binPath, themeId ? "omarchy", timeoutSecs ? 30, killSecs ? 5 }:
+# themeId is spliced into shell and file names unescaped.
+assert builtins.match "[a-z0-9-]+" themeId != null;
 pkgs.writeShellScript "t3code-omarchy-theme" ''
   set -u
   export PATH="${binPath}''${PATH:+:$PATH}"
