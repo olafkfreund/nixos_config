@@ -1,5 +1,5 @@
 import { View, div } from "gpui-kit";
-import { exec, focused, nextCommand, notify, panes, run, spaces } from "herdr";
+import { exec, focused, nextCommand, notify, openOverlay, panes, run, spaces } from "herdr";
 import { resizeDoc } from "./tree.js";
 
 const keys = { left: "h", down: "j", up: "k", right: "l" };
@@ -32,6 +32,12 @@ export default class Splits extends View {
     cx.spawn(async () => {
       for (;;) {
         const command = await nextCommand();
+        if (command === "worktree-open") {
+          // Same dialog as the + menu's "Open worktree…"; a key can't pass props itself.
+          openOverlay({ mod: "worktree", kind: "dialog", width: 560, height: 480,
+            props: { space: focused()?.space, folder: panes().find((p) => p.focused)?.cwd, action: "open" } });
+          continue;
+        }
         const match = /^(go|resize)-(left|down|up|right)$/.exec(command);
         if (!match) continue;
         const [, action, direction] = match;

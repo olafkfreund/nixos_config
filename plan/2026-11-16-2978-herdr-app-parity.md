@@ -151,7 +151,7 @@ as fallback) and always exits 0.
 | `ctrl-shift-g` | global | `{"command":"terminal.open","args":{"argv":["lazygit"],"place":"tab"}}` |
 | `ctrl-shift-y` | global | `terminal.open` `argv ["zoe"]`, `place "right"` |
 | `ctrl-alt-shift-y` | global | `terminal.open` `argv ["zoe"]`, `place "tab"` |
-| `ctrl-shift-u` | global | `mod.open` `worktree` with props `{action:"open"}` |
+| `ctrl-shift-u` | global | `splits.worktree-open`: the + menu's Open worktree dialog (`mod.open` takes no props) |
 | `ctrl-shift-i` | global | `mod.open:inbox` |
 
 Any clash with 0.1.16's defaults, other than alt-hjkl, moves our key.

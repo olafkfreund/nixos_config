@@ -24,7 +24,7 @@ save_manifest() {
 }
 
 install_item() {
-  local kind=$1 name=$2 src=$3 dest=$4 old source_hash disk_hash temp backup_name
+  local kind=$1 name=$2 src=$3 dest=$4 old source_hash disk_hash temp backup_name out
   [[ $name =~ ^[a-zA-Z0-9_-]+$ ]] || {
     log "invalid $kind name: $name"
     return 1
@@ -47,8 +47,8 @@ install_item() {
       rm -rf "${temp:?}"
       return 1
     }
-    if ! herdr-app check "$temp"; then
-      log "check failed: $src"
+    if ! out=$(herdr-app check "$temp" 2>&1); then
+      log "check failed: $src: $out"
       rm -rf "${temp:?}"
       return 1
     fi
