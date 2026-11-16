@@ -446,9 +446,14 @@ printf "■ You've hit your usage limit. Try again later\n■ Flex capacity unav
 diff -u "$tmp/expected" "$(field t1 review work)/ans/4.screen"
 
 # output and code containing phrases are not provider errors; a matching turn still wins
+# (written after the send, so the old whole-screen scan would report provider_error)
+rm -f "$TEST_STATE/screen"
+{ "$tool" ask t1 review "$tmp/prompt" --timeout 3 >"$tmp/out2" 2>&1 & }
+bg=$!
+wait_until jq -e '.members.review.pending.n == 5' "$rt/t1.json" >/dev/null || die 'phrase request not pending'
 printf 'grep: rate limit exceeded\nperr=("Usage limit reached" "rate limit exceeded")\n' >"$TEST_STATE/screen"
-team ask t1 review "$tmp/prompt" --timeout 1
-is '.outcome == "timeout" and .n == 5'
+wait "$bg" || :
+jq -e '.outcome == "timeout" and .n == 5' "$tmp/out2" >/dev/null || die 'phrase text triggered'
 work=$(field t1 review work)
 id=55555555-2222-3333-4444-555555555555
 jq -nc --arg id "$id" --arg in "$(pointer t1 5)" '{turn_id:$id,input:$in,reply:"done",source:"codex"}' >"$work/turns/$id.json"
@@ -478,9 +483,13 @@ for n in 6 7 8; do
 done
 
 # Retry and UI lines, including a circle under the C locale, do not trigger
+rm -f "$TEST_STATE/screen"
+{ LC_ALL=C "$tool" ask t1 review "$tmp/prompt" --timeout 3 >"$tmp/out2" 2>&1 & }
+bg=$!
+wait_until jq -e '.members.review.pending.n == 9' "$rt/t1.json" >/dev/null || die 'retry request not pending'
 printf '■ Copy failed: clipboard busy\n\nReconnecting… rate limit exceeded\n● rate limit exceeded\n' >"$TEST_STATE/screen"
-LC_ALL=C team ask t1 review "$tmp/prompt" --timeout 1
-is '.outcome == "timeout" and .n == 9'
+wait "$bg" || :
+jq -e '.outcome == "timeout" and .n == 9' "$tmp/out2" >/dev/null || die 'retry or UI text triggered'
 id=aaaaaaaa-2222-3333-4444-555555555555
 jq -nc --arg id "$id" --arg in "$(pointer t1 9)" '{turn_id:$id,input:$in,reply:"done",source:"codex"}' >"$work/turns/$id.json"
 team ask t1 review "$tmp/prompt" --resume 9 --timeout 5
