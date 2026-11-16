@@ -178,6 +178,11 @@ sees them and the menu lists them, but `omarchy-keys.nix` does not bind them.
 | `ALT+TAB` | Altscape: next window |
 | `ALT+SHIFT+TAB` | Altscape: previous window |
 | `SUPER+ALT+SHIFT+W` | Altscape settings |
+| `SUPER+CTRL+SHIFT+K` | omaPOD: toggle |
+| `SUPER+CTRL+SHIFT+COMMA` | omaPOD: rewind |
+| `SUPER+CTRL+SHIFT+PERIOD` | omaPOD: forward |
+| `SUPER+CTRL+SHIFT+N` | omaPOD: skip |
+| `SUPER+CTRL+SHIFT+O` | omaPOD: show |
 | `SUPER+SHIFT+V` | New Google Meet (link copied) |
 | `SUPER+CTRL+ALT+M` | Meeting record/transcribe/summarize |
 | `SUPER+ALT+V` | MicroVMs |
