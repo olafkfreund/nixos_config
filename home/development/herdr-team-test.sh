@@ -2,6 +2,7 @@
 # shellcheck disable=SC2016 # The quoted strings are passed to child shells.
 # Clear the live pane's connection before creating any test state or subprocess.
 while IFS= read -r name; do unset "$name"; done < <(compgen -A variable HERDR_)
+unset HC_TERMINAL_ID
 # The key checks below plant their own decoys; the caller's real ones would read as leaks.
 unset OPENAI_API_KEY OPENAI_API_KEY_FILE GEMINI_API_KEY GEMINI_API_KEY_FILE GOOGLE_API_KEY ANTHROPIC_API_KEY ANTHROPIC_API_KEY_FILE
 set -euo pipefail
@@ -50,7 +51,7 @@ new_pane() {
     printf '%s\n' "$n"
   ) 9> "$TEST_STATE/n.lock"
 }
-case "$1 $2" in
+case "$1 ${2:-}" in
   'tab create')
     n=$(new_pane)
     jq -nc --arg id "$n" '{result:{root_pane:{pane_id:("p"+$id),terminal_id:("t"+$id)},tab:{tab_id:$id}}}'
@@ -1498,3 +1499,168 @@ is '.downed == []'
 team ask nothing review "$tmp/prompt"
 assert_code 2
 ok unknown-task
+
+# --- hc backend: fake core and app; no live session is contacted ---
+cat >"$tmp/bin/herdr-app" <<'FAKE'
+#!/usr/bin/env bash
+set -euo pipefail
+case "$1 ${2:-}" in
+  'ls ')
+    addr=$(cat "$TEST_STATE/hc-addr" 2>/dev/null || :)
+    tab=$(cat "$TEST_STATE/hc-tab" 2>/dev/null || :)
+    [[ ! -e $TEST_STATE/hc-bad-place ]] || tab=wrong
+    jq -nc --arg a "$addr" --arg t "$tab" '{spaces:[{id:"space",tabs:[{id:"lead",terminals:[{terminal:"lead-address"}]},{id:$t,terminals:(if $a == "" then [] else [{terminal:$a}] end)}]}]}'
+    ;;
+  'do tab.new')
+    printf 'team-tab\n' >"$TEST_STATE/hc-tab"
+    printf 'new\n' >>"$TEST_STATE/app-log"
+    echo '{"space":"space","tab":"team-tab","terminal":"placeholder"}'
+    ;;
+  'do tab.select')
+    [[ $4 == lead ]] || exit 1
+    printf 'select\n' >>"$TEST_STATE/app-log"
+    echo '{}'
+    ;;
+  *) exit 2 ;;
+esac
+FAKE
+cat >"$tmp/bin/hc" <<'FAKE'
+#!/usr/bin/env bash
+set -euo pipefail
+printf '%s\n' "$*" >>"$TEST_STATE/hc-log"
+case $1 in
+  run)
+    shift
+    while [[ $1 != -- ]]; do shift; done
+    shift
+    [[ $1 == bash && -f $2 ]] || exit 2
+    launch=$2
+    [[ ! -e $TEST_STATE/hc-tamper-max ]] || sed -i 's/^maxsecs=.*/maxsecs=0/' "$launch"
+    printf '%s\n' "${launch%/launch}" >"$TEST_STATE/hc-ctl"
+    printf 'member-address\n' >"$TEST_STATE/hc-addr"
+    HC_TERMINAL_ID=member-address nohup bash "$launch" >/dev/null 2>&1 </dev/null &
+    printf '%s\n' "$!" >"$TEST_STATE/hc-pid"
+    echo '{"address":"member-address","parent":"lead-address"}'
+    ;;
+  get)
+    [[ $2 == member-address && -e $TEST_STATE/hc-addr ]] || exit 1
+    addr=member-address
+    [[ ! -e $TEST_STATE/hc-wrong-address ]] || addr=other-address
+    name=codex
+    [[ ! -e $TEST_STATE/hc-implement ]] || name=codex-implement
+    status=null
+    [[ ! -e $TEST_STATE/agent-up ]] || status='"idle"'
+    jq -nc --arg a "$addr" --arg n "$name" --argjson st "$status" '{address:$a,state:"running",status:$st,foreground:{argv:[$n],name:$n,pid:1},pid:1}'
+    ;;
+  read)
+    cat "$TEST_STATE/screen" 2>/dev/null || :
+    ;;
+  send)
+    "$HERDR_BIN_PATH" agent prompt "$2" "$3"
+    ;;
+  interrupt)
+    printf '0\n' >"$TEST_STATE/quit"
+    ;;
+  kill)
+    [[ $2 == member-address && -e $TEST_STATE/hc-addr ]] || exit 1
+    ctl=$(cat "$TEST_STATE/hc-ctl")
+    if [[ -f $ctl/pgid ]]; then
+      read -r pgid _ <"$ctl/pgid"
+      kill -TERM -- "-$pgid" 2>/dev/null || :
+    fi
+    kill "$(cat "$TEST_STATE/hc-pid")" 2>/dev/null || :
+    rm -f "$TEST_STATE/hc-addr"
+    ;;
+  *) exit 2 ;;
+esac
+FAKE
+sed -i "1s|.*|#!$(command -v bash)|" "$tmp/bin/hc" "$tmp/bin/herdr-app"
+chmod +x "$tmp/bin/hc" "$tmp/bin/herdr-app"
+unset HERDR_ENV HERDR_SOCKET_PATH HERDR_WORKSPACE_ID
+export HC_TERMINAL_ID=lead-address
+reset
+up h1 review
+[[ $(grep -c '^new$' "$TEST_STATE/app-log") == 1 && $(grep -c '^select$' "$TEST_STATE/app-log") == 1 ]] || die 'hc tab and focus'
+grep -q -- '--label herdr.space=space --label herdr.tab=team-tab' "$TEST_STATE/hc-log" || die 'hc labels'
+grep -q -- '--no-daemon' "$TEST_STATE/launched" || die 'hc codex daemon'
+arm h1 review
+printf 'TO: lead\nreview complete\nEND\n' >"$TEST_STATE/reply"
+team ask h1 review "$tmp/prompt" --timeout 5
+assert_code 0
+is '.outcome == "ok"'
+team converse h1 review "$tmp/prompt" --deadline 5
+assert_code 0
+team up h1 review
+assert_code 2
+is '.reason | test("exists")'
+team down h1
+assert_code 0
+no_leftovers
+ok hc-flow
+
+reset
+: >"$TEST_STATE/hc-bad-place"
+team up h1 review
+assert_code 1
+is '.reason | test("not placed")'
+[[ ! -e $TEST_STATE/hc-addr ]] || die 'failed placement left terminal'
+no_leftovers
+ok hc-placement
+
+reset
+up h1 review
+: >"$TEST_STATE/hc-wrong-address"
+team down h1
+assert_code 1
+[[ -e $TEST_STATE/hc-addr ]] || die 'unrecorded address killed'
+rm "$TEST_STATE/hc-wrong-address"
+team down h1
+assert_code 0
+ok hc-address-guard
+
+reset
+up h1 review
+kill "$lead"
+wait_until test ! -e "$TEST_STATE/hc-addr" || die 'lead watchdog did not kill hc terminal'
+team down h1
+sleep 3000 &
+sleepers+=($!)
+lead=$!
+export HERDR_TEAM_LEAD_PID=$lead
+ok hc-lead-death
+
+reset
+: >"$TEST_STATE/hc-tamper-max"
+up h1 review
+wait_until test ! -e "$TEST_STATE/hc-addr" || die 'timeout watchdog did not kill hc terminal'
+team down h1
+ok hc-timeout
+
+reset
+: >"$TEST_STATE/hc-implement"
+up h1 implement --step 15
+arm h1 implement
+printf 'done\n' >"$TEST_STATE/reply"
+team ask h1 implement "$tmp/prompt" --timeout 5
+assert_code 0
+printf 'change\n' >>"$repo/f"
+g -C "$repo" add f
+team finish h1 implement
+assert_code 1
+is '.failures | index("changes are staged") != null'
+ok hc-staged
+
+reset
+: >"$TEST_STATE/hc-implement"
+up h1 implement --step 15
+arm h1 implement
+printf 'done\n' >"$TEST_STATE/reply"
+team ask h1 implement "$tmp/prompt" --timeout 5
+assert_code 0
+printf 'change\n' >>"$repo/f"
+g -C "$repo" add f
+g -C "$repo" commit -q -m moved
+team finish h1 implement
+assert_code 1
+is '.head_moved == true'
+ok hc-head-moved
