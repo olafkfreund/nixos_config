@@ -6,8 +6,9 @@ omaPOD is a podcast app with an Omarchy bar widget. It is enabled on p620 and ra
 ## What it installs
 
 - The `omapod` package, its desktop entry and the podcast/OPML link handlers (`programs.omapod.enable`).
-- The Home Manager module with an hourly feed refresh (`omapod-refresh.timer`). Auto-downloads skip battery by
-  omaPOD's default.
+- The Home Manager module with an hourly feed refresh (`omapod-refresh.timer`). Automatic downloads are off by
+  omaPOD's default, so the refresh only checks feeds; if you turn them on, also turn off "download on battery" in
+  omaPOD's settings to keep razer from downloading on battery (omaPOD's default allows it).
 - The bar widget, installed by `programs.nixarchy.plugins` and enabled once per host by a post-boot hook. It
   appears after the next login. Turning it off later in Setup > Plugins sticks.
 - The key bindings, from a Nix-owned `~/.config/hypr/omapod-binds.lua`. Its `require` line is appended once to

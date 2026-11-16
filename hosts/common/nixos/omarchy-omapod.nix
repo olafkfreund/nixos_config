@@ -4,7 +4,7 @@
 # sticks); the widget and the keys appear after the next login.
 # Keys, bound by omaPOD's module defaults (nixarchy Lua backend), all on
 # Super+Ctrl+Shift: K toggle, "," rewind, "." forward, N skip, O show.
-# Feeds refresh hourly; auto-downloads skip battery by omaPOD's default.
+# Feeds refresh hourly; automatic downloads are off by omaPOD's default (when on, they also run on battery unless turned off in its settings).
 { inputs, pkgs, ... }:
 let
   id = "io.github.arikisonfire.pod";
