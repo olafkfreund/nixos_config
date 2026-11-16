@@ -1,8 +1,8 @@
 // Agents in grouped or priority views; parents take their most urgent sub-agent's place.
 
 import { View, div, image, svg } from "gpui-kit";
-import { v_flex, h_flex } from "gpui-base";
-import { agents, terminals, panes, focused, spaces, run, theme, shared, setShared, setAgentOrder, openOverlay, closeOverlay, props, window, layout } from "herdr";
+import { v_flex, h_flex, InputState, Input } from "gpui-base";
+import { agents, terminals, panes, focused, spaces, run, exec, theme, shared, setShared, setAgentOrder, openOverlay, closeOverlay, props, window, layout } from "herdr";
 
 function find(node, id) {
   if (node?.id === id) return node;
@@ -81,7 +81,20 @@ function icon(p, size, color) {
 export default class Agents extends View {
   init(_props, cx) {
     if (props()?.sortMenu) return;
+    if (props()?.controlMenu) {
+      this.input = InputState.new({ value: "" });
+      this.input.on("submit", () => this.send());
+      this.input.focus();
+      return;
+    }
     this.folded = new Set();
+    this.counts = new Map();
+    this.runtime = null;
+    cx.spawn(async (cx) => {
+      const result = await exec("sh", ["-c", "printf %s \"$XDG_RUNTIME_DIR\""]).catch(() => null);
+      this.runtime = result?.code === 0 ? result.stdout.trim() : null;
+      cx.notify();
+    });
     // Each agent's last state and when it changed (ms), kept across restarts.
     try { this.changed = JSON.parse(localStorage.getItem("changed") ?? "{}"); } catch { this.changed = {}; }
     if (!this.changed || typeof this.changed !== "object" || Array.isArray(this.changed)) this.changed = {};
@@ -89,7 +102,59 @@ export default class Agents extends View {
     if (!Array.isArray(this.pendingPins)) this.pendingPins = [];
     if (!this.pendingPins.length) localStorage.removeItem("pins");
     this.migratingPins = new Set();
-    cx.timer.every(30000, (cx) => cx.notify());
+    cx.timer.every(5000, (cx) => cx.notify());
+  }
+
+  send() {
+    const address = props()?.controlMenu;
+    const value = this.input.value();
+    if (!address || !value.trim()) return;
+    closeOverlay(props().overlay);
+    exec("hc", ["send", address, value]);
+  }
+
+  controlMenu(t) {
+    const address = props().controlMenu;
+    const terminal = terminals().find((item) => item.address === address);
+    const pane = panes().find((item) => item.terminal === address);
+    const item = (label, action) => div().id(`control-${label}`).h(30).px(8).rounded(7)
+      .flex().items_center().text_color(t.foreground).cursor_pointer()
+      .hover((el) => el.bg(t.hover)).on_click(() => { closeOverlay(props().overlay); action(); }).child(label);
+    return v_flex().w_full().p(5).bg(t.popover).text_size(12.8)
+      .child(item("Focus", () => run("agent.focus", { terminal: address })))
+      .when(terminal?.state === "live", (el) => el
+        .child(item("Peek", () => run("terminal.peek", { terminal: address })))
+        .child(h_flex().gap(5).p(5).items_center()
+          .child(Input.new(this.input).flex_1().h(30).px(7).rounded(6).bg(t.background).text_color(t.foreground))
+          .child(div().id("control-send").px(7).h(30).flex().items_center().rounded(6).bg(t.raised)
+            .cursor_pointer().on_click(() => this.send()).child("Send")))
+        .child(item("Interrupt", () => exec("hc", ["interrupt", address])))
+        .child(item("Stop", () => openOverlay({ mod: "confirm", kind: "dialog", width: 380, height: 180,
+          props: { title: "Stop agent?", detail: terminal.name || address, command: { name: "terminal.kill", args: { terminal: address } } } })))
+        .child(item(pane ? "Hide" : "Pane", () => run(pane ? "terminal.park" : "terminal.keep", { terminal: address }))));
+  }
+
+  subagentCount(a, terminal, cx) {
+    if (a.status !== "working" || terminal?.state !== "live" || !this.runtime) return null;
+    if (a.program?.key !== "claude" && !a.app?.includes("claude")) return null;
+    const cached = this.counts.get(a.address);
+    if (!cached || Date.now() - cached.at >= 5000) {
+      this.counts.set(a.address, { at: Date.now(), count: cached?.count ?? null });
+      const slash = a.address.indexOf("/");
+      const machine = slash < 0 ? null : a.address.slice(0, slash);
+      const addr = slash < 0 ? a.address : a.address.slice(slash + 1);
+      const path = `${this.runtime}/claude-hc-subagents/${addr}`;
+      cx.spawn(async (cx) => {
+        const result = await (machine ? exec("hc", ["exec", "--on", machine, "cat", path]) : exec("cat", [path])).catch(() => null);
+        let count = null;
+        if (result?.code === 0) {
+          try { const value = JSON.parse(result.stdout).count; if (Number.isInteger(value) && value >= 0) count = value; } catch { /* missing or invalid count */ }
+        }
+        this.counts.set(a.address, { at: Date.now(), count });
+        cx.notify();
+      });
+    }
+    return this.counts.get(a.address)?.count ?? null;
   }
 
   // Stamps agents whose state changed. Done and idle count as one: looking at a
@@ -202,6 +267,8 @@ export default class Agents extends View {
         .when(l === "└" || l === "├", el => el.border_b(1.5).rounded_bl(6))))
       .when(Boolean(pic), el => el.child(div().mr(8).child(pic)))
       .child(div().flex_1().truncate().text_color(on ? t.foreground : t.muted).child(k.name || k.template || k.program?.name || k.address))
+      .child(div().id(`sub-controls-${k.address}`).px(5).text_color(t.dim).cursor_pointer().tooltip("Agent controls")
+        .on_click((_e, cx) => { cx.stop_propagation(); openOverlay({ mod: "freund-agents", kind: "popup", width: 240, props: { controlMenu: k.address } }); }).child("⋯"))
       .child(this.status(t, { status: st }, compact));
   }
 
@@ -219,6 +286,7 @@ export default class Agents extends View {
   render(cx) {
     const t = theme();
     if (props()?.sortMenu) return this.sortMenu(t);
+    if (props()?.controlMenu) return this.controlMenu(t);
     const collapsed = narrow();
     const sort = sortOf();
     let list = agents();
@@ -246,8 +314,17 @@ export default class Agents extends View {
     const withKids = (a, i) => {
       const subs = collapsed ? [] : this.tree(all, a.address);
       const r = row(a, i, subs);
-      if (this.folded.has(a.address)) return [r];
-      return [r, ...subs.map((s) => this.subRow(t, s, shown, byPriority))];
+      const count = collapsed ? null : this.subagentCount(a, all.find((item) => item.address === a.address), cx);
+      const cwd = panes().find((item) => item.terminal === a.address)?.cwd;
+      const line = count === null ? [] : [h_flex().id(`task-subagents-${a.address}`).pl(39).pr(8).h(25).items_center()
+        .text_size(11.5).text_color(t.dim)
+        .child(div().flex_1().child(`Task subagents: ${count}`))
+        .child(div().id(`graph-${a.address}`).px(7).rounded(5).cursor_pointer()
+          .hover((el) => el.bg(t.hover)).on_click(() => {
+            run("agent.focus", { terminal: a.address });
+            run("terminal.open", { argv: ["zoe", cwd].filter(Boolean), place: "right" });
+          }).child("Graph"))];
+      return [r, ...line, ...(this.folded.has(a.address) ? [] : subs.map((s) => this.subRow(t, s, shown, byPriority)))];
     };
 
     // The fold chevron; folded, the count too, colored by the most urgent one.
@@ -310,6 +387,7 @@ export default class Agents extends View {
           .gap(4)
           .hover((s) => s.bg(t.hover))
           .on_click(() => run("pane.focus", { pane: a.pane }))
+          .on_mouse_down("right", () => openOverlay({ mod: "freund-agents", kind: "popup", width: 240, props: { controlMenu: a.address } }))
           .child(div().flex_1().min_w(0).whitespace_nowrap().text_right().text_color(t.muted).child(String(i + 1)))
           .child(h_flex().w(14).flex_none().items_center().justify_center().child(this.status(t, a, true)));
       }
@@ -354,6 +432,7 @@ export default class Agents extends View {
           cx.notify();
         })
         .on_click(() => run("pane.focus", { pane: a.pane }))
+        .on_mouse_down("right", () => openOverlay({ mod: "freund-agents", kind: "popup", width: 240, props: { controlMenu: a.address } }))
         .when(Boolean(pic), el => el.child(div().id(`agent-fold-${a.address}`)
           .when(subs.length > 0, el => el.on_click((_e, cx) => {
             cx.stop_propagation();
@@ -366,6 +445,8 @@ export default class Agents extends View {
         .when(Boolean(machine), el => el.child(div().text_size(10).text_color(t.dim).child(machine)))
         .when(subs.length > 0, el => el.child(fold(a, subs)))
         .when(this.hovered === a.address, el => el.child(pin))
+        .child(div().id(`controls-${a.address}`).text_color(t.dim).cursor_pointer().tooltip("Agent controls")
+          .on_click((_e, cx) => { cx.stop_propagation(); openOverlay({ mod: "freund-agents", kind: "popup", width: 240, props: { controlMenu: a.address } }); }).child("⋯"))
         .when(this.hovered !== a.address && Boolean(when), el => el.child(div().flex_none().text_size(11).text_color(t.dim).child(duration(now - when))))
         .child(this.status(t, a, byPriority && !isPinned));
     };
