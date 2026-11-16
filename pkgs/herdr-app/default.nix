@@ -21,7 +21,7 @@
 # Bump: version + sha256 from https://releases.herdr.dev/app/latest.json,
 # then re-run Verification 6 on p620.
 let
-  version = "0.1.15";
+  version = "0.1.16";
 
   releases = linkFarm "herdr-releases" [
     { name = "app/latest.json"; path = writeText "app.json" (builtins.toJSON { inherit version; }); }
@@ -41,7 +41,7 @@ stdenv.mkDerivation (finalAttrs: {
 
   src = fetchurl {
     url = "https://releases.herdr.dev/app/${version}/herdr-app-linux-x86_64.tar.gz";
-    sha256 = "f99e1e04be82c0e10b2f69ee7403ca34386f480d92511df5865af4703e7655dd";
+    sha256 = "282d2632196b238206cfe66bfb61c0faf299ca1c91843bd076521bbe36571216";
   };
 
   sourceRoot = "herdr-app";

@@ -12,7 +12,7 @@
 # re-run Verification 2-7 and 9 on p620. Check that a running old server keeps
 # its terminals across `hc server restart`.
 let
-  version = "0.1.20";
+  version = "0.1.21";
 
   frontmatter = writeText "herdr-core-skill-frontmatter" ''
     ---
@@ -27,7 +27,7 @@ stdenv.mkDerivation (finalAttrs: {
 
   src = fetchurl {
     url = "https://releases.herdr.dev/core/${version}/herdr-core-linux-x86_64.tar.gz";
-    sha256 = "ac6b86890c451a37584620aaa438b71bc0d0bd430a2e7c1d7e095f052c414e74";
+    sha256 = "78424755c10a40dde38a0bdb55c20ac19706e9ae05ed68fc2acf1fcff0d941c1";
   };
 
   sourceRoot = ".";

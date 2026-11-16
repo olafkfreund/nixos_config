@@ -75,6 +75,14 @@ in
     programs.bash.initExtra = claudeLauncher;
     programs.zsh.initContent = claudeLauncher;
 
+    # herdr-core (hc), the runtime behind herdr-app. hc only reads this file.
+    xdg.configFile."herdr-core/config.toml".text = ''
+      # Close to the TUI's scrollback_limit_bytes = 50000000 below; hc's default is 5.
+      history_mb = 48
+      # A recovered terminal keeps its last screen, like the TUI's pane_history.
+      restore_screen = true
+    '';
+
     xdg.configFile."herdr/config.toml".text = ''
       onboarding = false
 
