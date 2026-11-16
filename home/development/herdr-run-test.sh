@@ -438,3 +438,94 @@ if grep -qxE 'GITHUB_API_TOKEN|HERDR_RUN_TEST_DECOY|SSH_AUTH_SOCK|HERDR_PANE_ID|
 unset GITHUB_API_TOKEN HERDR_RUN_TEST_DECOY SSH_AUTH_SOCK HERDR_PANE_ID NIX_CONFIG
 ok env-allow-list
 exec 7>&-
+
+cat >"$tmp/hc" <<'HC'
+#!/usr/bin/env bash
+case $1 in
+  run)
+    while [[ $1 != -- ]]; do shift; done
+    shift
+    nohup "$@" >"$TEST_STATE/hc-tty" 2>&1 </dev/null &
+    printf '%s\n' "$!" >"$TEST_STATE/hc-pid"
+    printf '{"address":"a1","parent":"lead"}\n'
+    ;;
+  get) [[ ! -e $TEST_STATE/hc-killed ]] && printf '{"address":"a1"}\n' ;;
+  kill)
+    [[ $2 == a1 ]] || exit 1
+    : >"$TEST_STATE/hc-killed"
+    kill "$(cat "$TEST_STATE/hc-pid")" 2>/dev/null || :
+    ;;
+  *) exit 2 ;;
+esac
+HC
+cat >"$tmp/herdr-app" <<'APP'
+#!/usr/bin/env bash
+case $1 in
+  ls) printf '{"spaces":[{"id":"s1","tabs":[{"id":"t1","terminals":[{"terminal":"lead"}]}]}]}\n' ;;
+  do) [[ $2 == tab.select && $4 == t1 ]] ;;
+  *) exit 2 ;;
+esac
+APP
+sed -i "1s|.*|#!$(command -v bash)|" "$tmp/hc" "$tmp/herdr-app"
+chmod +x "$tmp/hc" "$tmp/herdr-app"
+export PATH="$tmp:$PATH" HC_TERMINAL_ID=lead HERDR_ENV=0
+
+reset_state
+printf 'prompt\0bytes\n' >"$tmp/input"
+printf 'prompt\0bytes\n' >"$tmp/want-out"
+printf 'stderr\0bytes\n' >"$tmp/want-err"
+for expected in 0 3 124; do
+  run_capture bash -c 'cat; printf "stderr\0bytes\n" >&2; exit "$1"' _ "$expected" <"$tmp/input"
+  assert_code "$expected"
+  assert_bytes
+done
+grep -qF 'state=working:app=herdr-run' "$TEST_STATE/hc-tty"
+grep -qF 'state=error:app=herdr-run' "$TEST_STATE/hc-tty"
+ok hc-io-status
+
+reset_state
+run_capture true
+assert_code 0
+grep -qF 'state=done:app=herdr-run' "$TEST_STATE/hc-tty"
+ok hc-done
+
+reset_state
+"$tool" codex bash -c 'echo $$ > "$TMPDIR/state/command-pid"; exec sleep 300' >"$tmp/out" 2>"$tmp/err" &
+helper=$!
+for _ in {1..300}; do
+  [[ -e $TEST_STATE/command-pid ]] && break
+  sleep 0.01
+done
+[[ -e $TEST_STATE/command-pid ]]
+kill -TERM "$helper"
+code=0
+wait "$helper" || code=$?
+assert_code 143
+[[ -e $TEST_STATE/hc-killed ]]
+if kill -0 "$(cat "$TEST_STATE/command-pid")" 2>/dev/null; then exit 1; fi
+ok hc-cancel
+
+reset_state
+script -qec "$(printf '%q ' env --default-signal=INT "$tool" codex bash -c 'echo $$ > "$TMPDIR/state/command-pid"; exec sleep 300')" /dev/null >"$tmp/out" 2>"$tmp/err" &
+script_pid=$!
+for _ in {1..300}; do
+  [[ -e $TEST_STATE/command-pid ]] && break
+  sleep 0.01
+done
+[[ -e $TEST_STATE/command-pid ]]
+runfile=$(find "$TMPDIR" -name run -type f -print -quit)
+helper=$(sed -n 's/^helper_pid=//p' "$runfile")
+kill -INT "$helper"
+code=0
+wait "$script_pid" || code=$?
+assert_code 130
+[[ -e $TEST_STATE/hc-killed ]]
+if kill -0 "$(cat "$TEST_STATE/command-pid")" 2>/dev/null; then exit 1; fi
+ok hc-ctrl-c
+
+reset_state
+unset HC_TERMINAL_ID
+HERDR_ENV=0 "$tool" codex bash -c 'printf "pass\\n"' >"$tmp/out"
+[[ $(cat "$tmp/out") == pass ]]
+[[ ! -e $TEST_STATE/hc-pid ]]
+ok outside-herdr-exec
