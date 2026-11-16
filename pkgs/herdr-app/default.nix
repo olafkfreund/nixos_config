@@ -13,6 +13,8 @@
 , curl
 , pipewire
 , herdr-core
+, herdr-app-sync
+, util-linux
 , linkFarm
 , writeText
 , runCommand
@@ -27,6 +29,19 @@ let
     { name = "app/latest.json"; path = writeText "app.json" (builtins.toJSON { inherit version; }); }
     { name = "core/latest.json"; path = writeText "core.json" (builtins.toJSON { version = herdr-core.version; generation = 1; }); }
   ];
+
+  # A window launch (no arguments) syncs the declared mods, layout and keys
+  # first (#2978). With no app home yet, the app makes it, so sync after it has.
+  syncOnLaunch = ''
+    if [ "$#" -eq 0 ] && [ -z "''${HERDR_APP_SYNC_RUNNING:-}" ]; then
+      export HERDR_APP_SYNC_RUNNING=1
+      if [ -d "''${HERDR_APP_HOME:-$HOME/.config/herdr-app}" ]; then
+        herdr-app-sync || :
+      else
+        ${util-linux}/bin/setsid -f sh -c 'sleep 20; herdr-app-sync' >/dev/null 2>&1 || :
+      fi
+    fi
+  '';
 
   frontmatter = writeText "herdr-app-skill-frontmatter" ''
     ---
@@ -79,7 +94,9 @@ stdenv.mkDerivation (finalAttrs: {
       --set HERDR_CORE_DIRS "${herdr-core}/bin" \
       --set HERDR_RELEASES_URL "file://${releases}" \
       --set HERDR_TELEMETRY 0 \
-      --set DO_NOT_TRACK 1
+      --set DO_NOT_TRACK 1 \
+      --prefix PATH : "${lib.makeBinPath [ herdr-app-sync ]}" \
+      --run ${lib.escapeShellArg syncOnLaunch}
   '';
 
   passthru.skill = runCommand "herdr-app-skill" { } ''
