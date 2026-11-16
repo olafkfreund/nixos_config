@@ -421,25 +421,89 @@ team ask t1 review "$tmp/prompt" --timeout 5
 assert_code 0
 is '.outcome == "ok" and .n == 2'
 rm "$TEST_STATE/reply"
-team ask t1 review "$tmp/prompt" --timeout 1
-is '.outcome == "timeout" and .n == 3'
-# a new provider string appears after the send: provider_error, lines kept verbatim
-{ "$tool" ask t1 review "$tmp/prompt" --resume 3 --timeout 20 >"$tmp/out2" 2>&1 & }
+# a new provider error appears after the send; only its reconstructed lines are kept
+{ "$tool" ask t1 review "$tmp/prompt" --timeout 20 >"$tmp/out2" 2>&1 & }
 bg=$!
-sleep 0.5
-printf 'noise\nError: Usage limit reached. Try again later\nmore\nQuota exceeded for today\n' >"$TEST_STATE/screen"
+wait_until jq -e '.members.review.pending.n == 3' "$rt/t1.json" >/dev/null || die 'provider request not pending'
+printf "■ You've hit your usage limit. Try again later\n\nagy error: Quota exceeded for today\n" >"$TEST_STATE/screen"
 wait "$bg" || :
 jq -e '.outcome == "provider_error" and .answer == null' "$tmp/out2" >/dev/null || die "provider_error"
-[[ $(grep -c . "$(field t1 review work)/ans/3.screen") == 2 ]]
-grep -qx 'Quota exceeded for today' "$(field t1 review work)/ans/3.screen"
-rm "$TEST_STATE/screen"
-# a stale interrupted marker does not count; a new one does
-printf '■ Conversation interrupted\n' >"$TEST_STATE/screen"
+printf "■ You've hit your usage limit. Try again later\nagy error: Quota exceeded for today\n" >"$tmp/expected"
+diff -u "$tmp/expected" "$(field t1 review work)/ans/3.screen"
+
+# a recognised error already visible at send time is the baseline
+printf "■ You've hit your usage limit. Try again later\n" >"$TEST_STATE/screen"
 team ask t1 review "$tmp/prompt" --timeout 1
 is '.outcome == "timeout" and .n == 4'
-team ask t1 review "$tmp/prompt" --resume 4 --timeout 1
-is '.outcome == "timeout"'
+jq -e '.members.review.pending.perr == 1' "$rt/t1.json" >/dev/null || die 'provider baseline'
 { "$tool" ask t1 review "$tmp/prompt" --resume 4 --timeout 20 >"$tmp/out2" 2>&1 & }
+bg=$!
+wait_until jq -e '.members.review.pending.n == 4' "$rt/t1.json" >/dev/null || die 'baseline request not pending'
+printf "■ You've hit your usage limit. Try again later\n\n■ Flex capacity unavailable.\n" >"$TEST_STATE/screen"
+wait "$bg" || :
+jq -e '.outcome == "provider_error" and .n == 4' "$tmp/out2" >/dev/null || die 'baseline provider_error'
+printf "■ You've hit your usage limit. Try again later\n■ Flex capacity unavailable.\n" >"$tmp/expected"
+diff -u "$tmp/expected" "$(field t1 review work)/ans/4.screen"
+
+# output and code containing phrases are not provider errors; a matching turn still wins
+printf 'grep: rate limit exceeded\nperr=("Usage limit reached" "rate limit exceeded")\n' >"$TEST_STATE/screen"
+team ask t1 review "$tmp/prompt" --timeout 1
+is '.outcome == "timeout" and .n == 5'
+work=$(field t1 review work)
+id=55555555-2222-3333-4444-555555555555
+jq -nc --arg id "$id" --arg in "$(pointer t1 5)" '{turn_id:$id,input:$in,reply:"done",source:"codex"}' >"$work/turns/$id.json"
+team ask t1 review "$tmp/prompt" --resume 5 --timeout 5
+is '.outcome == "ok" and .n == 5'
+
+for n in 6 7 8; do
+  rm -f "$TEST_STATE/screen"
+  { "$tool" ask t1 review "$tmp/prompt" --timeout 20 >"$tmp/out2" 2>&1 & }
+  bg=$!
+  wait_until jq -e --argjson n "$n" '.members.review.pending.n == $n' "$rt/t1.json" >/dev/null || die "provider request $n not pending"
+  case $n in
+    6) printf '■ Policy-restricted capacity is\nunavailable. Please try again\n' >"$TEST_STATE/screen" ;;
+    7) printf '■ Your request failed because the\nSelected model is at capacity.\n' >"$TEST_STATE/screen" ;;
+    8) printf '■ Flex capacity unavailable.\n' >"$TEST_STATE/screen" ;;
+  esac
+  wait "$bg" || :
+  jq -e --argjson n "$n" '.outcome == "provider_error" and .n == $n' "$tmp/out2" >/dev/null || die "provider request $n"
+  if ((n == 6 || n == 7)); then
+    if ((n == 6)); then
+      printf '■ Policy-restricted capacity is unavailable. Please try again\n' >"$tmp/expected"
+    else
+      printf '■ Your request failed because the Selected model is at capacity.\n' >"$tmp/expected"
+    fi
+    diff -u "$tmp/expected" "$work/ans/$n.screen"
+  fi
+done
+
+# Retry and UI lines, including a circle under the C locale, do not trigger
+printf '■ Copy failed: clipboard busy\n\nReconnecting… rate limit exceeded\n● rate limit exceeded\n' >"$TEST_STATE/screen"
+LC_ALL=C team ask t1 review "$tmp/prompt" --timeout 1
+is '.outcome == "timeout" and .n == 9'
+id=aaaaaaaa-2222-3333-4444-555555555555
+jq -nc --arg id "$id" --arg in "$(pointer t1 9)" '{turn_id:$id,input:$in,reply:"done",source:"codex"}' >"$work/turns/$id.json"
+team ask t1 review "$tmp/prompt" --resume 9 --timeout 5
+is '.outcome == "ok" and .n == 9'
+
+rm "$TEST_STATE/screen"
+{ LC_ALL=C "$tool" ask t1 review "$tmp/prompt" --timeout 20 >"$tmp/out2" 2>&1 & }
+bg=$!
+wait_until jq -e '.members.review.pending.n == 10' "$rt/t1.json" >/dev/null || die 'C locale provider request not pending'
+printf '■ Your request failed because the\nSelected model is at capacity.\n' >"$TEST_STATE/screen"
+wait "$bg" || :
+jq -e '.outcome == "provider_error" and .n == 10' "$tmp/out2" >/dev/null || die 'C locale provider_error'
+printf '■ Your request failed because the Selected model is at capacity.\n' >"$tmp/expected"
+diff -u "$tmp/expected" "$work/ans/10.screen"
+
+# a stale interrupted marker does not count; a new one does
+rm "$TEST_STATE/screen"
+printf '■ Conversation interrupted\n' >"$TEST_STATE/screen"
+team ask t1 review "$tmp/prompt" --timeout 1
+is '.outcome == "timeout" and .n == 11'
+team ask t1 review "$tmp/prompt" --resume 11 --timeout 1
+is '.outcome == "timeout"'
+{ "$tool" ask t1 review "$tmp/prompt" --resume 11 --timeout 20 >"$tmp/out2" 2>&1 & }
 bg=$!
 sleep 0.5
 printf '■ Conversation interrupted\nx\n■ Conversation interrupted\n' >"$TEST_STATE/screen"
