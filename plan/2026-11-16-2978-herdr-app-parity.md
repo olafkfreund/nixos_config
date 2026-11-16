@@ -287,6 +287,7 @@ Any clash with 0.1.16's defaults, other than alt-hjkl, moves our key.
 
 - **Step 4: `pkgs/herdr-app-sync/`** (new: `default.nix`, `herdr-app-sync.sh`,
    `test.sh`).
+  - **Deviation:** `herdr-app check` only checks mods (it fails a folder without `main.js`), so layouts are validated with `jq` (an object with string `id` and `type`) before the swap.
   - The package: `writeShellApplication`,
      `runtimeInputs = [ jq rsync coreutils util-linux systemd ]`. Its
      `checkPhase` runs `bash ./test.sh "$target"` with a fake `herdr-app`
