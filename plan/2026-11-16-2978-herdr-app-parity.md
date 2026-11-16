@@ -424,6 +424,12 @@ Any clash with 0.1.16's defaults, other than alt-hjkl, moves our key.
         `ignored_buftypes` / `ignored_filetypes` (`:27-41`).
   - Check: `herdr-app check`; `nvim --headless -c 'lua require("lazy")' -c q`
       starts without errors.
+  - **Deviations (done 2026-11-16):** `<mod>.<command>` reaches only a
+    shown copy, so the `freund` layout gets a 1 px `splits` block beside the
+    status bar (`status-row`). The Lua mappings are plain, not `<expr>`:
+    they change windows, which textlock forbids in an expression mapping;
+    in ignored buffers the key is fed back with `nvim_feedkeys`. Tested
+    headless: split nav, the edge call, resize, and an ignored buffer.
 - **Step 11: Hook hc branch.** `modules/programs/claude-code-managed.nix:687-735`:
   - Lines `:692-694` (today's guard) become the condition for a TUI
       branch with today's body, unchanged.
