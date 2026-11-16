@@ -11,7 +11,7 @@ cg=$dir/cgroup
 fake=$dir/hc-shell
 
 python3 -c 'import socket, sys; s = socket.socket(socket.AF_UNIX); s.bind(sys.argv[1])' "$dir/bus"
-printf '0::/user.slice/app.slice/hc-hold-1.scope\n' >"$cg"
+printf '0::/user.slice/app.slice/hc-hold-1.service\n' >"$cg"
 printf '#!%s\n' "$(command -v bash)" >"$fake"
 cat >>"$fake" <<'EOF'
 if grep -q '^wrap ' "$HC_TEST_LOG"; then
@@ -38,10 +38,14 @@ run() {
   : >"$log"
   : >"$err"
   HC_TEST_LOG=$log HC_TEST_SCOPE=$scope HC_ARGV_GUARD_CGROUP=$cg XDG_RUNTIME_DIR=$dir \
-    HC_TERMINAL_ID=t1 "$@" </dev/null 2>"$err" &
+    HC_TERMINAL_ID=t1 "$@" </dev/null >"$dir/stdout" 2>"$err" &
   pid=$!
   wait "$pid"
   check_stderr
+  [ ! -s "$dir/stdout" ] || {
+    cat "$dir/stdout" >&2
+    exit 1
+  }
 }
 
 # shellcheck disable=SC2016
@@ -54,19 +58,19 @@ diff -u "$dir/expected" "$log"
 # shellcheck disable=SC2016
 cmd='printf "run %s\n" "$$" >> "$HC_TEST_LOG"; exec bash --rcfile "$HC_TEST_GUARD" -ic "$HC_TEST_SECOND"'
 # shellcheck disable=SC2016
-second='printf "run2 %s\n" "$$" >> "$HC_TEST_LOG"'
+second='printf "run2 %s%s\n" "$$" "${_hc_cg+ leaked}${_hc_argv+ leaked}" >> "$HC_TEST_LOG"'
 HC_TEST_GUARD=$guard HC_TEST_SECOND=$second run bash --rcfile "$guard" -ic "$cmd"
 printf 'wrap %s\nrun %s\nrun2 %s\n' "$pid" "$pid" "$pid" >"$dir/expected"
 diff -u "$dir/expected" "$log"
 
-for cgroup in 'herdr-pane-9.scope' 'herdr-pane-9.scope/child.scope'; do
+for cgroup in 'herdr-pane-9.scope' 'herdr-pane-9.scope/child.scope' 'run-u5.scope' 'hc-hold-1.service/x.scope'; do
   printf '0::/user.slice/app.slice/%s\n' "$cgroup" >"$cg"
   run bash --rcfile "$guard" -ic "$second"
   printf 'run2 %s\n' "$pid" >"$dir/expected"
   diff -u "$dir/expected" "$log"
 done
 
-printf '0::/user.slice/app.slice/hc-hold-1.scope\n' >"$cg"
+printf '0::/user.slice/app.slice/hc-hold-1.service\n' >"$cg"
 run env -u HC_TERMINAL_ID bash --rcfile "$guard" -ic "$second"
 printf 'run2 %s\n' "$pid" >"$dir/expected"
 diff -u "$dir/expected" "$log"
@@ -77,4 +81,14 @@ diff -u "$dir/expected" "$log"
 
 run env HC_ARGV_GUARD_CGROUP="$dir/missing" bash --rcfile "$guard" -ic "$second"
 printf 'run2 %s\n' "$pid" >"$dir/expected"
+diff -u "$dir/expected" "$log"
+
+# The owner's aliases (cat=bat) and PATH must not change the guard's result.
+printf '0::/user.slice/app.slice/hc-hold-1.service\n' >"$cg"
+{
+  printf 'alias cat=false grep=false id=false\n'
+  cat "$guard"
+} >"$dir/aliased.bash"
+HC_TEST_GUARD=$dir/aliased.bash HC_TEST_SECOND=$second run bash --rcfile "$dir/aliased.bash" -ic "$cmd"
+printf 'wrap %s\nrun %s\nrun2 %s\n' "$pid" "$pid" "$pid" >"$dir/expected"
 diff -u "$dir/expected" "$log"
