@@ -35,15 +35,15 @@
     programs.flea = {
       enable = true;
       defaultFileManager.enable = true;
-      # The portal file picker is GNOME's (Nautilus), not Flea: owner's choice after screen sharing broke
-      # with Flea as the picker. Flea stays the file manager.
+      # Portal file picker: the GTK (GNOME) dialog, as before Flea. Owner's choice after screen sharing
+      # broke with Flea as the picker. xdg-desktop-portal-gnome serves only Settings outside GNOME, so gtk.
       filePicker.enable = false;
       hyprland.bindings.enable = true;
     };
     xdg.configFile."xdg-desktop-portal/hyprland-portals.conf".text = ''
       [preferred]
       default=hyprland;gtk
-      org.freedesktop.impl.portal.FileChooser=gnome;gtk
+      org.freedesktop.impl.portal.FileChooser=gtk
       org.freedesktop.impl.portal.Secret=gnome-keyring
     '';
     # home/desktop/gnome/default.nix sets Nautilus at normal priority, and mimeApps
