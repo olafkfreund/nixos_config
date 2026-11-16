@@ -13,8 +13,10 @@ All in `home/development/herdr-team.sh` around `perr` (line 937) and the `ask` l
 1. **Error lines first, phrases second.** A new `perr_lines` reads the screen and prints only provider-error
    lines, each joined with its wrapped continuation:
    - a Codex error starts with `■` after optional leading spaces (Codex renders terminal errors as
-     `format!("■ {message}")`); following lines that start with spaces and are not blank are the same message
-     wrapped by the TUI, so they are appended to it;
+     `format!("■ {message}")`). Codex wraps that cell at column zero (its continuation indent is the line's
+     leading whitespace, which is empty), so the following non-blank lines are the same message: they are joined
+     to it until a blank line (Codex separates history cells with one), another `■` or `agy error:` line, or six
+     lines, whichever comes first;
    - an agy error starts with `agy error:` after optional leading spaces (`agy-acp-member.py`).
 
    `perr_count` then counts those lines that contain a `perr` phrase (`grep -ciF`, as now), and the `.screen`
@@ -51,13 +53,23 @@ All in `home/development/herdr-team.sh` around `perr` (line 937) and the `ask` l
 
 `home/development/herdr-team-test.sh`, run by the `herdr-team` package's `checkPhase` on every build:
 
-- The existing provider-error test (line 426) uses verified shapes: `■ You've hit your usage limit…` and
-  `agy error: Quota exceeded for today`; `provider_error` with exactly those lines in `<n>.screen`.
-- New: an unprefixed phrase (`grep: rate limit exceeded`, a code line listing the phrases) appears after the
-  send and the turn times out instead; with a completed turn file the outcome is `ok`.
-- New: a `■` error wrapped over two lines where the phrase is on the continuation line is caught.
-- New: `■ Copy failed: …` with no phrase does not trigger.
-- The stale-error test (line 418) keeps passing.
+- The stale-error test (line 418) uses a recognised shape (`■ You've hit your usage limit…`), so it still proves
+  that an error already on screen at send time does not count.
+- The provider-error test (line 426) uses verified shapes: `■ You've hit your usage limit…` and
+  `agy error: Quota exceeded for today`; `provider_error`, with exactly those error lines in `<n>.screen`.
+- New, each after the send:
+  - an unprefixed phrase (`grep: rate limit exceeded`, a code line listing the phrases) times out instead; with a
+    completed turn file the outcome is `ok`;
+  - a `■` error wrapped at column zero, once with the phrase split across rows
+    (`■ Policy-restricted capacity is` / `unavailable. Please try again`) and once with the phrase wholly on the
+    second row, is caught;
+  - `■ Flex capacity unavailable.` is caught;
+  - `■ Copy failed: …` and Codex retry status text (`Reconnecting… rate limit exceeded`, no `■`) do not trigger;
+  - two consecutive `■` errors separated by a blank line count as two (a second one after a stale first one ends
+    the wait).
+- The provider cases run through the fake TUI read, as now; `screen_read` returns plain text for both backends
+  (the herdr read prints `visible_text()`, and a live `hc read` kept `■` and `agy error:` at column zero), so the
+  filter is the same for hc.
 
 Then `just test-host p620` and `razer`, deploy (stacked on #2990), and a live `herdr-team ask` on p620 where the
 member greps `herdr-team.sh` for the phrase list: the outcome is `ok`, not `provider_error`.
