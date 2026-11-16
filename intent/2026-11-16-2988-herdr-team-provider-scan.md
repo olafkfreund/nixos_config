@@ -20,10 +20,20 @@ fixture.
 
 ## Proposed outcome
 
-`ask` (and `converse`) return `provider_error` only when the provider itself reports an error: Codex's own error
-lines (Codex 0.169 prints them as `■ <message>`, the same marker as `■ Conversation interrupted`) and
-`agy-acp-member`'s `agy error:` lines. Text that merely contains a phrase, anywhere else on screen, no longer ends
-the wait. Real provider failures are still caught, with their lines saved to `<n>.screen` as now.
+A phrase counts only on a line with a verified provider-error shape, not anywhere on screen:
+
+- Codex: the line starts with `■ ` (Codex 0.169 renders terminal errors as `format!("■ {message}")`, the path its
+  usage-limit, capacity, stream and rate-limit failures take once retries are exhausted);
+- agy: the line starts with `agy error:` (printed by `agy-acp-member.py` for prompt errors).
+
+Incidental matches (code, logs or docs a member reads or prints) no longer end the wait. The `<n>.screen` evidence
+file uses the same rule. The usage-limit, capacity, stream-disconnect and rate-limit errors above are still caught,
+and the phrase list gains Codex's two missing capacity messages (`Policy-restricted capacity is unavailable`,
+`Flex capacity unavailable`).
+
+Accepted limitation: a member that prints an exact error line on purpose (for example agy quoting a line that
+starts with `agy error:`) can still trigger it. Screen scanning cannot tell origin; this is the same trust level as
+today, minus the accidental matches.
 
 ## Affected users and systems
 
@@ -33,14 +43,16 @@ the wait. Real provider failures are still caught, with their lines saved to `<n
 
 ## Constraints
 
-- No missed real failures: a usage-limit or capacity error must still end the wait instead of running to the
-  timeout.
-- Keep the baseline behaviour (only a match that appears after the send counts) and the `.screen` evidence file.
-- Existing tests keep passing; members run unrestricted, so nothing here may depend on the member's cooperation.
+- No regression for the listed terminal errors: each must still end the wait instead of running to the timeout.
+  The count-based baseline (only matches that appear after the send count) stays as it is, including its existing
+  blind spot when an old line scrolls off as a new one appears; fixing that is out of scope.
+- Keep the `.screen` evidence file. Existing tests keep their guarantees; fixtures that use unprefixed error text
+  change to the verified shapes, and a new test shows an unprefixed phrase no longer triggers.
+- Members run unrestricted, so nothing here may depend on the member's cooperation.
 - Stacked on `feat/2978-herdr-app-parity` (#2990), which edits the same file.
 
 ## Open questions
 
-- Exact Codex error line shapes: the `■` prefix is confirmed in the 0.169 binary for interrupt, copy and export
-  errors; the spec will confirm it for usage-limit, capacity and stream errors (source or a captured screen) before
-  relying on it, and keep a fallback if a provider error has no prefix.
+- Transient retries: while Codex retries (HTTP 429, a dropped stream) it shows the status in its status indicator,
+  without `■ `, so `ask` would keep waiting until the retries succeed or fail with a terminal `■ ` error.
+  Recommendation: keep waiting, since a retry that succeeds is not a failure and a final failure is still caught.
