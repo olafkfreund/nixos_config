@@ -389,11 +389,17 @@ always returns the app to its default layout and keys.
 
 ### Known gaps
 
-The window title has no host or workspace, reviewr's send-comments-to-agent and hintr's run-a-listed-key have no
-app equivalent yet, lazygit opens as a tab (there is no floating terminal), Collie is not wired to hc, and the
-Omarchy `nixarchy.herdr` widget still reads the TUI. Agents started from the app's + menu (or any `argv` launch)
-run in your login shell inside hc's one shared `hc-hold-*` unit, so the per-pane systemd scope (#2959) only covers
-plain shells. Each has a follow-up issue.
+| Gap | Issue |
+| --- | --- |
+| reviewr's send line comments to the agent | #2981 |
+| hintr's run-a-listed-key (`app.help` only lists) | #2982 |
+| Omarchy `nixarchy.herdr` widget still reads the TUI | #2983 |
+| window title has no host or workspace | #2984 |
+| Collie is not wired to hc | #2985 |
+| lazygit opens as a tab, not a float | #2986 |
+| agents started from the + menu share one `hc-hold-*` unit (no per-pane scope, #2959) | #2987 |
+| herdr-team's provider-error scan can match its own source on screen | #2988 |
+| hc keeps its first starter's environment (see below) | #2989 |
 
 ### hc keeps the environment of whoever started it first
 
