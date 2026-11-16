@@ -15,6 +15,7 @@
 , herdr-core
 , herdr-app-sync
 , util-linux
+, coreutils
 , linkFarm
 , writeText
 , runCommand
@@ -36,7 +37,8 @@ let
     if [ "$#" -eq 0 ] && [ -z "''${HERDR_APP_SYNC_RUNNING:-}" ]; then
       export HERDR_APP_SYNC_RUNNING=1
       if [ -d "''${HERDR_APP_HOME:-$HOME/.config/herdr-app}" ]; then
-        herdr-app-sync || :
+        # Never let a hung `herdr-app check` keep the window from opening.
+        ${coreutils}/bin/timeout 60 herdr-app-sync || :
       else
         ${util-linux}/bin/setsid -f sh -c 'sleep 20; herdr-app-sync' >/dev/null 2>&1 || :
       fi

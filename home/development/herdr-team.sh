@@ -308,15 +308,25 @@ stop_scope() { # unit: stop it; fails unless systemd confirms it is inactive
 # Stop the member's scope, then TERM its group when its leader is still ours; otherwise signal only verified pid/start pairs.
 # Returns nonzero only when the scope is still active.
 stop_member() { # ctl
-  local pgid pstart i pair pid start remaining signal sc='' rc=0 pairs=() file address
-  if [[ $backend == hc ]]; then
+  local pgid pstart i pair pid start remaining signal sc='' rc=0 pairs=() file address hcname rec_backend=tui
+  # Use the backend that started the member (TUI records have none), not the caller's.
+  for file in "$rt"/*.json; do
+    [[ -f $file ]] || continue
+    if jq -e --arg c "$1" 'any(.members[]; .ctl == $c)' "$file" >/dev/null 2>&1; then
+      rec_backend=$(jq -r '.backend // "tui"' "$file")
+      break
+    fi
+  done
+  if [[ $rec_backend == hc ]]; then
     # As in the TUI branch: the scope holds what the member left behind (MCP servers).
     { read -r sc <"$1/scope"; } 2>/dev/null || sc=''
     if [[ $sc =~ ^herdr-team-[A-Za-z0-9_-]+\.scope$ ]] && ! stop_scope "$sc"; then rc=1; fi
-    address=''
+    address='' hcname=''
     for file in "$rt"/*.json; do
       [[ -f $file ]] || continue
       address=$(jq -r --arg c "$1" '[.members[] | select(.ctl == $c) | .pane] | first // empty' "$file")
+      # hc addresses are short and can be reused: also match the name hc run gave it.
+      hcname=$(jq -r --arg c "$1" '.task as $t | [.members | to_entries[] | select(.value.ctl == $c) | "\($t)-\(.key)"] | first // empty' "$file")
       [[ -z $address ]] || break
     done
     [[ -n $address ]] || return "$rc"
@@ -325,10 +335,10 @@ stop_member() { # ctl
     if ! got=$(hc get "$address" --json 2>/dev/null); then
       got=$(herdr-app ls 2>/dev/null) || return 1
       jq -e --arg a "$address" '([.spaces[].tabs[].terminals[]? | select((.terminal // .address // .id // .) == $a)] | length) == 0' \
-        >/dev/null <<<"$got"
-      return
+        >/dev/null <<<"$got" || return 1
+      return "$rc"
     fi
-    jq -e --arg a "$address" '.address == $a' >/dev/null <<<"$got" || return 1
+    jq -e --arg a "$address" --arg n "$hcname" '.address == $a and .name == $n' >/dev/null <<<"$got" || return 1
     hc kill "$address" >/dev/null 2>&1 || return 1
     return "$rc"
   fi
@@ -761,7 +771,7 @@ up_hc() {
     jq -n --arg task "$task" --arg gen "$gen" --arg w "$root" --arg gd "$gd" --argjson lead "$lead" --arg ls "$lead_start" \
       --arg m "$role" --argjson rec "$rec" \
       '{task: $task, gen: $gen, tab: "", worktree: $w, gitdir: $gd, lead: {pid: $lead, start: $ls}, members: {($m): $rec},
-        reservation: null}' >"$f"
+        reservation: null, backend: "hc"}' >"$f"
   fi
   unlock
   # From here on any failure or signal takes the member down again.
@@ -802,13 +812,14 @@ stop_scope() { # unit: stop it; fails unless systemd confirms it is inactive; no
   while sleep_for 30; do
     if [[ $(start_of "$lead_pid") == "$lead_start" ]] && ((SECONDS < maxsecs)); then continue; fi
     : >"$ctl/stop"
-    if [[ -n ${HC_TERMINAL_ID:-} ]] && jq -e --arg a "$HC_TERMINAL_ID" --arg c "$ctl" '[.members[] | select(.ctl == $c and .pane == $a)] | length == 1' "$state_file" >/dev/null 2>&1; then
-      hc kill "$HC_TERMINAL_ID" >/dev/null 2>&1 || :
-    fi
     stop_scope "$scope" || :
     kill_group TERM || :
     sleep_for 5
     kill_group KILL || :
+    # Last: ending our own terminal can take this watchdog with it.
+    if [[ -n ${HC_TERMINAL_ID:-} ]] && jq -e --arg a "$HC_TERMINAL_ID" --arg c "$ctl" '[.members[] | select(.ctl == $c and .pane == $a)] | length == 1' "$state_file" >/dev/null 2>&1; then
+      hc kill "$HC_TERMINAL_ID" >/dev/null 2>&1 || :
+    fi
     exit 0
   done
 ) &
@@ -823,7 +834,8 @@ if [[ $containment == scope ]]; then
 else
   bash -c "$member" "$ctl" "${argv[@]}" 2>"$ctl/stderr" || code=$?
 fi
-kill "$wd" 2>/dev/null
+# A watchdog that started the stop (ctl/stop) still has its last hc kill to do.
+[[ -e $ctl/stop ]] || kill "$wd" 2>/dev/null
 : >"$ctl/gone"
 tail -n 5 "$ctl/stderr" >"$ctl/status.tmp" 2>/dev/null && mv "$ctl/status.tmp" "$ctl/status"
 stop_scope "$scope" || :

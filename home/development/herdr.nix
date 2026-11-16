@@ -41,8 +41,8 @@ let
   # pane or a Claude session (#2978). Drop those identities so claude() and
   # herdr-team see the app, not a TUI they are not in.
   hcShell = pkgs.writeShellScript "hc-shell" ''
-    for v in $(${pkgs.coreutils}/bin/env | ${pkgs.gnused}/bin/sed -n 's/^\(HERDR_[A-Z_]*\|CLAUDE_CODE_CHILD_SESSION\|CLAUDE_CODE_SESSION_[A-Z_]*\|CLAUDE_CODE_MESSAGING_[A-Z_]*\|CLAUDE_CODE_BRIDGE_SESSION_ID\|CLAUDE_CODE_ENTRYPOINT\|CLAUDE_CODE_EXECPATH\|TMUX\|TMUX_PANE\)=.*/\1/p'); do
-      unset "$v"
+    for v in $(${pkgs.coreutils}/bin/env | ${pkgs.gnused}/bin/sed -n 's/^\(HERDR_[A-Z0-9_]*\|CLAUDE_CODE_CHILD_SESSION\|CLAUDE_CODE_SESSION_[A-Z0-9_]*\|CLAUDE_CODE_MESSAGING_[A-Z0-9_]*\|CLAUDE_CODE_BRIDGE_SESSION_ID\|CLAUDE_CODE_ENTRYPOINT\|CLAUDE_CODE_EXECPATH\|TMUX\|TMUX_PANE\)=.*/\1/p'); do
+      [ "$v" = HERDR_APP_HOME ] || unset "$v"
     done
     exec ${paneShell} "$@"
   '';

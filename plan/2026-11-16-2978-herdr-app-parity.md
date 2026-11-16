@@ -481,7 +481,9 @@ Any clash with 0.1.16's defaults, other than alt-hjkl, moves our key.
     `~/.codex/config.toml`: Claude `PostToolUse` (`ExitPlanMode|TodoWrite|
     TaskCreate|TaskUpdate`), `TaskCreated`, `TaskCompleted`; Codex `Stop`,
     `UserPromptSubmit`, `PostToolUse` (`^update_plan$`) as managed hooks in
-    `/etc/codex/requirements.toml`. The hook is a no-op where the mod is absent.
+    `/etc/codex/requirements.toml`. The hook runs the pinned store copy of
+    `plan.py` (package `pkgs/herdr-agent-plans`, shared with the sync source);
+    the installed mod only switches it on (review finding, PR #2990).
   - `terminal-ids`: dendenlarin/herdr-terminal-ids @1b7eaff0 (Apache-2.0),
     as the pane header (`role: pane`, click-to-copy terminal ID). Its agent
     list role is not used (`freund-agents` owns that block); `freund-agents`

@@ -151,8 +151,8 @@ same_pane() {
 }
 close_pane() {
   if [[ $backend == hc ]]; then
-    local address
-    read -r address < "$dir/address" 2>/dev/null || return 0
+    local address=${runner_address:-}
+    [[ -n $address ]] || read -r address < "$dir/address" 2>/dev/null || return 0
     [[ -n $address ]] && hc kill "$address" >/dev/null 2>&1 || :
   elif same_pane; then "$herdr_bin" pane close "$pane" >/dev/null 2>&1 || :; fi
 }
@@ -180,6 +180,8 @@ kill_feeder() {
 finish() {
   trap - EXIT
   trap '' HUP INT TERM
+  # Read before $dir can be removed below; close_pane needs it afterwards.
+  if [[ $backend == hc ]]; then read -r runner_address < "$dir/address" 2>/dev/null || :; fi
   helper_alive=1
   kill -0 "$helper_pid" 2>/dev/null || helper_alive=
   # stopped early (pane closed, signal) or orphaned: stop the whole group before anything else

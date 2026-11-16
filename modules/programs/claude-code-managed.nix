@@ -771,10 +771,11 @@ let
 
   # herdr-agent-plans (#2978): the herdr-app Plan panel's hook. It needs the mod
   # that herdr-app-sync installs, so it is a no-op wherever the mod is absent.
+  # The store copy runs, never the writable one in the app home; the installed mod
+  # only switches it on.
   agentPlansHook = agent: pkgs.writeShellScript "agent-plans-${agent}" ''
-    p="''${HERDR_APP_HOME:-$HOME/.config/herdr-app}/mods/agent-plans/hook/plan.py"
-    [ -f "$p" ] || exit 0
-    ${pkgs.python3}/bin/python3 "$p" ${agent} || true
+    [ -d "''${HERDR_APP_HOME:-$HOME/.config/herdr-app}/mods/agent-plans" ] || exit 0
+    ${pkgs.python3}/bin/python3 ${pkgs.customPkgs.herdr-agent-plans}/mods/agent-plans/hook/plan.py ${agent} || true
   '';
   agentPlansHooks =
     let h = [{ type = "command"; command = "${agentPlansHook "claude"}"; timeout = 5; }]; in {

@@ -1531,7 +1531,10 @@ printf '%s\n' "$*" >>"$TEST_STATE/hc-log"
 case $1 in
   run)
     shift
-    while [[ $1 != -- ]]; do shift; done
+    while [[ $1 != -- ]]; do
+      [[ $1 != --name ]] || printf '%s\n' "$2" >"$TEST_STATE/hc-name"
+      shift
+    done
     shift
     [[ $1 == bash && -f $2 ]] || exit 2
     launch=$2
@@ -1550,7 +1553,8 @@ case $1 in
     [[ ! -e $TEST_STATE/hc-implement ]] || name=codex-implement
     status=null
     [[ ! -e $TEST_STATE/agent-up ]] || status='"idle"'
-    jq -nc --arg a "$addr" --arg n "$name" --argjson st "$status" '{address:$a,state:"running",status:$st,foreground:{argv:[$n],name:$n,pid:1},pid:1}'
+    hn=$(cat "$TEST_STATE/hc-name" 2>/dev/null || :)
+    jq -nc --arg a "$addr" --arg n "$name" --arg hn "$hn" --argjson st "$status" '{address:$a,name:$hn,state:"running",status:$st,foreground:{argv:[$n],name:$n,pid:1},pid:1}'
     ;;
   read)
     cat "$TEST_STATE/screen" 2>/dev/null || :

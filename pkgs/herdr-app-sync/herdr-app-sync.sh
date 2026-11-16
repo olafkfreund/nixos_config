@@ -124,6 +124,12 @@ main() {
     return 0
   fi
   mkdir -p "$app/mods" "$app/layouts" "$state" || return 1
+  # Activation, a window launch and the post-launch waiter can overlap.
+  exec 8>"$state/.lock" || return 1
+  if ! flock -w 60 8; then
+    log "another sync is still running"
+    return 0
+  fi
   [[ -f $manifest ]] || printf '{"mods":{},"layouts":{},"layout_switched":false}\n' >"$manifest"
   jq -e 'type == "object"' "$manifest" >/dev/null || {
     log "invalid manifest: $manifest"

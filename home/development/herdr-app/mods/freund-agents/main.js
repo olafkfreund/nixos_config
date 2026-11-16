@@ -110,7 +110,7 @@ export default class Agents extends View {
     const value = this.input.value();
     if (!address || !value.trim()) return;
     closeOverlay(props().overlay);
-    exec("hc", ["send", address, value]);
+    exec("hc", ["send", address, "--", value]); // text may start with "-"
   }
 
   controlMenu(t) {

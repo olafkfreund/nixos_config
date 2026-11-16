@@ -22,12 +22,7 @@ let
   };
 
   # Owner-requested additions (plan step 12b).
-  agentPlans = pkgs.fetchFromGitHub {
-    owner = "dendenlarin";
-    repo = "herdr-agent-plans";
-    rev = "8a4b42aa69649172d5c6b101a859edc9f4fbf33f";
-    hash = "sha256-+quH9SPBlrV3LAw2DSdQV6IoPacOzFmhSOc2rzJGCus=";
-  };
+  agentPlans = pkgs.customPkgs.herdr-agent-plans;
   terminalIds = pkgs.fetchFromGitHub {
     owner = "dendenlarin";
     repo = "herdr-terminal-ids";
