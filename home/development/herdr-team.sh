@@ -310,13 +310,16 @@ stop_scope() { # unit: stop it; fails unless systemd confirms it is inactive
 stop_member() { # ctl
   local pgid pstart i pair pid start remaining signal sc='' rc=0 pairs=() file address
   if [[ $backend == hc ]]; then
+    # As in the TUI branch: the scope holds what the member left behind (MCP servers).
+    { read -r sc <"$1/scope"; } 2>/dev/null || sc=''
+    if [[ $sc =~ ^herdr-team-[A-Za-z0-9_-]+\.scope$ ]] && ! stop_scope "$sc"; then rc=1; fi
     address=''
     for file in "$rt"/*.json; do
       [[ -f $file ]] || continue
       address=$(jq -r --arg c "$1" '[.members[] | select(.ctl == $c) | .pane] | first // empty' "$file")
       [[ -z $address ]] || break
     done
-    [[ -n $address ]] || return 0
+    [[ -n $address ]] || return "$rc"
     hc_owned "$address" || return 1
     local got
     if ! got=$(hc get "$address" --json 2>/dev/null); then
@@ -327,7 +330,7 @@ stop_member() { # ctl
     fi
     jq -e --arg a "$address" '.address == $a' >/dev/null <<<"$got" || return 1
     hc kill "$address" >/dev/null 2>&1 || return 1
-    return 0
+    return "$rc"
   fi
   { read -r sc <"$1/scope"; } 2>/dev/null || sc=''
   if [[ $sc =~ ^herdr-team-[A-Za-z0-9_-]+\.scope$ ]] && ! stop_scope "$sc"; then rc=1; fi
@@ -657,7 +660,7 @@ LAUNCH
 }
 
 up_hc() {
-  local branch kind wrapper notify common trust lead lead_start max created reply attempt i matched mpid mstart now first rec firstpane gd root agy_session screen ready_attempts err name
+  local branch kind wrapper notify common trust lead lead_start max created reply attempt i matched mpid mstart now first rec firstpane gd root agy_session screen ready_attempts err name placeholder=
   task=${1:-}
   role=${2:-}
   shift 2 || usage
@@ -700,6 +703,7 @@ up_hc() {
   lead_space=''
   tab=''
   containment=group
+  if [[ ${HERDR_TEAM_NO_SCOPE:-} != 1 ]] && timeout 3 systemctl --user show-environment >/dev/null 2>&1; then containment=scope; fi
   lock
   sweep
   if [[ -f $f ]]; then
@@ -840,6 +844,8 @@ LAUNCH
     created=$(herdr-app 'do' tab.new --space "$lead_space" --name "team $task" --argv '["true"]' 2>/dev/null) || created=''
     tab=$(jq -r '.tab // empty' <<<"$created" 2>/dev/null) || tab=''
     [[ -n $tab ]] || fail 'could not create the team tab'
+    # tab.new keeps its shell open; this run made it, so this run ends it once a member is placed.
+    placeholder=$(jq -r '.terminal // empty' <<<"$created" 2>/dev/null) || placeholder=''
     lock
     update "$f" '.tab = $tab' --arg tab "$tab"
     unlock
@@ -863,6 +869,7 @@ LAUNCH
     sleep_for 0.1
   done
   ((i < 20)) || fail 'hc member was not placed in the team tab'
+  if [[ -n ${placeholder:-} ]]; then hc kill "$placeholder" >/dev/null 2>&1 || :; fi
   for ((i = 0; i < 20; i++)); do
     [[ -d $ctl/claim ]] && break
     sleep_for 0.1
