@@ -54,7 +54,6 @@
     ../../common/nixos/llm-index.nix
     ../../common/nixos/omarchy-sole-hyprland.nix
     ../../common/nixos/omarchy-stylix-theme.nix
-    ../../common/nixos/omarchy-t3code-theme.nix
     ../../common/nixos/omarchy-desktop.nix
   ];
 
