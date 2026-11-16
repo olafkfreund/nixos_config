@@ -414,7 +414,7 @@ printf '  \n' >"$TEST_STATE/reply"
 team ask t1 review "$tmp/prompt" --timeout 5
 assert_code 1
 is '.outcome == "empty" and .ok == false'
-# a stale provider string does not count and a completed turn wins over the screen
+# a phrase outside an error line does not count and a completed turn wins over the screen
 printf 'answer\n' >"$TEST_STATE/reply"
 printf 'noise\nError: Usage limit reached. Try again later\nmore\n' >"$TEST_STATE/screen"
 team ask t1 review "$tmp/prompt" --timeout 5
@@ -466,7 +466,7 @@ for n in 6 7 8; do
   bg=$!
   wait_until jq -e --argjson n "$n" '.members.review.pending.n == $n' "$rt/t1.json" >/dev/null || die "provider request $n not pending"
   case $n in
-    6) printf '■ Policy-restricted capacity is\nunavailable. Please try again\n' >"$TEST_STATE/screen" ;;
+    6) printf '■ Policy-restricted capacity is  \r\nunavailable. Please try again\n' >"$TEST_STATE/screen" ;;
     7) printf '■ Your request failed because the\nSelected model is at capacity.\n' >"$TEST_STATE/screen" ;;
     8) printf '■ Flex capacity unavailable.\n' >"$TEST_STATE/screen" ;;
   esac

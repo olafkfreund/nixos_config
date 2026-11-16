@@ -949,6 +949,7 @@ perr_lines() {
     {
       line = $0
       sub(/^[[:space:]]*/, "", line)
+      sub(/[[:space:]]+$/, "", line)
       if (index(line, "■") == 1 || tolower(substr(line, 1, 10)) == "agy error:") {
         emit()
         error = line
@@ -963,7 +964,7 @@ perr_lines() {
       }
     }
     END { emit() }
-  ' <<<"$1"
+  ' 2>/dev/null <<<"$1" # gawk warns on invalid UTF-8; callers parse stdout as JSON
 }
 perr_count() { perr_lines "$1" | grep -ciF "${pargs[@]}" || :; }
 reminder() { # state file: the protocol every request file ends with
