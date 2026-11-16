@@ -121,8 +121,9 @@ as fallback) and always exits 0.
 **Layout `freund`:**
 
 - A clone of `main`, with root `"toast": "notify"`.
-- Tab bar `freund-chrome` (a clone of `workspace-chrome`, plus Issues and
-  GitLab buttons).
+- Tab bar: our `freund-tabs` (a clone of `tabs` with the GitLab panel button),
+  in a row with herdr-issues' own Issues button block; the `issues` and
+  `gitlab` panels join Files and Changes in the `panel-body` stack.
 - The agents block uses `freund-agents`.
 - After its first install, the sync runs `herdr-app do layout.switch
   --name freund` once, if the app answers (`layout_switched` in the
@@ -134,8 +135,11 @@ as fallback) and always exits 0.
 - Third-party, pinned, MIT:
   - `issues`: jankeesvw/herdr-issues @15ffaad00d37efe17ef952109a3198fe299ecb67;
   - `gitlab`: rem-aster/herdr-gitlab @dc4931a029f827c93632931a2e940a93b9a2da51;
-  - `resize`: jmayaalv/herdr-app-resize @4a3b91b11a4c950b1afae87c14ab2fd6236c013b.
-- Ours: `inbox`, `freund-agents`, `notify`, `splits`, `freund-chrome`.
+- Ours: `inbox`, `freund-agents`, `notify`, `splits`, `freund-tabs`.
+- `splits` vendors the resize logic of jmayaalv/herdr-app-resize
+  @4a3b91b11a4c950b1afae87c14ab2fd6236c013b (MIT, `tree.js` + its
+  `doc.get`/`doc.set` call, with attribution). That mod is a modal popup,
+  not a one-key resize, so it is not installed on its own.
 - Settings: `{"theme":"omarchy","sounds":{"enabled":true}}`.
 
 **Keys** (`keys.json`, our sections):
@@ -165,7 +169,7 @@ Any clash with 0.1.16's defaults, other than alt-hjkl, moves our key.
 1. New version and sha256 from `releases.herdr.dev/{app,core}/latest.json`.
 2. No SVG beside the exe.
 3. Diff the new default `keys.json` against our keys.
-4. Re-clone `workspace-chrome` → `freund-chrome` and `agents` →
+4. Re-clone `tabs` → `freund-tabs` and `agents` →
    `freund-agents`, and re-apply our diffs (kept in each mod's
    `NIXOS.md`).
 5. Re-run checks V3-V5.
@@ -251,101 +255,108 @@ Any clash with 0.1.16's defaults, other than alt-hjkl, moves our key.
 
 ### Part 1: packages and hc config
 
-1. **Bump both packages.**
-   - `pkgs/herdr-core/default.nix:15` → `"0.1.21"`; `:30` →
+- **Step 1: Bump both packages.**
+  - `pkgs/herdr-core/default.nix:15` → `"0.1.21"`; `:30` →
      `78424755c10a40dde38a0bdb55c20ac19706e9ae05ed68fc2acf1fcff0d941c1`.
-   - `pkgs/herdr-app/default.nix:24` → `"0.1.16"`; `:44` →
+  - `pkgs/herdr-app/default.nix:24` → `"0.1.16"`; `:44` →
      `282d2632196b238206cfe66bfb61c0faf299ca1c91843bd076521bbe36571216`.
-   - Check:
+  - Check:
      `out=$(nix build --no-link --print-out-paths --impure --expr '(builtins.getFlake (toString ./.)).nixosConfigurations.p620.pkgs.customPkgs.herdr-app')`
      succeeds, and `ls "$out/bin"` has no `herdr-app.svg`.
-2. **hc config.** `home/development/herdr.nix`, before `:78`: add
+- **Step 2: hc config.** `home/development/herdr.nix`, before `:78`: add
    `xdg.configFile."herdr-core/config.toml".text` with `history_mb = 48`
    (TUI keeps 50 000 000 bytes) and `restore_screen = true` (closest to
    `pane_history`), each with a one-line comment.
-   - Check: `just check-syntax`.
-   - **Deviation (found at checkpoint A, 2026-11-16):** hc 0.1.21 runs one
+  - Check: `just check-syntax`.
+  - **Deviation (found at checkpoint A, 2026-11-16):** hc 0.1.21 runs one
      `hc-hold-*` unit for all terminals of a core, not one per terminal. So
      the TUI's per-pane scope wrapper (`paneShell`, #2959) also becomes hc's
      `shell = ["${paneShell}"]`. Tested by hand: two `hc run` terminals
      through it got `herdr-pane-<pid>.scope` each. Explicit programs
      (`hc run -- cmd`) still share the holder unit.
-3. **Checkpoint A (p620).**
-   - Bus steps and merge, `just test-host p620`, then `just p620`.
-   - Save the live default `keys.json` before anything edits it:
+- **Step 3: Checkpoint A (p620).**
+  - Bus steps and merge, `just test-host p620`, then `just p620`.
+  - Save the live default `keys.json` before anything edits it:
      `cp ~/.config/herdr-app/keys.json ~/.local/state/herdr-app-defaults-0.1.16.json`.
      The app rewrites an untouched file on upgrade, so this happens after
      the app restarts on 0.1.16.
-   - Then `hc server restart` (bus steps).
-   - Check V7.
+  - Then `hc server restart` (bus steps).
+  - Check V7.
 
 ### Part 2 and 3: sync, clones, mods, wiring
 
-1. **`pkgs/herdr-app-sync/`** (new: `default.nix`, `herdr-app-sync.sh`,
+- **Step 4: `pkgs/herdr-app-sync/`** (new: `default.nix`, `herdr-app-sync.sh`,
    `test.sh`).
-   - The package: `writeShellApplication`,
+  - The package: `writeShellApplication`,
      `runtimeInputs = [ jq rsync coreutils util-linux systemd ]`. Its
      `checkPhase` runs `bash ./test.sh "$target"` with a fake `herdr-app`
      on `PATH` (`check` fails a folder containing a file `BAD`; `status`
      and `do` log their arguments).
-   - Register it in `pkgs/default.nix` after `:133`.
-   - CLI: `herdr-app-sync [<source-dir>]`; the default source is
+  - Register it in `pkgs/default.nix` after `:133`.
+  - CLI: `herdr-app-sync [<source-dir>]`; the default source is
      `~/.config/herdr-app-sync/source`. The app home is `HERDR_APP_HOME`,
      else `~/.config/herdr-app`; with no home it exits 0.
-   - The source holds `managed.json` (`{mods:[…], layouts:[…],
+  - The source holds `managed.json` (`{mods:[…], layouts:[…],
      first_layout:"freund"}`), `mods/<n>/`, `layouts/<n>.json`,
      `settings.json` and `keys.json`.
-   - Behaviour: the table, install steps, JSON merge, `layout_switched` and
+  - Behaviour: the table, install steps, JSON merge, `layout_switched` and
      logging under "App files" above.
-   - test.sh covers:
-     - each table row;
-     - a failed check keeping the old one;
-     - invalid JSON untouched;
-     - undeclared keys kept;
-     - JSON backed up before a merge;
-     - a rerun as a no-op (manifest bytes unchanged);
-     - backups outside the app home;
-     - `layout.switch` called exactly once;
-     - nothing deleted outside the app home and state dir.
-   - Check: `nix build` of the package.
-2. **Launch hook.** `pkgs/herdr-app/default.nix:77-82`:
-   - Add `herdr-app-sync` to `--prefix PATH`.
-   - Add `--run` with this logic. Only when `$# -eq 0` and
+  - test.sh covers:
+    - each table row;
+    - a failed check keeping the old one;
+    - invalid JSON untouched;
+    - undeclared keys kept;
+    - JSON backed up before a merge;
+    - a rerun as a no-op (manifest bytes unchanged);
+    - backups outside the app home;
+    - `layout.switch` called exactly once;
+    - nothing deleted outside the app home and state dir.
+  - Check: `nix build` of the package.
+- **Step 5: Launch hook.** `pkgs/herdr-app/default.nix:77-82`:
+  - Add `herdr-app-sync` to `--prefix PATH`.
+  - Add `--run` with this logic. Only when `$# -eq 0` and
      `HERDR_APP_SYNC_RUNNING` is unset, export `HERDR_APP_SYNC_RUNNING=1`;
      then:
-     - if the app home exists, run `herdr-app-sync || :`;
-     - else `setsid -f sh -c 'sleep 20; herdr-app-sync' >/dev/null 2>&1`.
-   - Pass `herdr-app-sync` in as an argument in `pkgs/default.nix:133`.
-   - Check: build with a fake `herdr-app-sync` earlier on `PATH` that
+    - if the app home exists, run `herdr-app-sync || :`;
+    - else `setsid -f sh -c 'sleep 20; herdr-app-sync' >/dev/null 2>&1`.
+  - Pass `herdr-app-sync` in as an argument in `pkgs/default.nix:133`.
+  - Check: build with a fake `herdr-app-sync` earlier on `PATH` that
      appends to a log.
-     - `herdr-app --version` → log empty.
-     - `HERDR_APP_HOME=<existing scratch> herdr-app` (killed after 3 s) →
+    - `herdr-app --version` → log empty.
+    - `HERDR_APP_HOME=<existing scratch> herdr-app` (killed after 3 s) →
        one line.
-     - With an absent scratch home → one line after 20 s.
-3. **Clones** (on p620, after checkpoint A, app open on 0.1.16):
-   - In the live app:
-     - `herdr-app do layout.clone '{"name":"main","as":"freund"}'`;
-     - `herdr-app do mod.clone '{"name":"workspace-chrome","as":"freund-chrome"}'`;
-     - `herdr-app do mod.clone '{"name":"agents","as":"freund-agents"}'`.
-   - Copy them to `home/development/herdr-app/layouts/freund.json` and
-     `home/development/herdr-app/mods/freund-{chrome,agents}/`.
-   - Layout edits:
-     - root `"toast": "notify"`;
-     - the tab-bar `content.mod` → `freund-chrome`;
-     - the agents block → `freund-agents`.
-   - `freund-chrome`: add Issues and GitLab buttons next to Files and
-     Changes, copying the exact change from herdr-issues'
-     `layouts/main-issues.json` and from herdr-gitlab's `install.py`
-     tab-bar edit (read it, never run it).
-   - Each clone's diff goes into a `NIXOS.md` beside it.
-   - Remove the three live clones afterwards; restore the layout with
+    - With an absent scratch home → one line after 20 s.
+- **Step 6: Clones** (on p620, after checkpoint A, app open on 0.1.16):
+  - In the live app:
+    - `herdr-app do layout.clone '{"name":"main","as":"freund"}'`;
+    - `herdr-app do mod.clone '{"name":"tabs","as":"freund-tabs"}'`;
+    - `herdr-app do mod.clone '{"name":"agents","as":"freund-agents"}'`.
+  - Copy them to `home/development/herdr-app/layouts/freund.json` and
+     `home/development/herdr-app/mods/freund-{tabs,agents}/`.
+  - Layout edits:
+    - root `"toast": "notify"`;
+    - the `tabs` block → `freund-tabs`, wrapped in a row `tab-bar` with
+       herdr-issues' button block (`issues-button`, `{mod: issues, props:
+       {button: true}}`, 78 px), as its `layouts/main-issues.json` does;
+    - `panel-body` gains `{id: issues, mod: issues}` and
+       `{id: gitlab, mod: gitlab}`;
+    - the agents block → `freund-agents`.
+  - `freund-tabs`: herdr-gitlab's two tab-bar edits (`install.py`,
+     `wire_tabs`): `enabled` gains `"gitlab"`, and a GitLab `panelButton`
+     follows Changes (read it, never run it).
+  - **Deviation (done 2026-11-16):** the plan named a `workspace-chrome`
+     clone. Reading both mods showed herdr-gitlab edits `tabs`, and
+     herdr-issues needs no mod clone, only a layout block. So `freund-tabs`
+     replaces `freund-chrome`.
+  - Each clone's diff goes into a `NIXOS.md` beside it.
+  - Remove the three live clones afterwards; restore the layout with
      `layout.switch --name main`.
-   - Check: `herdr-app check` on both repo mod folders.
-4. **`notify`** (`home/development/herdr-app/mods/notify/main.js`,
+  - Check: `herdr-app check` on both repo mod folders.
+- **Step 7: `notify`** (`home/development/herdr-app/mods/notify/main.js`,
    `mod.json` with `"place":"none"`):
-   - On render it reads `props()` (`title`, `body`, `overlay`, and the
+  - On render it reads `props()` (`title`, `body`, `overlay`, and the
      agent's terminal if present).
-   - It calls `exec("sh", ["-c", script, "notify", title, body, terminal ?? ""])`
+  - It calls `exec("sh", ["-c", script, "notify", title, body, terminal ?? ""])`
      without awaiting it, then `closeOverlay(overlay)`, where `script` is:
 
      ```sh
@@ -353,131 +364,131 @@ Any clash with 0.1.16's defaults, other than alt-hjkl, moves our key.
      [ "$r" = open ] && [ -n "$3" ] && herdr-app do agent.focus --terminal "$3"
      ```
 
-   - Check: `herdr-app check` (V3's notification check runs at
+  - Check: `herdr-app check` (V3's notification check runs at
      checkpoint B).
-5. **`inbox`** (`home/development/herdr-app/mods/inbox/`): the "Issues
+- **Step 8: `inbox`** (`home/development/herdr-app/mods/inbox/`): the "Issues
    inbox" decisions above, exactly.
-   - `mod.json` holds `roots`.
-   - Fetch logic lives in `logic.js`, kept separate from the UI, with a
+  - `mod.json` holds `roots`.
+  - Fetch logic lives in `logic.js`, kept separate from the UI, with a
      `node --test` file run in the step's check (`pkgs.nodejs` in the
      check only). It covers:
-     - de-duplication with merged reasons;
-     - the cap line;
-     - one provider failing;
-     - `gh:` vs `gl:` IDs never colliding.
-   - Check: `node --test`, then `herdr-app check`.
-6. **`freund-agents` controls** (`home/development/herdr-app/mods/freund-agents/`,
+    - de-duplication with merged reasons;
+    - the cap line;
+    - one provider failing;
+    - `gh:` vs `gl:` IDs never colliding.
+  - Check: `node --test`, then `herdr-app check`.
+- **Step 9: `freund-agents` controls** (`home/development/herdr-app/mods/freund-agents/`,
    from step 6). The row menu:
-   - Focus (`agent.focus`), Peek (`terminal.peek`);
-   - Send: an input, then `exec("hc", ["send", addr, text])`;
-   - Interrupt (`hc interrupt addr`);
-   - Stop: a confirm dialog, then `terminal.kill`;
-   - Pane / Hide (`terminal.keep` / `terminal.park`).
+  - Focus (`agent.focus`), Peek (`terminal.peek`);
+  - Send: an input, then `exec("hc", ["send", addr, text])`;
+  - Interrupt (`hc interrupt addr`);
+  - Stop: a confirm dialog, then `terminal.kill`;
+  - Pane / Hide (`terminal.keep` / `terminal.park`).
 
    Remote rows use the app's `machine/address`, with `hc … --on <machine>`
    where hc needs it.
 
    Subagent line:
-   - It reads `$XDG_RUNTIME_DIR/claude-hc-subagents/<t>`, a JSON
+  - It reads `$XDG_RUNTIME_DIR/claude-hc-subagents/<t>`, a JSON
      `{"count": N}`: locally with `cat`, remotely with `hc exec --on <m>
      cat`.
-   - It shows only while the row is live and `working`.
-   - Graph button: `agent.focus`, then `terminal.open {argv: ["zoe",
+  - It shows only while the row is live and `working`.
+  - Graph button: `agent.focus`, then `terminal.open {argv: ["zoe",
      cwd], place: "right"}`.
 
    Keep the clone's own `setAgentOrder`. Keep changes to upstream lines
    small, and note them in `NIXOS.md`.
-   - Check: `herdr-app check`.
-7. **`splits` + Neovim.**
-    - **The mod** (`home/development/herdr-app/mods/splits/`):
+  - Check: `herdr-app check`.
+- **Step 10: `splits` + Neovim.**
+  - **The mod** (`home/development/herdr-app/mods/splits/`):
       `nextCommand()` handles `go-*` and `resize-*`.
-      - If the focused pane's `program.key === "nvim"`:
+    - If the focused pane's `program.key === "nvim"`:
         `exec("hc", ["keys", terminal, "ctrl+h"])` (or `alt+h`, and so on).
-      - Else `go-*` → `run("pane.go", {direction})`, and `resize-*` → the
-        `resize` mod's own command (its name comes from its source at
-        step 12).
-    - **Lua:** `home/shell/lazyvim/lazyvim/lua/plugins/herdr-splits.lua`
+    - Else `go-*` → `run("pane.go", {direction})`, and `resize-*` → one
+        resize step through `resizeDoc` from a vendored copy of
+        herdr-app-resize's `tree.js` plus its `doc.get` / `doc.set` RPC
+        (MIT, attribution in the file header; pinned commit above).
+  - **Lua:** `home/shell/lazyvim/lazyvim/lua/plugins/herdr-splits.lua`
       (54 lines).
-      - `:19` cond → `vim.env.HERDR_ENV == "1" or vim.env.HC_TERMINAL_ID ~= nil`.
-      - The `keys` entries (`:44-51`) call `nav(dir)` / `size(dir)`. These
+    - `:19` cond → `vim.env.HERDR_ENV == "1" or vim.env.HC_TERMINAL_ID ~= nil`.
+    - The `keys` entries (`:44-51`) call `nav(dir)` / `size(dir)`. These
         use `require("herdr-splits")` in the TUI. In the app they run a
         local function: `wincmd`, and at the edge
         `vim.fn.jobstart({"herdr-app","do","pane.go","--direction",dir})`;
         `resize` stays inside Neovim.
-      - Edge test: the window number didn't change.
-      - The local function returns early for the same
+    - Edge test: the window number didn't change.
+    - The local function returns early for the same
         `ignored_buftypes` / `ignored_filetypes` (`:27-41`).
-    - Check: `herdr-app check`; `nvim --headless -c 'lua require("lazy")' -c q`
+  - Check: `herdr-app check`; `nvim --headless -c 'lua require("lazy")' -c q`
       starts without errors.
-8. **Hook hc branch.** `modules/programs/claude-code-managed.nix:687-735`:
-    - Lines `:692-694` (today's guard) become the condition for a TUI
+- **Step 11: Hook hc branch.** `modules/programs/claude-code-managed.nix:687-735`:
+  - Lines `:692-694` (today's guard) become the condition for a TUI
       branch with today's body, unchanged.
-    - New branch when `HERDR_ENV` != 1 and `HC_TERMINAL_ID` is non-empty:
-      - the same `flock`'d counter, named
+  - New branch when `HERDR_ENV` != 1 and `HC_TERMINAL_ID` is non-empty:
+    - the same `flock`'d counter, named
         `$source-hc-$HC_TERMINAL_ID` (sanitised as today);
-      - for `source = claude-subagents` only, also write
+    - for `source = claude-subagents` only, also write
         `$XDG_RUNTIME_DIR/claude-hc-subagents/$HC_TERMINAL_ID` as
         `{"count":N}` (a temp file, then `mv`).
-      - No `herdr` call.
-    - Check: `just check-syntax`, then run the built script by hand:
+    - No `herdr` call.
+  - Check: `just check-syntax`, then run the built script by hand:
       `HC_TERMINAL_ID=tX bash $script inc` twice → `{"count":2}`; `reset` →
       `{"count":0}`; with `HERDR_ENV=1` and no pane → exit 0, no file.
-9. **Home Manager wiring.** New `home/development/herdr-app.nix`, imported
+- **Step 12: Home Manager wiring.** New `home/development/herdr-app.nix`, imported
     in `home/development/default.nix` after `:23`, under
     `config.programs.herdrSkill.enable`.
-    - It builds the source with `linkFarm`:
-      - `mods/{inbox,notify,splits,freund-chrome,freund-agents}` from
+  - It builds the source with `linkFarm`:
+    - `mods/{inbox,notify,splits,freund-tabs,freund-agents}` from
         `./herdr-app/mods/` (listed explicitly);
-      - `mods/issues`, `mods/gitlab`, `mods/resize`: `fetchFromGitHub` at
-        the pinned commits, subfolder from each repo (`mods/issues`,
-        `mods/gitlab`; resize's real path, read from the repo);
-      - `layouts/freund.json`;
-      - `settings.json` and `keys.json`, from the tables above, via
+    - `mods/issues`, `mods/gitlab`: `fetchFromGitHub` at the pinned
+        commits, subfolders `mods/issues` and `mods/gitlab`;
+    - `layouts/freund.json`;
+    - `settings.json` and `keys.json`, from the tables above, via
         `builtins.toJSON`;
-      - `managed.json`.
-    - `xdg.configFile."herdr-app-sync/source".source` points at it.
-    - `home.activation.herdrAppSync` runs after `writeBoundary`:
+    - `managed.json`.
+  - `xdg.configFile."herdr-app-sync/source".source` points at it.
+  - `home.activation.herdrAppSync` runs after `writeBoundary`:
       `${herdr-app-sync}/bin/herdr-app-sync || true`.
-    - Check:
-      - `just check-syntax`, `just test-host p620`;
-      - `jq` diff of our `keys.json` keys against
+  - Check:
+    - `just check-syntax`, `just test-host p620`;
+    - `jq` diff of our `keys.json` keys against
         `~/.local/state/herdr-app-defaults-0.1.16.json`: only alt-h/j/k/l
         may overlap.
-    - Hashes come from `nix-prefetch-github` or a failed build, never
+  - Hashes come from `nix-prefetch-github` or a failed build, never
       guessed.
-10. **Checkpoint B** (p620, then razer).
-    - Bus steps and merge. `just test-host p620` → `just p620`. Run V2-V5
+- **Step 13: Checkpoint B** (p620, then razer).
+  - Bus steps and merge. `just test-host p620` → `just p620`. Run V2-V5
       and V8 on p620.
-    - Then `glab auth status` on razer, and `just deploy-via-p620 razer`.
+  - Then `glab auth status` on razer, and `just deploy-via-p620 razer`.
       Run V2-V5 and V8 on razer.
-    - Write the "Herdr app" section into `docs/applications/herdr.md`:
-      - what is managed;
-      - the keys table;
-      - sync, backups and rollback;
-      - the gaps;
-      - the bump checklist.
+  - Write the "Herdr app" section into `docs/applications/herdr.md`:
+    - what is managed;
+    - the keys table;
+    - sync, backups and rollback;
+    - the gaps;
+    - the bump checklist.
 
 ### Part 5: `herdr-team` / `herdr-run` on hc
 
- 1. **Spike** (app terminal, scratch names):
-    - `herdr-app do tab.new --space <S> --name spike --argv '["true"]'`;
-    - `hc run --bg --keep --name spike-m --label herdr.space=<S> --label herdr.tab=<T> -- sleep 300`.
+- **Step 14: Spike** (app terminal, scratch names):
+  - `herdr-app do tab.new --space <S> --name spike --argv '["true"]'`;
+  - `hc run --bg --keep --name spike-m --label herdr.space=<S> --label herdr.tab=<T> -- sleep 300`.
 
     It must show:
-    - the member in tab T, with focus unchanged;
-    - `hc get spike-m` has `parent` = the caller;
-    - `hc kill spike-m` removes it;
-    - whether `hc run` children inherit `CLAUDE_CODE_CHILD_SESSION`. If they
+  - the member in tab T, with focus unchanged;
+  - `hc get spike-m` has `parent` = the caller;
+  - `hc kill spike-m` removes it;
+  - whether `hc run` children inherit `CLAUDE_CODE_CHILD_SESSION`. If they
       do, the launch strips it.
 
     Write the result into this plan before step 15 (a plan update in its
     own commit). If labels don't place the member: `terminal.keep {place:
     "tab"}`, then `space.select` / `tab.select` back. If that also fails,
     stop and report.
- 2. **`herdr-team` hc backend** (`home/development/herdr-team.sh`):
-    - `:15-18` → the backend choice (table above). The TUI functions stay
+- **Step 15: `herdr-team` hc backend** (`home/development/herdr-team.sh`):
+  - `:15-18` → the backend choice (table above). The TUI functions stay
       byte-identical.
-    - **Member launch on hc** (the TUI's `up`, `:352-600`, including the
+  - **Member launch on hc** (the TUI's `up`, `:352-600`, including the
       launch and retry at `:538-545` and the readiness loop at `:558-590`):
       1. Write the work dir and the `launch` script first; it reads
          `$HC_TERMINAL_ID` at runtime.
@@ -493,84 +504,84 @@ Any clash with 0.1.16's defaults, other than alt-hjkl, moves our key.
          today.
       5. On a failed placement or readiness: `hc kill <t>`, drop the
          record, fail as today.
-    - **Verbs:**
-      - `same_pane` (`:244`) → a recorded-address check through `hc get`;
-      - screen reads (`:566`, `:682`, `:714`) → `hc read <t> --lines <n>`;
-      - sends (`:699-701`) → `hc send`;
-      - teardown (`:317-350`) → `hc kill`, recorded addresses only;
-      - interrupts (`:1121-1128`) → `hc interrupt`;
-      - renames → `--name`.
-    - Members still go through `agent-env`, which strips `HC_*`.
-    - Tests: `herdr-team-test.sh` gets an hc block, with a fake `hc` and
+  - **Verbs:**
+    - `same_pane` (`:244`) → a recorded-address check through `hc get`;
+    - screen reads (`:566`, `:682`, `:714`) → `hc read <t> --lines <n>`;
+    - sends (`:699-701`) → `hc send`;
+    - teardown (`:317-350`) → `hc kill`, recorded addresses only;
+    - interrupts (`:1121-1128`) → `hc interrupt`;
+    - renames → `--name`.
+  - Members still go through `agent-env`, which strips `HC_*`.
+  - Tests: `herdr-team-test.sh` gets an hc block, with a fake `hc` and
       `herdr-app` in `$tmp/bin`, covering:
-      - up / ask / converse / finish / down;
-      - lead death (watchdog);
-      - timeout cleanup;
-      - a failed placement;
-      - a duplicate `up` refused;
-      - an unrecorded address refused;
-      - `finish` with staged changes and with a moved HEAD.
-    - Check: `just test-host p620`, which runs the build
+    - up / ask / converse / finish / down;
+    - lead death (watchdog);
+    - timeout cleanup;
+    - a failed placement;
+    - a duplicate `up` refused;
+    - an unrecorded address refused;
+    - `finish` with staged changes and with a moved HEAD.
+  - Check: `just test-host p620`, which runs the build
       (`agent-run.nix:18-27`).
-    - The TUI functions' `git diff` is empty (check by extracting the TUI
+  - The TUI functions' `git diff` is empty (check by extracting the TUI
       backend functions before and after).
- 3. **`herdr-run` hc backend** (`home/development/herdr-run.sh`):
-    - `:10-12` → the backend choice; the outside-herdr `exec "$@"` stays.
-    - On hc, the runner is
+- **Step 16: `herdr-run` hc backend** (`home/development/herdr-run.sh`):
+  - `:10-12` → the backend choice; the outside-herdr `exec "$@"` stays.
+  - On hc, the runner is
       `hc run --bg --keep --name "↳ <label>" --label herdr.space=<S> --label herdr.tab=<T> -- bash <dir>/run`,
       started from the caller's terminal, so it is the caller's child.
-    - The runner writes OSC 7501 `state=working`, then `done` or `error`,
+  - The runner writes OSC 7501 `state=working`, then `done` or `error`,
       to its own tty.
-    - stdin, stdout, stderr, the exit status and cancellation keep the
+  - stdin, stdout, stderr, the exit status and cancellation keep the
       current FIFO design.
-    - `place_tab` and the socket calls (`:214-240`) are TUI-only.
-    - Tests: `herdr-run-test.sh` gets hc cases for stdin, separate stderr,
+  - `place_tab` and the socket calls (`:214-240`) are TUI-only.
+  - Tests: `herdr-run-test.sh` gets hc cases for stdin, separate stderr,
       the exit code, cancellation and the outside-herdr pass-through.
-    - Check: `just test-host p620`.
- 4. **Checkpoint C:** bus steps and merge, deploy p620 then razer, then
+  - Check: `just test-host p620`.
+- **Step 17: Checkpoint C:** bus steps and merge, deploy p620 then razer, then
     V6 (first three bullets) and V8 on both.
 
 ### Part 6: Claude agent teams on hc
 
- 1. **Spike.** In a scratch checkout of the pinned shim
+- **Step 18: Spike.** In a scratch checkout of the pinned shim
     (`rameshbaskaran/herdr-claude-teams@984b0823` with our two patches),
     write a prototype hc transport for `split-window`, `send-keys`,
     `capture-pane`, `kill-pane` and `respawn-pane`.
-    - Run the shim's pytest suite against it (with fakes).
-    - Then run a real `claude` agent team with 2 teammates in an app
+  - Run the shim's pytest suite against it (with fakes).
+  - Then run a real `claude` agent team with 2 teammates in an app
       terminal: teammates must open as tabs after the lead, and teardown
       must leave nothing.
-    - If it fails: stop, report, and Claude teams stay in-process in the
+  - If it fails: stop, report, and Claude teams stay in-process in the
       app.
- 2. **`pkgs/herdr-claude-teams/hc-backend.patch`**, added to `patches` at
+- **Step 19: `pkgs/herdr-claude-teams/hc-backend.patch`**, added to `patches` at
     `default.nix:22`:
-    - **Leader:** `HC_TERMINAL_ID`.
-    - **Ownership:** a file
+  - **Leader:** `HC_TERMINAL_ID`.
+  - **Ownership:** a file
       `$XDG_RUNTIME_DIR/herdr-claude-teams/<leader>.json` lists the
       addresses the shim created. Kill and respawn refuse anything else, as
       `ownership.patch` does with `HERDR_PANE_ID`.
-    - **`split-window`:** `herdr-app do tab.new` (unfocused, after the
+  - **`split-window`:** `herdr-app do tab.new` (unfocused, after the
       lead's tab, named for the teammate, `argv ["cat"]` placeholder), then
       the teammate's labelled `hc run`. Fake `%N` IDs map to addresses.
-    - **`respawn-pane`:** `hc interrupt` the placeholder, wait until
+  - **`respawn-pane`:** `hc interrupt` the placeholder, wait until
       `hc get` shows its foreground is not `cat`, then `hc send`
       (`ownership.patch:180` behaviour).
-    - **The rest:** `send-keys` → `hc keys` / `hc send`; `capture-pane` →
+  - **The rest:** `send-keys` → `hc keys` / `hc send`; `capture-pane` →
       `hc read`; `kill-pane` → `hc kill`; `list-panes` / `display-message`
       → `hc ls --json`, filtered to the owned set.
-    - **Tests:** pytest gets hc cases (fake `hc` and `herdr-app`),
+  - **Tests:** pytest gets hc cases (fake `hc` and `herdr-app`),
       including refusing an unowned address.
-    - **Launcher:** `home/development/herdr.nix:42` (`claude()`) also
+  - **Launcher:** `home/development/herdr.nix:42` (`claude()`) also
       routes when `HERDR_ENV` != 1 and `HC_TERMINAL_ID` is set.
-    - Check: the package build runs pytest; `just test-host p620`.
- 3. **Checkpoint D:** bus steps and merge, deploy p620 then razer, then V6
+  - Check: the package build runs pytest; `just test-host p620`.
+- **Step 20: Checkpoint D:** bus steps and merge, deploy p620 then razer, then V6
     (last bullet) and V8.
- 4. **Follow-ups and PR.**
-    - One issue per gap (6), each linking #2978; put their numbers into the
+- **Step 21: Follow-ups and PR.**
+  - One issue per gap (6), each linking #2978; put their numbers into the
       docs.
-    - Open the PR linking intent, spec and plan, and saying which steps the
+  - Open the PR linking intent, spec and plan, and saying which steps the
       coder or Codex did and any fallbacks.
-    - Get a Codex review of the diff against this plan.
+  - Get a Codex review of the diff against this plan.
 
 ## Rollback
 
