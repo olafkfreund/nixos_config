@@ -37,6 +37,15 @@ let
     fi
     exec ${pkgs.bashInteractive}/bin/bash "$@"
   '';
+  # An hc terminal copies its environment from whoever started it, often a TUI
+  # pane or a Claude session (#2978). Drop those identities so claude() and
+  # herdr-team see the app, not a TUI they are not in.
+  hcShell = pkgs.writeShellScript "hc-shell" ''
+    for v in $(${pkgs.coreutils}/bin/env | ${pkgs.gnused}/bin/sed -n 's/^\(HERDR_[A-Z_]*\|CLAUDE_CODE_CHILD_SESSION\|CLAUDE_CODE_SESSION_[A-Z_]*\|CLAUDE_CODE_MESSAGING_[A-Z_]*\|CLAUDE_CODE_BRIDGE_SESSION_ID\|CLAUDE_CODE_ENTRYPOINT\|CLAUDE_CODE_EXECPATH\|TMUX\|TMUX_PANE\)=.*/\1/p'); do
+      unset "$v"
+    done
+    exec ${paneShell} "$@"
+  '';
   claudeLauncher = ''
     claude() {
       if [[ ''${HERDR_ENV:-} == 1 && -n ''${HERDR_SOCKET_PATH:-} ]]; then
@@ -82,8 +91,9 @@ in
       # A recovered terminal keeps its last screen, like the TUI's pane_history.
       restore_screen = true
       # hc puts every terminal in ONE hc-hold-* unit, so the #2959 reason above
-      # applies here too: give each shell its own scope.
-      shell = ["${paneShell}"]
+      # applies here too: give each shell its own scope (hcShell, which also
+      # drops inherited TUI and Claude-session variables).
+      shell = ["${hcShell}"]
     '';
 
     xdg.configFile."herdr/config.toml".text = ''

@@ -391,7 +391,21 @@ always returns the app to its default layout and keys.
 
 The window title has no host or workspace, reviewr's send-comments-to-agent and hintr's run-a-listed-key have no
 app equivalent yet, lazygit opens as a tab (there is no floating terminal), Collie is not wired to hc, and the
-Omarchy `nixarchy.herdr` widget still reads the TUI. Each has a follow-up issue.
+Omarchy `nixarchy.herdr` widget still reads the TUI. Agents started from the app's + menu (or any `argv` launch)
+run in your login shell inside hc's one shared `hc-hold-*` unit, so the per-pane systemd scope (#2959) only covers
+plain shells. Each has a follow-up issue.
+
+### hc keeps the environment of whoever started it first
+
+The core saves the environment of the process that first started it and reuses it across `hc server restart`
+and updates. If that was a herdr TUI pane or a Claude session, every app terminal inherits `HERDR_ENV=1` and that
+session's variables, and `claude()` / `herdr-team` then act as if they were in the TUI. Plain app shells drop those
+variables (`hcShell` in `home/development/herdr.nix`), but `argv` launches do not. Start the app from the launcher,
+never from a TUI pane, and to repair a polluted core run, from outside herdr:
+
+```bash
+systemd-run --user --collect --wait -p Type=oneshot hc server restart --fresh
+```
 
 ### Bumping herdr-app or herdr-core
 

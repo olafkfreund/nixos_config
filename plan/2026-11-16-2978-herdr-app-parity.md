@@ -483,6 +483,14 @@ Any clash with 0.1.16's defaults, other than alt-hjkl, moves our key.
     - sync, backups and rollback;
     - the gaps;
     - the bump checklist.
+  - **Found at checkpoint B (2026-11-16):** hc keeps the environment of the
+    process that first started the core, across restarts; a core first
+    started from a TUI pane gives app terminals `HERDR_ENV=1` and that
+    session's variables. Fix: hc's `shell` is now `hcShell` (drops `HERDR_*`,
+    TUI and Claude-session variables, then `paneShell`), and the p620 core was
+    repaired with `hc server restart --fresh` from a clean systemd shell.
+    `argv` launches use the login shell, not hc's `shell`: clean once the core
+    is, but no per-pane scope. That is a seventh gap and follow-up issue.
 
 ### Part 5: `herdr-team` / `herdr-run` on hc
 
