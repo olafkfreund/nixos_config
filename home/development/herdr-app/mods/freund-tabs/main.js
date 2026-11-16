@@ -131,7 +131,8 @@ export default class Tabs extends View {
     const panel = find(root, "panel"), body = find(root, "panel-body");
     // GitLab (mods/gitlab) sits in the same stack as Files and Changes; Issues has its own button block.
     const enabled = [...(shared("workspace.panels") ?? ["files", "changes"]), "gitlab"];
-    this.syncPanel(space, panel, body, enabled);
+    // Issues and Plans have their own buttons (not in `enabled`), but a space must still restore them.
+    this.syncPanel(space, panel, body, [...enabled, "issues", "plans"]);
     const panelButton = (id, label, icon) => {
       const on = panel && !panel.hidden && body?.active === id;
       return h_flex().id(`panel-${id}`).h(26).px(8).gap(5).flex_none().items_center().rounded(6)
