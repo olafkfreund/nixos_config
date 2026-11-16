@@ -11,3 +11,5 @@ issue 2978) are listed below; on an app bump, re-clone `agents` and re-apply the
 - `subRow` adds a controls button for nested agents.
 - `render` switches to the control popup when requested; `withKids` adds the Task subagents line and Graph button.
 - Agent rows add right-click (including the narrow rail) and a controls button to open that popup.
+- The controls popup has a Copy ID item (`cx.write_to_clipboard`, as herdr-terminal-ids does); its item
+  helper passes `cx` to the action.

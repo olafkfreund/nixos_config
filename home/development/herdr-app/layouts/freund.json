@@ -101,6 +101,20 @@
               "size": {
                 "px": 78
               }
+            },
+            {
+              "id": "plans-button",
+              "type": "block",
+              "window_drag": true,
+              "size": {
+                "px": 72
+              },
+              "content": {
+                "mod": "agent-plans",
+                "props": {
+                  "button": true
+                }
+              }
             }
           ],
           "size": {
@@ -119,7 +133,10 @@
                 "pane": {
                   "header": {
                     "content": {
-                      "mod": "pane"
+                      "mod": "terminal-ids",
+                      "props": {
+                        "role": "pane"
+                      }
                     },
                     "reveal": "always",
                     "height": 30,
@@ -174,6 +191,13 @@
                       "type": "block",
                       "content": {
                         "mod": "gitlab"
+                      }
+                    },
+                    {
+                      "id": "plans",
+                      "type": "block",
+                      "content": {
+                        "mod": "agent-plans"
                       }
                     }
                   ],

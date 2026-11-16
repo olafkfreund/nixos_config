@@ -119,9 +119,10 @@ export default class Agents extends View {
     const pane = panes().find((item) => item.terminal === address);
     const item = (label, action) => div().id(`control-${label}`).h(30).px(8).rounded(7)
       .flex().items_center().text_color(t.foreground).cursor_pointer()
-      .hover((el) => el.bg(t.hover)).on_click(() => { closeOverlay(props().overlay); action(); }).child(label);
+      .hover((el) => el.bg(t.hover)).on_click((_e, cx) => { closeOverlay(props().overlay); action(cx); }).child(label);
     return v_flex().w_full().p(5).bg(t.popover).text_size(12.8)
       .child(item("Focus", () => run("agent.focus", { terminal: address })))
+      .child(item("Copy ID", (cx) => cx.write_to_clipboard(address)))
       .when(terminal?.state === "live", (el) => el
         .child(item("Peek", () => run("terminal.peek", { terminal: address })))
         .child(h_flex().gap(5).p(5).items_center()

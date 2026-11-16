@@ -472,6 +472,23 @@ Any clash with 0.1.16's defaults, other than alt-hjkl, moves our key.
     one-time layout switch needs a running app: on a window launch the sync
     now starts a detached waiter that reruns it once `herdr-app status`
     answers (up to 60 s).
+- **Step 12b: owner-requested mods (added 2026-11-16, owner: "and this one
+  as well ... please").** Done by the lead.
+  - `agent-plans`: dendenlarin/herdr-agent-plans @8a4b42aa (MIT). A Plan
+    button in the `tab-bar` row and a `plans` block in `panel-body`. Its
+    hooks are declared in `modules/programs/claude-code-managed.nix` instead
+    of its Connect button editing `~/.claude/settings.json` /
+    `~/.codex/config.toml`: Claude `PostToolUse` (`ExitPlanMode|TodoWrite|
+    TaskCreate|TaskUpdate`), `TaskCreated`, `TaskCompleted`; Codex `Stop`,
+    `UserPromptSubmit`, `PostToolUse` (`^update_plan$`) as managed hooks in
+    `/etc/codex/requirements.toml`. The hook is a no-op where the mod is absent.
+  - `terminal-ids`: dendenlarin/herdr-terminal-ids @1b7eaff0 (Apache-2.0),
+    as the pane header (`role: pane`, click-to-copy terminal ID). Its agent
+    list role is not used (`freund-agents` owns that block); `freund-agents`
+    gets a Copy ID item instead.
+  - Not adopted: AngDrew/herdr-core-cliproxy (needs a CLIProxyAPI hub that
+    is not deployed, keeps its management key in plain text inside the mod
+    folder, no license).
 - **Step 13: Checkpoint B** (p620, then razer).
   - Bus steps and merge. `just test-host p620` → `just p620`. Run V2-V5
       and V8 on p620.

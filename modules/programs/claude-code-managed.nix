@@ -769,6 +769,20 @@ let
     }];
   };
 
+  # herdr-agent-plans (#2978): the herdr-app Plan panel's hook. It needs the mod
+  # that herdr-app-sync installs, so it is a no-op wherever the mod is absent.
+  agentPlansHook = agent: pkgs.writeShellScript "agent-plans-${agent}" ''
+    p="''${HERDR_APP_HOME:-$HOME/.config/herdr-app}/mods/agent-plans/hook/plan.py"
+    [ -f "$p" ] || exit 0
+    ${pkgs.python3}/bin/python3 "$p" ${agent} || true
+  '';
+  agentPlansHooks =
+    let h = [{ type = "command"; command = "${agentPlansHook "claude"}"; timeout = 5; }]; in {
+      PostToolUse = [{ matcher = "ExitPlanMode|TodoWrite|TaskCreate|TaskUpdate"; hooks = h; }];
+      TaskCreated = [{ hooks = h; }];
+      TaskCompleted = [{ hooks = h; }];
+    };
+
   formatHooks = lib.optionalAttrs cfg.formatOnEdit.enable {
     PostToolUse = [{
       matcher = "Write|Edit|MultiEdit";
@@ -839,6 +853,7 @@ let
         busAnnounceHooks
         busPeekHooks
         subagentHooks
+        agentPlansHooks
         tmuxCcmHooks
       ];
     })
@@ -1161,6 +1176,29 @@ in
       type = "command"
       command = "/etc/codex/hooks/subagent-dec"
       timeout = 5
+    '' + ''
+
+      [[hooks.Stop]]
+
+      [[hooks.Stop.hooks]]
+      type = "command"
+      command = "/etc/codex/hooks/agent-plans"
+      timeout = 5
+
+      [[hooks.UserPromptSubmit]]
+
+      [[hooks.UserPromptSubmit.hooks]]
+      type = "command"
+      command = "/etc/codex/hooks/agent-plans"
+      timeout = 5
+
+      [[hooks.PostToolUse]]
+      matcher = "^update_plan$"
+
+      [[hooks.PostToolUse.hooks]]
+      type = "command"
+      command = "/etc/codex/hooks/agent-plans"
+      timeout = 5
     '';
 
     # Managed Codex commands must sit under managed_dir and are run without
@@ -1171,6 +1209,8 @@ in
     environment.etc."codex/hooks/subagent-dec" = lib.mkIf cfg.subagentMetadata.codex {
       source = pkgs.writeShellScript "codex-subagent-dec" "exec ${subagentScript} dec codex-subagents";
     };
+
+    environment.etc."codex/hooks/agent-plans".source = agentPlansHook "codex";
 
     # agy reads ~/.gemini/config/hooks.json, which Syncthing carries between
     # hosts, so the command path must be absolute /etc, not a store path.

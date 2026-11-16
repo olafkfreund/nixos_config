@@ -21,6 +21,20 @@ let
     hash = "sha256-AKSirvOamYWeNBtsGkVzZUtlF2zlr9lr/xxr+fTCRN0=";
   };
 
+  # Owner-requested additions (plan step 12b).
+  agentPlans = pkgs.fetchFromGitHub {
+    owner = "dendenlarin";
+    repo = "herdr-agent-plans";
+    rev = "8a4b42aa69649172d5c6b101a859edc9f4fbf33f";
+    hash = "sha256-+quH9SPBlrV3LAw2DSdQV6IoPacOzFmhSOc2rzJGCus=";
+  };
+  terminalIds = pkgs.fetchFromGitHub {
+    owner = "dendenlarin";
+    repo = "herdr-terminal-ids";
+    rev = "1b7eaff0fb9af82793a6a20ca0b96d907f580003";
+    hash = "sha256-lFUrQolJHg7d9wlXbIlbg5+11UBbplbxgBAJsenrFB4=";
+  };
+
   ours = [ "inbox" "notify" "splits" "freund-tabs" "freund-agents" ];
 
   open = argv: place: { command = "terminal.open"; args = { inherit argv place; }; };
@@ -47,6 +61,8 @@ let
     ++ [
       { name = "mods/issues"; path = "${issues}/mods/issues"; }
       { name = "mods/gitlab"; path = "${gitlab}/mods/gitlab"; }
+      { name = "mods/agent-plans"; path = "${agentPlans}/mods/agent-plans"; }
+      { name = "mods/terminal-ids"; path = "${terminalIds}/mods/terminal-ids"; }
       { name = "layouts/freund.json"; path = ./herdr-app/layouts/freund.json; }
       {
         name = "settings.json";
@@ -56,7 +72,7 @@ let
       {
         name = "managed.json";
         path = pkgs.writeText "managed.json" (builtins.toJSON {
-          mods = ours ++ [ "issues" "gitlab" ];
+          mods = ours ++ [ "issues" "gitlab" "agent-plans" "terminal-ids" ];
           layouts = [ "freund" ];
           first_layout = "freund";
         });
