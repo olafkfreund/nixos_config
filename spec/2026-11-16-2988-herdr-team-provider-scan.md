@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2988
 intent: intent/2026-11-16-2988-herdr-team-provider-scan.md
 ---
