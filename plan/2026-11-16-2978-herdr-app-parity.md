@@ -339,8 +339,14 @@ Any clash with 0.1.16's defaults, other than alt-hjkl, moves our key.
    `mod.json` with `"place":"none"`):
    - On render it reads `props()` (`title`, `body`, `overlay`, and the
      agent's terminal if present).
-   - It calls `exec("sh", ["-c", 'r=$(notify-send -a Herdr -A open=Open -- "$1" "$2"); [ "$r" = open ] && [ -n "$3" ] && herdr-app do agent.focus --terminal "$3"', "notify", title, body, terminal ?? ""])`
-     without awaiting it, then `closeOverlay(overlay)`.
+   - It calls `exec("sh", ["-c", script, "notify", title, body, terminal ?? ""])`
+     without awaiting it, then `closeOverlay(overlay)`, where `script` is:
+
+     ```sh
+     r=$(notify-send -a Herdr -A open=Open -- "$1" "$2")
+     [ "$r" = open ] && [ -n "$3" ] && herdr-app do agent.focus --terminal "$3"
+     ```
+
    - Check: `herdr-app check` (V3's notification check runs at
      checkpoint B).
 5. **`inbox`** (`home/development/herdr-app/mods/inbox/`): the "Issues
