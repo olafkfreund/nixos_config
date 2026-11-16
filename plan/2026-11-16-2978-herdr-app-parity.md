@@ -214,7 +214,7 @@ Any clash with 0.1.16's defaults, other than alt-hjkl, moves our key.
     only its own.
 - **V7 hc:**
   - 0.1.21 / 0.1.16, and Updates says managed.
-  - One `hc-hold-*` unit per terminal.
+  - Each app shell in its own `herdr-pane-*.scope` (the holder is shared, see step 2).
   - The screen is restored after `hc server restart`.
 - **V8 TUI unchanged:** `herdr` runs with all 13 plugins; `herdr-team` and
   `herdr-run` inside the TUI behave as before.
@@ -264,6 +264,12 @@ Any clash with 0.1.16's defaults, other than alt-hjkl, moves our key.
    (TUI keeps 50 000 000 bytes) and `restore_screen = true` (closest to
    `pane_history`), each with a one-line comment.
    - Check: `just check-syntax`.
+   - **Deviation (found at checkpoint A, 2026-11-16):** hc 0.1.21 runs one
+     `hc-hold-*` unit for all terminals of a core, not one per terminal. So
+     the TUI's per-pane scope wrapper (`paneShell`, #2959) also becomes hc's
+     `shell = ["${paneShell}"]`. Tested by hand: two `hc run` terminals
+     through it got `herdr-pane-<pid>.scope` each. Explicit programs
+     (`hc run -- cmd`) still share the holder unit.
 3. **Checkpoint A (p620).**
    - Bus steps and merge, `just test-host p620`, then `just p620`.
    - Save the live default `keys.json` before anything edits it:

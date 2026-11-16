@@ -81,6 +81,9 @@ in
       history_mb = 48
       # A recovered terminal keeps its last screen, like the TUI's pane_history.
       restore_screen = true
+      # hc puts every terminal in ONE hc-hold-* unit, so the #2959 reason above
+      # applies here too: give each shell its own scope.
+      shell = ["${paneShell}"]
     '';
 
     xdg.configFile."herdr/config.toml".text = ''
