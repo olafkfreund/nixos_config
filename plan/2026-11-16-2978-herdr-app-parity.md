@@ -509,6 +509,15 @@ Any clash with 0.1.16's defaults, other than alt-hjkl, moves our key.
     own commit). If labels don't place the member: `terminal.keep {place:
     "tab"}`, then `space.select` / `tab.select` back. If that also fails,
     stop and report.
+  - **Spike result (2026-11-16, from an app terminal):** a labelled
+    `hc run --bg --keep` member lands in the given tab (`herdr-app ls` lists
+    it there), its `parent` is the caller, and `hc kill` removes it. Focus
+    moved, but to the new team tab: `tab.new` focuses it (it has no
+    no-focus argument), so step 15 runs `tab.select` back to the lead's tab
+    after creating the team tab. The member inherited
+    `CLAUDE_CODE_CHILD_SESSION` (polluted core, see step 13); members go
+    through `agent-env`, which keeps only its allowlist, so no extra strip is
+    needed. No fallback needed.
 - **Step 15: `herdr-team` hc backend** (`home/development/herdr-team.sh`):
   - `:15-18` → the backend choice (table above). The TUI functions stay
       byte-identical.
