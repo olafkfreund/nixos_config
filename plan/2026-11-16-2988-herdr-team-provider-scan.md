@@ -34,41 +34,55 @@ Branch `fix/2988-herdr-team-provider-scan`, worktree `~/.config/nixos-2988`, sta
 - **Step 1:** `home/development/herdr-team.sh:937-945`.
   - Add the three phrases to `perr`.
   - Add `perr_lines() { …; }` printing the reconstructed error lines of `$1` (gawk; `gawk` is in the package's
-    `runtimeInputs`, `home/development/agent-run.nix:21`).
+    `runtimeInputs`, `home/development/agent-run.nix:20`).
   - `perr_count` becomes `perr_lines "$1" | grep -ciF "${pargs[@]}" || :`.
   - Line 1076 becomes `perr_lines "$screen" | grep -iF "${pargs[@]}" >"$work/ans/$n.screen" || :`.
   - Lines 1006 and 1017 (`pbase`) are unchanged and so use the new count.
   Check: `bash -n`; `shellcheck --exclude=SC2016` clean.
   Traps: the script runs under `set -euo pipefail` (writeShellApplication), so a grep with no match inside a
   pipeline must not abort (`|| :` stays at the end); `■` is multibyte, so match it as a literal string in awk
-  (`index()` or a literal regex), not a bracket class; keep the awk in one function, no new files.
+  (`index()` or a literal regex), never a bracket class (under `LC_ALL=C`, `[■]` also matches `●`), and never
+  strip it by a fixed character count (`length("■")` is 3 under `C`, 1 under UTF-8); keep the awk in one function,
+  no new files.
 
 - **Step 2:** `home/development/herdr-team-test.sh:415-435`, the provider cases (fake TUI screen via
-  `$TEST_STATE/screen`):
-  - line 419 fixture: `■ You've hit your usage limit. Try again later` (stale, still `ok`);
-  - line 430 fixture: `■ You've hit your usage limit. Try again later` plus `agy error: Quota exceeded for today`
-    after the send → `provider_error`, and `3.screen` has exactly those two lines;
-  - new cases, each in the existing `--resume`/background style, each ending in the asserted outcome:
-    an unprefixed phrase (`grep: rate limit exceeded`) → `timeout` (short `--timeout`), and `ok` when a reply file
-    exists; `■ Policy-restricted capacity is` / `unavailable. Please try again` → `provider_error`;
-    `■ Your request failed because the` / `Selected model is at capacity.` → `provider_error`;
-    `■ Flex capacity unavailable.` → `provider_error`; `■ Copy failed: clipboard busy` and
-    `Reconnecting… rate limit exceeded` → `timeout`; a stale `■` error, a blank line, and a new `■` error →
-    `provider_error`.
+  `$TEST_STATE/screen`; the fake makes a turn file only when it receives a prompt, `:124`, and `--resume` sends
+  nothing, `herdr-team.sh:1000`). Harness rules for every new case:
+  - positive cases (expect `provider_error`): start a fresh ask in the background with a long `--timeout` (20 s,
+    as at `:427`), wait until the pending request exists in the state file (bounded poll, not a fixed sleep), then
+    write the screen and `wait` for the result;
+  - negative cases (expect no trigger): a foreground ask with `--timeout 1-2` and the screen already written, then
+    assert `timeout`; close the pending request before the next case the way the suite already does for a timed
+    out ask (resume with an injected matching turn JSON as at `:487`, which also proves `ok` wins), so the next
+    fresh ask does not return `busy`.
+  Cases:
+  - baseline: a recognised stale `■ You've hit your usage limit. Try again later` on screen at send time and no
+    reply → `timeout`, and the stored `pending.perr` is 1; then add a blank line and a second `■` error and resume
+    → `provider_error` (proves the baseline and blank-line separation);
+  - the existing case at `:430`, with `■ You've hit your usage limit. Try again later` and
+    `agy error: Quota exceeded for today` → `provider_error`, `3.screen` has exactly those two lines;
+  - `grep: rate limit exceeded` and a code line listing phrases (`perr=("Usage limit reached" "rate limit
+    exceeded")`) → `timeout`, then the injected turn → `ok`;
+  - `■ Policy-restricted capacity is` / `unavailable. Please try again` → `provider_error`;
+  - `■ Your request failed because the` / `Selected model is at capacity.` → `provider_error`;
+  - `■ Flex capacity unavailable.` → `provider_error`;
+  - `■ Copy failed: clipboard busy`, `Reconnecting… rate limit exceeded` and `● rate limit exceeded` → `timeout`;
+  - the wrapped-error case once more under `LC_ALL=C`.
   Check: `nix build .#nixosConfigurations.p620.config.system.build.toplevel --no-link` succeeds; the
   `herdr-team` package's `checkPhase` (`home/development/agent-run.nix:22-28`) runs shellcheck and this suite.
   Also make one case fail on purpose (revert the step 1 filter locally) and see the build fail, then restore.
-  Traps: keep timeouts short (1-3 s) so the suite stays fast; reset `$TEST_STATE/screen` and `reply` between cases
-  as the surrounding tests do.
 
-- **Step 3 (lead):** `just test-host p620` and `just test-host razer` (the `herdr-team` `checkPhase` runs the
-  suite). Then deploy, from a local stack with the open herdr branches so the hosts keep them: merge
-  `origin/feat/2978-herdr-app-parity`, `origin/fix/2987-hc-argv-scope` and `origin/fix/gnome-file-picker` into a
-  local `deploy/` branch; bus `read_new` + `post`; `AGENT_BUS_ANNOUNCED=1 ALLOW_BRANCH_DEPLOY=1 just p620` and
-  `AGENT_BUS_ANNOUNCED=1 ALLOW_BRANCH_DEPLOY=1 just deploy-via-p620 razer`.
-  Live check on p620: `herdr-team up s2988 review`, then `ask` with a prompt telling the member to run
-  `grep -n 'rate limit' home/development/herdr-team.sh` and answer "done": the outcome is `ok`, not
-  `provider_error`; `herdr-team down s2988`.
+- **Step 3 (lead):** in order:
+  - a local `deploy/` branch from the finished `fix/2988-herdr-team-provider-scan`, merging
+    `origin/feat/2978-herdr-app-parity`, `origin/fix/2987-hc-argv-scope` and `origin/fix/gnome-file-picker`, so the
+    hosts keep the open branches;
+  - on that branch, `just test-host p620` and `just test-host razer` (the `herdr-team` `checkPhase` runs the suite);
+  - bus `read_new("#agents:freundcloud.org.uk")` + `post`; `AGENT_BUS_ANNOUNCED=1 ALLOW_BRANCH_DEPLOY=1 just p620`
+    and `AGENT_BUS_ANNOUNCED=1 ALLOW_BRANCH_DEPLOY=1 just deploy-via-p620 razer`.
+  Live check on p620: `herdr-team up s2988 review`; `ask` with a prompt telling the member to run
+  `grep -n 'rate limit' home/development/herdr-team.sh`, then wait 30 seconds before answering "done". While the
+  ask is pending, `herdr pane read` the member pane and confirm the grep output with the phrase is on screen; the
+  final outcome is `ok`, not `provider_error`. Then `herdr-team down s2988`.
 
 - **Step 4 (lead):** commit per step, push, PR (links intent, spec, plan; steps Codex did), Opus review of the diff,
   `@codex review`.
@@ -80,4 +94,6 @@ Branch `fix/2988-herdr-team-provider-scan`, worktree `~/.config/nixos-2988`, sta
 
 ## Rollback
 
-Revert the step 1 commit and switch: the scan goes back to whole-screen phrase matching. Nothing else depends on it.
+Revert the step 1 and step 2 commits together (the new tests fail against the old scan, and they run in the build),
+build, then switch; or boot the previous generation. The scan goes back to whole-screen phrase matching. Nothing
+else depends on it.
