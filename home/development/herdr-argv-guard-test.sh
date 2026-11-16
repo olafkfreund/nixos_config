@@ -12,8 +12,8 @@ fake=$dir/hc-shell
 
 python3 -c 'import socket, sys; s = socket.socket(socket.AF_UNIX); s.bind(sys.argv[1])' "$dir/bus"
 printf '0::/user.slice/app.slice/hc-hold-1.scope\n' >"$cg"
-cat >"$fake" <<'EOF'
-#!/usr/bin/env bash
+printf '#!%s\n' "$(command -v bash)" >"$fake"
+cat >>"$fake" <<'EOF'
 if grep -q '^wrap ' "$HC_TEST_LOG"; then
   printf 'wrapper ran twice\n' >&2
   exit 1
