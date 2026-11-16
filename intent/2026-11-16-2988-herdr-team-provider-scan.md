@@ -22,7 +22,7 @@ fixture.
 
 A phrase counts only on a line with a verified provider-error shape, not anywhere on screen:
 
-- Codex: the line starts with `■ ` (Codex 0.169 renders terminal errors as `format!("■ {message}")`, the path its
+- Codex: the line starts with `■` (Codex 0.169 renders terminal errors as `format!("■ {message}")`, the path its
   usage-limit, capacity, stream and rate-limit failures take once retries are exhausted);
 - agy: the line starts with `agy error:` (printed by `agy-acp-member.py` for prompt errors).
 
@@ -54,5 +54,5 @@ today, minus the accidental matches.
 ## Open questions
 
 - Transient retries: while Codex retries (HTTP 429, a dropped stream) it shows the status in its status indicator,
-  without `■ `, so `ask` would keep waiting until the retries succeed or fail with a terminal `■ ` error.
+  without `■`, so `ask` would keep waiting until the retries succeed or fail with a terminal `■` error.
   Recommendation: keep waiting, since a retry that succeeds is not a failure and a final failure is still caught.
