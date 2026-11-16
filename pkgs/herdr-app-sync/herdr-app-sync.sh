@@ -143,7 +143,7 @@ main() {
   name=$(jq -r '.first_layout // empty' "$source_dir/managed.json")
   if [[ -n $name && $(jq -r '.layout_switched // false' "$manifest") == false && -f $app/layouts/$name.json ]] \
     && jq -e --arg name "$name" '.layouts[$name] != null' "$manifest" >/dev/null && herdr-app status >/dev/null 2>&1; then
-    if herdr-app do layout.switch --name "$name"; then
+    if herdr-app "do" layout.switch --name "$name"; then
       local temp
       temp=$(mktemp "$state/.manifest.XXXXXX") || return 1
       jq '.layout_switched = true' "$manifest" >"$temp" && mv "$temp" "$manifest"
