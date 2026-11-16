@@ -142,11 +142,18 @@ main() {
 
   name=$(jq -r '.first_layout // empty' "$source_dir/managed.json")
   if [[ -n $name && $(jq -r '.layout_switched // false' "$manifest") == false && -f $app/layouts/$name.json ]] \
-    && jq -e --arg name "$name" '.layouts[$name] != null' "$manifest" >/dev/null && herdr-app status >/dev/null 2>&1; then
-    if herdr-app "do" layout.switch --name "$name"; then
-      local temp
-      temp=$(mktemp "$state/.manifest.XXXXXX") || return 1
-      jq '.layout_switched = true' "$manifest" >"$temp" && mv "$temp" "$manifest"
+    && jq -e --arg name "$name" '.layouts[$name] != null' "$manifest" >/dev/null; then
+    if herdr-app status >/dev/null 2>&1; then
+      if herdr-app "do" layout.switch --name "$name"; then
+        local temp
+        temp=$(mktemp "$state/.manifest.XXXXXX") || return 1
+        jq '.layout_switched = true' "$manifest" >"$temp" && mv "$temp" "$manifest"
+      fi
+    elif [[ -n ${HERDR_APP_SYNC_RUNNING:-} ]]; then
+      # Window launch: the app is not up yet, so switch once it answers.
+      # shellcheck disable=SC2016 # expanded by the inner sh
+      setsid -f sh -c 'for _ in $(seq 60); do herdr-app status >/dev/null 2>&1 && exec "$0" "$1"; sleep 1; done' \
+        "$0" "$source_dir" >/dev/null 2>&1 || :
     fi
   fi
 }

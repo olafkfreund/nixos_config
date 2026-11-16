@@ -69,7 +69,8 @@ in
     xdg.configFile."herdr-app-sync/source".source = source;
 
     home.activation.herdrAppSync = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      ${pkgs.customPkgs.herdr-app-sync}/bin/herdr-app-sync || true
+      # The sync runs `herdr-app check`, which is not on PATH during activation.
+      PATH="${pkgs.customPkgs.herdr-app}/bin:$PATH" ${pkgs.customPkgs.herdr-app-sync}/bin/herdr-app-sync || true
     '';
   };
 }

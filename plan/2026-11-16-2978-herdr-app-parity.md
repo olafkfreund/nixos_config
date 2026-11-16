@@ -465,6 +465,13 @@ Any clash with 0.1.16's defaults, other than alt-hjkl, moves our key.
         may overlap.
   - Hashes come from `nix-prefetch-github` or a failed build, never
       guessed.
+  - **Deviations (found at checkpoint B, 2026-11-16):** `herdr-app` is not
+    on PATH during Home Manager activation, so the activation step puts the
+    app's `bin` on PATH for the sync's `herdr-app check` (a package
+    dependency would cycle: the app's wrapper runs the sync). And the
+    one-time layout switch needs a running app: on a window launch the sync
+    now starts a detached waiter that reruns it once `herdr-app status`
+    answers (up to 60 s).
 - **Step 13: Checkpoint B** (p620, then razer).
   - Bus steps and merge. `just test-host p620` → `just p620`. Run V2-V5
       and V8 on p620.
