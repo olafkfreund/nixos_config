@@ -603,6 +603,18 @@ Any clash with 0.1.16's defaults, other than alt-hjkl, moves our key.
       must leave nothing.
   - If it fails: stop, report, and Claude teams stay in-process in the
       app.
+  - **Spike result (2026-11-16, p620):** Codex wrote the prototype transport
+    in a scratch checkout of the pinned shim (an hc adapter behind
+    `socket_client.call`; resize, layout and move are safe no-ops); 178
+    tests pass. Live: a lead in an app tab made a two-teammate team. First
+    run failed: the `cat` placeholder survives ^C in an app terminal, so
+    `respawn-pane` typed the command into `cat`. With the tab created as a
+    plain shell instead, `split-window` ×2, `respawn-pane` ×2 and `kill-pane`
+    ×2 all succeeded, both teammates answered, and no child terminal was
+    left. `tab.new` / `space.new` take no focus argument, so focus is
+    restored with `tab.select` / `space.select`.
+  - **Deviation:** the reviewed prototype became the patch directly (by the
+    lead), instead of a second Codex pass.
 - **Step 19: `pkgs/herdr-claude-teams/hc-backend.patch`**, added to `patches` at
     `default.nix:22`:
   - **Leader:** `HC_TERMINAL_ID`.

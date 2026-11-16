@@ -48,7 +48,9 @@ let
   '';
   claudeLauncher = ''
     claude() {
-      if [[ ''${HERDR_ENV:-} == 1 && -n ''${HERDR_SOCKET_PATH:-} ]]; then
+      # Inside the TUI, or a herdr-app terminal (hc backend, #2978).
+      if [[ ''${HERDR_ENV:-} == 1 && -n ''${HERDR_SOCKET_PATH:-} ]] \
+        || [[ ''${HERDR_ENV:-} != 1 && -n ''${HC_TERMINAL_ID:-} ]]; then
         command herdr-claude-teams "$@"
       else
         command claude "$@"
