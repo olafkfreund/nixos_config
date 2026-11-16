@@ -3593,6 +3593,29 @@
         "type": "github"
       }
     },
+    "omapod": {
+      "inputs": {
+        "home-manager": [
+          "home-manager"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794833218,
+        "narHash": "sha256-eQsTMSKZIJr7D4lzCgCDkA/x1trIgt/kyiVgcTaJuto=",
+        "owner": "olafkfreund",
+        "repo": "nixarchy-omapod",
+        "rev": "94997b6f33e23407ff7bcadea2873492755d2825",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "repo": "nixarchy-omapod",
+        "type": "github"
+      }
+    },
     "omarchroma": {
       "flake": false,
       "locked": {
@@ -3779,6 +3802,7 @@
         "nixos-tfm": "nixos-tfm",
         "nixpkgs": "nixpkgs_7",
         "nur": "nur",
+        "omapod": "omapod",
         "rust-overlay": "rust-overlay_3",
         "seance": "seance",
         "sops-nix": "sops-nix_2",

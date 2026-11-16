@@ -147,6 +147,12 @@
       inputs.nixarchy-meeting-mode.follows = "nixarchy-meeting-mode";
       inputs.home-manager.follows = "home-manager";
     };
+    # omaPOD: podcast app + Omarchy bar widget; hosts/common/nixos/omarchy-omapod.nix (#2977).
+    omapod = {
+      url = "github:olafkfreund/nixarchy-omapod";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
     # nixarchy-llm-index: local document and code index served to agents over MCP;
     # hosts/common/nixos/llm-index.nix (#2882). Pinned by rev so an update cannot move it.
     nixarchy-llm-index = {

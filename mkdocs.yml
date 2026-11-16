@@ -205,6 +205,7 @@ nav:
       - "Hello Lock (lock screen)": applications/hello-lock.md
       - "tfm (file manager)": applications/tfm.md
       - "Flux (phone link)": applications/flux.md
+      - "omaPOD (podcasts)": applications/omapod.md
   - Command System:
       - Overview: Nixos/README.md
       - Commands Index: Nixos/COMMANDS-INDEX.md
