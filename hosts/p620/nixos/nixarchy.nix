@@ -34,7 +34,7 @@
     ../../common/nixos/omarchy-voice-pkgs.nix
     ../../common/nixos/omarchy-screenshots.nix
     ../../common/nixos/omarchy-ai-mirror.nix
-    ../../common/nixos/omarchy-flea.nix
+    ../../common/nixos/omarchy-portals.nix
     ../../common/nixos/omarchy-nixi-companion.nix
     ../../common/nixos/nixi-fleet.nix
     ../../common/nixos/omarchy-microvm.nix
@@ -74,6 +74,10 @@
   # installed imperatively at ~/.local/bin/claude -- that copy is invisible to
   # Nix, which is how the two drifted apart in the first place.
   programs.nixarchy.defaultAgent = "claude";
+
+  # Omarchroma Icons (nixarchy-omatheme#66): installs Reversal and Yaru and the
+  # image helpers; the panel's Icons page turns it on. Removing this reverts it.
+  programs.nixarchyThemeEngine.icons.enable = true;
 
   # ~/.config/hypr/hyprland.lua is home-manager's here, so the seed keeps it and
   # Omarchy's own config is never installed. The Omarchy session entry is what

@@ -353,14 +353,18 @@ so nothing there is a store symlink.
 | --- | --- | --- |
 | layout `freund` | clone of `main` 0.1.16 | the TUI layout |
 | `freund-agents` | clone of `agents` + a controls popup (⋯ or right-click) | herdr-radar's agent view |
-| `freund-tabs` | clone of `tabs` + a GitLab button | — |
+| `freund-tabs` | clone of `tabs` + a GitLab button + the window title | — |
 | `inbox` | ours: GitHub + gitlab.com issues and PRs/MRs, assigned, authored or review-requested | GitHub Start |
 | `issues` | jankeesvw/herdr-issues, pinned | GitHub Start, per repo |
 | `gitlab` | rem-aster/herdr-gitlab, pinned | — |
 | `notify` | ours: alerts go to `notify-send`; Open runs the alert's action | `[ui.toast] delivery = "system"` |
 | `splits` | ours: ctrl/alt+hjkl through Neovim | herdr-splits |
+| `reviewer` | herdr-reviewer + reviewr's turns, read-only git; diff line comments pasted to an agent | reviewr |
 | settings | `theme = "omarchy"` (Omarchy keeps `themes/omarchy.json` current), sounds on | `[theme] name = "terminal"` |
 | hc config | `history_mb = 48`, `restore_screen = true`, per-shell systemd scope | scrollback, pane history, #2959 |
+
+The window title is `<machine or host>: <space>`, set by `freund-tabs`. For a remote space it shows the machine
+name, not the remote's hostname. In other layouts it stays "Herdr".
 
 `argv` launches (menu agents, `tab.new --argv`, `terminal.open`, splits) skip `hcShell` and would share one
 `hc-hold-*` unit, so a bashrc guard (`home/development/hc-argv-guard.bash`) re-execs them into their own
@@ -376,8 +380,24 @@ so nothing there is a store symlink.
 | ctrl+shift+y / ctrl+alt+shift+y | zoetrope (`zoe`) right / in a tab |
 | ctrl+shift+u | open a worktree |
 | ctrl+shift+i | issues inbox |
+| ctrl+shift+d | diff review: comment on lines, paste them to an agent in the tab |
 | ctrl+shift+p / ctrl+? | command palette / key help (app defaults) |
 | ctrl+shift+l | cycle layouts (back to `main`) |
+
+### Diff comments
+
+Issue #2981. `ctrl+shift+d` opens the `reviewer` mod beside `changes`. Select a diff line or range, write a
+comment, repeat, then send all comments in one paste into an agent in the same tab.
+
+- Scopes: Uncommitted, Branch, Last agent turn and one picked Commit. Each scope keeps its own drafts.
+- Paste only: the text is pasted into the agent's input and never submitted; press Enter there yourself.
+- A send is refused when the tab has no agent or the agent is not idle (`working` and `blocked` are refused with
+  the status shown). With several agents in the tab, pick one in the dialog.
+- Drafts live in the app's shared state, per repo and scope, and survive closing the panel and restarting the app.
+  Comments whose lines changed since they were written are labelled and sent with a note.
+- Confirmation is a screen heuristic: the mod compares the agent's screen before and after. If it cannot confirm
+  the paste, the comments are kept and the review stays on the clipboard.
+- The clipboard is restored after a confirmed paste, as text only; an image or other clipboard content is lost.
 
 ### Sync, backups and rollback
 
@@ -395,27 +415,38 @@ always returns the app to its default layout and keys.
 
 | Gap | Issue |
 | --- | --- |
-| reviewr's send line comments to the agent | #2981 |
-| hintr's run-a-listed-key (`app.help` only lists) | #2982 |
+| hintr's run-a-listed-key: use the palette (`ctrl-shift-p`), which lists and runs commands with their keys; mod commands (lazygit, zoetrope) are not in it | #2982 (won't fix) |
 | Omarchy `nixarchy.herdr` widget still reads the TUI | #2983 |
-| window title has no host or workspace | #2984 |
 | Collie is not wired to hc | #2985 |
 | lazygit opens as a tab, not a float | #2986 |
 | herdr-team's provider-error scan can match its own source on screen | #2988 |
-| hc keeps its first starter's environment (see below) | #2989 |
+| an hc command before login can still start a core with a dirty environment (see below) | #2989 |
 
 ### hc keeps the environment of whoever started it first
 
 The core saves the environment of the process that first started it and reuses it across `hc server restart`
 and updates. If that was a herdr TUI pane or a Claude session, every app terminal inherits `HERDR_ENV=1` and that
 session's variables, and `claude()` / `herdr-team` then act as if they were in the TUI. Plain app shells drop those
-variables (`hcShell` in `home/development/herdr.nix`), and `argv` launches now drop them too, through the guard
-in interactive bash with a user bus. The core's own saved environment stays. Start the app from the launcher,
-never from a TUI pane, and to repair a polluted core run, from outside herdr:
+variables (`hcShell` in `home/development/herdr.nix`), and `argv` launches drop them too, through the guard
+in interactive bash with a user bus. That cleans identities in shells, not credentials or the core's own saved
+environment.
+
+`hc-core-ensure` (package `pkgs/hc-core-ensure`) keeps the core's environment clean. It re-runs itself through
+`systemd-run --user`, so the work happens in the user manager's environment, and it never fails the caller:
+
+- `login` (the `hc-core-ensure` user unit, once per graphical session): restarts a running core with
+  `hc server restart --fresh`, or starts one.
+- `launch` (every `herdr-app` window launch, before the sync): starts the core only if it is not running.
+
+The unit refuses manual starts and is not restarted by a Home Manager switch. Its journal lines are in
+`journalctl --user -t hc-core-ensure`. To repair a polluted core by hand, from any shell:
 
 ```bash
-systemd-run --user --collect --wait -p Type=oneshot hc server restart --fresh
+hc-core-ensure login
 ```
+
+Limit: an hc command run before login, or after the core exits and before the next app launch, can start a core
+from a dirty environment. It stays that way until the next login.
 
 ### Bumping herdr-app or herdr-core
 

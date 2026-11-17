@@ -1,0 +1,3 @@
+discord-1.0.168
+mutter-51.0
+tailscale-1.104.6
