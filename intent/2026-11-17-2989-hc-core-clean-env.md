@@ -14,18 +14,40 @@ launch or `herdr-team`/`herdr-run` call starts it if it is not running. When tha
 or a Claude Code session, every app terminal inherits `HERDR_ENV=1`, `TMUX`, the Claude session variables and that
 caller's token, and `claude()` and `herdr-team` behave as if they were in the TUI. It happened twice during #2978.
 
-# 2978 and #2987 limit the damage: `hcShell` strips those variables from plain app shells, and the argv guard does
-the same for argv launches in interactive bash. They don't cover everything: non-interactive `hc run` commands and
-`herdr-team` members still inherit the saved environment, and the repair (`systemd-run --user --collect --wait -p
-Type=oneshot hc server restart --fresh`, documented in `docs/applications/herdr.md`) is manual.
+The fixes from #2978 and #2987 limit the damage, but only for identities: `hcShell` drops selected `HERDR_*`,
+Claude session and `TMUX` variables from plain app shells, and the argv guard does the same for argv launches in
+interactive bash. Neither filters credentials (`NIX_CONFIG` with the GitHub token, API keys) or anything else the
+first caller had, and neither covers direct `hc run` executables or non-interactive scripts. `herdr-team` agents
+themselves are safe (`agent-env` runs them under `env -i` with an allowlist), but their launch shells are not. A
+restart keeps the saved environment; the repair (`… hc server restart --fresh` through `systemd-run`) is manual
+and only affects programs started afterwards.
+
+hc 0.1.21 starts the core itself through `systemd-run` as a transient `hc-serve-*` service, passing the caller's
+environment through a private `EnvironmentFile` (`/run/user/<uid>/hc-serve-*/environment`). The core is not tied
+to the graphical session (lingering is on), so it survives logout, and a later `hc server start` just connects to
+it.
 
 ## Proposed outcome
 
-On p620 and razer the core is started at graphical login by a systemd user unit, from the user manager's
-environment (the same one `uwsm app` launches get), before anything else can start it. After a reboot or relogin,
-`/proc/<core pid>/environ` has no `HERDR_*`, `TMUX`, `CLAUDE_CODE_SESSION_*` or similar caller variables, whichever
-app or agent touches hc first. A core that was already polluted gets repaired by one documented command, or by the
-next login.
+One small helper, `hc-core-ensure`, makes sure a running core started from a clean environment:
+
+- It starts or repairs the core from the **user manager's environment** (through `systemd-run --user`), never from
+  its own caller's, so it is safe to call from a TUI pane or an agent.
+- If the core is not running, it starts it. If it is running and its saved environment file names a caller
+  identity or credential (`HERDR_*` other than `HERDR_APP_HOME`, `TMUX*`, `CLAUDE_CODE_*` session variables,
+  `NIX_CONFIG`, `*_API_KEY*`), it runs `hc server restart --fresh` (programs keep running; new terminals get the
+  clean environment). Otherwise it does nothing.
+- It runs at graphical login (a user unit after `graphical-session.target`, so UWSM's environment is in) and every
+  time herdr-app starts (its wrapper already runs `herdr-app-sync`), which covers a core that exited or was started
+  early by something else.
+
+Observable: after login, or after launching herdr-app, a new app terminal and a new `hc run` command have none of
+those variables, whoever touched hc first. Checked through a newly launched terminal's environment, not only the
+core's `/proc/<pid>/environ` (hc changes its own environment after restoring restart state).
+
+Not promised: an hc command run before login, or between a core exit and the next herdr-app launch, can still
+start a core from its own environment; the next login or app launch repairs it. Programs already running keep the
+environment they started with.
 
 ## Affected users and systems
 
@@ -35,9 +57,10 @@ next login.
 
 ## Constraints
 
-- Never stop or restart a running core as a side effect of a Home Manager switch: that would disturb live agents
-  (`hc server restart` keeps programs running, but a stop would not).
-- Keep `hc` itself unpatched; use its CLI (`hc server start`/`status`/`restart --fresh`).
+- A Home Manager switch never runs the helper (the unit is not restarted on switch); only login and herdr-app
+  launches do. The helper never stops the core; `restart --fresh` keeps programs running.
+- Keep `hc` itself unpatched; use its CLI and the declared package path (a login shell can still resolve an older
+  `hc` on PATH: 0.1.20 was seen while 0.1.21 runs).
 - The core must not inherit the user manager's own secrets beyond what `uwsm app` launches already get; nothing new
   is added to the environment.
 - Stacked on `feat/2978-herdr-app-parity` (#2990), which owns the hc config in `herdr.nix`.
@@ -45,7 +68,5 @@ next login.
 
 ## Open questions
 
-- If a core is already running at login (an old one kept alive across a relogin, or started by an early agent),
-  should the unit leave it alone, or restart it with `--fresh` when its environment has a TUI or Claude identity?
-  Recommendation: restart with `--fresh` only when the saved environment has `HERDR_ENV` or a Claude session
-  variable (programs keep running across a restart), otherwise leave it.
+- The repair list (which saved variables mean "polluted"). Recommendation: the identities above plus `NIX_CONFIG`
+  and `*_API_KEY*`; anything the user manager itself has is fine by definition.
