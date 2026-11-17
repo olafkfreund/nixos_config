@@ -220,7 +220,6 @@ in
           "hypr.plugin-browser-binds"
           "hypr.altscape-binds"
           "hypr.agent-voice-binds"
-          "hypr.flea-binds"
         ];
 
         external = [
