@@ -33,10 +33,10 @@ One small helper, `hc-core-ensure`, makes sure a running core started from a cle
 
 - It starts or repairs the core from the **user manager's environment** (through `systemd-run --user`), never from
   its own caller's, so it is safe to call from a TUI pane or an agent.
-- If the core is not running, it starts it. If it is running and its saved environment file names a caller
-  identity or credential (`HERDR_*` other than `HERDR_APP_HOME`, `TMUX*`, `CLAUDE_CODE_*` session variables,
-  `NIX_CONFIG`, `*_API_KEY*`), it runs `hc server restart --fresh` (programs keep running; new terminals get the
-  clean environment). Otherwise it does nothing.
+- At login it runs `hc server restart --fresh` if a core is running (programs keep running; new terminals get the
+  clean environment), or starts one. At an app launch it only starts a core if none runs. (Revised with the spec:
+  the first draft restarted only when the saved environment file looked polluted, but that file is not what new
+  terminals get after a plain restart, so there is no reliable test to base it on.)
 - It runs at graphical login (a user unit after `graphical-session.target`, so UWSM's environment is in) and every
   time herdr-app starts (its wrapper already runs `herdr-app-sync`), which covers a core that exited or was started
   early by something else.
@@ -68,5 +68,4 @@ environment they started with.
 
 ## Open questions
 
-- The repair list (which saved variables mean "polluted"). Recommendation: the identities above plus `NIX_CONFIG`
-  and `*_API_KEY*`; anything the user manager itself has is fine by definition.
+None (the repair-list question fell away with the revision above).
