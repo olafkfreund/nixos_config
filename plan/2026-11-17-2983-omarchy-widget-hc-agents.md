@@ -97,7 +97,7 @@ branch). Line numbers are those of tip `b14b503` and drift as earlier steps land
   `blocked`/`error`/`working` keep their word; raw `idle` or `done` becomes `done` when `turn > seen`, else `idle`.
   When the label is absent keep the existing `attention` rule (`done` plus `{word:"done", seen:true}` becomes `idle`).
   Window-open `$appStatus` precedence stays first. Treat the label as a number (it may arrive as a string; compare
-  numerically, and an unparseable value counts as absent). Tests in `tests/herdr-sessions.sh`: raw `idle` with
+  numerically, and an unparsable value counts as absent). Tests in `tests/herdr-sessions.sh`: raw `idle` with
   `turn > seen` gives done; raw `done` with `turn <= seen` gives idle even when `attention` says seen for an older
   turn; no label falls back to `attention`; window open ignores all of it. Check: `bash tests/herdr-sessions.sh`.
   Traps: the snapshot fixture must carry `turn` and `labels` (schema-shaped, from live `hc events --json | head -1`);
