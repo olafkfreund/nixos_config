@@ -326,6 +326,16 @@ break the `freund` layout; the sync checks layouts with `jq`, and `ctrl+alt+shif
   backticks inside `git commit -m`); a deploy with a changed unit may exit 4 as a cosmetic switch result on razer;
   after a push, compare the remote branch head; return the shared checkout to `main` if it was moved.
 
+## Deviations (implementation)
+
+- Step 6: with the probes skipped, the dialog stays open and runs the paste transaction itself (no hand-off to the
+  panel). A paste the screen cannot prove keeps the comments.
+- Step 7: the whole-quote comparison lives in a new `mods/reviewer/stale.js` with `tests/stale.test.js`, so it is
+  tested directly.
+- Step 8: of gfronza's 19 donor tests, 5 apply as is; 14 need donor-only scope, session and multi-repo APIs the plan
+  excludes, so `tests/reader.test.js` adapts their cases instead of porting them.
+- Step 9: `splits/main.js` gained a copy of freund-tabs' `find` helper for the review toggle.
+
 ## Tests
 
 - Unit: `node --test home/development/herdr-app/tests/*.test.js` runs `paste.test.js`, `turns.test.js`, the end-to-end
