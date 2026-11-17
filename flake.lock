@@ -3709,11 +3709,11 @@
         "nixpkgs-qt": "nixpkgs-qt"
       },
       "locked": {
-        "lastModified": 1794935657,
-        "narHash": "sha256-8yrFEi0Y1nd4u/cuKX39gcpd5d4fQNNN0sywg7iEd2E=",
+        "lastModified": 1794942753,
+        "narHash": "sha256-i8fugQYg2gY9xY4CVISuzIsh4r27NaGyaFHfKMxgnwU=",
         "owner": "olafkfreund",
         "repo": "omateams",
-        "rev": "85a7fa4bb957c27c16fd1ab66285c2fee30959a4",
+        "rev": "cdf0605ee83cf0d9e8e54822d466549cbd0133c3",
         "type": "github"
       },
       "original": {
