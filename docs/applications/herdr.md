@@ -359,6 +359,7 @@ so nothing there is a store symlink.
 | `gitlab` | rem-aster/herdr-gitlab, pinned | — |
 | `notify` | ours: alerts go to `notify-send`; Open runs the alert's action | `[ui.toast] delivery = "system"` |
 | `splits` | ours: ctrl/alt+hjkl through Neovim | herdr-splits |
+| `reviewer` | herdr-reviewer + reviewr's turns, read-only git; diff line comments pasted to an agent | reviewr |
 | settings | `theme = "omarchy"` (Omarchy keeps `themes/omarchy.json` current), sounds on | `[theme] name = "terminal"` |
 | hc config | `history_mb = 48`, `restore_screen = true`, per-shell systemd scope | scrollback, pane history, #2959 |
 
@@ -376,8 +377,24 @@ so nothing there is a store symlink.
 | ctrl+shift+y / ctrl+alt+shift+y | zoetrope (`zoe`) right / in a tab |
 | ctrl+shift+u | open a worktree |
 | ctrl+shift+i | issues inbox |
+| ctrl+shift+d | diff review: comment on lines, paste them to an agent in the tab |
 | ctrl+shift+p / ctrl+? | command palette / key help (app defaults) |
 | ctrl+shift+l | cycle layouts (back to `main`) |
+
+### Diff comments
+
+Issue #2981. `ctrl+shift+d` opens the `reviewer` mod beside `changes`. Select a diff line or range, write a
+comment, repeat, then send all comments in one paste into an agent in the same tab.
+
+- Scopes: Uncommitted, Branch, Last agent turn and one picked Commit. Each scope keeps its own drafts.
+- Paste only: the text is pasted into the agent's input and never submitted; press Enter there yourself.
+- A send is refused when the tab has no agent or the agent is not idle (`working` and `blocked` are refused with
+  the status shown). With several agents in the tab, pick one in the dialog.
+- Drafts live in the app's shared state, per repo and scope, and survive closing the panel and restarting the app.
+  Comments whose lines changed since they were written are labelled and sent with a note.
+- Confirmation is a screen heuristic: the mod compares the agent's screen before and after. If it cannot confirm
+  the paste, the comments are kept and the review stays on the clipboard.
+- The clipboard is restored after a confirmed paste, as text only; an image or other clipboard content is lost.
 
 ### Sync, backups and rollback
 
@@ -395,7 +412,6 @@ always returns the app to its default layout and keys.
 
 | Gap | Issue |
 | --- | --- |
-| reviewr's send line comments to the agent | #2981 |
 | hintr's run-a-listed-key (`app.help` only lists) | #2982 |
 | Omarchy `nixarchy.herdr` widget still reads the TUI | #2983 |
 | window title has no host or workspace | #2984 |
