@@ -396,7 +396,7 @@ always returns the app to its default layout and keys.
 | Gap | Issue |
 | --- | --- |
 | reviewr's send line comments to the agent | #2981 |
-| hintr's run-a-listed-key (`app.help` only lists) | #2982 |
+| hintr's run-a-listed-key: use the palette (`ctrl-shift-p`), which lists and runs commands with their keys; mod commands (lazygit, zoetrope) are not in it | #2982 (won't fix) |
 | Omarchy `nixarchy.herdr` widget still reads the TUI | #2983 |
 | window title has no host or workspace | #2984 |
 | Collie is not wired to hc | #2985 |
