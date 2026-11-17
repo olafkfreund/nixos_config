@@ -100,11 +100,17 @@ reviewers:
    }
    ```
 
-   Verify (lead), with the override flags from above:
-   `nix eval --raw` of
-   `.#nixosConfigurations.p620.config.home-manager.users.olafkfreund.programs.nixarchy.plugins.omateams.src`.
-   It ends in `/share/omateams/plugin`, and the store path is the fork's
-   package.
+   Verify (lead), with the override flags from above, for **both** p620 and
+   razer:
+   - `nix eval --raw` of
+     `.#nixosConfigurations.<host>.config.home-manager.users.olafkfreund.programs.nixarchy.plugins.omateams.src`
+     must equal
+     `<the same host's ...programs.omateams.package>/share/omateams/plugin`.
+     Evaluate both and compare them.
+   - If the plugin option is missing (an attribute error), nixarchy's option
+     isn't visible to the fork's module. In that case add
+     `programs.nixarchy.plugins.omateams.src = "${omateams}/share/omateams/plugin";`
+     to the host module, as before, and note the deviation in this plan.
 
 3. **`hosts/common/nixos/omarchy-omaoutlook.nix`: one line.**
    - Replace the `omateams = pkgs.customPkgs.omateams.override { ... };`
@@ -114,9 +120,20 @@ reviewers:
      it.
    - Update the header's "Upgrade by" line only if it mentions omateams.
 
-   Verify (lead): `nix eval` of omaoutlook's `omateams` argument (through
-   `home-manager.users.olafkfreund.home.packages`) equals the user's
-   `programs.omateams.package`.
+   Verify (lead), per host:
+   - Take the derivation whose `pname` is `omaoutlook` from
+     `home-manager.users.olafkfreund.home.packages`.
+   - Its `postPatch` string must contain
+     `"<the user's programs.omateams.package>/bin/omateams"`.
+   - For example:
+
+     ```bash
+     nix eval --raw --impure --expr "let c = (builtins.getFlake (toString ./.)).nixosConfigurations.p620.config.home-manager.users.olafkfreund; o = builtins.head (builtins.filter (p: (p.pname or \"\") == \"omaoutlook\") c.home.packages); in if builtins.match \".*\${c.programs.omateams.package}/bin/omateams.*\" o.postPatch != null then \"ok\" else \"MISMATCH\""
+     ```
+
+     With the override, use `nix eval` on the flake attribute and the same
+     `--override-input` flags instead of `getFlake`. Expect `ok`.
+   - Step 5's compiled-binary check is the stronger evidence.
 
 4. **`pkgs/`: remove the local package.**
    - Delete `pkgs/omateams/`.
@@ -135,33 +152,73 @@ reviewers:
    The grep must print nothing.
 
 5. **Lead: build and check, with the override flags.**
-   - `git add -A` and `git rm -r pkgs/omateams`.
+   - `git add -A`. It also stages step 4's deleted files; no `git rm` is
+     needed.
    - For p620 and razer:
      `nix build .#nixosConfigurations.<host>.config.system.build.toplevel -o result-<host>`.
-   - For each host, run every closure check in the spec's Verification
-     section:
-     - one omateams, and it is the fork's;
-     - `ldd` of `.omateams-wrapped` shows only `qtwebengine-6.140.0`;
-     - all three memory properties and the unscoped fallback in the wrapper;
-     - the host's Hyprland store path in the Qt wrapper;
-     - the desktop entry and icon;
-     - the `BarWidget` fallback, `checkInstalled()`, and the store binary
-       path in `Service.qml`;
-     - no `install.sh`;
-     - omaoutlook's binary holds the omateams path, as UTF-8 or UTF-16.
+   - **Closure checks**, run for each host. `pkg` is
+     `nix eval --raw .#nixosConfigurations.<host>.config.home-manager.users.olafkfreund.programs.omateams.package`
+     (with the same flags), and each check names its expected result:
+     1. `nix-store -qR result-<host> | grep -E -- '-omateams-[0-9]'` prints
+        exactly one path, and it equals `pkg`.
+     2. `ldd $pkg/bin/.omateams-wrapped | grep -o 'qtwebengine-[^/]*' | sort -u`
+        prints only `qtwebengine-6.140.0`.
+     3. `$pkg/bin/omateams` contains `MemoryHigh=12G`, `MemoryMax=16G`,
+        `MemorySwapMax=0`, and a second `exec "$pkg/bin/omateams-unscoped"`
+        line for the case with no user bus.
+     4. `$pkg/bin/omateams-unscoped` contains the store path of
+        `nixosConfigurations.<host>.config.programs.hyprland.package`.
+     5. `$pkg/share/applications/omateams.desktop` and
+        `$pkg/share/icons/hicolor/scalable/apps/omateams.svg` exist.
+     6. `$pkg/share/omateams/plugin/ui/BarWidget.qml` contains
+        `(Color.bar && Color.bar.background) || "transparent"`.
+     7. `$pkg/share/omateams/plugin/ui/Service.qml` contains
+        `checkInstalled()`, has no `ensureHost()` call in
+        `Component.onCompleted`, and contains `"$pkg/bin/omateams"`.
+     8. `$pkg/share/omateams/plugin/install.sh` does not exist.
+     9. omaoutlook's `bin/.omaoutlook-wrapped` holds `$pkg/bin/omateams`,
+        as UTF-8 or UTF-16 (search the bytes with python, as the fork's
+        version check does).
    - Run the Opus review (a fresh agent given this plan and `git diff`) and
      the Codex review. Fix confirmed findings, then commit, naming the steps.
 
 6. **Lead: after olafkfreund/omateams#2 merges.**
-   - `nix flake lock --update-input omateams`, which writes `flake.lock`
-     against the default branch.
-   - Rerun step 5's builds without the override.
+   - `nix flake update omateams`. It adds the input to `flake.lock` against
+     the default branch. `--update-input` is deprecated in Nix 2.35.
+   - Rerun step 5's builds **and all nine closure checks** without the
+     override, since the merged revision can differ from the branch tested.
+   - Review the `flake.lock` diff: only the `omateams` node and its follows
+     are added. Commit it as
+     `chore(flake): lock omateams to the merged flake (#3028)`.
    - Open the PR linking the three artifacts.
 
 7. **Lead: runtime, only with the owner's OK to switch each host.**
-   - The spec's runtime list for p620: items 1-8, starting with the
-     explicit restart and the running exe's store path.
-   - The razer check.
+   - **p620:**
+     1. Restart: `omateams quit`, then let the bar start it, or run
+        `omateams --hidden`.
+        `readlink -f /proc/$(omateams status | jq .pid)/exe` must equal
+        `$pkg/bin/.omateams-wrapped`.
+     2. Teams is still signed in, the bar widget shows, and the host is
+        hidden.
+     3. `omateams status | jq '{captured, overdue}'` shows
+        `captured: false` and an `overdue` field. That field exists only
+        with the guard.
+     4. `systemctl --user show` on the host's scope (find it with
+        `systemctl --user status $(omateams status | jq .pid)`) with
+        `-p MemoryHigh -p MemoryMax -p MemorySwapMax` shows `12G`, `16G`
+        and `0`, in bytes.
+     5. Share and stop 3 times. Expect no `eglCreateSync failed` in
+        `journalctl --user --since -10min`. Either `hostMemory` stays
+        bounded, or a "Teams restarted" notice shows the guard acting; both
+        are acceptable.
+     6. A Teams link opened from omaoutlook opens in omateams.
+     7. Turn `runInBackground` off in the shell UI, run `omateams quit`,
+        and reload the shell: the host doesn't start. Then turn it back on.
+     8. The plugin stays enabled. If the user had turned it off, the
+        enable-once hook would not turn it back on; that is its existing
+        behaviour.
+   - **razer:** after the switch and a restart, Teams starts, is signed in,
+     and shows the bar widget. The running exe is razer's `$pkg`.
    - Report the results in the PR.
 
 ## Tests
