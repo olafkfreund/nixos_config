@@ -232,3 +232,22 @@ reviewers:
 - Before merge: drop the branch.
 - After merge: revert the PR, then rebuild. `pkgs/omateams` comes back,
   and the sign-in in `~/.local/share/omateams` is untouched either way.
+
+## Deviations during implementation
+
+- **Closure check 9 (omaoutlook binary) can't be measured.**
+  - Qt stores compiled QML compressed in the binary, so the omateams path
+    is not in it as plain bytes.
+  - The omaoutlook installed before this change fails the same check, so
+    this is not a regression.
+  - What proves the omaoutlook link instead:
+    - step 3's evaluation: omaoutlook's `postPatch` holds the user's
+      `programs.omateams.package` path, on both hosts;
+    - omaoutlook's own install check, which greps the patched `Main.qml` for
+      that path at build time.
+- **Existing gap, not changed here.** For the same reason, Nix records no
+  store reference from omaoutlook to omateams. It stays safe because the
+  same omateams is in the user's closure through `home.packages`.
+- **Step 3's check command.** `builtins.match` refuses a pattern that refers
+  to a store path. The check strips that reference
+  (`builtins.unsafeDiscardStringContext`) and tests with `builtins.split`.

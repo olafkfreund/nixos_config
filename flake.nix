@@ -157,6 +157,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
+    # omateams: Microsoft Teams web in an Omarchy-themed window, from our fork;
+    # hosts/common/nixos/omarchy-omateams.nix (#3028). nixpkgs-qt is not followed:
+    # it pins QtWebEngine 6.140.0 (QTBUG-142040) until our nixpkgs has it.
+    omateams = {
+      url = "github:olafkfreund/omateams";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
     # nixarchy-llm-index: local document and code index served to agents over MCP;
     # hosts/common/nixos/llm-index.nix (#2882). Pinned by rev so an update cannot move it.
     nixarchy-llm-index = {
