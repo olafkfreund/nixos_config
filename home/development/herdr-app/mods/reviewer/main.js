@@ -198,6 +198,7 @@ export default class Changes extends View {
             entry.watch?.cancel();
             entry.root = root;
             entry.turns = new Turns((cmd, args, opts) => exec(cmd, args, { ...opts, on: entry.on }), { name: tab.replace(/[^\w-]/g, "-") });
+            entry.turnsId = Math.random().toString(36).slice(2);
             this.watchTurn(tab, entry, root, cx);
           }
           await entry.turns.start(root, Date.now());
@@ -232,7 +233,9 @@ export default class Changes extends View {
   }
 
   publishTurn(tab, entry) {
-    setShared(TURNS, { ...(shared(TURNS) ?? {}), [tab]: { root: entry.root, on: entry.on, last: entry.turns.last(entry.root) } });
+    const last = entry.turns.last(entry.root);
+    setShared(TURNS, { ...(shared(TURNS) ?? {}), [tab]: { root: entry.root, on: entry.on,
+      last: { ...last, gen: last.gen === null ? null : `${entry.turnsId}:${last.gen}` } } });
   }
 
   watch(root, cx) {

@@ -71,7 +71,7 @@ test("adapted reader lists snapshot stats, diff and end tree content after later
   }
 });
 
-test("restart keeps earlier turn drafts separate when the new turn is sent", async () => {
+test("paste keeps unsent drafts after a scope switch and clears selected earlier turns", async () => {
   const root = "/repo", store = { "reviewer.drafts": {} };
   const a = panel(root, store, "A").view;
   Object.assign(a, { root, scope: "turn", scopeInfo: { turn: { gen: 1 } } });
@@ -85,27 +85,54 @@ test("restart keeps earlier turn drafts separate when the new turn is sent", asy
   store["reviewer.drafts"][newKey] = [{ id: "new", path: "b.txt" }];
   const dialogSource = readFileSync(new URL("../mods/reviewer/dialog.js", import.meta.url), "utf8")
     .replace(/^import .*;\n/gm, "").replace("export class Dialog", "class Dialog") + "\nglobalThis.Dialog = Dialog;";
-  const agent = { address: "fake-pane", tab: "tab", status: "idle" };
-  let screen = "", clipboard = "previous", closed = false;
+  const agent = { address: "fake-pane", tab: "tab", status: "done" };
+  let screen = "", clipboard = "previous", closed = false, toast = null;
+  let pasted;
+  const pasteStarted = new Promise((resolve) => { pasted = resolve; });
   const runtime = { confirmed, setTimeout, agents: () => [agent], focused: () => ({ tab: "tab", terminal: agent.address }),
     shared: (key) => store[key], setShared: (key, value) => { store[key] = value; },
     props: () => ({ overlay: "fake" }), closeOverlay: () => { closed = true; },
-    hc: async () => ({ code: 0, stdout: screen }), run: (command) => { if (command === "terminal.paste") screen += clipboard; },
+    hc: async () => ({ code: 0, stdout: screen }), run: (command) => { if (command === "terminal.paste") { screen += clipboard; pasted(); } },
+    notify: (message) => { toast = message; },
   };
   runInNewContext(dialogSource, runtime);
   const dialog = Object.create(runtime.Dialog.prototype);
   Object.assign(dialog, { note: "", context: "Review current turn", drafts: [{ key: newKey, ids: ["new"] }],
-    earlier: [{ key: oldKey, ids: ["old"], context: "Earlier turn" }], includeEarlier: false,
+    earlier: [{ key: oldKey, ids: ["old"], context: "Earlier turn" }], includeEarlier: true,
     repo: root, scope: "turn", sending: false, pick: null });
   const tasks = [];
   const cx = { spawn: (fn) => tasks.push(Promise.resolve().then(() => fn(cx))), notify() {},
-    read_from_clipboard: () => clipboard, write_to_clipboard: (text) => { clipboard = text; }, push_toast() {} };
+    read_from_clipboard: () => clipboard, write_to_clipboard: (text) => { clipboard = text; } };
   dialog.send(cx);
+  await Promise.race([pasteStarted, new Promise((_, reject) => setTimeout(() => reject(new Error(dialog.error || "paste did not start")), 1000))]);
+  store["reviewer.drafts"][newKey].push({ id: "unsent", path: "c.txt" });
+  store["reviewer.drafts"][`:${root}:work`] = [{ id: "work", path: "d.txt" }];
+  b.refresh = () => {};
+  b.setScope("work", { notify() {} });
   await Promise.all(tasks);
   assert.equal(closed, true, dialog.error);
-  assert.equal(store["reviewer.drafts"][newKey], undefined);
-  assert.deepEqual(store["reviewer.drafts"][oldKey].map((comment) => comment.quote), ["saved"]);
+  assert.match(toast?.title ?? "", /Pasted into/);
+  assert.deepEqual(store["reviewer.drafts"][newKey].map((comment) => comment.id), ["unsent"]);
+  assert.equal(store["reviewer.drafts"][oldKey], undefined);
+  assert.deepEqual(store["reviewer.drafts"][`:${root}:work`].map((comment) => comment.id), ["work"]);
   assert.equal(clipboard, "previous");
+});
+
+test("new Turns instances keep drafts separate across A to B to A", () => {
+  const root = "/repo", store = {}, { view } = panel(root, store, "A");
+  const a = { root, on: null, turnsId: "first", turns: { last: () => ({ gen: 1 }) } };
+  view.publishTurn("tab", a);
+  Object.assign(view, { root, scope: "turn", scopeInfo: { turn: store["reviewer.turns"].tab.last } });
+  const first = view.draftKey();
+  store["reviewer.drafts"] = { [first]: [{ id: "first", path: "a.txt" }] };
+  const b = { root: "/other", on: null, turnsId: "second", turns: { last: () => ({ gen: 1 }) } };
+  view.publishTurn("tab", b);
+  a.turns = { last: () => ({ gen: 1 }) }; a.turnsId = "third";
+  view.publishTurn("tab", a);
+  view.scopeInfo.turn = store["reviewer.turns"].tab.last;
+  assert.notEqual(view.draftKey(), first);
+  assert.equal(store["reviewer.drafts"][first][0].id, "first");
+  assert.equal(view.loadDrafts("turn").length, 0);
 });
 
 test("stale check rereads commented file after switching, including range interiors", async () => {
@@ -127,8 +154,12 @@ test("stale check rereads commented file after switching, including range interi
 });
 
 test("hidden tracker remains the sole snapshot owner when panel opens and drops an old send", () => {
-  const store = { "reviewer.send": { id: "old", text: "never paste" } };
+  const store = { "reviewer.send": { id: "old", text: "never paste" },
+    "reviewer.drafts": { ":/repo:work": [{ id: "saved", path: "a.txt" }] } };
   const { view, context } = panel("/repo", store, "B");
+  let pasteCalls = 0;
+  context.run = () => { pasteCalls++; };
+  context.hc = () => { pasteCalls++; };
   const periods = [];
   const cx = { timer: { every: (ms) => periods.push(ms) }, focus_handle: () => ({}), spawn() {} };
   context.props = () => ({ turns: true });
@@ -143,4 +174,7 @@ test("hidden tracker remains the sole snapshot owner when panel opens and drops 
   assert.deepEqual(periods, [250, 10000]);
   assert.equal(visible.trackers, undefined);
   assert.equal(store["reviewer.send"], null);
+  assert.equal(store["reviewer.handled"], undefined);
+  assert.equal(pasteCalls, 0);
+  assert.equal(store["reviewer.drafts"][":/repo:work"][0].id, "saved");
 });

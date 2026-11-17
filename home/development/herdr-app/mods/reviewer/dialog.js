@@ -7,7 +7,7 @@
 // Esc closes. Commands: "reviewer.send", "reviewer.close".
 import { div, svg } from "gpui-kit";
 import { v_flex, h_flex, TextareaState, Textarea, Popover } from "gpui-base";
-import { agents, focused, hc, run, shared, setShared, props, closeOverlay, theme, settings, nextCommand } from "herdr";
+import { agents, focused, hc, run, shared, setShared, props, closeOverlay, theme, settings, nextCommand, notify } from "herdr";
 import { confirmed } from "./paste.js";
 
 const DOT = { working: "working", blocked: "blocked", done: "done", idle: "idle" };
@@ -54,7 +54,7 @@ export class Dialog {
     const text = this.text(), target = this.target();
     if (!text) { this.error = "Type a note first"; cx.notify(); return; }
     if (!target) { this.error = "no agent in this tab"; cx.notify(); return; }
-    if (target.status !== "idle") { this.error = `${target.program?.name ?? target.app ?? target.address} is ${target.status}; wait until idle`; cx.notify(); return; }
+    if (target.status !== "idle" && target.status !== "done") { this.error = `${target.program?.name ?? target.app ?? target.address} is ${target.status}; wait until idle`; cx.notify(); return; }
     const request = { id: `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`,
       text, target: target.address, repo: this.repo, scope: this.scope,
       drafts: [...this.drafts, ...(this.includeEarlier ? this.earlier.map(({ key, ids }) => ({ key, ids })) : [])] };
@@ -69,7 +69,7 @@ export class Dialog {
         setShared("reviewer.send", null);
         const current = agents().find((a) => a.address === request.target && a.tab === focused()?.tab);
         if (!current) { this.error = "agent is gone"; return; }
-        if (current.status !== "idle") { this.error = `${current.status}; agent is not idle`; return; }
+        if (current.status !== "idle" && current.status !== "done") { this.error = `${current.status}; agent is not idle`; return; }
         const before = await hc(["read", request.target, "--lines", "0"]);
         if (before.code !== 0) throw new Error(before.stderr || "Could not read the agent screen");
         const clipboard = cx.read_from_clipboard();
@@ -93,7 +93,7 @@ export class Dialog {
         setShared("reviewer.drafts", drafts);
         setShared("reviewer.cleared", { id: request.id, drafts: request.drafts });
         if (clipboard !== undefined) cx.write_to_clipboard(clipboard);
-        cx.push_toast({ title: `Pasted into ${current.program?.name ?? current.app ?? current.address}; press Enter there to submit`, level: "success" });
+        notify({ title: `Pasted into ${current.program?.name ?? current.app ?? current.address}; press Enter there to submit`, level: "success" });
         this.close(true);
       } catch (e) {
         this.error = pasted ? "Could not confirm the paste; your comments are kept; the review is on the clipboard" : `Paste failed: ${e}; your comments are kept`;
