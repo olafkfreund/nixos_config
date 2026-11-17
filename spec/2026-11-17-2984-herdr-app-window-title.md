@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2984
 intent: intent/2026-11-17-2984-herdr-app-window-title.md
 ---
