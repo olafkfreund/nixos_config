@@ -13,16 +13,16 @@
 }:
 
 let
-  version = "0.169.0";
+  version = "0.169.1";
 
   sources = {
     x86_64-linux = {
       target = "x86_64-unknown-linux-musl";
-      hash = "sha256-O47QkRScxjpZBGufCUvPohzbTdoV7eRBzjabzuSnG6A=";
+      hash = "sha256-c431sxguK4WKSBQ/DC//KI2N0gAzDa3+TFyfPqx+IkQ=";
     };
     aarch64-linux = {
       target = "aarch64-unknown-linux-musl";
-      hash = "sha256-yNC0qyqXxZW3CxBBLTbQ1UZNzvHh0yRrBz1IAXzfWk8=";
+      hash = "sha256-PeUCrTfW9Y5NvJF9dsy8jzwWpAhM+qeK+tr2yGVZvOw=";
     };
   };
 
