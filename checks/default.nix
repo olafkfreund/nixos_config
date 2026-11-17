@@ -152,7 +152,4 @@ in
 
   # #2758 gate: remote build and copy with untrusted users and required signatures. Needs KVM.
   nix-untrusted-remote-build = import ./nix-untrusted-remote-build.nix { inherit pkgs; };
-
-  # #2973 gate: the T3 Code Omarchy theme activation script.
-  t3code-theme = import ./t3code-theme.nix { inherit pkgs; };
 }
