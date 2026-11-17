@@ -245,10 +245,13 @@ closure_absent() {
       return 1
     fi
   done <"$TMP/eval-inputs.txt"
-  if sed -E 's/-[0-9].*$//' "$TMP/names.txt" \
-    | awk -v family="$family" '$0 == family || index($0, family "-") == 1 { found = 1; exit } END { exit !found }'; then
-    return 1
-  fi
+  # One process, no pipe: with pipefail an early awk exit gave sed SIGPIPE (141), read as "absent" (fail-open).
+  # awk exits 0 = family present, 1 = absent, anything else = unsure; only 1 lets the skip through.
+  local rc=0
+  awk -v family="$family" '{ n = $0; sub(/-[0-9].*$/, "", n) }
+    n == family || index(n, family "-") == 1 { found = 1; exit }
+    END { exit (found ? 0 : 1) }' "$TMP/names.txt" || rc=$?
+  [ "$rc" -eq 1 ] || return 1
   RESOLVED_NAME="$name"
   return 0
 }
