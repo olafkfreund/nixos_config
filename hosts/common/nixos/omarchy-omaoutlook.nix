@@ -13,7 +13,8 @@ let
   };
 in
 {
-  imports = [ ./omarchy-enable-once.nix ];
+  # Teams links open in omateams, so its module comes along.
+  imports = [ ./omarchy-enable-once.nix ./omarchy-omateams.nix ];
 
   home-manager.users.olafkfreund = {
     programs.nixarchy.plugins.omaoutlook.src = "${omaoutlook}/share/omaoutlook/plugin";

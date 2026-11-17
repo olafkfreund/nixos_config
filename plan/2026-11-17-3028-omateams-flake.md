@@ -251,3 +251,13 @@ reviewers:
 - **Step 3's check command.** `builtins.match` refuses a pattern that refers
   to a store path. The check strips that reference
   (`builtins.unsafeDiscardStringContext`) and tests with `builtins.split`.
+- **Review fixes from step 5.** These come from the Opus review. Codex's one
+  finding is the missing `flake.lock` entry, which is step 6 by design.
+  - **`.claude/commands/check-updates.md`:** the `pkgs/omateams` row is
+    removed. The flake input falls under "Other flake inputs".
+  - **`omarchy-omaoutlook.nix` imports `./omarchy-omateams.nix`:** it reads
+    the user's `programs.omateams.package` now, so a host importing only
+    omaoutlook would otherwise fail to evaluate.
+  - **`pkgs/default.nix`:** omaoutlook's default `omateams` is a `throw`
+    naming the host module, not `null`, so a bare build says what is
+    missing.
