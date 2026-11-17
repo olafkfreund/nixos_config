@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2982
 author: olafkfreund
 ---
@@ -77,3 +77,7 @@ If the owner wants it, the cheapest version is one small mod: a list from `keys(
 3. Can a mod run a `keys()` action that carries `argv`/`place` (lazygit, zoe)? Recommendation: check
    `herdr.d.ts` `do()` and the `open` helper before any spec.
 4. Close or park? Recommendation: park until question 1 is answered, then close or spec accordingly.
+
+## Decision
+
+Approved by the owner on 2026-11-17, with the recommendation given for each open question above.
