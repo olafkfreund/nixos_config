@@ -188,7 +188,7 @@ export default class Changes extends View {
           this.trackers.set(tab, entry);
         }
         const state = workState(group.map(a => a.status)), transition = entry.edge(state);
-        if (transition.started) cx.spawn(async (cx) => {
+        if (transition.started) this.queueTurn(entry, cx, async (cx) => {
           const pane = panes().find(p => p.pane === group[0].pane), cwd = pane?.cwd;
           if (!cwd) return;
           const top = await gitRead(["rev-parse", "--show-toplevel"], { cwd, on: entry.on });
@@ -202,15 +202,27 @@ export default class Changes extends View {
             this.watchTurn(tab, entry, root, cx);
           }
           await entry.turns.start(root, Date.now());
-          this.publishTurn(tab, entry); cx.notify();
+          this.publishTurn(tab, entry);
         });
-        if (transition.ended && entry.turns) cx.spawn(async (cx) => {
-          await entry.turns.end(); this.publishTurn(tab, entry); cx.notify();
+        if (transition.ended) this.queueTurn(entry, cx, async () => {
+          if (entry.turns) { await entry.turns.end(); this.publishTurn(tab, entry); }
         });
       }
-      for (const [tab, entry] of this.trackers) if (!byTab.has(tab) && entry.edge("resting").ended && entry.turns) {
-        cx.spawn(async (cx) => { await entry.turns.end(); this.publishTurn(tab, entry); cx.notify(); });
+      for (const [tab, entry] of this.trackers) if (!byTab.has(tab) && entry.edge("resting").ended) {
+        this.queueTurn(entry, cx, async () => {
+          if (entry.turns) { await entry.turns.end(); this.publishTurn(tab, entry); }
+        });
       }
+    });
+  }
+
+  queueTurn(entry, cx, work) {
+    const previous = entry.queue ?? Promise.resolve();
+    let done;
+    entry.queue = new Promise(resolve => { done = resolve; });
+    cx.spawn(async (cx) => {
+      try { await previous; await work(cx); cx.notify(); }
+      finally { done(); }
     });
   }
 

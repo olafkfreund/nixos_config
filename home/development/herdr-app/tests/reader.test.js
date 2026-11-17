@@ -5,7 +5,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { runInNewContext } from "node:vm";
-import { Turns, READ, alternates, turnFor } from "../mods/reviewer/turns.js";
+import { Turns, READ, alternates, turnFor, createTracker, workState } from "../mods/reviewer/turns.js";
 import { commentState } from "../mods/reviewer/stale.js";
 import { confirmed } from "../mods/reviewer/paste.js";
 
@@ -18,7 +18,7 @@ const exec = (cmd, args, { cwd }) => new Promise((resolve) => execFile(cmd, args
 
 function panel(root, store, session) {
   const context = {
-    View: class {}, Turns, READ, alternates, turnFor, commentState,
+    View: class {}, Turns, READ, alternates, turnFor, createTracker, workState, commentState,
     tokenize: (text) => ({ spans: [{ text, cls: "" }], state: null }), languageOf: () => null,
     spaces: () => [{ active: true, folder: root }], panes: () => [], focused: () => ({ tab: "tab" }),
     exec, readTextFile: async (path) => readFileSync(path, "utf8"), watchFolder: () => {},
@@ -177,4 +177,38 @@ test("hidden tracker remains the sole snapshot owner when panel opens and drops 
   assert.equal(store["reviewer.handled"], undefined);
   assert.equal(pasteCalls, 0);
   assert.equal(store["reviewer.drafts"][":/repo:work"][0].id, "saved");
+});
+
+test("tracker ends a turn after delayed repository discovery", async () => {
+  const { view, context } = panel("/repo", {}, "B");
+  const calls = [];
+  let release;
+  context.agents = () => [{ tab: "tab", pane: "pane", space: "space", status }];
+  context.panes = () => [{ pane: "pane", cwd: "/repo" }];
+  context.spaces = () => [{ id: "space", machine: null }];
+  context.exec = async () => {
+    await new Promise(resolve => { release = resolve; });
+    return { code: 0, stdout: "/repo\n" };
+  };
+  context.Turns = class {
+    async start() { calls.push("start"); }
+    async end() { calls.push("end"); }
+    last() { return { gen: 1 }; }
+  };
+  const tasks = [], timers = [];
+  const cx = { timer: { every: (_ms, fn) => timers.push(fn) }, spawn: fn => {
+    tasks.push(Promise.resolve().then(() => fn(cx)));
+  }, notify() {} };
+  view.initTracker(cx);
+  let status = "idle";
+  timers[0](cx);
+  status = "working";
+  timers[0](cx);
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(typeof release, "function");
+  status = "idle";
+  timers[0](cx);
+  release();
+  await Promise.all(tasks);
+  assert.deepEqual(calls, ["start", "end"]);
 });
