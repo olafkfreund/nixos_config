@@ -5,6 +5,7 @@
 //          c219fda115336d3db796b81717a2f2139b223e86 (mods/reviewer/turns.js)
 // Local changes (plan/2026-11-17-2981-herdr-app-diff-comments.md; filled in as steps land):
 //   - mod.json: "focusable": true.
+//   - Step 4: private-index turn snapshots, snapshot-backed preview and always-mounted tracker.
 //   - Step 3: git is read-only (no committing, message input or button), no "Last commit" scope, no agent send
 //     or start; scopes are Uncommitted, Branch, Last agent turn (stub until turns.js), Commit.
 //
@@ -47,11 +48,12 @@
 //          base: the branch reviews are against (default: origin/HEAD, else main, else master) }.
 import { View, div, svg } from "gpui-kit";
 import { v_flex, h_flex, TextareaState, Textarea, Scrollbar, v_virtual_list, VirtualListScrollHandle, Popover } from "gpui-base";
-import { spaces, panes, focused, exec, readTextFile, watchFolder, theme, settings, nextCommand, props, shared, setShared } from "herdr";
+import { spaces, panes, agents, focused, exec, readTextFile, watchFolder, theme, settings, nextCommand, props, shared, setShared } from "herdr";
 import { tokenize, languageOf } from "./highlight.js";
 import { ask } from "./ask.js";
 import { palette } from "./palette.js";
 import { Dialog } from "./dialog.js";
+import { Turns, createTracker, workState, READ, alternates, turnFor } from "./turns.js";
 
 function location() {
   const space = spaces().find((s) => s.active), f = focused();
@@ -67,15 +69,11 @@ const NONE = "#00000000", SENT = "reviewer.sent", DRAFTS = "reviewer.drafts", SC
 // "commit:<sha>" for a picked commit: the id keys the remembered scope and the drafts.
 const SCOPES = ["work", "branch", "turn", "commit"];
 const LOG_SIZE = 100;
-const OPEN = "reviewer.open", OPEN_TTL = 30_000, FULL = "reviewer.full";
+const OPEN = "reviewer.open", OPEN_TTL = 30_000, FULL = "reviewer.full", TURNS = "reviewer.turns";
+const gitRead = (args, opts, env = []) => exec(env.length ? "env" : "git", env.length ? [...env, "git", ...READ, ...args] : [...READ, ...args], opts);
 // Diff lines shown at most; with the unchanged lines filled in, file lines at
 // most (a bigger file shows its hunks only). A fold this short is just shown.
 const DIFF_LINES = 1500, FILE_LINES = 30000, FILE_BYTES = 2_000_000, SHORT_GAP = 2;
-// Flags for the automatic git reads (the same ones Herdr's Changes panel
-// uses): never take index.lock, which an agent's commit may need at the same
-// moment; never start a repo's fsmonitor just because it got focus; never
-// rewrite the index from git diff.
-const READ = ["--no-optional-locks", "-c", "core.fsmonitor=false", "-c", "diff.autoRefreshIndex=false"];
 // The code font: the terminal's (`font` in settings, JetBrains Mono when
 // unset), one size smaller than the terminal (`font_size`, 14 when unset);
 // `props.font_size` overrides. Rows and widths scale with it.
@@ -143,6 +141,7 @@ function fillGaps(lines, text) {
 
 export default class Changes extends View {
   init(_props, cx) {
+    if (props()?.turns) { this.initTracker(cx); return; }
     // Opened as the send dialog (ask.js): this copy is the dialog, nothing else.
     if (props()?.dialog) { this.dialog = Object.create(Dialog.prototype); this.dialog.init(_props, cx); return; }
     this.files = []; this.rows = []; this.index = new Map(); this.items = []; this.sizes = []; this.diffWidth = 0; this.gutter = 30;
@@ -168,6 +167,66 @@ export default class Changes extends View {
         cx.notify();
       }
     });
+  }
+
+  initTracker(cx) {
+    this.trackers = new Map();
+    setShared(TURNS, {});
+    cx.timer.every(250, (cx) => {
+      const byTab = new Map();
+      for (const agent of agents()) byTab.set(agent.tab, [...(byTab.get(agent.tab) ?? []), agent]);
+      for (const [tab, group] of byTab) {
+        let entry = this.trackers.get(tab);
+        if (!entry) {
+          entry = { edge: createTracker(), turns: null, root: null, on: spaces().find(s => s.id === group[0].space)?.machine ?? null };
+          this.trackers.set(tab, entry);
+        }
+        const state = workState(group.map(a => a.status)), transition = entry.edge(state);
+        if (transition.started) cx.spawn(async (cx) => {
+          const pane = panes().find(p => p.pane === group[0].pane), cwd = pane?.cwd;
+          if (!cwd) return;
+          const top = await gitRead(["rev-parse", "--show-toplevel"], { cwd, on: entry.on });
+          if (top.code !== 0) return;
+          const root = top.stdout.trim();
+          if (entry.root !== root) {
+            entry.watch?.cancel();
+            entry.root = root;
+            entry.turns = new Turns((cmd, args, opts) => exec(cmd, args, { ...opts, on: entry.on }), { name: tab.replace(/[^\w-]/g, "-") });
+            this.watchTurn(tab, entry, root, cx);
+          }
+          await entry.turns.start(root, Date.now());
+          this.publishTurn(tab, entry); cx.notify();
+        });
+        if (transition.ended && entry.turns) cx.spawn(async (cx) => {
+          await entry.turns.end(); this.publishTurn(tab, entry); cx.notify();
+        });
+      }
+      for (const [tab, entry] of this.trackers) if (!byTab.has(tab) && entry.edge("resting").ended && entry.turns) {
+        cx.spawn(async (cx) => { await entry.turns.end(); this.publishTurn(tab, entry); cx.notify(); });
+      }
+    });
+  }
+
+  watchTurn(tab, entry, root, cx) {
+    cx.spawn(async (cx) => {
+      try {
+        while (this.trackers.get(tab) === entry && entry.root === root) {
+          const pending = watchFolder(root);
+          entry.watch = pending;
+          const paths = await pending;
+          if (entry.root !== root) break;
+          if (paths.length) {
+            entry.turns.wrote(root, Date.now(), paths);
+            await entry.turns.refresh();
+            this.publishTurn(tab, entry); cx.notify();
+          }
+        }
+      } catch { /* A later turn can start a fresh watch. */ }
+    });
+  }
+
+  publishTurn(tab, entry) {
+    setShared(TURNS, { ...(shared(TURNS) ?? {}), [tab]: { root: entry.root, on: entry.on, last: entry.turns.last(entry.root) } });
   }
 
   watch(root, cx) {
@@ -217,16 +276,20 @@ export default class Changes extends View {
         const remembered = (shared(SCOPE) ?? {})[scopeKey];
         let [scope, sha] = wanted ? ["commit", wanted] : root === this.root ? [this.scope, this.sha] : remembered?.startsWith("commit:") ? ["commit", remembered.slice(7)] : [remembered ?? null, null];
         const info = hasHead ? await this.scopes(git, scope === "commit" ? sha : null) : { branch: null, base: null, merge: null, turn: null, commit: null };
+        info.turn = turnFor(shared(TURNS), focused()?.tab, root, on);
+        const turnEnv = info.turn?.objects ? [alternates(info.turn.objects)] : [];
         if (!scope) scope = info.merge ? "branch" : "work";
         if (scope === "branch" && !info.merge) scope = "work";
-        if (scope === "turn" && !info.turn) scope = "work";
         if (scope === "commit" && !info.commit) { scope = "work"; sha = null; }
         if (scope !== "commit") sha = null;
         // What is diffed: the working tree against one ref, or a picked commit against its parent.
-        const range = scope === "commit" ? [info.commit.parent, info.commit.sha] : [scope === "branch" ? info.merge : "HEAD"];
+        const range = scope === "commit" ? [info.commit.parent, info.commit.sha]
+          : scope === "turn" ? (info.turn?.from && info.turn?.to ? [info.turn.from, info.turn.to] : [])
+          : [scope === "branch" ? info.merge : "HEAD"];
+        const diffGit = (args) => gitRead(args, { cwd: root, on }, scope === "turn" ? turnEnv : []);
         // Files: what differs in the range, plus (for the working tree) untracked files and conflicts from the status.
         const stats = {}, changed = new Map();
-        const results = hasHead ? [await git(["diff", ...range, "--numstat", "-z", "--no-renames"])] : [await git(["diff", "--cached", "--numstat", "-z", "--no-renames"]), await git(["diff", "--numstat", "-z", "--no-renames"])];
+        const results = scope === "turn" && !range.length ? [] : hasHead ? [await diffGit(["diff", ...range, "--numstat", "-z", "--no-renames"])] : [await git(["diff", "--cached", "--numstat", "-z", "--no-renames"]), await git(["diff", "--numstat", "-z", "--no-renames"])];
         for (const result of results) {
           if (result.code !== 0) throw new Error(result.stderr);
           for (const entry of result.stdout.split("\0")) {
@@ -237,7 +300,7 @@ export default class Changes extends View {
           }
         }
         if (hasHead) {
-          const names = await git(["diff", ...range, "--name-status", "-z", "--no-renames"]);
+          const names = scope === "turn" && !range.length ? { code: 0, stdout: "" } : await diffGit(["diff", ...range, "--name-status", "-z", "--no-renames"]);
           if (names.code !== 0) throw new Error(names.stderr);
           const parts = names.stdout.split("\0");
           // With diff.autoRefreshIndex off, a file whose stat changed but whose
@@ -246,7 +309,7 @@ export default class Changes extends View {
           for (let i = 0; i + 1 < parts.length && parts[i]; i += 2) { if (parts[i][0] !== "M" || stats[parts[i + 1]]) changed.set(parts[i + 1], parts[i][0]); }
         }
         // A picked commit is history: the working tree's state is not part of it.
-        const entries = scope === "commit" ? [] : status.stdout.split("\0").filter(Boolean);
+        const entries = scope === "commit" || scope === "turn" ? [] : status.stdout.split("\0").filter(Boolean);
         for (const entry of entries) {
           const xy = entry.slice(0, 2), path = entry.slice(3);
           if (xy === "??") changed.set(path, "?");
@@ -265,7 +328,7 @@ export default class Changes extends View {
         this.root = root; this.on = on; this.hasHead = hasHead; this.scope = scope; this.sha = sha; this.scopeInfo = info; this.range = range;
         // Each scope keeps its own comments: switching swaps the set, the others stay saved.
         if (changedSet) { this.comments = this.loadDrafts(this.scopeId()); this.composer = null; }
-        this.files = files; this.limited = changed.size > 1000; this.error = null;
+        this.files = files; this.limited = changed.size > 1000; this.error = scope === "turn" ? info.turn?.problem ?? null : null;
         this.watch(root, cx);
         if (requested !== null) {
           // "": the repo itself, no file to select.
@@ -368,7 +431,7 @@ export default class Changes extends View {
   }
   // From a picked commit, the next scope is Uncommitted.
   cycleScope(cx) {
-    const ok = SCOPES.slice(0, 3).filter((s) => s === "work" || (s === "turn" ? this.scopeInfo?.turn : this.scopeInfo?.merge));
+    const ok = SCOPES.slice(0, 3).filter((s) => s !== "branch" || this.scopeInfo?.merge);
     this.setScope(ok[(ok.indexOf(this.scope) + 1) % ok.length], cx);
   }
   // The commits for the picker, read when it opens: on a branch that has left
@@ -389,7 +452,7 @@ export default class Changes extends View {
     const file = this.files.find((f) => f.path === path), root = this.root, on = this.on;
     if (!file) return;
     let lines;
-    if (file.fresh || (!this.hasHead && file.status === "A")) {
+    if (this.scope !== "turn" && (file.fresh || (!this.hasHead && file.status === "A"))) {
       const text = await readTextFile(`${root}/${path}`, { on }).catch(() => null);
       if (text === null) lines = ["Cannot preview this file (binary, too large, or unreadable)"];
       else if (text.includes("\0")) lines = ["Binary file · no text diff"];
@@ -399,15 +462,16 @@ export default class Changes extends View {
       }
     } else {
       const range = this.hasHead ? this.range : [];
-      const r = await exec("git", [...READ, "diff", ...range, "--no-ext-diff", "--no-textconv", "--no-color", "--", path], { cwd: root, on });
+      const env = this.scope === "turn" && this.scopeInfo?.turn?.objects ? [alternates(this.scopeInfo.turn.objects)] : [];
+      const r = await gitRead(["diff", ...range, "--no-ext-diff", "--no-textconv", "--no-color", "--", path], { cwd: root, on }, env);
       if (r.code !== 0) throw new Error(r.stderr);
       const all = r.stdout.replace(/\n$/, "").split("\n"), first = all.findIndex((l) => l.startsWith("@@"));
       lines = first < 0 ? [file.binary ? "Binary file changed" : "No text diff available"] : all.slice(first);
       // The unchanged lines around the hunks, from the new side of the file:
       // the picked commit's blob, else the working tree. A cut diff or a deleted file has none.
       if (first >= 0 && lines.length <= DIFF_LINES && file.status !== "D") {
-        const commit = this.scope === "commit" && range.length === 2 ? range[1] : null;
-        const text = commit ? await exec("git", [...READ, "show", `${commit}:${path}`], { cwd: root, on }).then((s) => s.code === 0 ? s.stdout : null).catch(() => null)
+        const commit = (this.scope === "commit" || this.scope === "turn") && range.length === 2 ? range[1] : null;
+        const text = commit ? await gitRead(["show", `${commit}:${path}`], { cwd: root, on }, env).then((s) => s.code === 0 ? s.stdout : null).catch(() => null)
           : await readTextFile(`${root}/${path}`, { on }).catch(() => null);
         if (typeof text === "string") lines = fillGaps(lines, text);
       }
@@ -637,7 +701,7 @@ export default class Changes extends View {
     const options = [
       { scope: "work", label: "Uncommitted", detail: "working tree vs HEAD", ok: true },
       { scope: "branch", label: i.base ? `vs ${i.base}` : "vs base branch", detail: i.merge ? `everything on ${i.branch} since it left ${i.base}` : i.base ? `on ${i.base} itself` : "no main or master branch", ok: Boolean(i.merge) },
-      { scope: "turn", label: "Last agent turn", detail: "no agent turn seen since the window opened", ok: Boolean(i.turn) },
+      { scope: "turn", label: "Last agent turn", detail: i.turn?.gen ? "latest turn in this tab" : "no agent turn seen since the window opened", ok: true },
     ];
     const box = h_flex().id("scope-box").h(24).px(8).gap(6).items_center().rounded(6).border_1().border_color(this.choosingScope ? t.accent : t.border).bg(t.raised).cursor_pointer().hover((s) => s.bg(t.hover))
       .tooltip("What is reviewed: the uncommitted changes, the whole branch, the last agent turn, or one commit").child(div().text_size(12).child(this.scopeLabel())).child(svg("mods/reviewer/chevron-down.svg").size(11).text_color(t.dim));
@@ -729,8 +793,11 @@ export default class Changes extends View {
   }
 
   render(cx) {
+    if (props()?.turns) return div().w(1).h(1);
     if (this.dialog) return this.dialog.render(cx);
     const request = shared(OPEN);
+    const turn = turnFor(shared(TURNS), focused()?.tab, this.root, this.on);
+    if (this.scope === "turn" && (turn?.gen !== this.scopeInfo?.turn?.gen || turn?.to !== this.scopeInfo?.turn?.to)) cx.timer.after(1, (cx) => this.refresh(cx));
     if (request != null && this.stale(request)) cx.timer.after(1, () => setShared(OPEN, null));
     else if (key() !== this.context || (request?.id !== this.tried && this.requestedFile(request) !== null)) this.refresh(cx);
     const size = codeSize();
@@ -780,7 +847,7 @@ export default class Changes extends View {
             .on_click((_e, cx) => { cx.stop_propagation(); this.commentFile(f.path, cx); })
             .when(Boolean(k), (e) => e.child(String(k))).child(svg("mods/reviewer/comment.svg").size(k ? 10 : 12)))
           .when(f.add > 0, (e) => e.child(div().text_size(11).text_color(t.ansi2).child(`+${f.add}`))).when(f.del > 0, (e) => e.child(div().text_size(11).text_color(t.ansi1).child(`−${f.del}`)));
-      })).when(!this.files.length, (e) => e.child(div().p(8).text_color(t.dim).child(this.error || (this.loading ? "Loading changes…" : !this.root ? "No folder" : this.scope === "work" ? "No uncommitted changes" : "No changes in this scope")))))
+      })).when(!this.files.length, (e) => e.child(div().p(8).text_color(t.dim).child(this.error || (this.loading ? "Loading changes…" : !this.root ? "No folder" : this.scope === "work" ? "No uncommitted changes" : this.scope === "turn" && !this.scopeInfo?.turn?.gen ? "no agent turn seen since the window opened" : "No changes in this scope")))))
       .when(this.limited, el => el.child(div().px(12).py(4).text_size(11).text_color(t.dim).child("Showing the first 1,000 changed files")))
       .child(h_flex().flex_1().min_h(0).items_stretch()
         .child(div().flex_1().min_w(0).min_h(0).relative().font_family(codeFont()).text_size(this.fontSize)

@@ -239,6 +239,19 @@
               "size": {
                 "px": 1
               }
+            },
+            {
+              "id": "review-turns",
+              "type": "block",
+              "content": {
+                "mod": "reviewer",
+                "props": {
+                  "turns": true
+                }
+              },
+              "size": {
+                "px": 1
+              }
             }
           ],
           "size": {
