@@ -355,6 +355,14 @@ These came up in step 2. The privacy boundary does not change.
 - **Policy entry shape,** taken from the 1.18.31 binary:
   `{ action = "provider.use"; resource; effect; }`.
 
+## Owner decision after deploy (2026-11-17)
+
+On p620, `qwen3.8:27b` loaded at 32k context took 18 GB and spilled 7% onto
+the CPU, pushing other models out of the GPU. You chose `qwen3:14b` instead:
+9 GB, with tools and thinking. `MODEL` in `llm-docs.nix` changes to it, and
+the proxy and opencode config follow from that one `let`. Live check 4 is
+re-run with it.
+
 ## Tests
 
 | Command | Expected |
