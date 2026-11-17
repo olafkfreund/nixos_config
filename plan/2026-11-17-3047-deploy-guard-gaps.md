@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3047
 spec: spec/2026-11-17-3047-deploy-guard-gaps.md
 coders:
