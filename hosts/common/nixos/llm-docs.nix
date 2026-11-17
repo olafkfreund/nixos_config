@@ -13,7 +13,7 @@ in
     home-manager.users.olafkfreund =
       { config, lib, pkgs, ... }:
       let
-        MODEL = "qwen3.8:27b";
+        MODEL = "qwen3:14b"; # 9 GB, fits the GPU fully; qwen3.8:27b spilled to CPU (owner, 2026-11-17)
         home = config.home.homeDirectory;
         llmIndex = config.services.llm-index;
         opencode = "${inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.opencode-bin}/bin/opencode";
