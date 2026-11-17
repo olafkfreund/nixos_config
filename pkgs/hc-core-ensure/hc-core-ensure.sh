@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 inner="${HC_CORE_ENSURE_INNER:-}"
 unset HC_CORE_ENSURE_INNER
 
