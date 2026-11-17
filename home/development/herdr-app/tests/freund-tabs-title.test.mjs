@@ -10,8 +10,8 @@ globalThis.localStorage = { getItem: () => null };
 
 const stub = source => `data:text/javascript,${encodeURIComponent(source)}`;
 const imports = {
-  "gpui-kit": stub("export class View {} export const div = () => {}; export const svg = () => {}; export const image = () => {};"),
-  "gpui-base": stub("export const h_flex = () => {}; export const ScrollHandle = { new: () => ({}) };"),
+  "gpui-kit": stub("export class View {} const chain = new Proxy({}, { get: () => () => chain }); export const div = () => chain; export const svg = () => chain; export const image = () => chain;"),
+  "gpui-base": stub("const chain = new Proxy({}, { get: () => () => chain }); export const h_flex = () => chain; export const ScrollHandle = { new: () => ({}) };"),
   herdr: stub(`
     const state = globalThis.freundTabsTest;
     export const spaces = () => state.spaces;
@@ -20,7 +20,7 @@ const imports = {
     export const panes = () => [];
     export const run = () => {};
     export const openOverlay = () => {};
-    export const theme = () => {};
+    export const theme = () => ({});
     export const window = () => {};
     export const shared = () => {};
     export const layout = () => {};
@@ -47,9 +47,15 @@ try {
 function tabs(execResult) {
   state.calls = [];
   state.execResult = execResult;
+  state.spaces = [];
   const view = Object.create(Tabs.prototype);
   view.init();
   return view;
+}
+
+function render(view, spaces) {
+  state.spaces = spaces;
+  view.render();
 }
 
 const settled = () => new Promise(resolve => setImmediate(resolve));
@@ -57,8 +63,7 @@ const settled = () => new Promise(resolve => setImmediate(resolve));
 // T1: a hostname result arriving during cleanup cannot restore the old title.
 let resolveHost;
 let view = tabs(new Promise(resolve => { resolveHost = resolve; }));
-view.activeSpace = { name: "Work", machine: null };
-view.retitle();
+render(view, [{ name: "Work", machine: null, active: true }]);
 await view.close();
 assert.deepEqual(state.calls, ["Work", null]);
 resolveHost({ stdout: "p620\n" });
@@ -70,36 +75,33 @@ console.log("T1 late hostname after close");
 // T2: configured machine takes precedence; failed lookup leaves the bare name.
 view = tabs(Promise.resolve({ stdout: "p620\n" }));
 await settled();
-view.activeSpace = { name: "Work", machine: null };
-view.retitle();
-view.activeSpace = { name: "Remote", machine: "razer" };
-view.retitle();
+render(view, [{ name: "Work", machine: null, active: true }]);
+render(view, [{ name: "Remote", machine: "razer", active: true }]);
 assert.deepEqual(state.calls, [null, "p620: Work", "razer: Remote"]);
 view = tabs(Promise.reject(new Error("hostname failed")));
 await settled();
-view.activeSpace = { name: "Work", machine: null };
-view.retitle();
+render(view, [{ name: "Work", machine: null, active: true }]);
 assert.deepEqual(state.calls, ["Work"]);
 console.log("T2 local, remote and unknown host");
 
 // T3: unchanged data is silent; each name or machine change emits once.
 view = tabs(Promise.resolve({ stdout: "p620\n" }));
 await settled();
-view.activeSpace = { name: "Work", machine: null };
-view.retitle();
-view.retitle();
-view.activeSpace.name = "Renamed";
-view.retitle();
-view.activeSpace.machine = "razer";
-view.retitle();
+const space = { name: "Work", machine: null, active: true };
+render(view, [space]);
+render(view, [space]);
+space.name = "Renamed";
+render(view, [space]);
+space.machine = "razer";
+render(view, [space]);
 assert.deepEqual(state.calls, [null, "p620: Work", "p620: Renamed", "razer: Renamed"]);
 console.log("T3 title de-duplication and changes");
 
 // T4: no active space clears the title once, including on the first render.
 view = tabs(Promise.reject(new Error("hostname failed")));
 await settled();
-view.retitle();
-view.retitle();
+render(view, []);
+render(view, [{ name: "Inactive", active: false }]);
 assert.deepEqual(state.calls, [null]);
 console.log("T4 no active space");
 
