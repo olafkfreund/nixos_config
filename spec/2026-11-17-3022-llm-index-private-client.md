@@ -61,6 +61,7 @@ llm-docs-proxy ── unix socket (one file) ┼── socat 127.0.0.1:11434 ─
 | Inside the sandbox | Source on the host | Mode |
 | --- | --- | --- |
 | `/nix/store` | `/nix/store` | ro |
+| `/lib64`, `/run/current-system/sw/share/nix-ld` | same | ro. Amendment 2026-11-17: `opencode-bin` is linked against `/lib64/ld-linux-x86-64.so.2`, which is nix-ld; without these it cannot start. They contain only symlinks into the store: the loader and the system's default library set. |
 | `/etc/passwd`, `/etc/group`, `/etc/nsswitch.conf`, `/etc/localtime` | same | ro, individual files |
 | `/home/olafkfreund` | tmpfs | |
 | `~/.config/llm-index/config.toml` | same | ro |
@@ -209,6 +210,23 @@ the error and has nowhere else to go.
 - **Mounting the whole state folder.** It would let the sandbox write
   `public.db`, which hosted clients read (Codex and agy review).
 - **A menu entry.** Nobody asked for one, and it can be added later.
+
+## Amendment (2026-11-17, after the probe)
+
+An end-to-end probe on p620 ran opencode 1.18.31 in this sandbox. It used
+the mounts above, including the nix-ld rows, with a logging proxy in front
+of the bridge. The results:
+
+- **No network needed:** opencode ran fully offline, because the
+  `@ai-sdk/openai-compatible` provider is bundled. The bootstrap below is
+  therefore not built. The wrapper still fails closed: if a future opencode
+  needs a download, it exits with the error, and the bootstrap design below
+  is the fix to apply then.
+- **Model string:** opencode sent the bare name, `model: "qwen3.8:27b"`.
+- **Tools:** the model was offered exactly `private_get`, `private_recent`,
+  `private_search` and `private_status`.
+- **Tool calling:** `qwen3.8:27b` called `private_search` and answered
+  correctly.
 
 ## Risks
 

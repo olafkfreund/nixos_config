@@ -27,17 +27,37 @@ network namespace with only loopback, and no `--new-session`.
 
 **Mounts.** Exactly these, and nothing else:
 
-| Inside | Mode |
-| --- | --- |
-| `/nix/store` | ro |
-| `/lib64` and `/run/current-system/sw/share/nix-ld` | ro. `opencode-bin` is linked against `/lib64/ld-linux-x86-64.so.2`, which is nix-ld (probed 2026-11-17). |
-| `/etc/passwd`, `/etc/group`, `/etc/nsswitch.conf`, `/etc/localtime` | ro |
-| `/home/olafkfreund` | tmpfs |
-| `~/.config/llm-index/config.toml` | ro |
-| `~/.local/state/llm-index/{private,public}.db{,-wal,-shm}` | ro, as six individual files |
-| `~/.local/share/opencode`, `~/.config/opencode`, `~/.cache/opencode` | rw, from host `~/.local/share/llm-docs/{data,config,cache}`, mode 0700 |
-| `/run/llm-docs.sock` | the proxy socket file only |
-| `/tmp`, `/proc`, `/dev` | `--tmpfs` / `--proc` / `--dev` |
+`H = /home/olafkfreund`. Each row is one bwrap argument group, in this
+order:
+
+| Inside | Host source | bwrap |
+| --- | --- | --- |
+| `/nix/store` | `/nix/store` | `--ro-bind` |
+| `/lib64` | `/lib64` | `--ro-bind`. Spec amendment: opencode-bin's loader is nix-ld. |
+| `/run/current-system/sw/share/nix-ld` | same | `--ro-bind` (spec amendment) |
+| `/etc/passwd`, `/etc/group`, `/etc/nsswitch.conf`, `/etc/localtime` | same | `--ro-bind` each |
+| `/proc`, `/dev`, `/tmp`, `$H` | none | `--proc`, `--dev`, `--tmpfs /tmp`, `--tmpfs /home` |
+| `$H/.config/llm-index/config.toml` | same | `--ro-bind` |
+| `$H/.local/state/llm-index/<f>` for `<f>` in `private.db`, `private.db-wal`, `private.db-shm`, `public.db`, `public.db-wal`, `public.db-shm` | same | `--ro-bind` each, six arguments |
+| `$H/.local/share/opencode` | `$H/.local/share/llm-docs/data` | `--bind` |
+| `$H/.config/opencode` | `$H/.local/share/llm-docs/config` | `--bind` |
+| `$H/.cache/opencode` | `$H/.local/share/llm-docs/cache` | `--bind` |
+| `/run/llm-docs.sock` | `$XDG_RUNTIME_DIR/llm-docs/ollama.sock` | `--bind` (the socket file only) |
+
+`$H/.local/share/llm-docs` and its three children are all 0700. Any process
+running as you can still read them, as it can `~/Documents`, so mode 0700
+only keeps other Unix users out.
+
+**Descriptors.** Only fds 0-2 cross into the sandbox. Both the wrapper,
+before `exec bwrap`, and the inner runner, before `exec opencode`, close
+every fd above 2:
+
+```bash
+for f in /proc/self/fd/*; do n=${f##*/}; [ "$n" -gt 2 ] && eval "exec $n>&-"; done 2>/dev/null || true
+```
+
+The wrapper starts the proxy as a background child first; its socket is not
+an fd of the shell.
 
 **Inner runner.** It starts
 `socat TCP-LISTEN:11434,bind=127.0.0.1,fork,reuseaddr UNIX-CONNECT:/run/llm-docs.sock`.
@@ -77,7 +97,8 @@ wrapper starts it and stops it on exit.
   and `small_model` are both `ollama/qwen3.8:27b`.
 - `experimental.policies`: deny `provider.use` for `*`, then allow `ollama`.
 - MCP server: `private`, command
-  `[llm-index, "mcp", "--tier", "private", "--config", "<abs config path>"]`.
+  `[ "${cfg.package}/bin/llm-index" "mcp" "--tier" "private" "--config" "${config.home.homeDirectory}/.config/llm-index/config.toml" ]`.
+  That is `/home/olafkfreund/.config/llm-index/config.toml`.
 - `permission`: `"*": "deny"`, then allow exactly `private_search`,
   `private_get`, `private_recent` and `private_status`.
 - `share: "disabled"`, `autoupdate: false`, `snapshot: false`, `plugin: []`.
@@ -91,7 +112,16 @@ using a logging proxy:
 - the model was offered only the four `private_*` tools;
 - `qwen3.8:27b` called `private_search` and answered correctly.
 
-So the spec's bootstrap fallback is not needed, and the model choice stands.
+So the spec's bootstrap fallback is not built, and the model choice stands.
+The spec records this and the nix-ld rows as an amendment.
+
+If either assumption breaks during implementation or after an opencode
+update, the plan stops and asks you before changing anything:
+
+- opencode tries to download;
+- `qwen3.8:27b` stops calling the tools.
+
+The wrapper fails closed in both cases: no network, and no other model.
 
 **Nix.**
 
@@ -111,7 +141,8 @@ So the spec's bootstrap fallback is not needed, and the model choice stands.
 
 **Change:** write the proxy to the contract above.
 
-- **Arguments:** `--socket PATH --model NAME`, or `--self-test`.
+- **Arguments:** `--socket PATH --model NAME`, or `--self-test`. Before
+  binding, it unlinks a stale socket left at `PATH` by an earlier crash.
 - **Server:** `socketserver.ThreadingUnixStreamServer`, with a hand-written
   request parser that reads the request line, the headers, and exactly
   `Content-Length` bytes. No `http.server` keep-alive.
@@ -136,9 +167,18 @@ So the spec's bootstrap fallback is not needed, and the model choice stands.
   - `/api/pull`, `/api/chat`, `GET /v1/chat/completions` and
     `/v1/chat/completions?x=1` get 403;
   - a non-gguf or tiny model upstream gets 503;
-  - upstream down gets 502.
+  - upstream down gets 502;
+  - `GET /v1/models` returns only the pinned model.
 
-  Every rejection case also asserts that the fake upstream got no request.
+  The assertions on what reaches the fake upstream:
+
+  - For every 400, 403 and 413 case, and for `GET /v1/models`, it receives
+    no request at all.
+  - For the 503 case, it receives only `/api/tags` and `/api/show`, and no
+    chat request.
+
+**Where:** new file `hosts/common/nixos/llm-docs-proxy.py`, starting at
+line 1.
 
 **Check:** `python3 -I hosts/common/nixos/llm-docs-proxy.py --self-test`
 exits 0, and `flake8 --max-line-length 100` is clean.
@@ -150,6 +190,9 @@ exits 0, and `flake8 --max-line-length 100` is clean.
 - No third-party imports: `writePython3Bin` gets no libraries.
 
 ### 2. `hosts/common/nixos/llm-docs.nix`, plus imports in `llm-index.nix` and p620
+
+**Where:** the new file `hosts/common/nixos/llm-docs.nix`, written from line
+1, and the two one-line edits below.
 
 **Change:**
 
@@ -164,11 +207,13 @@ exits 0, and `flake8 --max-line-length 100` is clean.
     `bubblewrap`, `socat` and `coreutils`. It:
     - checks its arguments;
     - checks `/proc/sys/dev/tty/legacy_tiocsti` is `0`;
-    - creates `$XDG_RUNTIME_DIR/llm-docs` (0700) and
-      `~/.local/share/llm-docs/{data,config,cache}` (0700);
+    - creates `$XDG_RUNTIME_DIR/llm-docs`, `~/.local/share/llm-docs` and
+      its `{data,config,cache}` with `install -d -m 0700` each, the parent
+      first, so modes are set even when the folders exist;
     - starts the proxy in the background and traps EXIT to kill it;
     - waits for the socket;
-    - runs `bwrap` with the mounts and environment above. The inner runner
+    - closes fds above 2, then runs `bwrap` with the mounts and environment
+      above. The inner runner
       is a separate `writeShellScript` in the store, given socat's store
       path. opencode is
       `${inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.opencode-bin}/bin/opencode`,
@@ -176,10 +221,18 @@ exits 0, and `flake8 --max-line-length 100` is clean.
       re-runs live check 4.
   - **The opencode config:** built with `builtins.toJSON` in Nix and passed
     as one `--setenv OPENCODE_CONFIG_CONTENT` argument.
+  - **One sandbox definition, two entry points.** The bwrap argument list is
+    a single Nix list, used by `llm-docs` and by a diagnostic script,
+    `llm-docs-diag <cmd…>`. The diagnostic runs `<cmd…>` in the same sandbox,
+    with the same mounts, environment and bridge, in place of opencode. It
+    is exposed only through a read-only HM option, `local.llmDocs.diag`
+    (`type = package`, `readOnly = true`), and is never added to
+    `home.packages`, so it is not on `PATH`. The lead builds it for live
+    checks 1 and 2.
   - `home.packages = [ llm-docs ]`.
 - **`hosts/common/nixos/llm-index.nix:10`:** `imports = [ ./omarchy-enable-once.nix ./llm-docs.nix ];`.
-- **`hosts/p620/nixos/nixarchy.nix:60`:** add
-  `local.llmIndex.privateClient.enable = true;`.
+- **`hosts/p620/nixos/nixarchy.nix`:** a new line 61, after the existing
+  `local.llmIndex.sourcePath` line: `local.llmIndex.privateClient.enable = true;`.
 
 **Check:**
 
@@ -201,14 +254,28 @@ exits 0, and `flake8 --max-line-length 100` is clean.
 
 ### 3. Lead: build, review, PR, deploy and live checks
 
-**Run:** step 2's checks, a fresh Opus review given only this plan and the
-diff, and the Codex and agy reviews. Then open the PR linking the intent,
-spec and plan, and wait for CI on p510, p620 and razer. After the merge:
-`git pull --ff-only` in `~/.config/nixos`, announce on the agent bus, and
-`just p620`.
+This step edits no files.
 
-**Live checks,** as in the spec. Run them in a throwaway session, and wipe
-any history files it creates that hold private text:
+**Run:** step 2's checks, a fresh Opus review given only this plan and the
+diff, and the Codex and agy reviews. The Codex review is a new
+`codex exec --ephemeral` session, not the one that wrote step 1. Then open the PR linking the intent,
+spec and plan, and wait for CI on p510, p620 and razer. After the merge:
+
+1. `git pull --ff-only` in `~/.config/nixos`.
+2. Read the agent bus (`read_new`), check that nothing conflicts on p620,
+   and post the deploy.
+3. Run `AGENT_BUS_ANNOUNCED=1 just p620`.
+
+**Live checks.** Before the first check, assert that
+`~/.local/share/llm-docs` does not exist yet. The checks then run before you
+have used the client, so the folder holds only verification sessions, and
+it is removed completely at the end. To run commands inside the sandbox,
+build the diagnostic script:
+
+```bash
+nix build -o /tmp/claude-diag .#nixosConfigurations.p620.config.home-manager.users.olafkfreund.local.llmDocs.diag
+/tmp/claude-diag/bin/llm-docs-diag curl -sS https://1.1.1.1
+```
 
 1. **Network, inside the sandbox:** the bridge answers; these all fail:
    - `https://1.1.1.1`;
@@ -221,9 +288,9 @@ any history files it creates that hold private text:
    folder lists only the six files.
 3. **Proxy:**
    - a chat request for `gpt-oss:120b-cloud` through the socket gets 403;
-   - with Ollama stopped (announce on the bus first; Ollama is shared), a
-     chat answers with an error and the proxy log shows no other
-     destination. Restart Ollama afterwards.
+   - with Ollama stopped, a chat answers with an error and the proxy log
+     shows no other destination. Ollama is shared: read the bus, post, then
+     stop it with `AGENT_BUS_ANNOUNCED=1`, and restart it right after.
 4. **A real question:** `llm-docs run "<question about a known document>"`
    calls `private_search` and answers. The proxy log shows only
    `qwen3.8:27b`.
@@ -239,8 +306,14 @@ any history files it creates that hold private text:
 
 - p510 is not built locally (CI only).
 - Stopping Ollama interrupts other agents, so announce on the bus first.
-- Wipe the history from the verification runs:
-  `rm -rf ~/.local/share/llm-docs/data/*` after the checks.
+- After the checks, remove the whole verification folder:
+  `rm -rf ~/.local/share/llm-docs`. It held only verification sessions,
+  because of the assert above. Your first real session recreates it.
+- After any opencode version change, re-run all six live checks, not only
+  check 4.
+- **Descriptor check:** `exec 9</etc/hostname` before the diag, then
+  `llm-docs-diag ls /proc/self/fd` lists only 0, 1, 2 and the listing's own
+  fd.
 
 ## Tests
 
