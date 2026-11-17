@@ -80,6 +80,8 @@ extend-ignore-re = [
 
 [files]
 extend-exclude = [
+  # Saved upstream issue payloads (verbatim third-party text)
+  "scripts/test-fixtures/nixos-issue-audit/**",
   # Lock files
   "*.lock",
   "flake.lock",

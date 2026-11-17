@@ -34,18 +34,17 @@
     ../../common/nixos/omarchy-voice-pkgs.nix
     ../../common/nixos/omarchy-screenshots.nix
     ../../common/nixos/omarchy-ai-mirror.nix
-    ../../common/nixos/omarchy-flea.nix
+    ../../common/nixos/omarchy-portals.nix
     ../../common/nixos/omarchy-nixi-companion.nix
     ../../common/nixos/nixi-fleet.nix
     ../../common/nixos/omarchy-microvm.nix
     ../../common/nixos/omarchy-winvm.nix
     ../../common/nixos/omarchy-omadroid.nix
-    ../../common/nixos/omarchy-altscape.nix
     ../../common/nixos/omarchy-omapod.nix
+    ../../common/nixos/omarchy-pocket.nix
     ../../common/nixos/omarchy-expose.nix
     ../../common/nixos/omarchy-omateams.nix
     ../../common/nixos/omarchy-gmessages.nix
-    ../../common/nixos/omarchy-hello-lock.nix
     ../../common/nixos/omarchy-omaoutlook.nix
     ../../common/nixos/omarchy-omamail.nix
     ../../common/nixos/omarchy-pixelbuds.nix
@@ -58,6 +57,7 @@
   ];
 
   local.llmIndex.sourcePath = "/mnt/code/Source-home"; # real path; ~/Source is a symlink
+  local.llmIndex.privateClient.enable = true;
 
   # Claude Code is this machine's agent, and saying so here is what pins nixi's
   # ACP adapter. nixarchy only adds claude to `services.nixi.agents` when

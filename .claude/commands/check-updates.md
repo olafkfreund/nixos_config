@@ -65,7 +65,6 @@ packages WE ACTUALLY RUN — gnome-shell, ollama, docker, etc.>
 | Package | Ours | Upstream tip |
 |---|---|---|
 | pkgs/altscape | `rev` in `pkgs/altscape/default.nix` | `gh api repos/qempexe/omarchy-altscape/commits --jq '.[0].sha'` |
-| pkgs/omateams | `rev` in `pkgs/omateams/default.nix` | `gh api repos/Divanyx/omateams/commits --jq '.[0].sha'` |
 | pkgs/omaoutlook | `rev` in `pkgs/omaoutlook/default.nix` | `gh api repos/Divanyx/omaoutlook/commits --jq '.[0].sha'` |
 
 Review the upstream diff before bumping. Drop `qt612-color.patch` if PR 10 merged.

@@ -74,6 +74,10 @@
       inputs.nixarchy-omatheme.url = "github:olafkfreund/nixarchy-omatheme/e47e9dd8e9c3ae0cc74e784c246bcf6dff8c8adc";
       inputs.nixarchy-omatheme.inputs.nixpkgs.follows = "nixpkgs";
       inputs.nixarchy-omatheme.inputs.home-manager.follows = "home-manager";
+      # #2983 herdr widget 1.1.0 (herdr-core / herdr-app agents in the bar, nixarchy-herdr#27); remove once
+      # nixarchy edge pins 7b678da or later (nixarchy#1836 merged, edge publish pending).
+      inputs.nixarchy-herdr.url = "github:olafkfreund/nixarchy-herdr/7b678da44fb6aa8c4d9508cf6552a260949db89f";
+      inputs.nixarchy-herdr.flake = false;
 
       # nixarchy's NixOS module imports home-manager.nixosModules.home-manager
       # itself. From its own pin that is a second copy of nixos/common.nix, and
@@ -153,10 +157,18 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
+    # omateams: Microsoft Teams web in an Omarchy-themed window, from our fork;
+    # hosts/common/nixos/omarchy-omateams.nix (#3028). nixpkgs-qt is not followed:
+    # it pins QtWebEngine 6.140.0 (QTBUG-142040) until our nixpkgs has it.
+    omateams = {
+      url = "github:olafkfreund/omateams";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
     # nixarchy-llm-index: local document and code index served to agents over MCP;
     # hosts/common/nixos/llm-index.nix (#2882). Pinned by rev so an update cannot move it.
     nixarchy-llm-index = {
-      url = "github:olafkfreund/nixarchy-llm-index/54e0fbebf8a5ce6ea6ccc3056350eb533a95b0f1";
+      url = "github:olafkfreund/nixarchy-llm-index/188bc815bb163159534ad04f5246d9c2dcc07734";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
