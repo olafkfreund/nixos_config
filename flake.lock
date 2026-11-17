@@ -3409,6 +3409,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-qt": {
+      "locked": {
+        "lastModified": 1794926479,
+        "narHash": "sha256-UCEjB3LC/jzxc5vqgCnFBVlce07fn3P4x+RCWJNKkzM=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "614ba4ae06fe11e36b386321b8735d1a6bf441db",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "614ba4ae06fe11e36b386321b8735d1a6bf441db",
+        "type": "github"
+      }
+    },
     "nixpkgs-stable": {
       "locked": {
         "lastModified": 1789009968,
@@ -3682,6 +3698,30 @@
         "type": "github"
       }
     },
+    "omateams": {
+      "inputs": {
+        "home-manager": [
+          "home-manager"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "nixpkgs-qt": "nixpkgs-qt"
+      },
+      "locked": {
+        "lastModified": 1794935657,
+        "narHash": "sha256-8yrFEi0Y1nd4u/cuKX39gcpd5d4fQNNN0sywg7iEd2E=",
+        "owner": "olafkfreund",
+        "repo": "omateams",
+        "rev": "85a7fa4bb957c27c16fd1ab66285c2fee30959a4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "repo": "omateams",
+        "type": "github"
+      }
+    },
     "pre-commit": {
       "inputs": {
         "flake-compat": "flake-compat",
@@ -3803,6 +3843,7 @@
         "nixpkgs": "nixpkgs_7",
         "nur": "nur",
         "omapod": "omapod",
+        "omateams": "omateams",
         "rust-overlay": "rust-overlay_3",
         "seance": "seance",
         "sops-nix": "sops-nix_2",
