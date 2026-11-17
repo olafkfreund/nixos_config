@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2998
 author: olafkfreund
 ---
@@ -110,3 +110,7 @@ Needs watching:
 5. Does a CDI GPU container work on p510 and razer today (existing evidence, no deploy)?
 6. Does gnome-keyring unlock reliably on each host's real login path?
 7. Reproduce 589114 on p620? What do the resolved kernel and driver versions say for 554125?
+
+## Decision
+
+Approved by the owner on 2026-11-17, with the recommendation given for each open question above.
