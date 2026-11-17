@@ -2230,11 +2230,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794926228,
-        "narHash": "sha256-FUAr3EkEjAYmiR5eBcQd6HxoYsbDa1feVFdG09KlHs0=",
+        "lastModified": 1794941551,
+        "narHash": "sha256-8k8sut3bZ24xdkyLmr1A909F09iB8O5gnvTmxqac33c=",
         "owner": "olafkfreund",
         "repo": "nixarchy",
-        "rev": "836f13a356cb26729526114037b053a71bc58418",
+        "rev": "09ac527dff8f0ed50cb64c5129f8440e691761bc",
         "type": "github"
       },
       "original": {
@@ -2540,17 +2540,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1794940516,
-        "narHash": "sha256-NLrc2h4XmjzyZ5rzmKAu8JMSK1km701JT4g9CDfVMbc=",
+        "lastModified": 1794935513,
+        "narHash": "sha256-oz/KAbnGTehIZeWIz993JOLyq+9LpNfWNg7hkC+1Wu4=",
         "owner": "olafkfreund",
         "repo": "nixarchy-gltui",
-        "rev": "42c67f568e396ca7f7896a1809052cdb681dfc62",
+        "rev": "e2b13c0ccde6febb52e0d8329172a8a125c8703d",
         "type": "github"
       },
       "original": {
         "owner": "olafkfreund",
         "repo": "nixarchy-gltui",
-        "rev": "42c67f568e396ca7f7896a1809052cdb681dfc62",
+        "rev": "e2b13c0ccde6febb52e0d8329172a8a125c8703d",
         "type": "github"
       }
     },
@@ -2779,17 +2779,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1794914023,
-        "narHash": "sha256-/C22XtT4QHLqHgZ+NNaxqr6/opcgfIXOW7NFGyAGYjo=",
+        "lastModified": 1794936270,
+        "narHash": "sha256-YYPyfZ+yd9H/P9BwMReJ+8Q38pGxH8NLuJwxFpZY66s=",
         "owner": "olafkfreund",
         "repo": "nixarchy-microvm",
-        "rev": "1edff4ac378cd4688f6ef6c8e8559615b9dade66",
+        "rev": "61610c6597e2157fe4d22469e29f068534d091da",
         "type": "github"
       },
       "original": {
         "owner": "olafkfreund",
         "repo": "nixarchy-microvm",
-        "rev": "1edff4ac378cd4688f6ef6c8e8559615b9dade66",
+        "rev": "61610c6597e2157fe4d22469e29f068534d091da",
         "type": "github"
       }
     },
