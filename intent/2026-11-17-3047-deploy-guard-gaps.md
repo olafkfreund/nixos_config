@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3047
 author: olafkfreund
 ---
@@ -59,6 +59,8 @@ this intent found three gaps, each reproduced by feeding text to the guards:
 
 Today `nhs --no-deploy p510` is denied by both guards; `nhsb p510` (which calls `just update-commit`, not the
 script) passes both. `--no-deploy` is not read-only: it updates the lock, builds, commits, pushes and opens a PR.
+
+Owner answers (2026-11-17): the recommendations below, all three.
 
 1. Script with `--no-deploy`: same as `nhs --no-deploy` today (announce, and p510 approval for p510)?
    Recommended: yes, matching the wrapper.
