@@ -30,7 +30,7 @@ let
     hash = "sha256-lFUrQolJHg7d9wlXbIlbg5+11UBbplbxgBAJsenrFB4=";
   };
 
-  ours = [ "inbox" "notify" "splits" "freund-tabs" "freund-agents" ];
+  ours = [ "inbox" "notify" "splits" "freund-tabs" "freund-agents" "reviewer" ];
 
   open = argv: place: { command = "terminal.open"; args = { inherit argv place; }; };
   dirs = [ "left" "down" "up" "right" ];
@@ -48,6 +48,7 @@ let
       "ctrl-alt-shift-y" = open [ "zoe" ] "tab";
       "ctrl-shift-u" = "splits.worktree-open";
       "ctrl-shift-i" = "mod.open:inbox";
+      "ctrl-shift-d" = "splits.review-toggle";
     };
   };
 
