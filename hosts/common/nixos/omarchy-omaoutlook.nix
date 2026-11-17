@@ -5,14 +5,16 @@
 # Upgrade by bumping rev + hash in pkgs/omaoutlook, never `omarchy plugin update`.
 { config, pkgs, ... }:
 let
-  omateams = pkgs.customPkgs.omateams.override { hyprland = config.programs.hyprland.package; };
+  # The same omateams the user runs, so Teams links open in it.
+  omateams = config.home-manager.users.olafkfreund.programs.omateams.package;
   omaoutlook = pkgs.customPkgs.omaoutlook.override {
     inherit omateams;
     hyprland = config.programs.hyprland.package;
   };
 in
 {
-  imports = [ ./omarchy-enable-once.nix ];
+  # Teams links open in omateams, so its module comes along.
+  imports = [ ./omarchy-enable-once.nix ./omarchy-omateams.nix ];
 
   home-manager.users.olafkfreund = {
     programs.nixarchy.plugins.omaoutlook.src = "${omaoutlook}/share/omaoutlook/plugin";

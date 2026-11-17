@@ -52,11 +52,9 @@
   altscape = pkgs.callPackage ./altscape { };
   # Exposé: window overview for the Omarchy shell (#2723).
   expose-plugin = pkgs.callPackage ./expose-plugin { };
-  # Omateams: Microsoft Teams web in an Omarchy-themed window (#2505).
-  omateams = pkgs.callPackage ./omateams { };
   hello-lock = pkgs.callPackage ./hello-lock { };
   # Omaoutlook: Microsoft Outlook web in an Omarchy-themed window (#2602).
-  omaoutlook = pkgs.callPackage ./omaoutlook { omateams = pkgs.callPackage ./omateams { }; };
+  omaoutlook = pkgs.callPackage ./omaoutlook { omateams = throw "omaoutlook needs omateams; see hosts/common/nixos/omarchy-omaoutlook.nix"; };
 
   # notebooklm-mcp-cli — unofficial CLI *and* MCP server for Google NotebookLM.
   # Replaced notebooklm-go (#1781), which was CLI-only: the MCP server is what
