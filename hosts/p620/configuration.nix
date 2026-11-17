@@ -125,9 +125,12 @@ in
     enable = true;
     host = "0.0.0.0";
     modelsDir = "/mnt/data/ollama/models";
-    # qwen3.8:27b (~18GB Q4) on a 24GB card. Dense, so the whole thing has to
-    # sit in VRAM to be worth running; MAX_LOADED_MODELS=1 (module) evicts it
-    # before loading any on-demand model rather than trying to fit both.
+    # The card is an RX 7900 XT with 20 GB, not 24. qwen3.8:27b (~18GB Q4) plus
+    # its 32K KV cache filled it on 2026-11-17 and Hyprland crashed (amdgpu
+    # "Failed to pin framebuffer: -ENOMEM"). Keep 3 GiB free for the desktop;
+    # whatever does not fit then runs on the CPU, slower but without a crash.
+    # MAX_LOADED_MODELS=1 (module) evicts it before loading any on-demand model.
+    gpuOverhead = 3 * 1024 * 1024 * 1024;
     persistentModels = [ "qwen3.8:27b" ];
     # qwen2.5:7b is here for p510, not for this host: audiobook-mcp and
     # audiobook-import use it for strict-JSON metadata extraction, and their
