@@ -286,7 +286,7 @@ Deploys and restarts follow the bus rule in `AGENTS.md`: read `#agents`, post, t
    Blocked turns the badge red, working amber, done green.
 2. Close the window: an unseen finish stays green; look at it in the app, and it clears. Mind R1 (a second finish).
 3. Enter on an app agent focuses it. With the window closed, it starts the app and focuses it.
-4. `a` sends a prompt; `i` interrupts; `K` asks "End <title>?" naming sub-agents, and ends only that terminal.
+4. `a` sends a prompt; `i` interrupts; `K` asks `End <title>?` naming sub-agents, and ends only that terminal.
    Use throwaway `hc run` terminals and leave the real agents alone.
 5. Stale state: with `hc` temporarily unusable (for example a wrapper on the shell's `PATH` that exits 1), rows read
    "not live" and the badge shows the stale mark. Never stop the real core to test this.
