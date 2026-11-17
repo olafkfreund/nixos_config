@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2974
 author: olafkfreund
 ---
@@ -63,3 +63,7 @@ theme from Issue #2973. Razer and p510 are unaffected.
    `nix eval --raw --no-write-lock-file .#nixosConfigurations.p620.pkgs.t3code.version`.
    Do not use `nixpkgs#t3code`: the machine's registry resolves `nixpkgs` to a system
    store source, which a lock update in this repo does not change.
+
+## Decision
+
+Approved by the owner on 2026-11-17, with the recommendation given for each open question above.
