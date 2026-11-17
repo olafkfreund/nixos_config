@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2986
 author: olafkfreund
 ---
@@ -78,3 +78,7 @@ popup. p510 is not involved.
    palette or menu opened over lazygit returns focus to it on close. Focus returns to the original terminal
    when lazygit exits. Initial focus alone is not enough, so closing issue 781 is not the trigger; a released
    build that passes all three is.
+
+## Decision
+
+Approved by the owner on 2026-11-17, with the recommendation given for each open question above.
