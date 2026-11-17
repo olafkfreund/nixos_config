@@ -21,6 +21,7 @@
     ./claude-code-skills
     ./claude-code-commands
     ./herdr.nix # herdr agent-multiplexer config (p620 + razer)
+    ./herdr-app.nix # herdr-app mods, layout and keys via herdr-app-sync (#2978)
 
     # Version control and CI/CD
     ./gitlab/default.nix

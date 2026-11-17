@@ -19,7 +19,8 @@ python3Packages.buildPythonApplication {
     hash = "sha256-mtmKZeB9Zi8zaDzxHKFaUX1VC7T7KumT7rXOH01F0yY=";
   };
 
-  patches = [ ./ownership.patch ./teammate-tabs.patch ];
+  # hc-backend: the same tmux shim inside herdr-app terminals (hc), #2978.
+  patches = [ ./ownership.patch ./teammate-tabs.patch ./hc-backend.patch ];
 
   build-system = [ python3Packages.hatchling ];
   nativeBuildInputs = [ makeWrapper ];

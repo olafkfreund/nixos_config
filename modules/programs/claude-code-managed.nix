@@ -682,22 +682,27 @@ let
   # PostToolUse would otherwise leak the counter upward forever. When a turn
   # ends nothing can still be fanned out, so zero is always correct there.
   #
-  # No-ops entirely outside herdr (HERDR_ENV guard), so p510 and plain terminals
-  # are unaffected.
   subagentScript = pkgs.writeShellScript "claude-herdr-subagents.sh" ''
     action="''${1:-}"
     # Second argument names the metadata source, so Codex and Claude counters never mix.
     source="''${2:-claude-subagents}"
     cat >/dev/null 2>&1 || true   # drain hook stdin; the payload is not needed
 
-    [ "''${HERDR_ENV:-}" = "1" ] || exit 0
-    [ -n "''${HERDR_PANE_ID:-}" ] || exit 0
-    command -v herdr >/dev/null 2>&1 || exit 0
+    if [ "''${HERDR_ENV:-}" = "1" ]; then
+      [ -n "''${HERDR_PANE_ID:-}" ] || exit 0
+      command -v herdr >/dev/null 2>&1 || exit 0
+      target="$HERDR_PANE_ID"
+    elif [ -n "''${HC_TERMINAL_ID:-}" ]; then
+      # hc publishes Claude's count to its own terminal status file.
+      target="hc-$HC_TERMINAL_ID"
+    else
+      exit 0
+    fi
 
     dir="''${XDG_RUNTIME_DIR:-/tmp}/claude-herdr-subagents"
     mkdir -p "$dir" 2>/dev/null || exit 0
-    # Pane-scoped so two Claude panes never share a counter.
-    f="$dir/$(printf '%s-%s' "$source" "$HERDR_PANE_ID" | tr -c 'A-Za-z0-9_' '_').count"
+    # Terminal-scoped so two Claude sessions never share a counter.
+    f="$dir/$(printf '%s-%s' "$source" "$target" | tr -c 'A-Za-z0-9_' '_').count"
 
     # flock: subagents are dispatched in parallel, so a plain read/modify/write
     # loses updates. Verified with 20 concurrent increments.
@@ -724,12 +729,20 @@ let
       tail -n 100 "$log" >"$log.tmp" 2>/dev/null && mv "$log.tmp" "$log" 2>/dev/null
     fi
 
-    if [ "$n" -gt 0 ]; then
-      herdr pane report-metadata "$HERDR_PANE_ID" \
-        --source "$source" --token "agents=$n" >/dev/null 2>&1
-    else
-      herdr pane report-metadata "$HERDR_PANE_ID" \
-        --source "$source" --clear-token agents >/dev/null 2>&1
+    if [ "''${HERDR_ENV:-}" = "1" ]; then
+      if [ "$n" -gt 0 ]; then
+        herdr pane report-metadata "$HERDR_PANE_ID" \
+          --source "$source" --token "agents=$n" >/dev/null 2>&1
+      else
+        herdr pane report-metadata "$HERDR_PANE_ID" \
+          --source "$source" --clear-token agents >/dev/null 2>&1
+      fi
+    elif [ "$source" = "claude-subagents" ]; then
+      status_dir="''${XDG_RUNTIME_DIR:-/tmp}/claude-hc-subagents"
+      mkdir -p "$status_dir" 2>/dev/null || exit 0
+      status_file="$status_dir/$(printf '%s' "$HC_TERMINAL_ID" | tr -c 'A-Za-z0-9_' '_')"
+      tmp=$(mktemp "$status_dir/.XXXXXX") || exit 0
+      printf '{"count":%s}' "$n" >"$tmp" && mv "$tmp" "$status_file" || rm -f "$tmp"
     fi
     exit 0
   '';
@@ -755,6 +768,21 @@ let
       hooks = [{ type = "command"; command = "${subagentScript} reset"; timeout = 5; }];
     }];
   };
+
+  # herdr-agent-plans (#2978): the herdr-app Plan panel's hook. It needs the mod
+  # that herdr-app-sync installs, so it is a no-op wherever the mod is absent.
+  # The store copy runs, never the writable one in the app home; the installed mod
+  # only switches it on.
+  agentPlansHook = agent: pkgs.writeShellScript "agent-plans-${agent}" ''
+    [ -d "''${HERDR_APP_HOME:-$HOME/.config/herdr-app}/mods/agent-plans" ] || exit 0
+    ${pkgs.python3}/bin/python3 ${pkgs.customPkgs.herdr-agent-plans}/mods/agent-plans/hook/plan.py ${agent} || true
+  '';
+  agentPlansHooks =
+    let h = [{ type = "command"; command = "${agentPlansHook "claude"}"; timeout = 5; }]; in {
+      PostToolUse = [{ matcher = "ExitPlanMode|TodoWrite|TaskCreate|TaskUpdate"; hooks = h; }];
+      TaskCreated = [{ hooks = h; }];
+      TaskCompleted = [{ hooks = h; }];
+    };
 
   formatHooks = lib.optionalAttrs cfg.formatOnEdit.enable {
     PostToolUse = [{
@@ -826,6 +854,7 @@ let
         busAnnounceHooks
         busPeekHooks
         subagentHooks
+        agentPlansHooks
         tmuxCcmHooks
       ];
     })
@@ -1148,6 +1177,29 @@ in
       type = "command"
       command = "/etc/codex/hooks/subagent-dec"
       timeout = 5
+    '' + ''
+
+      [[hooks.Stop]]
+
+      [[hooks.Stop.hooks]]
+      type = "command"
+      command = "/etc/codex/hooks/agent-plans"
+      timeout = 5
+
+      [[hooks.UserPromptSubmit]]
+
+      [[hooks.UserPromptSubmit.hooks]]
+      type = "command"
+      command = "/etc/codex/hooks/agent-plans"
+      timeout = 5
+
+      [[hooks.PostToolUse]]
+      matcher = "^update_plan$"
+
+      [[hooks.PostToolUse.hooks]]
+      type = "command"
+      command = "/etc/codex/hooks/agent-plans"
+      timeout = 5
     '';
 
     # Managed Codex commands must sit under managed_dir and are run without
@@ -1158,6 +1210,8 @@ in
     environment.etc."codex/hooks/subagent-dec" = lib.mkIf cfg.subagentMetadata.codex {
       source = pkgs.writeShellScript "codex-subagent-dec" "exec ${subagentScript} dec codex-subagents";
     };
+
+    environment.etc."codex/hooks/agent-plans".source = agentPlansHook "codex";
 
     # agy reads ~/.gemini/config/hooks.json, which Syncthing carries between
     # hosts, so the command path must be absolute /etc, not a store path.

@@ -7,7 +7,11 @@ if [[ $label != codex && $label != agy || $# -eq 0 ]]; then
   echo 'usage: herdr-run <codex|agy> <command> [args...]' >&2
   exit 2
 fi
-if [[ ${HERDR_ENV:-} != 1 || -z ${HERDR_SOCKET_PATH:-} || -z ${HERDR_TAB_ID:-} || -z ${HERDR_WORKSPACE_ID:-} ]]; then
+if [[ ${HERDR_ENV:-} == 1 && -n ${HERDR_SOCKET_PATH:-} && -n ${HERDR_TAB_ID:-} && -n ${HERDR_WORKSPACE_ID:-} ]]; then
+  backend=tui
+elif [[ ${HERDR_ENV:-} != 1 && -n ${HC_TERMINAL_ID:-} ]]; then
+  backend=hc
+else
   exec "$@"
 fi
 
@@ -18,13 +22,18 @@ socket() { printf '%s\n' "$1" | socat -t5 - "UNIX-CONNECT:$HERDR_SOCKET_PATH"; }
 same_pane() {
   local reply
   [[ -n ${pane:-} ]] || return 1
+  if [[ $backend == hc ]]; then
+    reply=$(hc get "$pane" --json 2>/dev/null) || return 1
+    jq -e --arg address "$pane" '.address == $address' >/dev/null 2>&1 <<<"$reply"
+    return
+  fi
   reply=$(h pane get "$pane" 2>/dev/null) || return 1
   jq -e --arg terminal "$terminal" '.result.pane.terminal_id == $terminal' >/dev/null 2>&1 <<<"$reply"
 }
-close_pane() { if same_pane; then h pane close "$pane" >/dev/null 2>&1 || :; fi; }
-report() { if same_pane; then h pane report-agent "$pane" --source herdr-run --agent "$label" --state "$1" >/dev/null 2>&1 || :; fi; }
-release_pane() { if same_pane; then h pane release-agent "$pane" --source herdr-run --agent "$label" >/dev/null 2>&1 || :; fi; }
-mark() { if same_pane; then h pane report-metadata "$pane" --source herdr-run --token "split_mark=↳ $label" >/dev/null 2>&1 || :; fi; }
+close_pane() { if same_pane; then if [[ $backend == hc ]]; then hc kill "$pane" >/dev/null 2>&1 || :; else h pane close "$pane" >/dev/null 2>&1 || :; fi; fi; }
+report() { if [[ $backend == tui ]] && same_pane; then h pane report-agent "$pane" --source herdr-run --agent "$label" --state "$1" >/dev/null 2>&1 || :; fi; }
+release_pane() { if [[ $backend == tui ]] && same_pane; then h pane release-agent "$pane" --source herdr-run --agent "$label" >/dev/null 2>&1 || :; fi; }
+mark() { if [[ $backend == tui ]] && same_pane; then h pane report-metadata "$pane" --source herdr-run --token "split_mark=↳ $label" >/dev/null 2>&1 || :; fi; }
 kill_group() {
   local pgid
   [[ -f $dir/cmd.pgid ]] || return 1
@@ -129,7 +138,7 @@ done
   printf 'cmd=('
   printf '%q ' "$@"
   printf ')\n'
-  printf 'helper_pid=%q\nfeeder_pid=%q\nlabel=%q\ntitle=%q\nscale=%q\nherdr_bin=%q\n' "$$" "$feeder_pid" "$label" "$title" "$scale" "${HERDR_BIN_PATH:-herdr}"
+  printf 'helper_pid=%q\nfeeder_pid=%q\nlabel=%q\ntitle=%q\nscale=%q\nherdr_bin=%q\nbackend=%q\n' "$$" "$feeder_pid" "$label" "$title" "$scale" "${HERDR_BIN_PATH:-herdr}" "$backend"
   cat <<'RUNNER'
 mkdir claim || exit 0
 printf '%s\n' "$$" > runner.pid.tmp && mv runner.pid.tmp runner.pid
@@ -140,7 +149,13 @@ same_pane() {
   reply=$("$herdr_bin" pane get "$pane" 2>/dev/null) || return 1
   jq -e --arg terminal "$terminal" '.result.pane.terminal_id == $terminal' >/dev/null 2>&1 <<< "$reply"
 }
-close_pane() { if same_pane; then "$herdr_bin" pane close "$pane" >/dev/null 2>&1 || :; fi; }
+close_pane() {
+  if [[ $backend == hc ]]; then
+    local address=${runner_address:-}
+    [[ -n $address ]] || read -r address < "$dir/address" 2>/dev/null || return 0
+    [[ -n $address ]] && hc kill "$address" >/dev/null 2>&1 || :
+  elif same_pane; then "$herdr_bin" pane close "$pane" >/dev/null 2>&1 || :; fi
+}
 # The group ID is held in memory once known, so it still works after the
 # helper has removed the private directory.
 kill_group() {
@@ -165,11 +180,19 @@ kill_feeder() {
 finish() {
   trap - EXIT
   trap '' HUP INT TERM
+  # Read before $dir can be removed below; close_pane needs it afterwards.
+  if [[ $backend == hc ]]; then read -r runner_address < "$dir/address" 2>/dev/null || :; fi
   helper_alive=1
   kill -0 "$helper_pid" 2>/dev/null || helper_alive=
   # stopped early (pane closed, signal) or orphaned: stop the whole group before anything else
   if [[ ! -e $dir/status || -z $helper_alive ]]; then stop_group; fi
   if [[ ! -e $dir/status ]]; then printf 'lost\n' > "$dir/status.tmp" && mv "$dir/status.tmp" "$dir/status"; fi
+  if [[ $backend == hc ]]; then
+    local result
+    read -r result < "$dir/status" || result=lost
+    if [[ $result == 0 ]]; then result=done; else result=error; fi
+    printf '\033]7501;state=%s:app=herdr-run\033\\' "$result"
+  fi
   if [[ -n ${watchdog_pid:-} ]]; then kill "$watchdog_pid" 2>/dev/null; fi
   # with the helper gone nobody else cleans up
   if [[ -z $helper_alive ]]; then kill_feeder; rm -rf -- "$dir"; close_pane; fi
@@ -179,6 +202,7 @@ trap 'exit 129' HUP
 trap 'exit 130' INT
 trap 'exit 143' TERM
 printf '\033]0;%s\007' "$title"
+if [[ $backend == hc ]]; then printf '\033]7501;state=working:app=herdr-run\033\\'; fi
 : > out; : > err
 # $0 is the private directory: the command runs in the caller's cwd.
 setsid -w env -i "$BASH" --noprofile --norc -c \
@@ -235,44 +259,60 @@ place_tab() {
   socket "$(jq -nc --arg tab "$tab" --argjson n "$insert" '{id:"1",method:"tab.move",params:{tab_id:$tab,insert_index:$n}}')" >/dev/null 2>&1 || :
 }
 
-lock="${XDG_RUNTIME_DIR:-/tmp}/herdr-run-${HERDR_TAB_ID}.lock"
-exec {lock_fd}>"$lock"
-flock "$lock_fd"
-created=$(h tab create --workspace "$HERDR_WORKSPACE_ID" --cwd "$PWD" --label "↳ $label" --no-focus 2>/dev/null) || created=
-pane=$(jq -r '.result.root_pane.pane_id // empty' 2>/dev/null <<<"$created") || pane=
-terminal=$(jq -r '.result.root_pane.terminal_id // empty' 2>/dev/null <<<"$created") || terminal=
-tab=$(jq -r '.result.tab.tab_id // empty' 2>/dev/null <<<"$created") || tab=
-if [[ -z $pane || -z $terminal || -z $tab ]]; then
-  flock -u "$lock_fd"
-  close_pane
-  headless "$@"
-fi
-# Bake the returned identity ahead of the runner body.
-{
-  printf 'pane=%q\nterminal=%q\n' "$pane" "$terminal"
-  cat "$dir/run"
-} >"$dir/run.tmp"
-mv "$dir/run.tmp" "$dir/run"
-mark
-place_tab || :
-flock -u "$lock_fd"
-
-for ((attempt = 1; attempt <= 3; attempt++)); do
-  if ! h pane run "$pane" "bash $(printf '%q' "$dir/run")" >/dev/null 2>&1; then break; fi
-  for _ in 1 2; do
-    [[ -d $dir/claim ]] && break 2
-    sleep_for 0.5
-  done
-done
-if [[ ! -d $dir/claim ]]; then
-  if mkdir "$dir/claim" 2>/dev/null; then
+if [[ $backend == hc ]]; then
+  listing=$(herdr-app ls 2>/dev/null) || listing=
+  location=$(jq -c --arg a "$HC_TERMINAL_ID" '
+    [.spaces[] as $s | $s.tabs[] as $t | $t.terminals[]? | select((.terminal // .address // .id // .) == $a)
+      | {space:$s.id, tab:$t.id}] | first // empty' <<<"$listing" 2>/dev/null) || location=
+  [[ -n $location ]] || headless "$@"
+  space=$(jq -r .space <<<"$location")
+  tab=$(jq -r .tab <<<"$location")
+  created=$(hc run --bg --keep --name "↳ $label" --label "herdr.space=$space" \
+    --label "herdr.tab=$tab" -- bash "$dir/run" 2>/dev/null) || created=
+  pane=$(jq -r '.address // empty' <<<"$created" 2>/dev/null) || pane=
+  herdr-app 'do' tab.select --id "$tab" >/dev/null 2>&1 || :
+  [[ -n $pane ]] || headless "$@"
+  printf '%s\n' "$pane" >"$dir/address"
+else
+  lock="${XDG_RUNTIME_DIR:-/tmp}/herdr-run-${HERDR_TAB_ID}.lock"
+  exec {lock_fd}>"$lock"
+  flock "$lock_fd"
+  created=$(h tab create --workspace "$HERDR_WORKSPACE_ID" --cwd "$PWD" --label "↳ $label" --no-focus 2>/dev/null) || created=
+  pane=$(jq -r '.result.root_pane.pane_id // empty' 2>/dev/null <<<"$created") || pane=
+  terminal=$(jq -r '.result.root_pane.terminal_id // empty' 2>/dev/null <<<"$created") || terminal=
+  tab=$(jq -r '.result.tab.tab_id // empty' 2>/dev/null <<<"$created") || tab=
+  if [[ -z $pane || -z $terminal || -z $tab ]]; then
+    flock -u "$lock_fd"
     close_pane
     headless "$@"
   fi
-  for _ in 1 2; do
-    [[ -f $dir/runner.pid ]] && break
-    sleep_for 0.5
+  # Bake the returned identity ahead of the runner body.
+  {
+    printf 'pane=%q\nterminal=%q\n' "$pane" "$terminal"
+    cat "$dir/run"
+  } >"$dir/run.tmp"
+  mv "$dir/run.tmp" "$dir/run"
+  mark
+  place_tab || :
+  flock -u "$lock_fd"
+
+  for ((attempt = 1; attempt <= 3; attempt++)); do
+    if ! h pane run "$pane" "bash $(printf '%q' "$dir/run")" >/dev/null 2>&1; then break; fi
+    for _ in 1 2; do
+      [[ -d $dir/claim ]] && break 2
+      sleep_for 0.5
+    done
   done
+  if [[ ! -d $dir/claim ]]; then
+    if mkdir "$dir/claim" 2>/dev/null; then
+      close_pane
+      headless "$@"
+    fi
+    for _ in 1 2; do
+      [[ -f $dir/runner.pid ]] && break
+      sleep_for 0.5
+    done
+  fi
 fi
 report working
 (

@@ -12,7 +12,11 @@ usage() {
   echo 'usage: herdr-team up|ask|converse|status|down|finish ... (see the header of herdr-team.sh)' >&2
   exit 2
 }
-if [[ ${HERDR_ENV:-} != 1 || -z ${HERDR_SOCKET_PATH:-} || -z ${HERDR_WORKSPACE_ID:-} ]]; then
+if [[ ${HERDR_ENV:-} == 1 && -n ${HERDR_SOCKET_PATH:-} && -n ${HERDR_WORKSPACE_ID:-} ]]; then
+  backend=tui
+elif [[ -n ${HC_TERMINAL_ID:-} ]]; then
+  backend=hc
+else
   echo 'herdr-team: not inside herdr' >&2
   exit 2
 fi
@@ -25,6 +29,29 @@ mkdir -p "$rt"
 chmod 700 "$rt"
 sleep_for() { sleep "$(awk -v n="$1" -v s="$scale" 'BEGIN { printf "%.3f", n*s }')"; }
 h() { "${HERDR_BIN_PATH:-herdr}" "$@"; }
+hc_owned() { # address: only a member record may authorize a terminal operation
+  local file
+  for file in "$rt"/*.json; do
+    [[ -f $file ]] || continue
+    if jq -e --arg a "$1" '[.members[] | select(.pane == $a and .terminal == $a)] | length > 0' "$file" >/dev/null; then
+      return 0
+    fi
+  done
+  return 1
+}
+screen_read() {
+  if [[ $backend == hc ]]; then hc_owned "$1" && hc read "$1" --lines 200; else h pane read "$1" --source visible; fi
+}
+send_prompt() {
+  if [[ $backend == hc ]]; then hc_owned "$1" && hc send "$1" "$3"; elif [[ $2 == agy ]]; then
+    h pane send-text "$1" "$3" && h pane send-keys "$1" enter
+  else h agent prompt "$1" "$3"; fi
+}
+interrupt_member() {
+  if [[ $backend == hc ]]; then hc_owned "$1" && hc interrupt "$1"; elif [[ $2 == agy ]]; then
+    h pane send-keys "$1" ctrl+c
+  else h agent send-keys "$1" ctrl+c; fi
+}
 refuse() {
   jq -cn --arg r "$1" --arg o "${2:-refused}" '{ok: false, outcome: $o, reason: $r}'
   exit 2
@@ -243,6 +270,14 @@ sweep() { # remove state files with no live member; hold the lock
 
 same_pane() { # pane terminal [kind] [agy_session]
   local reply
+  if [[ $backend == hc ]]; then
+    hc_owned "$1" || return 1
+    reply=$(hc get "$1" --json 2>/dev/null) || return 1
+    jq -e --arg t "$2" --arg k "${3:-}" \
+      '.address == $t and ($k == "" or (.status != null and ((.foreground.name // "") | contains($k))))' \
+      >/dev/null 2>&1 <<<"$reply"
+    return
+  fi
   reply=$(h pane get "$1" 2>/dev/null) || return 1
   jq -e --arg t "$2" --arg k "${3:-}" --arg s "${4:-}" \
     '.result.pane.terminal_id == $t and ($k == "" or .result.pane.agent == $k or ($k == "agy" and (.result.pane.agent // "") == ""))
@@ -273,7 +308,40 @@ stop_scope() { # unit: stop it; fails unless systemd confirms it is inactive
 # Stop the member's scope, then TERM its group when its leader is still ours; otherwise signal only verified pid/start pairs.
 # Returns nonzero only when the scope is still active.
 stop_member() { # ctl
-  local pgid pstart i pair pid start remaining signal sc='' rc=0 pairs=()
+  local pgid pstart i pair pid start remaining signal sc='' rc=0 pairs=() file address hcname rec_backend=tui
+  # Use the backend that started the member (TUI records have none), not the caller's.
+  for file in "$rt"/*.json; do
+    [[ -f $file ]] || continue
+    if jq -e --arg c "$1" 'any(.members[]; .ctl == $c)' "$file" >/dev/null 2>&1; then
+      rec_backend=$(jq -r '.backend // "tui"' "$file")
+      break
+    fi
+  done
+  if [[ $rec_backend == hc ]]; then
+    # As in the TUI branch: the scope holds what the member left behind (MCP servers).
+    { read -r sc <"$1/scope"; } 2>/dev/null || sc=''
+    if [[ $sc =~ ^herdr-team-[A-Za-z0-9_-]+\.scope$ ]] && ! stop_scope "$sc"; then rc=1; fi
+    address='' hcname=''
+    for file in "$rt"/*.json; do
+      [[ -f $file ]] || continue
+      address=$(jq -r --arg c "$1" '[.members[] | select(.ctl == $c) | .pane] | first // empty' "$file")
+      # hc addresses are short and can be reused: also match the name hc run gave it.
+      hcname=$(jq -r --arg c "$1" '.task as $t | [.members | to_entries[] | select(.value.ctl == $c) | "\($t)-\(.key)"] | first // empty' "$file")
+      [[ -z $address ]] || break
+    done
+    [[ -n $address ]] || return "$rc"
+    hc_owned "$address" || return 1
+    local got
+    if ! got=$(hc get "$address" --json 2>/dev/null); then
+      got=$(herdr-app ls 2>/dev/null) || return 1
+      jq -e --arg a "$address" '([.spaces[].tabs[].terminals[]? | select((.terminal // .address // .id // .) == $a)] | length) == 0' \
+        >/dev/null <<<"$got" || return 1
+      return "$rc"
+    fi
+    jq -e --arg a "$address" --arg n "$hcname" '.address == $a and .name == $n' >/dev/null <<<"$got" || return 1
+    hc kill "$address" >/dev/null 2>&1 || return 1
+    return "$rc"
+  fi
   { read -r sc <"$1/scope"; } 2>/dev/null || sc=''
   if [[ $sc =~ ^herdr-team-[A-Za-z0-9_-]+\.scope$ ]] && ! stop_scope "$sc"; then rc=1; fi
   { read -r pgid pstart <"$1/pgid"; } 2>/dev/null || return "$rc"
@@ -327,10 +395,10 @@ teardown() { # state file, member: stop it, close its pane, remove its dirs and 
   if [[ -d $ctl ]]; then : >"$ctl/stop"; fi
   if ! stop_member "$ctl"; then
     echo "herdr-team: scope $(<"$ctl/scope") did not stop" >&2
-    if [[ -n $pane ]] && same_pane "$pane" "$terminal" '' "$agy_session"; then h pane close "$pane" >/dev/null 2>&1 || :; fi
+    if [[ $backend == tui && -n $pane ]] && same_pane "$pane" "$terminal" '' "$agy_session"; then h pane close "$pane" >/dev/null 2>&1 || :; fi
     return 1
   fi
-  if [[ -n $pane ]] && same_pane "$pane" "$terminal" '' "$agy_session"; then h pane close "$pane" >/dev/null 2>&1 || :; fi
+  if [[ $backend == tui && -n $pane ]] && same_pane "$pane" "$terminal" '' "$agy_session"; then h pane close "$pane" >/dev/null 2>&1 || :; fi
   # the launcher writes its last records after the member ends; let it finish before removing ctl
   pid=$(mget "$f" "$m" pid)
   start=$(mget "$f" "$m" start)
@@ -349,7 +417,7 @@ teardown() { # state file, member: stop it, close its pane, remove its dirs and 
   unlock
 }
 
-up() {
+up_tui() {
   local branch kind wrapper notify common trust lead lead_start max created reply attempt i matched mpid mstart now first rec firstpane gd root agy_session screen ready_attempts err name
   task=${1:-}
   role=${2:-}
@@ -601,6 +669,271 @@ LAUNCH
     '{ok: true, task: $task, member: $member, pane: $pane, tab: $tab, containment: $containment}'
 }
 
+up_hc() {
+  local branch kind wrapper notify common trust lead lead_start max created reply attempt i matched mpid mstart now first rec firstpane gd root agy_session screen ready_attempts err name placeholder=
+  task=${1:-}
+  role=${2:-}
+  shift 2 || usage
+  step=''
+  while (($#)); do
+    case $1 in
+      --step)
+        [[ ${2:-} =~ ^[0-9]+$ ]] || usage
+        step=$2
+        shift 2
+        ;;
+      *) usage ;;
+    esac
+  done
+  task_ok "$task"
+  case $role in review | implement | agy-implement) ;; *) usage ;; esac
+  [[ $role != agy-implement || $agy_member == true ]] || refuse 'agy member not enabled'
+  root=$(gq rev-parse --show-toplevel 2>/dev/null) || refuse 'not a git worktree'
+  branch=$(gq branch --show-current 2>/dev/null) || refuse 'not a git worktree'
+  root=$(realpath -- "$root")
+  if [[ $root == "$(realpath -m -- "$HOME/.config/nixos")" || $branch == main ]]; then
+    refuse 'refusing shared checkout or main branch'
+  fi
+  wrapper=$role
+  [[ $role != review ]] || wrapper=codex
+  [[ $role != implement ]] || wrapper=codex-implement
+  for tool in agent-env "$wrapper"; do
+    command -v "$tool" >/dev/null 2>&1 || refuse "$tool not found"
+  done
+  kind=codex
+  max=10800
+  [[ $role != agy-implement ]] || kind=agy
+  [[ $role != review ]] || max=28800
+  lead=$(lead_pid)
+  lead_start=$(stat_field "$lead" 20) || refuse 'lead process not found'
+
+  f=$(sf "$task")
+  firstpane=''
+  lead_tab=''
+  lead_space=''
+  tab=''
+  containment=group
+  if [[ ${HERDR_TEAM_NO_SCOPE:-} != 1 ]] && timeout 3 systemctl --user show-environment >/dev/null 2>&1; then containment=scope; fi
+  lock
+  sweep
+  if [[ -f $f ]]; then
+    jq -e --argjson p "$lead" --arg s "$lead_start" --arg w "$root" \
+      '.lead.pid == $p and .lead.start == $s and .worktree == $w' "$f" >/dev/null || refuse 'task name is in use by live members'
+    if jq -e --arg m "$role" '.members | has($m)' "$f" >/dev/null; then
+      refuse "member $role exists; run: herdr-team down $task $role"
+    fi
+    gen=$(jq -r .gen "$f")
+    gd=$(jq -r .gitdir "$f")
+    tab=$(jq -r .tab "$f")
+    first=$(live_members "$f" | head -n1)
+    firstpane=$(mget "$f" "$first" pane)
+  else
+    gen=$(head -c8 /dev/urandom | od -An -tx1 | tr -d ' \n')
+    gd=$(gq rev-parse --absolute-git-dir 2>/dev/null) || refuse 'not a git worktree'
+  fi
+  if [[ $role != review ]]; then
+    if [[ -n $(lg status --porcelain) ]]; then refuse 'worktree is dirty; commit or discard first'; fi
+    if worktree_busy "$root"; then refuse 'worktree already has an implementer or a finish in progress'; fi
+  fi
+  work=$(mktemp -d "$wroot/herdr-team.$gen.$role.XXXXXX")
+  mkdir -p "$work/req" "$work/turns/done" "$work/ans"
+  chmod 700 "$work" "$work/req" "$work/turns" "$work/turns/done" "$work/ans" # the sink insists on a 0700 turns dir
+  ctl=$rt/$gen/$role
+  mkdir -p "$ctl"
+  scope=''
+  if [[ $containment == scope ]]; then
+    scope=herdr-team-$task-$gen-$role.scope
+    printf '%s\n' "$scope" >"$ctl/scope"
+  fi
+  now=$(date +%s)
+  # Members run unrestricted (#2812). agent-env drops the token-bearing environment; the coder guard is a best-effort tripwire.
+  notify="notify=[\"${sink_path:?}\",\"$work/turns\"]"
+  common=$(realpath -e -- "$(gq rev-parse --path-format=absolute --git-common-dir)")
+  trust="projects={\"$root\"={trust_level=\"trusted\"}"
+  if [[ $(dirname -- "$common") != "$root" ]]; then trust+=",\"$(dirname -- "$common")\"={trust_level=\"trusted\"}"; fi
+  trust+='}'
+  case $role in
+    review)
+      argv=(agent-env env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY
+        -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE codex --no-daemon --dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt -c "$notify" -c "$trust")
+      ;;
+    implement) argv=(agent-env codex-implement --no-daemon -c "$notify" -c "$trust") ;;
+    agy-implement) argv=(agent-env agy-implement --acp --turns "$work/turns") ;;
+  esac
+  rec=$(jq -n --arg role "$role" --arg kind "$kind" --arg step "$step" \
+    --arg work "$work" --arg ctl "$ctl" --argjson since "$now" --arg containment "$containment" --arg scope "$scope" \
+    '{role: $role, kind: $kind, pane: "", terminal: "", agy_session: null, pid: null, start: null, step: $step, fingerprint: null,
+      head: null, pending: null, last: null, next: 1, work: $work, ctl: $ctl, since: $since, containment: $containment}
+      + (if $scope == "" then {} else {scope: $scope} end)')
+  if [[ -f $f ]]; then
+    update "$f" '.members[$m] = $rec' --arg m "$role" --argjson rec "$rec"
+  else
+    jq -n --arg task "$task" --arg gen "$gen" --arg w "$root" --arg gd "$gd" --argjson lead "$lead" --arg ls "$lead_start" \
+      --arg m "$role" --argjson rec "$rec" \
+      '{task: $task, gen: $gen, tab: "", worktree: $w, gitdir: $gd, lead: {pid: $lead, start: $ls}, members: {($m): $rec},
+        reservation: null, backend: "hc"}' >"$f"
+  fi
+  unlock
+  # From here on any failure or signal takes the member down again.
+  armed=1
+  trap 'if ((armed)); then armed=0; teardown "$f" "$role" >/dev/null 2>&1 || :; fi' EXIT
+  trap 'exit 130' INT
+  trap 'exit 143' TERM
+  trap 'exit 129' HUP
+
+  {
+    printf '#!/usr/bin/env bash\ncd %q || exit 127\nPATH=%q\n' "$root" "$PATH"
+    printf 'ctl=%q\nlead_pid=%q\nlead_start=%q\nscale=%q\nmaxsecs=%q\n' "$ctl" "$lead" "$lead_start" "$scale" \
+      "$(awk -v n="$max" -v s="$scale" 'BEGIN { printf "%d", n*s }')"
+    printf 'scope=%q\ncontainment=%q\nstop_secs=%q\nstate_file=%q\n' "$scope" "$containment" "$stop_secs" "$f"
+    printf 'argv=('
+    printf '%q ' "${argv[@]}"
+    printf ')\n'
+    cat <<'LAUNCH'
+mkdir "$ctl/claim" 2>/dev/null || exit 0
+start_of() { sed 's/.*) //' "/proc/$1/stat" 2>/dev/null | awk '{ print $20 }'; }
+sleep_for() { sleep "$(awk -v n="$1" -v s="$scale" 'BEGIN { printf "%.3f", n*s }')"; }
+printf '%s %s\n' "$$" "$(start_of $$)" >"$ctl/pid.tmp" && mv "$ctl/pid.tmp" "$ctl/pid"
+kill_group() {
+  local g
+  { read -r g _ <"$ctl/pgid"; } 2>/dev/null || return 1
+  [[ $g =~ ^[0-9]+$ ]] && ((g > 1)) || return 1
+  kill -"$1" -- "-$g" 2>/dev/null
+}
+stop_scope() { # unit: stop it; fails unless systemd confirms it is inactive; no-op in group mode
+  [[ $containment == scope ]] || return 0
+  timeout "$((stop_secs + 5))" systemctl --user stop -- "$1" >/dev/null 2>&1 || :
+  local state
+  state=$(timeout 5 systemctl --user show -p ActiveState --value -- "$1" 2>/dev/null) || return 1
+  [[ $state == inactive || $state == failed ]]
+}
+# The lead going away (pid and start time) or the role's maximum ends the member.
+(
+  while sleep_for 30; do
+    if [[ $(start_of "$lead_pid") == "$lead_start" ]] && ((SECONDS < maxsecs)); then continue; fi
+    : >"$ctl/stop"
+    stop_scope "$scope" || :
+    kill_group TERM || :
+    sleep_for 5
+    kill_group KILL || :
+    # Last: ending our own terminal can take this watchdog with it.
+    if [[ -n ${HC_TERMINAL_ID:-} ]] && jq -e --arg a "$HC_TERMINAL_ID" --arg c "$ctl" '[.members[] | select(.ctl == $c and .pane == $a)] | length == 1' "$state_file" >/dev/null 2>&1; then
+      hc kill "$HC_TERMINAL_ID" >/dev/null 2>&1 || :
+    fi
+    exit 0
+  done
+) &
+wd=$!
+code=0
+# Job control gives the member its own process group and the terminal.
+set -m
+member='[ ! -e "$0/stop" ] && echo "$$ $(sed "s/.*) //" /proc/$$/stat | awk "{ print \$20 }")" >"$0/pgid.tmp" && mv "$0/pgid.tmp" "$0/pgid" && export HERDR_TEAM_MEMBER="$0" && exec "$@"; exit 127'
+if [[ $containment == scope ]]; then
+  systemd-run --user --scope --quiet --collect --expand-environment=no --unit="$scope" \
+    -p TimeoutStopSec="$stop_secs" -- bash -c "$member" "$ctl" "${argv[@]}" 2>"$ctl/stderr" || code=$?
+else
+  bash -c "$member" "$ctl" "${argv[@]}" 2>"$ctl/stderr" || code=$?
+fi
+# A watchdog that started the stop (ctl/stop) still has its last hc kill to do.
+[[ -e $ctl/stop ]] || kill "$wd" 2>/dev/null
+: >"$ctl/gone"
+tail -n 5 "$ctl/stderr" >"$ctl/status.tmp" 2>/dev/null && mv "$ctl/status.tmp" "$ctl/status"
+stop_scope "$scope" || :
+printf '%s\n' "$code" >"$ctl/exit.tmp" && mv "$ctl/exit.tmp" "$ctl/exit"
+exit "$code"
+LAUNCH
+  } >"$ctl/launch"
+
+  # Find the caller's tab, then create one task tab and restore focus.
+  listing=$(herdr-app ls 2>/dev/null) || fail 'could not list app tabs'
+  location=$(jq -c --arg a "$HC_TERMINAL_ID" '
+    [.spaces[] as $s | $s.tabs[] as $t | $t.terminals[]? | select((.terminal // .address // .id // .) == $a)
+      | {space:$s.id, tab:$t.id}] | first // empty' <<<"$listing")
+  [[ -n $location ]] || fail 'lead terminal is not in the app'
+  lead_space=$(jq -r .space <<<"$location")
+  lead_tab=$(jq -r .tab <<<"$location")
+  if [[ -z $tab ]]; then
+    created=$(herdr-app 'do' tab.new --space "$lead_space" --name "team $task" --argv '["true"]' 2>/dev/null) || created=''
+    tab=$(jq -r '.tab // empty' <<<"$created" 2>/dev/null) || tab=''
+    [[ -n $tab ]] || fail 'could not create the team tab'
+    # tab.new keeps its shell open; this run made it, so this run ends it once a member is placed.
+    placeholder=$(jq -r '.terminal // empty' <<<"$created" 2>/dev/null) || placeholder=''
+    lock
+    update "$f" '.tab = $tab' --arg tab "$tab"
+    unlock
+    herdr-app 'do' tab.select --id "$lead_tab" >/dev/null 2>&1 || fail 'could not restore lead tab'
+  fi
+  created=$(hc run --bg --keep --name "$task-$role" --cwd "$root" --label "herdr.space=$lead_space" \
+    --label "herdr.tab=$tab" -- bash "$ctl/launch" 2>/dev/null) || created=''
+  pane=$(jq -r '.address // empty' <<<"$created" 2>/dev/null) || pane=''
+  [[ -n $pane ]] || fail 'hc run failed'
+  terminal=$pane
+  lock
+  update "$f" '.members[$m] |= (.pane = $a | .terminal = $a)' --arg m "$role" --arg a "$pane"
+  unlock
+  [[ $(jq -r '.parent // empty' <<<"$created") == "$HC_TERMINAL_ID" ]] || fail 'hc parent mismatch'
+  # A labelled run must appear in the requested app tab; kill it through its record on failure.
+  for ((i = 0; i < 20; i++)); do
+    listing=$(herdr-app ls 2>/dev/null) || listing=''
+    if jq -e --arg a "$pane" --arg t "$tab" '
+      any(.spaces[].tabs[]; .id == $t and any(.terminals[]?; (.terminal // .address // .id // .) == $a))' \
+      >/dev/null 2>&1 <<<"$listing"; then break; fi
+    sleep_for 0.1
+  done
+  ((i < 20)) || fail 'hc member was not placed in the team tab'
+  if [[ -n ${placeholder:-} ]]; then hc kill "$placeholder" >/dev/null 2>&1 || :; fi
+  for ((i = 0; i < 20; i++)); do
+    [[ -d $ctl/claim ]] && break
+    sleep_for 0.1
+  done
+  if [[ ! -d $ctl/claim ]] && mkdir "$ctl/claim" 2>/dev/null; then fail 'the launcher did not start'; fi
+  for _ in {1..20}; do
+    [[ -f $ctl/pid ]] && break
+    sleep_for 0.1
+  done
+  read -r mpid mstart <"$ctl/pid" || fail 'the launcher did not record itself'
+  lock
+  update "$f" '.members[$m] |= (.pid = $pid | .start = $start)' --arg m "$role" --argjson pid "$mpid" --arg start "$mstart"
+  unlock
+  matched=
+  ready_attempts=60
+  [[ $kind != agy ]] || ready_attempts=180
+  for ((i = 0; i < ready_attempts; i++)); do
+    if [[ -d $ctl/claim && -f $ctl/pid ]] && same_pane "$pane" "$terminal" "$kind"; then
+      if [[ $kind != agy ]]; then
+        matched=1
+        break
+      fi
+      screen=$(screen_read "$pane" 2>/dev/null) || screen=''
+      # the client writes the id to a file: a wrapped pane line could cut it short
+      if [[ $screen == *'agy session '* && -f $work/turns/session ]] && agy_session=$(<"$work/turns/session") \
+        && [[ $agy_session =~ ^[A-Za-z0-9._-]+$ ]]; then
+        matched=1
+        break
+      fi
+      # first use of a new agy runs the guard probe before the client (up to 300 s + 600 s)
+      [[ $screen != *'running the guard probe'* ]] || ready_attempts=1200
+    fi
+    [[ ! -f $ctl/exit ]] || fail "launcher exited $(<"$ctl/exit"): $(tr '\n' ' ' <"$ctl/status")"
+    sleep_for 1
+  done
+  [[ -n $matched ]] || fail "hc did not report $kind in the terminal"
+  if [[ $kind == agy ]]; then
+    lock
+    update "$f" '.members[$m].agy_session = $s' --arg m "$role" --arg s "$agy_session"
+    unlock
+  fi
+  reply=$(fingerprint)
+  lock
+  update "$f" '.members[$m] |= (.fingerprint = $fp | .head = $head)' --arg m "$role" \
+    --arg fp "$reply" --arg head "$(lg rev-parse HEAD)"
+  unlock
+  # shellcheck disable=SC2034 # read by the EXIT trap
+  armed=0
+  jq -cn --arg task "$task" --arg member "$role" --arg pane "$pane" --arg tab "$tab" --arg containment "$containment" \
+    '{ok: true, task: $task, member: $member, pane: $pane, tab: $tab, containment: $containment}'
+}
+
 perr=("Usage limit reached" "reached your usage limit" "reached your workspace credit limit" "Selected model is at capacity"
   "service unavailable" "rate limit exceeded" "rate limit reached" "exceeded retry limit" "Quota exceeded"
   "stream disconnected before completion" "agy error:")
@@ -679,7 +1012,7 @@ ask() {
     outcome=agent_gone
   else
     rev_send=$(fingerprint)
-    screen=$(h pane read "$pane" --source visible 2>/dev/null) || screen=''
+    screen=$(screen_read "$pane" 2>/dev/null) || screen=''
     baseline=$(grep -cF "$marker" <<<"$screen" || :)
     pbase=$(perr_count "$screen")
     lock
@@ -695,11 +1028,7 @@ ask() {
       cat -- "$prompt"
       reminder "$f" "$member"
     } >"$work/req/$n.md.tmp" && mv "$work/req/$n.md.tmp" "$work/req/$n.md" \
-      && { if [[ $kind == agy ]]; then
-        h pane send-text "$pane" "$pointer" >/dev/null 2>&1 && h pane send-keys "$pane" enter >/dev/null 2>&1
-      else
-        h agent prompt "$pane" "$pointer" >/dev/null 2>&1
-      fi; }; }; then
+      && send_prompt "$pane" "$kind" "$pointer" >/dev/null 2>&1; }; then
       outcome=send_failed
     fi
   fi
@@ -711,7 +1040,7 @@ ask() {
       outcome=cancelled
       break
     fi
-    screen=$(h pane read "$pane" --source visible 2>/dev/null) || screen=''
+    screen=$(screen_read "$pane" 2>/dev/null) || screen=''
     for t in "$work"/turns/*.json; do
       [[ -e $t || -L $t ]] || continue
       if [[ -f $t && ! -L $t ]] && (($(stat -c %s "$t") > 1048576)); then
@@ -1117,15 +1446,11 @@ finish() {
   last=$(jq -r --arg m "$role" '.members[$m].last.outcome // ""' "$f")
   # A graceful quit only: one ctrl+c, a second if the agent is still there after 3 s.
   if alive "$pid" "$start" && same_pane "$pane" "$terminal" "$kind" "$agy_session"; then
-    if [[ $kind == agy ]]; then
-      h pane send-keys "$pane" ctrl+c >/dev/null 2>&1 || :
-    else h agent send-keys "$pane" ctrl+c >/dev/null 2>&1 || :; fi
+    interrupt_member "$pane" "$kind" >/dev/null 2>&1 || :
     for ((i = 0; i < 30; i++)); do
       [[ -f $ctl/exit || -f $ctl/gone ]] && break
       if ((i == 6)); then
-        if [[ $kind == agy ]]; then
-          h pane send-keys "$pane" ctrl+c >/dev/null 2>&1 || :
-        else h agent send-keys "$pane" ctrl+c >/dev/null 2>&1 || :; fi
+        interrupt_member "$pane" "$kind" >/dev/null 2>&1 || :
       fi
       sleep_for 0.5
     done
@@ -1186,7 +1511,7 @@ finish() {
 sub=${1:-}
 shift || usage
 case $sub in
-  up) up "$@" ;;
+  up) if [[ $backend == hc ]]; then up_hc "$@"; else up_tui "$@"; fi ;;
   ask) ask "$@" ;;
   converse) converse "$@" ;;
   status) status "$@" ;;

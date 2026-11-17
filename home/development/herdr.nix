@@ -37,9 +37,20 @@ let
     fi
     exec ${pkgs.bashInteractive}/bin/bash "$@"
   '';
+  # An hc terminal copies its environment from whoever started it, often a TUI
+  # pane or a Claude session (#2978). Drop those identities so claude() and
+  # herdr-team see the app, not a TUI they are not in.
+  hcShell = pkgs.writeShellScript "hc-shell" ''
+    for v in $(${pkgs.coreutils}/bin/env | ${pkgs.gnused}/bin/sed -n 's/^\(HERDR_[A-Z0-9_]*\|CLAUDE_CODE_CHILD_SESSION\|CLAUDE_CODE_SESSION_[A-Z0-9_]*\|CLAUDE_CODE_MESSAGING_[A-Z0-9_]*\|CLAUDE_CODE_BRIDGE_SESSION_ID\|CLAUDE_CODE_ENTRYPOINT\|CLAUDE_CODE_EXECPATH\|TMUX\|TMUX_PANE\)=.*/\1/p'); do
+      [ "$v" = HERDR_APP_HOME ] || unset "$v"
+    done
+    exec ${paneShell} "$@"
+  '';
   claudeLauncher = ''
     claude() {
-      if [[ ''${HERDR_ENV:-} == 1 && -n ''${HERDR_SOCKET_PATH:-} ]]; then
+      # Inside the TUI, or a herdr-app terminal (hc backend, #2978).
+      if [[ ''${HERDR_ENV:-} == 1 && -n ''${HERDR_SOCKET_PATH:-} ]] \
+        || [[ ''${HERDR_ENV:-} != 1 && -n ''${HC_TERMINAL_ID:-} ]]; then
         command herdr-claude-teams "$@"
       else
         command claude "$@"
@@ -74,6 +85,18 @@ in
     # Login shell and herdr panes are bash; zsh gets the same function.
     programs.bash.initExtra = claudeLauncher;
     programs.zsh.initContent = claudeLauncher;
+
+    # herdr-core (hc), the runtime behind herdr-app. hc only reads this file.
+    xdg.configFile."herdr-core/config.toml".text = ''
+      # Close to the TUI's scrollback_limit_bytes = 50000000 below; hc's default is 5.
+      history_mb = 48
+      # A recovered terminal keeps its last screen, like the TUI's pane_history.
+      restore_screen = true
+      # hc puts every terminal in ONE hc-hold-* unit, so the #2959 reason above
+      # applies here too: give each shell its own scope (hcShell, which also
+      # drops inherited TUI and Claude-session variables).
+      shell = ["${hcShell}"]
+    '';
 
     xdg.configFile."herdr/config.toml".text = ''
       onboarding = false

@@ -337,3 +337,87 @@ validate with `herdr config check` — note that it does *not* validate
   them. Ask the agent to write its output to a file instead.
 - Never `herdr server stop` from an active session unless you mean to kill every
   pane process with it.
+
+## Herdr app (herdr-app + hc)
+
+On p620 and razer the desktop app runs next to the TUI (issue 2978). The TUI is unchanged and stays the fallback.
+The app has its own extension model (gpui-kit mods), so the TUI plugins are replaced by app mods and app settings.
+
+### What is managed
+
+`home/development/herdr-app.nix` declares everything; `herdr-app-sync` copies it into `~/.config/herdr-app` on
+every switch and every window launch. The app owns that folder (it rewrites its shipped mods and writes its JSON),
+so nothing there is a store symlink.
+
+| Item | Source | Replaces in the TUI |
+| --- | --- | --- |
+| layout `freund` | clone of `main` 0.1.16 | the TUI layout |
+| `freund-agents` | clone of `agents` + a controls popup (⋯ or right-click) | herdr-radar's agent view |
+| `freund-tabs` | clone of `tabs` + a GitLab button | — |
+| `inbox` | ours: GitHub + gitlab.com issues and PRs/MRs, assigned, authored or review-requested | GitHub Start |
+| `issues` | jankeesvw/herdr-issues, pinned | GitHub Start, per repo |
+| `gitlab` | rem-aster/herdr-gitlab, pinned | — |
+| `notify` | ours: alerts go to `notify-send`; Open runs the alert's action | `[ui.toast] delivery = "system"` |
+| `splits` | ours: ctrl/alt+hjkl through Neovim | herdr-splits |
+| settings | `theme = "omarchy"` (Omarchy keeps `themes/omarchy.json` current), sounds on | `[theme] name = "terminal"` |
+| hc config | `history_mb = 48`, `restore_screen = true`, per-shell systemd scope | scrollback, pane history, #2959 |
+
+### Keys
+
+| Key | Action |
+| --- | --- |
+| ctrl+h/j/k/l | move between panes and Neovim splits |
+| alt+h/j/k/l | resize (Neovim splits inside Neovim); replaces the app's alt = focus |
+| ctrl+shift+g | lazygit in a new tab (closes when lazygit exits) |
+| ctrl+shift+y / ctrl+alt+shift+y | zoetrope (`zoe`) right / in a tab |
+| ctrl+shift+u | open a worktree |
+| ctrl+shift+i | issues inbox |
+| ctrl+shift+p / ctrl+? | command palette / key help (app defaults) |
+| ctrl+shift+l | cycle layouts (back to `main`) |
+
+### Sync, backups and rollback
+
+`herdr-app-sync` keeps a manifest in `~/.local/state/herdr-app-sync/` and installs a mod only after
+`herdr-app check` passes (layouts are checked with `jq`). Anything it replaces, including a hand-edited managed
+mod and the previous `settings.json` / `keys.json`, goes to `~/.local/state/herdr-app-sync/backups/<time>/`.
+Declared keys and settings win; everything else in those files stays yours. Logs:
+`journalctl --user -t herdr-app-sync`.
+
+To undo it on a host: remove `~/.config/herdr-app-sync/source` and close the app, delete the managed items that have
+no backup, copy the backups back (oldest first), delete `manifest.json`, and start the app. `ctrl+alt+shift+esc`
+always returns the app to its default layout and keys.
+
+### Known gaps
+
+| Gap | Issue |
+| --- | --- |
+| reviewr's send line comments to the agent | #2981 |
+| hintr's run-a-listed-key (`app.help` only lists) | #2982 |
+| Omarchy `nixarchy.herdr` widget still reads the TUI | #2983 |
+| window title has no host or workspace | #2984 |
+| Collie is not wired to hc | #2985 |
+| lazygit opens as a tab, not a float | #2986 |
+| agents started from the + menu share one `hc-hold-*` unit (no per-pane scope, #2959) | #2987 |
+| herdr-team's provider-error scan can match its own source on screen | #2988 |
+| hc keeps its first starter's environment (see below) | #2989 |
+
+### hc keeps the environment of whoever started it first
+
+The core saves the environment of the process that first started it and reuses it across `hc server restart`
+and updates. If that was a herdr TUI pane or a Claude session, every app terminal inherits `HERDR_ENV=1` and that
+session's variables, and `claude()` / `herdr-team` then act as if they were in the TUI. Plain app shells drop those
+variables (`hcShell` in `home/development/herdr.nix`), but `argv` launches do not. Start the app from the launcher,
+never from a TUI pane, and to repair a polluted core run, from outside herdr:
+
+```bash
+systemd-run --user --collect --wait -p Type=oneshot hc server restart --fresh
+```
+
+### Bumping herdr-app or herdr-core
+
+1. Version and sha256 from `https://releases.herdr.dev/{app,core}/latest.json`.
+2. No `herdr-app.svg` beside the binary (that keeps the self-updater off).
+3. Diff the new default `keys.json` (`herdrdev/herdr-app`, `defaults/keys.json` at the tag) against ours.
+4. Re-clone `tabs` → `freund-tabs` and `agents` → `freund-agents` and re-apply the changes listed in each mod's
+   `NIXOS.md`.
+5. Check the inbox, the GitHub and GitLab panels, notifications, ctrl/alt+hjkl and the agent controls.

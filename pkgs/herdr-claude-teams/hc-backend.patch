@@ -1,0 +1,419 @@
+diff --git a/herdr_claude_teams/hc_client.py b/herdr_claude_teams/hc_client.py
+new file mode 100644
+index 0000000..3e4ac1e
+--- /dev/null
++++ b/herdr_claude_teams/hc_client.py
+@@ -0,0 +1,140 @@
++"""Herdr-shaped calls backed by hc terminals and herdr-app tabs."""
++
++from __future__ import annotations
++
++import json
++import os
++import subprocess
++
++from . import ownership
++from .socket_client import HerdrError
++
++
++def _run(*argv: str, json_result: bool = False):
++    result = subprocess.run(argv, text=True, capture_output=True, check=False)
++    if result.returncode:
++        raise HerdrError("hc_error", result.stderr.strip() or result.stdout.strip())
++    if json_result:
++        try:
++            return json.loads(result.stdout)
++        except ValueError as exc:
++            raise HerdrError("invalid_response", f"{argv[0]} returned invalid JSON") from exc
++    return result.stdout
++
++
++def _listing() -> dict:
++    return _run("herdr-app", "ls", json_result=True)
++
++
++def _panes(listing: dict) -> list[dict]:
++    leader = os.environ["HC_TERMINAL_ID"]
++    panes = []
++    for space in listing.get("spaces", []):
++        for tab in space.get("tabs", []):
++            for entry in tab.get("terminals", []):
++                address = entry if isinstance(entry, str) else entry.get("terminal") or entry.get("address") or entry.get("id")
++                if address != leader and not ownership.is_owned(address):
++                    continue
++                panes.append({
++                    "pane_id": address, "terminal_id": address, "tab_id": tab["id"],
++                    "workspace_id": space["id"], "focused": address == leader,
++                    "label": tab.get("name", ""),
++                })
++    return panes
++
++
++def _pane(address: str) -> dict:
++    pane = next((p for p in _panes(_listing()) if p["pane_id"] == address), None)
++    if pane is None:
++        raise HerdrError("pane_not_found", f"pane {address} not found")
++    return pane
++
++
++def _app(command: str, **params):
++    result = _run("herdr-app", "do", command, json.dumps(params), json_result=True)
++    if isinstance(result, dict) and result.get("error"):
++        raise HerdrError("app_error", str(result["error"]))
++    return result
++
++
++def call(method: str, params: dict) -> dict:
++    address = params.get("pane_id", "")
++    if method == "pane.get":
++        return {"type": "pane_info", "pane": _pane(address)}
++    if method == "pane.list":
++        return {"type": "pane_list", "panes": _panes(_listing())}
++    if method == "pane.close":
++        if not ownership.is_owned(address):
++            raise HerdrError("not_owned", f"pane {address} is not owned")
++        _run("hc", "kill", address)
++        return {"type": "ok"}
++    if method == "pane.read":
++        _pane(address)
++        text = _run("hc", "read", "--lines", "1000" if params.get("source") == "recent" else "0", address)
++        return {"type": "pane_read", "read": {"pane_id": address, "text": text, "source": params.get("source", "visible"), "truncated": False}}
++    if method == "pane.send_text":
++        _pane(address)
++        text = params.get("text", "")
++        if text == "\x03":
++            _run("hc", "interrupt", address)
++        elif text.endswith("\r"):
++            if text == "\r":
++                _run("hc", "keys", address, "enter")
++            else:
++                _run("hc", "send", address, text[:-1])
++        elif text:
++            # hc keys types without submitting; send-keys -l may precede Enter.
++            _run("hc", "keys", address, *("space" if c == " " else c for c in text))
++        return {"type": "ok"}
++    if method == "pane.process_info":
++        _pane(address)
++        state = _run("hc", "get", address, "--json", json_result=True)
++        argv = (state.get("foreground") or {}).get("argv") or []
++        return {"type": "pane_process_info", "foreground_processes": [{"argv": argv}] if argv else []}
++    if method == "pane.rename":
++        pane = _pane(address)
++        _app("tab.rename", id=pane["tab_id"], name=params.get("label", ""))
++        pane["label"] = params.get("label", "")
++        return {"type": "pane_info", "pane": pane}
++    if method == "pane.report_metadata":
++        tokens = params.get("tokens") or {}
++        label = tokens.get("split_mark")
++        if label and ownership.is_owned(address):
++            _app("tab.rename", id=_pane(address)["tab_id"], name=label)
++        return {"type": "ok"}
++    if method == "pane.resize":
++        return {"type": "pane_resize", "resize": {}}
++    if method == "pane.layout":
++        pane = _pane(address)
++        area = {"x": 0, "y": 0, "width": 200, "height": 50}
++        return {"type": "pane_layout", "layout": {"area": area, "focused_pane_id": address, "panes": [{"pane_id": address, "focused": True, "rect": area}], "splits": [], "tab_id": pane["tab_id"], "workspace_id": pane["workspace_id"], "zoomed": False}}
++    if method == "pane.move":
++        return {"type": "pane_move", "move_result": {"changed": False}}
++    if method == "tab.create":
++        before = _pane(os.environ["HC_TERMINAL_ID"])
++        # A plain shell, not a `cat` placeholder: in an app terminal cat survives ^C,
++        # so respawn-pane would type the teammate's command into cat.
++        created = _app("tab.new", space=params.get("workspace_id"), name=params.get("label", "teammate"), **({"folder": params["cwd"]} if params.get("cwd") else {}))
++        # tab.new focuses the new tab (no focus argument); give the lead its tab back.
++        _app("tab.select", id=before["tab_id"])
++        pane = {"pane_id": created["terminal"], "terminal_id": created["terminal"], "tab_id": created["tab"], "workspace_id": created["space"], "focused": False}
++        return {"type": "tab_created", "tab": {"tab_id": created["tab"], "workspace_id": created["space"]}, "root_pane": pane}
++    if method == "tab.list":
++        return {"type": "tab_list", "tabs": [{"tab_id": tab["id"], "workspace_id": space["id"], "label": tab.get("name", "")} for space in _listing().get("spaces", []) for tab in space.get("tabs", []) if not params.get("workspace_id") or params["workspace_id"] == space["id"]]}
++    if method == "tab.rename":
++        _app("tab.rename", id=params["tab_id"], name=params.get("label", ""))
++        return {"type": "ok"}
++    if method == "tab.move":
++        _app("tab.move", id=params["tab_id"], index=params["insert_index"] + 1)
++        return {"type": "ok"}
++    if method == "tab.focus":
++        _app("tab.select", id=params["tab_id"])
++        return {"type": "ok"}
++    if method == "workspace.list":
++        return {"type": "workspace_list", "workspaces": [{"workspace_id": space["id"], "label": space.get("name", space["id"]), "focused": False} for space in _listing().get("spaces", [])]}
++    if method == "workspace.create":
++        before = _pane(os.environ["HC_TERMINAL_ID"])
++        created = _app("space.new", name=params.get("label", "team"))
++        _app("space.select", id=before["workspace_id"])
++        return {"type": "workspace_created", "workspace_id": created["space"], "root_pane": {"pane_id": created["terminal"]}}
++    raise HerdrError("invalid_request", f"unknown method {method}")
+diff --git a/herdr_claude_teams/launcher.py b/herdr_claude_teams/launcher.py
+index 7f5f687..498f059 100644
+--- a/herdr_claude_teams/launcher.py
++++ b/herdr_claude_teams/launcher.py
+@@ -43,21 +43,23 @@ def default_shim_dir(env: dict | None = None) -> Path:
+ 
+ 
+ def in_herdr(env: dict) -> bool:
+-    return env.get("HERDR_ENV") == "1" and bool(env.get("HERDR_SOCKET_PATH"))
++    return (env.get("HERDR_ENV") == "1" and bool(env.get("HERDR_SOCKET_PATH"))) or bool(
++        env.get("HC_TERMINAL_ID") and env.get("HERDR_ENV") != "1"
++    )
+ 
+ 
+ def resolve_leader_pane(env: dict) -> dict:
+     """Resolve the running pane to its canonical herdr pane via HERDR_PANE_ID."""
+     result = socket_client.call(
+         "pane.get",
+-        {"pane_id": env.get("HERDR_PANE_ID")},
+-        socket_path=env["HERDR_SOCKET_PATH"],
++        {"pane_id": env.get("HERDR_PANE_ID") if env.get("HERDR_ENV") == "1" else env.get("HC_TERMINAL_ID")},
++        socket_path=env.get("HERDR_SOCKET_PATH") if env.get("HERDR_ENV") == "1" else None,
+     )
+     return result["pane"]
+ 
+ 
+ def build_env(env: dict, leader_pane: dict, *, shim_dir: str, pid: int) -> dict:
+-    socket_path = env["HERDR_SOCKET_PATH"]
++    socket_path = env.get("HERDR_SOCKET_PATH") if env.get("HERDR_ENV") == "1" else env.get("HC_TERMINAL_SOCKET", "hc")
+     new = dict(env)
+     new["TMUX_PANE"] = ids.to_tmux_pane(leader_pane["terminal_id"])
+     new["TMUX"] = f"{socket_path},{pid},herdr"
+diff --git a/herdr_claude_teams/ownership.py b/herdr_claude_teams/ownership.py
+index 8d8ad6f..895fcc8 100644
+--- a/herdr_claude_teams/ownership.py
++++ b/herdr_claude_teams/ownership.py
+@@ -7,6 +7,7 @@ one ``socket<TAB>pane_id<TAB>terminal_id`` line per teammate pane.
+ from __future__ import annotations
+ 
+ import fcntl
++import json
+ import os
+ import tempfile
+ from pathlib import Path
+@@ -18,6 +19,8 @@ def owned_dir() -> Path:
+ 
+ 
+ def _leader_file() -> Path | None:
++    if os.environ.get("HERDR_ENV") != "1" and os.environ.get("HC_TERMINAL_ID"):
++        return owned_dir() / f"{os.environ['HC_TERMINAL_ID'].replace('/', '_')}.json"
+     leader = os.environ.get("HERDR_PANE_ID")
+     if not leader:
+         return None
+@@ -41,6 +44,23 @@ def record(pane: dict) -> None:
+     path = _leader_file()
+     if path is None:
+         return
++    if path.suffix == ".json":
++        terminal_id = pane.get("terminal_id")
++        if not terminal_id:
++            return
++        path.parent.mkdir(parents=True, exist_ok=True)
++        with open(path, "a+", encoding="utf-8") as handle:
++            fcntl.flock(handle, fcntl.LOCK_EX)
++            handle.seek(0)
++            content = handle.read()
++            addresses = json.loads(content) if content else []
++            handle.seek(0)
++            if terminal_id not in addresses:
++                addresses.append(terminal_id)
++            handle.seek(0)
++            handle.truncate()
++            json.dump(addresses, handle)
++        return
+     row = "\t".join(
+         (os.environ.get("HERDR_SOCKET_PATH", ""), pane.get("pane_id", ""), pane.get("terminal_id", ""))
+     )
+@@ -53,6 +73,12 @@ def record(pane: dict) -> None:
+ def is_owned(terminal_id: str) -> bool:
+     if not terminal_id:
+         return False
++    path = _leader_file()
++    if path is not None and path.suffix == ".json":
++        try:
++            return terminal_id in json.loads(path.read_text(encoding="utf-8"))
++        except (OSError, ValueError):
++            return False
+     socket_path = os.environ.get("HERDR_SOCKET_PATH", "")
+     for path in owned_dir().glob("*.owned"):
+         for sock, _pane, term in _entries(path):
+@@ -64,6 +90,18 @@ def is_owned(terminal_id: str) -> bool:
+ def forget(terminal_id: str) -> None:
+     if not terminal_id:
+         return
++    path = _leader_file()
++    if path is not None and path.suffix == ".json":
++        try:
++            with open(path, "r+", encoding="utf-8") as handle:
++                fcntl.flock(handle, fcntl.LOCK_EX)
++                addresses = json.load(handle)
++                handle.seek(0)
++                handle.truncate()
++                json.dump([a for a in addresses if a != terminal_id], handle)
++        except (OSError, ValueError):
++            pass
++        return
+     socket_path = os.environ.get("HERDR_SOCKET_PATH", "")
+     for path in owned_dir().glob("*.owned"):
+         try:
+diff --git a/herdr_claude_teams/socket_client.py b/herdr_claude_teams/socket_client.py
+index 50de482..18750fa 100644
+--- a/herdr_claude_teams/socket_client.py
++++ b/herdr_claude_teams/socket_client.py
+@@ -41,6 +41,9 @@ def call(
+     socket_path: str | None = None,
+     timeout: float = 5.0,
+ ) -> dict:
++    if os.environ.get("HERDR_ENV") != "1" and os.environ.get("HC_TERMINAL_ID"):
++        from . import hc_client
++        return hc_client.call(method, params or {})
+     path = resolve_socket_path(socket_path)
+     request = {"id": f"herdr-claude-teams:{next(_ids)}", "method": method, "params": params or {}}
+     trace.log("rpc", method=method, params=params or {})
+diff --git a/herdr_claude_teams/verbs.py b/herdr_claude_teams/verbs.py
+index ef99723..90e50d0 100644
+--- a/herdr_claude_teams/verbs.py
++++ b/herdr_claude_teams/verbs.py
+@@ -224,7 +224,7 @@ def _split_window(parsed) -> int:
+     new_tab = (result.get("tab") or {}).get("tab_id") or pane.get("tab_id")
+     _place_after_lead(new_tab, lead["tab_id"], lead["workspace_id"])
+     # tab.create has no "launch this" param: type the command, as _respawn_pane does.
+-    if command:
++    if command and not (os.environ.get("HERDR_ENV") != "1" and os.environ.get("HC_TERMINAL_ID") and command == "cat"):
+         call("pane.send_text", {"pane_id": pane["pane_id"], "text": command + "\r"})
+     if parsed.has("-P"):
+         fmt_str = parsed.value("-F") or "#{pane_id}"
+@@ -352,6 +352,8 @@ def _label_teammate(pane_id: str, terminal_id: str, command: str) -> None:
+ 
+ 
+ def _spawn_relabel(pane_id: str, terminal_id: str, label: str) -> None:
++    if os.environ.get("HERDR_ENV") != "1" and os.environ.get("HC_TERMINAL_ID"):
++        return
+     if os.environ.get("HERDR_CLAUDE_TEAMS_NO_RELABEL"):
+         return
+     try:
+diff --git a/tests/test_hc_backend.py b/tests/test_hc_backend.py
+new file mode 100644
+index 0000000..e161c4a
+--- /dev/null
++++ b/tests/test_hc_backend.py
+@@ -0,0 +1,122 @@
++"""hc transport exercised through fake command-line programs only."""
++
++import json
++import os
++import sys
++
++import pytest
++
++from herdr_claude_teams import launcher, shim
++from _fake_herdr import FakeHerdr
++
++
++FAKE = r'''#!PYTHON
++import json, os, sys
++from pathlib import Path
++p = Path(os.environ["FAKE_HC_STATE"])
++s = json.loads(p.read_text())
++name = Path(sys.argv[0]).name
++a = sys.argv[1:]
++s["calls"].append([name, *a])
++out = {}
++if name == "herdr-app":
++    if a[0] == "ls":
++        out = {"spaces": s["spaces"]}
++    else:
++        command, args = a[1], json.loads(a[2])
++        if command == "tab.new":
++            tab = {"id": "tab" + str(len(s["spaces"][0]["tabs"]) + 1), "name": args["name"], "terminals": [{"terminal": "t2"}]}
++            s["spaces"][0]["tabs"].append(tab)
++            out = {"space": "s1", "tab": tab["id"], "terminal": "t2"}
++        elif command == "tab.move":
++            tabs = s["spaces"][0]["tabs"]
++            tab = next(t for t in tabs if t["id"] == args["id"])
++            tabs.remove(tab)
++            tabs.insert(args["index"] - 1, tab)
++        elif command == "tab.rename":
++            next(t for t in s["spaces"][0]["tabs"] if t["id"] == args["id"])["name"] = args["name"]
++elif a[0] == "get":
++    fg = s["foreground"].pop(0) if s["foreground"] else "sh"
++    out = {"address": a[1], "foreground": {"argv": [fg]}}
++elif a[0] == "read":
++    out = s["screen"]
++elif a[0] == "kill":
++    for space in s["spaces"]:
++        for tab in space["tabs"]:
++            tab["terminals"] = [t for t in tab["terminals"] if t["terminal"] != a[1]]
++elif a[0] not in ("interrupt", "send", "keys"):
++    sys.exit(2)
++p.write_text(json.dumps(s))
++sys.stdout.write(out if isinstance(out, str) else json.dumps(out) + "\n")
++'''
++
++
++@pytest.fixture
++def fake_hc(tmp_path, monkeypatch):
++    state = tmp_path / "state.json"
++    state.write_text(json.dumps({
++        "spaces": [{"id": "s1", "name": "work", "tabs": [
++            {"id": "tab1", "name": "lead", "terminals": [{"terminal": "t1"}]},
++            {"id": "tabx", "name": "other", "terminals": [{"terminal": "t9"}]},
++        ]}], "foreground": ["cat", "cat", "sh"], "screen": "teammate output\n", "calls": [],
++    }))
++    binary = tmp_path / "bin"
++    binary.mkdir()
++    for name in ("hc", "herdr-app"):
++        path = binary / name
++        path.write_text(FAKE.replace("#!PYTHON", f"#!{sys.executable}"))
++        path.chmod(0o755)
++    monkeypatch.setenv("PATH", str(binary) + os.pathsep + os.environ["PATH"])
++    monkeypatch.setenv("FAKE_HC_STATE", str(state))
++    monkeypatch.setenv("HC_TERMINAL_ID", "t1")
++    monkeypatch.setenv("HC_TERMINAL_SOCKET", "/fake/hc.sock")
++    monkeypatch.delenv("HERDR_ENV", raising=False)
++    monkeypatch.delenv("HERDR_SOCKET_PATH", raising=False)
++    return lambda: json.loads(state.read_text())
++
++
++def test_hc_launcher(fake_hc, monkeypatch):
++    monkeypatch.setenv("HERDR_CLAUDE_TEAMS_SHIM_DIR", "/fake/shim")
++    captured = []
++    launcher.main([], _exec=lambda f, a, e: captured.append(e))
++    assert captured[0]["TMUX_PANE"] == "%t1"
++    assert captured[0]["TMUX"].startswith("/fake/hc.sock,")
++
++
++def test_tui_socket_wins_when_hc_address_is_also_set(fake_hc, monkeypatch):
++    from herdr_claude_teams.socket_client import call
++
++    with FakeHerdr(leader_pane="wL-1") as fake:
++        monkeypatch.setenv("HERDR_ENV", "1")
++        monkeypatch.setenv("HERDR_SOCKET_PATH", fake.path)
++        assert call("pane.get", {"pane_id": "wL-1"})["pane"]["terminal_id"] == "term_1"
++        assert fake.state.methods() == ["pane.get"]
++        assert fake_hc()["calls"] == []
++
++
++def test_hc_teammate_lifecycle(fake_hc, capsys, monkeypatch):
++    from herdr_claude_teams import ownership, verbs
++
++    monkeypatch.setattr(verbs, "PLACEHOLDER_POLL_SECONDS", 0.001)
++    assert shim.main(["split-window", "-t", "%t1", "-h", "-P", "-F", "#{pane_id}", "cat"]) == 0
++    assert capsys.readouterr().out.strip() == "%t2"
++    state = fake_hc()
++    assert [t["id"] for t in state["spaces"][0]["tabs"]] == ["tab1", "tab3", "tabx"]
++    assert [c for c in state["calls"] if c[:3] == ["herdr-app", "do", "tab.new"]]
++    assert not any(c[1] == "send" for c in state["calls"])
++    assert json.loads((ownership.owned_dir() / "t1.json").read_text()) == ["t2"]
++
++    assert shim.main(["respawn-pane", "-k", "-t", "%t2", "claude --agent-name alpha"]) == 0
++    calls = fake_hc()["calls"]
++    assert [c[1] for c in calls if c[0] == "hc"] == ["interrupt", "get", "get", "get", "send"]
++    assert [c for c in calls if c[:2] == ["hc", "send"]][-1] == ["hc", "send", "t2", "claude --agent-name alpha"]
++
++    assert shim.main(["capture-pane", "-p", "-t", "%t2"]) == 0
++    assert capsys.readouterr().out == "teammate output\n"
++    assert [c for c in fake_hc()["calls"] if c[:2] == ["hc", "read"]][-1] == ["hc", "read", "--lines", "0", "t2"]
++
++    assert shim.main(["kill-pane", "-t", "%t9"]) == 0
++    assert not any(c[:3] == ["hc", "kill", "t9"] for c in fake_hc()["calls"])
++    assert shim.main(["kill-pane", "-t", "%t2"]) == 0
++    assert [c for c in fake_hc()["calls"] if c[:2] == ["hc", "kill"]] == [["hc", "kill", "t2"]]
++    assert json.loads((ownership.owned_dir() / "t1.json").read_text()) == []
