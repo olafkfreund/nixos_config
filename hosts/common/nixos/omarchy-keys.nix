@@ -218,7 +218,6 @@ in
           "hypr.nixi-companion-binds"
           "hypr.microvm-binds"
           "hypr.plugin-browser-binds"
-          "hypr.altscape-binds"
           "hypr.agent-voice-binds"
         ];
 
@@ -234,18 +233,6 @@ in
           {
             key = "SUPER + SHIFT + ESCAPE";
             description = "ai-mirror: stop agent control";
-          }
-          {
-            key = "ALT + TAB";
-            description = "Altscape: next window";
-          }
-          {
-            key = "ALT + SHIFT + TAB";
-            description = "Altscape: previous window";
-          }
-          {
-            key = "SUPER + ALT + SHIFT + W";
-            description = "Altscape settings";
           }
           {
             key = "SUPER + SHIFT + V";
