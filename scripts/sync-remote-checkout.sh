@@ -4,7 +4,7 @@ set -uo pipefail
 say() { printf 'checkout sync (%s): %s\n' "$host" "$1"; }
 
 sync_checkout() {
-  local tree=$1 commit output
+  local tree=$1 expected=${2:-} commit output
   if [[ $host == p620 || $host == "$(hostname)" ]]; then
     say 'local host; skipped'
     return 0
@@ -23,7 +23,7 @@ sync_checkout() {
     return 0
   fi
   if output=$(
-    timeout 120 ssh -o BatchMode=yes -o ConnectTimeout=10 "$host" env GIT_TERMINAL_PROMPT=0 bash -s -- "$commit" <<'REMOTE'
+    timeout 120 ssh -o BatchMode=yes -o ConnectTimeout=10 "$host" env GIT_TERMINAL_PROMPT=0 bash -s -- "$commit" "$expected" <<'REMOTE'
 # Wrapped in a function so bash reads the whole script before running any of it.
 main() {
 set -uo pipefail
@@ -55,6 +55,13 @@ if ! git merge-base --is-ancestor HEAD "$1" 2>/dev/null; then
   exit 0
 fi
 count=$(git rev-list --count "$old..$1" 2>/dev/null) || { printf 'could not sync: commit count failed\n'; exit 1; }
+if [[ -n ${2:-} ]]; then
+  running=$(readlink -f /run/current-system 2>/dev/null) || running=
+  if [[ $running != "$2" ]]; then
+    printf 'target is not running the deployed system; skipped\n'
+    exit 0
+  fi
+fi
 if ! git merge --ff-only --no-overwrite-ignore --no-autostash -q "$1" >/dev/null 2>&1; then
   printf 'could not sync: fast-forward failed\n'
   exit 1
@@ -73,6 +80,12 @@ REMOTE
     fi
   fi
   return 0
+}
+
+# Clean and still on the tree recorded before the command.
+source_unmoved() {
+  local status
+  status=$(git status --porcelain 2>/dev/null) && [[ -z $status && $(git rev-parse 'HEAD^{tree}' 2>/dev/null) == "$tree" ]]
 }
 
 case ${1:-} in
@@ -100,7 +113,20 @@ case ${1:-} in
     fi
     "$@"
     result=$?
-    if ((result != 0)); then
+    if ((result == 4)) && [[ -n $reason ]]; then
+      say "$reason"
+    elif ((result == 4)); then
+      # Activated with a failed unit: sync only if the target runs exactly what the recorded tree evaluates to.
+      if ! source_unmoved; then
+        say 'exit 4; source moved during the command; skipped'
+      elif ! expected=$(nix eval --raw ".#nixosConfigurations.$host.config.system.build.toplevel" 2>/dev/null) || [[ -z $expected ]]; then
+        say 'exit 4; could not evaluate the deployed system; skipped'
+      elif ! source_unmoved; then
+        say 'exit 4; source moved during the command; skipped'
+      else
+        sync_checkout "$tree" "$expected"
+      fi
+    elif ((result != 0)); then
       say 'command failed; skipped'
     elif [[ -z $reason && -n $(git status --porcelain 2>/dev/null) ]]; then
       # An edit while the command ran may have been deployed but is not in the recorded tree.
