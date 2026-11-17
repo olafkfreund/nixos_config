@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2985
 author: olafkfreund
 ---
@@ -101,3 +101,7 @@ Verdict for this run: `still-parked`. Do not write a spec or plan for implementa
    and razer, which needs two instances joined in one crew, or are separate URLs acceptable? Panes of
    other hc machines are not mirrored by the adapter either way. The answer decides whether merely
    starting a second instance satisfies #2985.
+
+## Decision
+
+Approved by the owner on 2026-11-17, with the recommendation given for each open question above.
