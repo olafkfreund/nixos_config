@@ -7,6 +7,7 @@
 , libnotify
 , coreutils
 , bash
+, systemd
 }:
 # Omateams (Divanyx/omateams): Microsoft Teams web in an Omarchy-themed Qt
 # window, plus its shell plugin. Upstream's install.sh compiles the host into
@@ -64,10 +65,30 @@ stdenv.mkDerivation rec {
 
   qtWrapperArgs = [ "--prefix" "PATH" ":" (lib.makeBinPath [ hyprland libnotify coreutils bash ]) ];
 
+  # QtWebEngine runs the GPU thread inside this process; after a screen share
+  # it can leak there without limit (180 GiB on p620, 2026-11-17), and the
+  # app's own guard only warns once. A scope with a hard cap lets the kernel
+  # end omateams instead of the machine running out of memory.
+  postFixup = ''
+    mv $out/bin/omateams $out/bin/omateams-unscoped
+    cat > $out/bin/omateams <<EOF
+    #!${bash}/bin/bash
+    if [ -S "\''${XDG_RUNTIME_DIR:-/run/user/\$(id -u)}/bus" ]; then
+      exec ${systemd}/bin/systemd-run --user --scope --collect --quiet \\
+        -p MemoryHigh=12G -p MemoryMax=16G -p MemorySwapMax=0 \\
+        -- $out/bin/omateams-unscoped "\$@"
+    fi
+    exec $out/bin/omateams-unscoped "\$@"
+    EOF
+    chmod +x $out/bin/omateams
+  '';
+
   doInstallCheck = true;
   installCheckPhase = ''
     f=$out/share/omateams/plugin/ui/Service.qml
     grep -qF "$out/bin/omateams" $f
+    grep -qF 'MemoryMax=16G' $out/bin/omateams
+    ${bash}/bin/bash -n $out/bin/omateams
     grep -qF 'Component.onCompleted: checkInstalled()' $f
     test ! -e $out/share/omateams/plugin/install.sh
     # The host restarts itself whenever the running version differs from the manifest's.
