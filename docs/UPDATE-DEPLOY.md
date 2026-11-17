@@ -147,9 +147,11 @@ It is skipped, with a one-line reason, when:
 - the target checkout is not on `main`, is dirty, or has local commits
 - the target is p620 or the deploy is to the same host
 
-The sync never fails a deploy. It runs only when the activation exits 0, so a deploy that ends in exit 4 (a unit
-that failed to restart, common on p510) leaves the checkout alone. To do it by hand on the remote host, with the
-commit that was deployed:
+The sync never fails a deploy. It runs when the activation exits 0, and after exit 4 (activated, but a unit
+failed to restart, common on p510) only when the target runs exactly the system this deploy built: the wrapper
+evaluates the deployed tree and the target compares it with `/run/current-system` just before the fast-forward.
+The deploy still reports 4. Any other failure leaves the checkout alone. To sync by hand on the remote host, with
+the commit that was deployed:
 
 ```bash
 git -C ~/.config/nixos fetch origin
