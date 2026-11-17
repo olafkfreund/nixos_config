@@ -165,7 +165,7 @@ Sequence, all in the mod, in this order:
    - Unrelated output that changes the screen without either signal is not confirmation.
    - Ambiguous means not confirmed: the drafts are kept.
 6. Confirmed: set the `sent` shared key (the panel clears that scope's drafts), restore the saved clipboard text,
-   toast "Pasted into <agent>; press Enter there to submit".
+   toast `Pasted into <agent>; press Enter there to submit`.
    Not confirmed: drafts are kept, the review stays on the clipboard, toast "Could not confirm the paste; your
    comments are kept; the review is on the clipboard". The mod never retries by itself.
 
