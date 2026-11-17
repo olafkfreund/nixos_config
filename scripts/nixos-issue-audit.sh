@@ -12,20 +12,26 @@
 # Usage:
 #   scripts/nixos-issue-audit.sh                # report → stdout, findings → ./findings.jsonl
 #   scripts/nixos-issue-audit.sh --out DIR      # report → DIR/report.md, findings → DIR/findings.jsonl
+#   scripts/nixos-issue-audit.sh --fixture DIR  # read issue feeds and closure data from DIR
 #
 # Requires: gh (authed), jq, nix (for cross-check), curl.
 
 set -euo pipefail
 
 OUT_DIR=""
+FIXTURE=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --out)
       OUT_DIR="$2"
       shift 2
       ;;
+    --fixture)
+      FIXTURE="$2"
+      shift 2
+      ;;
     -h | --help)
-      sed -n '2,16p' "$0"
+      sed -n '2,17p' "$0"
       exit 0
       ;;
     *)
@@ -55,7 +61,11 @@ REPORT_BUF=$(mktemp)
 NIXPKGS_NODE=$(jq -r '.nodes.root.inputs.nixpkgs' flake.lock)
 SINCE=$(jq -r --arg n "$NIXPKGS_NODE" '.nodes[$n].locked.lastModified | todate' flake.lock)
 OUR_REV=$(jq -r --arg n "$NIXPKGS_NODE" '.nodes[$n].locked.rev' flake.lock)
-RELEASE=$(nix eval --raw .#nixosConfigurations.p620.config.system.nixos.release 2>/dev/null || echo "unknown")
+if [ -n "$FIXTURE" ]; then
+  RELEASE=fixture
+else
+  RELEASE=$(nix eval --raw .#nixosConfigurations.p620.config.system.nixos.release 2>/dev/null || echo "unknown")
+fi
 TODAY=$(date -u +%Y-%m-%d)
 
 log "cutoff: $SINCE  rev: ${OUR_REV:0:10}  release: $RELEASE"
@@ -63,13 +73,18 @@ log "cutoff: $SINCE  rev: ${OUR_REV:0:10}  release: $RELEASE"
 # 2. Pull issue feeds -------------------------------------------------------
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP" "$REPORT_BUF"' EXIT
-log "fetching open + closed nixpkgs issues since cutoff …"
-gh api --paginate "repos/NixOS/nixpkgs/issues?state=open&since=$SINCE&per_page=100" \
-  --jq '.[] | select(.pull_request == null) | {n: .number, t: .title, labels: [.labels[].name], created: .created_at, body_preview: (.body // "" | .[0:400])}' \
-  >"$TMP/open.jsonl"
-gh api --paginate "repos/NixOS/nixpkgs/issues?state=closed&since=$SINCE&per_page=100" \
-  --jq '.[] | select(.pull_request == null) | select(.closed_at > "'"$SINCE"'") | {n: .number, t: .title, labels: [.labels[].name], closed: .closed_at, body_preview: (.body // "" | .[0:400])}' \
-  >"$TMP/closed.jsonl"
+if [ -n "$FIXTURE" ]; then
+  cp "$FIXTURE/open.jsonl" "$TMP/open.jsonl"
+  cp "$FIXTURE/closed.jsonl" "$TMP/closed.jsonl"
+else
+  log "fetching open + closed nixpkgs issues since cutoff …"
+  gh api --paginate "repos/NixOS/nixpkgs/issues?state=open&since=$SINCE&per_page=100" \
+    --jq '.[] | select(.pull_request == null) | {n: .number, t: .title, labels: [.labels[].name], created: .created_at, body_preview: (.body // "" | .[0:400])}' \
+    >"$TMP/open.jsonl"
+  gh api --paginate "repos/NixOS/nixpkgs/issues?state=closed&since=$SINCE&per_page=100" \
+    --jq '.[] | select(.pull_request == null) | select(.closed_at > "'"$SINCE"'") | {n: .number, t: .title, labels: [.labels[].name], closed: .closed_at, body_preview: (.body // "" | .[0:400])}' \
+    >"$TMP/closed.jsonl"
+fi
 
 OPEN_TOTAL=$(wc -l <"$TMP/open.jsonl")
 CLOSED_TOTAL=$(wc -l <"$TMP/closed.jsonl")
@@ -88,6 +103,155 @@ jq -c --arg re "$REGEX" 'select((.t | test($re; "i")) or (.body_preview | test($
 OPEN_MATCHES=$(wc -l <"$TMP/matches-open.jsonl")
 CLOSED_MATCHES=$(wc -l <"$TMP/matches-closed.jsonl")
 log "matches: open=$OPEN_MATCHES  closed=$CLOSED_MATCHES"
+
+INV_OK=0
+INV_COUNT=0
+AUDIT_START=$SECONDS
+
+token_for_title() {
+  local title="${1#nixos/}"
+  local token
+  if [[ "$title" == *:* ]]; then
+    token="${title%%:*}"
+  else
+    token="${title%%[[:space:]]*}"
+  fi
+  case "${token,,}" in
+    home-manager | nixos | nix | systemd | treewide | modules | services | programs) return 1 ;;
+  esac
+  [[ "$token" =~ ^[A-Za-z0-9_.+-]+$ ]] || return 1
+  printf '%s\n' "$token"
+}
+
+family_of() {
+  sed -E 's/-[0-9].*$//' <<<"$1"
+}
+
+build_inventory() {
+  local started=$SECONDS host host_started drv remaining reason=""
+  : >"$TMP/names.txt"
+  if [ -n "$FIXTURE" ]; then
+    cp "$FIXTURE/names.txt" "$TMP/names.txt"
+    cp "$FIXTURE/eval-inputs.txt" "$TMP/eval-inputs.txt"
+    if [ "$(cat "$FIXTURE/inventory-status")" = ok ]; then INV_OK=1; fi
+  else
+    if ! jq -r '.nodes.root.inputs | keys[] | ascii_downcase' flake.lock >"$TMP/eval-inputs.txt"; then
+      reason="flake input names unavailable"
+    elif [ ! -s "$TMP/eval-inputs.txt" ]; then
+      reason="flake input names empty"
+    fi
+    for host in p620 razer p510; do
+      [ -z "$reason" ] || break
+      host_started=$SECONDS
+      remaining=$((600 - (SECONDS - AUDIT_START)))
+      if [ "$remaining" -le 0 ]; then
+        reason="600 s budget exhausted"
+        break
+      fi
+      if ! drv=$(timeout "$((remaining < 240 ? remaining : 240))" nix eval --raw ".#nixosConfigurations.${host}.config.system.build.toplevel.drvPath" 2>/dev/null); then
+        reason="$host evaluation failed or timed out"
+        break
+      fi
+      remaining=$((600 - (SECONDS - AUDIT_START)))
+      if [ "$remaining" -le 0 ]; then
+        reason="600 s budget exhausted"
+        break
+      fi
+      if [ "$((240 - (SECONDS - host_started)))" -lt "$remaining" ]; then
+        remaining=$((240 - (SECONDS - host_started)))
+      fi
+      if [ "$remaining" -le 0 ]; then
+        reason="$host 240 s budget exhausted"
+        break
+      fi
+      if ! timeout "$remaining" nix-store -qR "$drv" >"$TMP/$host.paths" 2>/dev/null; then
+        reason="$host closure query failed or timed out"
+        break
+      fi
+      if [ "$(wc -l <"$TMP/$host.paths")" -lt 1000 ]; then
+        reason="$host closure has fewer than 1000 lines"
+        break
+      fi
+      sed -E 's@^.*/[a-z0-9]{32}-@@; s/\.drv$//' "$TMP/$host.paths" >>"$TMP/names.txt"
+    done
+    if [ -z "$reason" ]; then INV_OK=1; fi
+  fi
+  LC_ALL=C sort -u "$TMP/names.txt" -o "$TMP/names.txt"
+  INV_COUNT=$(wc -l <"$TMP/names.txt")
+  if [ "$INV_OK" -eq 0 ]; then log "inventory unavailable: ${reason:-fixture status incomplete}"; fi
+  log "inventory: $INV_COUNT names in $((SECONDS - started)) s"
+}
+
+resolve_tokens() {
+  local row title token tokens remaining result
+  : >"$TMP/tokens.txt"
+  while IFS= read -r row; do
+    title=$(jq -r '.t' <<<"$row")
+    if token=$(token_for_title "$title"); then printf '%s\n' "$token" >>"$TMP/tokens.txt"; fi
+  done < <(cat "$TMP/matches-open.jsonl" "$TMP/matches-closed.jsonl")
+  LC_ALL=C sort -u "$TMP/tokens.txt" -o "$TMP/tokens.txt"
+  if [ -n "$FIXTURE" ]; then
+    cp "$FIXTURE/resolved.json" "$TMP/resolved.json"
+    return
+  fi
+  printf '{}\n' >"$TMP/resolved.json"
+  [ -s "$TMP/tokens.txt" ] || return
+  remaining=$((600 - (SECONDS - AUDIT_START)))
+  if [ "$remaining" -le 0 ]; then
+    log "resolver unavailable: 600 s budget exhausted"
+    return
+  fi
+  tokens=$(jq -Rsc 'split("\n") | map(select(length > 0))' "$TMP/tokens.txt")
+  if ! result=$(timeout "$remaining" nix eval --json .#nixosConfigurations.p620.pkgs --apply "pkgs: let
+    lib = pkgs.lib;
+    tokens = builtins.fromJSON ''$tokens'';
+    lookup = token: let
+      attempt = key: builtins.tryEval (let p = lib.attrByPath (lib.splitString \".\" key) null pkgs;
+        in if lib.isDerivation p then p.name else null);
+      original = attempt token;
+      lower = attempt (lib.toLower token);
+    in if original.success && original.value != null then original.value
+       else if lower.success then lower.value else null;
+  in builtins.listToAttrs (map (token: { name = token; value = lookup token; }) tokens)" 2>/dev/null); then
+    log "resolver unavailable: eval failed, timed out, or returned empty output"
+    return
+  fi
+  if [ -z "$result" ]; then
+    log "resolver unavailable: empty output"
+    return
+  fi
+  if jq -e 'type == "object"' <<<"$result" >/dev/null 2>&1; then
+    printf '%s\n' "$result" >"$TMP/resolved.json"
+  else
+    log "resolver unavailable: invalid output"
+  fi
+}
+
+if [ $((OPEN_MATCHES + CLOSED_MATCHES)) -gt 0 ]; then
+  build_inventory
+  resolve_tokens
+fi
+
+closure_absent() {
+  local token name family input
+  [ "$INV_OK" -eq 1 ] || return 1
+  token=$(token_for_title "$1") || return 1
+  name=$(jq -er --arg token "$token" '.[$token] | select(type == "string" and length > 0)' "$TMP/resolved.json" 2>/dev/null) || return 1
+  family=$(family_of "$name")
+  while IFS= read -r input; do
+    [ -n "$input" ] || return 1
+    input="${input,,}"
+    if [[ "${token,,}" == "$input"* || "$input" == "${token,,}"* || "${family,,}" == "$input"* || "$input" == "${family,,}"* ]]; then
+      return 1
+    fi
+  done <"$TMP/eval-inputs.txt"
+  if sed -E 's/-[0-9].*$//' "$TMP/names.txt" \
+    | awk -v family="$family" '$0 == family || index($0, family "-") == 1 { found = 1; exit } END { exit !found }'; then
+    return 1
+  fi
+  RESOLVED_NAME="$name"
+  return 0
+}
 
 # 4. Helpers ----------------------------------------------------------------
 # Effective-enable check across our active hosts. Echoes true/false.
@@ -196,6 +360,10 @@ classify_one() {
     sev=GREEN
     why="Upstream marked stale."
     rec="No action."
+  elif closure_absent "$t"; then
+    sev=GREEN
+    why="Not in any host closure: \`$RESOLVED_NAME\` absent from the p620, razer and p510 derivation closures."
+    rec="No action."
   else
     sev=WATCH
     why="Inventory keyword matched but specific exposure not auto-verified."
@@ -255,6 +423,11 @@ emit_section() {
 }
 
 SHORT_REV="${OUR_REV:0:10}"
+if [ "$INV_OK" -eq 1 ]; then
+  INVENTORY_HEADER="Closure inventory: $INV_COUNT names"
+else
+  INVENTORY_HEADER="closure inventory unavailable, no closure skips"
+fi
 cat >"$REPORT_BUF" <<EOF
 # NixOS Issue Audit — $TODAY
 
@@ -264,6 +437,7 @@ cat >"$REPORT_BUF" <<EOF
 - Hosts: p620, razer, p510
 - Open issues scanned: $OPEN_TOTAL · closed issues scanned: $CLOSED_TOTAL
 - Matches after inventory regex: open=$OPEN_MATCHES closed=$CLOSED_MATCHES
+- $INVENTORY_HEADER
 
 ## Summary
 
