@@ -97,7 +97,8 @@ wrapper starts it and stops it on exit.
   and `small_model` are both `ollama/qwen3.8:27b`.
 - `experimental.policies`: deny `provider.use` for `*`, then allow `ollama`.
 - MCP server: `private`, command
-  `[ "${cfg.package}/bin/llm-index" "mcp" "--tier" "private" "--config" "${config.home.homeDirectory}/.config/llm-index/config.toml" ]`.
+  `[ "${cfg.package}/bin/llm-index" "mcp" "--tier" "private" "--config" <cfg> ]`,
+  where `<cfg>` is `"${config.home.homeDirectory}/.config/llm-index/config.toml"`.
   That is `/home/olafkfreund/.config/llm-index/config.toml`.
 - `permission`: `"*": "deny"`, then allow exactly `private_search`,
   `private_get`, `private_recent` and `private_status`.
