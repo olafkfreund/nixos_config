@@ -411,12 +411,27 @@ To undo it on a host: remove `~/.config/herdr-app-sync/source` and close the app
 no backup, copy the backups back (oldest first), delete `manifest.json`, and start the app. `ctrl+alt+shift+esc`
 always returns the app to its default layout and keys.
 
+### Omarchy bar widget
+
+The `nixarchy.herdr` bar widget (nixarchy-herdr 1.1.0, pinned through nixarchy) shows herdr-app agents next to
+classic Herdr sessions:
+
+- An app agent is a live hc terminal that reports a status. Each herdr-app space is one row; agents on other
+  machines show in the menu only, never in the bar counts.
+- On an app row, Enter focuses the agent (opening the window if needed), `a` sends it a prompt, `i` interrupts it
+  and `K` ends it after a confirmation that names every sub-agent ending with it.
+- "Done" follows herdr-app's own seen-turn label, so a finished turn you have not looked at stays visible with the
+  window closed. An error while the window is closed counts as blocked.
+- When herdr-core cannot be reached the rows read "not live" and the badge carries a `!` mark, while classic
+  session counts stay visible. A failed list is retried a few times, then waits for the next event.
+
+New bar code loads after `omarchy-restart-shell` (a plugin reload keeps the old QML types) or a logout and login.
+
 ### Known gaps
 
 | Gap | Issue |
 | --- | --- |
 | hintr's run-a-listed-key: use the palette (`ctrl-shift-p`), which lists and runs commands with their keys; mod commands (lazygit, zoetrope) are not in it | #2982 (won't fix) |
-| Omarchy `nixarchy.herdr` widget still reads the TUI | #2983 |
 | Collie is not wired to hc | #2985 |
 | lazygit opens as a tab, not a float | #2986 |
 | herdr-team's provider-error scan can match its own source on screen | #2988 |
