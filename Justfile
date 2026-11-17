@@ -164,6 +164,7 @@ boot-space-all:
 test-guards:
     @python3 ./scripts/test-p510-deploy-guard.py
     @python3 ./scripts/test-bus-guard.py
+    @bash ./scripts/test-nixos-issue-audit.sh
 
 # Check for available updates
 [group('update')]
