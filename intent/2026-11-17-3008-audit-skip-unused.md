@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3008
 author: olafkfreund
 ---
@@ -109,3 +109,7 @@ tailscale 587975, mutter 587731) stay on Watch.
    and a separate issue for the existing checks.
 8. Does this task only filter existing candidates, or also replace regex candidate selection?
    Recommend filter only.
+
+## Decision
+
+Approved by the owner on 2026-11-17, with the recommendation given for each open question above.
