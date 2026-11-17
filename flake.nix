@@ -71,7 +71,7 @@
       inputs.nixarchy-voice.inputs.nixpkgs.follows = "nixpkgs";
       inputs.nixarchy-voice.inputs.ai-mirror.follows = "nixarchy/ai-mirror";
       # #2732 slow-login fix, #2880 live editor themes, #2938 Omarchroma 4.1.0, nixarchy-omatheme#60 starship re-render, nixarchy-omatheme#66 Icons; remove once nixarchy pins this commit or later.
-      inputs.nixarchy-omatheme.url = "github:olafkfreund/nixarchy-omatheme/a702122343f8937b91ab63f971538bc39ae76a06";
+      inputs.nixarchy-omatheme.url = "github:olafkfreund/nixarchy-omatheme/999579d7519901b0bd42fd1f6d3f2656ff558780";
       inputs.nixarchy-omatheme.inputs.nixpkgs.follows = "nixpkgs";
       inputs.nixarchy-omatheme.inputs.home-manager.follows = "home-manager";
 
