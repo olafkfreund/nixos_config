@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2984
 spec: spec/2026-11-17-2984-herdr-app-window-title.md
 coders:
