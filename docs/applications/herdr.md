@@ -353,7 +353,7 @@ so nothing there is a store symlink.
 | --- | --- | --- |
 | layout `freund` | clone of `main` 0.1.16 | the TUI layout |
 | `freund-agents` | clone of `agents` + a controls popup (⋯ or right-click) | herdr-radar's agent view |
-| `freund-tabs` | clone of `tabs` + a GitLab button | — |
+| `freund-tabs` | clone of `tabs` + a GitLab button + the window title | — |
 | `inbox` | ours: GitHub + gitlab.com issues and PRs/MRs, assigned, authored or review-requested | GitHub Start |
 | `issues` | jankeesvw/herdr-issues, pinned | GitHub Start, per repo |
 | `gitlab` | rem-aster/herdr-gitlab, pinned | — |
@@ -361,6 +361,9 @@ so nothing there is a store symlink.
 | `splits` | ours: ctrl/alt+hjkl through Neovim | herdr-splits |
 | settings | `theme = "omarchy"` (Omarchy keeps `themes/omarchy.json` current), sounds on | `[theme] name = "terminal"` |
 | hc config | `history_mb = 48`, `restore_screen = true`, per-shell systemd scope | scrollback, pane history, #2959 |
+
+The window title is `<machine or host>: <space>`, set by `freund-tabs`. For a remote space it shows the machine
+name, not the remote's hostname. In other layouts it stays "Herdr".
 
 `argv` launches (menu agents, `tab.new --argv`, `terminal.open`, splits) skip `hcShell` and would share one
 `hc-hold-*` unit, so a bashrc guard (`home/development/hc-argv-guard.bash`) re-execs them into their own
@@ -398,7 +401,6 @@ always returns the app to its default layout and keys.
 | reviewr's send line comments to the agent | #2981 |
 | hintr's run-a-listed-key: use the palette (`ctrl-shift-p`), which lists and runs commands with their keys; mod commands (lazygit, zoetrope) are not in it | #2982 (won't fix) |
 | Omarchy `nixarchy.herdr` widget still reads the TUI | #2983 |
-| window title has no host or workspace | #2984 |
 | Collie is not wired to hc | #2985 |
 | lazygit opens as a tab, not a float | #2986 |
 | herdr-team's provider-error scan can match its own source on screen | #2988 |
