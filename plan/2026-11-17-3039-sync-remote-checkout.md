@@ -28,7 +28,7 @@ Branch `fix/3039-sync-remote-checkout`, worktree `~/.config/nixos-shelfish`.
 - `sync HOST TREE`: skip when HOST is `p620` or `$(hostname)`. `git fetch -q origin main`; newest commit in
   `git log --first-parent -n 500 --format='%H %T' origin/main` whose tree equals TREE; none → skip. One call
   `ssh HOST bash -s -- COMMIT` with a fixed stdin script, in `~/.config/nixos`: not on branch `main` → skip;
-  `git status --porcelain` not empty → skip; `git fetch -q origin`; HEAD = COMMIT → "already current";
+  `git status --porcelain --ignored=no` not empty → skip; `git fetch -q origin`; HEAD = COMMIT → "already current";
   `git merge-base --is-ancestor HEAD COMMIT` fails → skip; else
   `git merge --ff-only --no-overwrite-ignore --no-autostash -q COMMIT` → "fast-forwarded OLD..NEW (N commits)".
   SSH or remote failure → "could not sync: …". Always exit 0. No reset, checkout, stash or rebase.
@@ -47,18 +47,22 @@ Branch `fix/3039-sync-remote-checkout`, worktree `~/.config/nixos-shelfish`.
   - The script as decided above. The remote part is a quoted heredoc passed on stdin (`ssh "$HOST" bash -s --
     "$commit" <<'REMOTE'`); it uses only `$1` and never interpolates local values into the remote text.
   - The test builds, in a temp dir: a bare `origin`, a deploying clone `src` and a target clone at
-    `$tmp/home/.config/nixos`; a fake `ssh` first on `PATH` that drops the host argument and runs
-    `HOME=$tmp/home bash -s -- …` with stdin; a `hostname` stub returning `testhost`. Cases (each asserts the target
+    `$tmp/home/.config/nixos`; a fake `ssh` first on `PATH` that removes only the HOST argument and runs the
+    remaining argv as is (`HOME=$tmp/home "$@"`, already `bash -s -- COMMIT`) with stdin; a `hostname` stub
+    returning `testhost`. Cases (each asserts the target
     HEAD and the printed line): `around` with a failing COMMAND → its exit code, no ssh (fake ssh writes a marker);
-    `around` on clean `main` with `origin/main` advanced past the deployed commit → target at the deployed commit,
-    not past it; dirty source; feature branch; feature branch whose tree equals a `main` commit → skipped;
+    `around` on clean `main` whose COMMAND itself commits to the source and pushes a newer `origin/main` →
+    target at the tree recorded before COMMAND, not the new HEAD and not past it; dirty source; feature branch;
+    feature branch whose tree equals a `main` commit → skipped;
     `sync` with a squash-merge commit's tree → target at the squash commit; `main` moved before the squash (tree
     not on main) → skipped; dirty target; target on another branch; target with a local commit → skipped and
     unchanged; ignored file in the target at a path the new commit tracks (add the path to the target's
-    `.git/info/exclude`) → not overwritten, line says it could not sync; fake ssh exiting 255 → exit 0;
+    `.git/info/exclude`) → not overwritten, line says it could not sync; `merge.autostash=true` in the target
+    plus a fake `git` wrapper that edits a tracked file after the cleanliness check → no stash created, edit
+    intact, merge refused; fake ssh exiting 255 → exit 0;
     HOST `p620` and HOST `testhost` → no ssh.
   Check: `bash scripts/test-sync-remote-checkout.sh` passes; `shellcheck` on both files is clean; break one case on
-  purpose (drop `--no-overwrite-ignore`) and see the test fail, then restore.
+  purpose (drop `--no-overwrite-ignore`, then `--no-autostash`) and see the test fail each time, then restore.
   Traps: bus guard matches command text (deploy/switch words): write prose and test data without them where
   possible, and run checks from files; `git` in the test needs `user.name`/`user.email` set per repo; no network.
 
@@ -68,10 +72,13 @@ Branch `fix/3039-sync-remote-checkout`, worktree `~/.config/nixos-shelfish`.
     `razer`/`p510` or `{{HOST}}`), keeping every argument. Line 460 (self-deploy) is not wrapped.
   - Line 391 (`quick-deploy` no-change branch): after the echo, `./scripts/sync-remote-checkout.sh around {{ HOST }}
     -- true; \`.
-  - Line 164 (`test-guards`): add `@bash ./scripts/test-sync-remote-checkout.sh` and
-    `@bash ./modules/programs/claude-coder-guard.test.sh`.
-  Check: `just --list` works; `just --dry-run razer` (run from a file, the bus guard blocks that text) shows the
-  wrapped command; `just test-guards` passes (after step 4).
+  - Line 164 (`test-guards`): add `@bash ./scripts/test-sync-remote-checkout.sh`,
+    `@bash ./scripts/test-nhs-checkout-sync.sh` (from step 3) and `@bash ./modules/programs/claude-coder-guard.test.sh`.
+  Check: `just --list` and `just check-syntax` work. From a file (the bus guard blocks that text), `just --dry-run`
+  for `razer`, `p510`, `deploy-local-build x`, `deploy-via-p620 x` and `quick-deploy x`, with the output grepped:
+  each remote activation is wrapped with the right host, every original argument is still there, the self-deploy
+  branch is not wrapped, and the no-change branch has the `around … -- true` call. `just test-guards` passes
+  (after step 4).
   Traps: Justfile recipe lines with `\` continuations need the `;` before `\`; keep the `# Guarded by name
   (#2951)` comments; the bus/p510 guards must still fire on `just razer`/`just p510` (they match recipe names).
 
@@ -82,11 +89,21 @@ Branch `fix/3039-sync-remote-checkout`, worktree `~/.config/nixos-shelfish`.
   - Line 675 (remote activation): immediately before the `if ! nh_switch_or_boot … --target-host` line,
     `DEPLOYED_TREE=$(git rev-parse 'HEAD^{tree}')`.
   - Step 12 (lines 745–768) and the no-PR case: after the `if [ -n "${PR_URL:-}" ]` block, sync when
-    `MODE=remote` and either there was no PR or a new flag `MERGED=1` (set right after the successful
-    `ok "lock landed …"` at line 767) is set: `… sync "$HOST" "$DEPLOYED_TREE" || true`. The merge-failure branch
-    never sets `MERGED`.
-  Check: `bash -n` and shellcheck clean; read every `exit` in the file and confirm none of rollback,
-  `--no-deploy`, merge failure or local-mode paths reach a sync call; step 6 live check.
+    `MODE=remote` and either there was no PR or `MERGED=1`: `… sync "$HOST" "$DEPLOYED_TREE" || true`, skipped
+    when `DEPLOYED_TREE` is empty. Initialise `MERGED=0` and `DEPLOYED_TREE=""` explicitly near the other state
+    variables (an inherited value must not count); set `MERGED=1` only right after the successful
+    `ok "lock landed …"` at line 767. The merge-failure branch never sets it.
+  - The sync command is `"${NHS_SYNC_CMD:-$REPO_ROOT/scripts/sync-remote-checkout.sh}"`, so a test can record calls.
+  - `scripts/test-nhs-checkout-sync.sh` (new, run by `just test-guards`): runs the script in a temp clone with stub
+    `nh`, `gh`, `ssh`, `nix`, `nixos-rebuild` and health check on `PATH` and `NHS_SYNC_CMD` pointing at a recorder.
+    Paths: remote no-PR success → one `sync HOST <tree>` with the pre-activation tree; lock change with merge and
+    pull success → one call with the pre-activation tree; nothing-to-do → one call with HEAD's tree; boot-mode
+    success → one call; activation failure and health-check failure (rollback) → no call; both `--no-deploy` exits
+    → no call; local mode → no call; merge failure → no call; pull failure → no call; recorder exiting 1 → the
+    script's own exit code unchanged. If stubbing a path proves impractical, report it; the lead decides and
+    updates this plan.
+  Check: `bash -n` and shellcheck clean; `bash scripts/test-nhs-checkout-sync.sh` passes; break the `MERGED`
+  condition on purpose and see it fail, then restore.
   Traps: `set -euo pipefail` in this script: guard every new command with `|| true`; `DEPLOYED_TREE` must be set
   on every remote path that reaches step 12 (default it to empty at the top and skip the sync when empty).
 
@@ -112,7 +129,7 @@ Branch `fix/3039-sync-remote-checkout`, worktree `~/.config/nixos-shelfish`.
 
 ## Tests
 
-- `just test-guards` (now also the sync and coder-guard suites).
+- `just test-guards` (now also the sync, nhs-sync and coder-guard suites); `just check-syntax`.
 - `bash -n` and shellcheck on the changed scripts; `just test-host p620`.
 - Step 6's live checks on razer.
 
