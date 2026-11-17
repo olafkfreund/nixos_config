@@ -46,6 +46,14 @@ let
     done
     exec ${paneShell} "$@"
   '';
+  hcArgvGuard = pkgs.runCommand "hc-argv-guard" { } ''
+    bash -n ${./hc-argv-guard.bash}
+    ${lib.getExe pkgs.shellcheck-minimal} -s bash ${./hc-argv-guard.bash}
+    ${lib.getExe pkgs.shellcheck-minimal} ${./herdr-argv-guard-test.sh}
+    PATH=${lib.makeBinPath [ pkgs.bash pkgs.coreutils pkgs.diffutils pkgs.gnugrep pkgs.gnused pkgs.python3 ]} \
+      bash ${./herdr-argv-guard-test.sh} ${./hc-argv-guard.bash} </dev/null
+    substitute ${./hc-argv-guard.bash} $out --replace-fail @hcShell@ ${hcShell}
+  '';
   claudeLauncher = ''
     claude() {
       # Inside the TUI, or a herdr-app terminal (hc backend, #2978).
@@ -100,7 +108,10 @@ in
     };
 
     # Login shell and herdr panes are bash; zsh gets the same function.
-    programs.bash.initExtra = claudeLauncher;
+    programs.bash.initExtra = lib.mkMerge [
+      claudeLauncher
+      (lib.mkIf cfg.enable (lib.mkOrder 50 "source ${hcArgvGuard}"))
+    ];
     programs.zsh.initContent = claudeLauncher;
 
     # herdr-core (hc), the runtime behind herdr-app. hc only reads this file.

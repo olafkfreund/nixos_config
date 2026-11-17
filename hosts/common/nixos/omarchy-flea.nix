@@ -2,7 +2,7 @@
 # (upstream's prebuilt binaries in an FHS runtime). The NixOS module registers Flea's
 # portal file chooser backend and its FileManager1 D-Bus service, and turns on
 # gvfs/udisks2/usbmuxd (mkDefault). The Home Manager part makes Flea the folder
-# default, the portal file picker and the Super+Shift+F / Super+Alt+Shift+F app.
+# default and the Super+Shift+F / Super+Alt+Shift+F app.
 #
 # One step per machine that a rebuild cannot do, because the file is user-owned
 # (same caveat as omarchy-ai-mirror.nix):
@@ -35,16 +35,17 @@
     programs.flea = {
       enable = true;
       defaultFileManager.enable = true;
-      filePicker = {
-        enable = true;
-        # The lines the mutable hyprland-portals.conf held before Flea took the file over.
-        extraConfig = {
-          default = "hyprland;gtk";
-          "org.freedesktop.impl.portal.Secret" = "gnome-keyring";
-        };
-      };
+      # Portal file picker: the GTK (GNOME) dialog, as before Flea. Owner's choice after screen sharing
+      # broke with Flea as the picker. xdg-desktop-portal-gnome serves only Settings outside GNOME, so gtk.
+      filePicker.enable = false;
       hyprland.bindings.enable = true;
     };
+    xdg.configFile."xdg-desktop-portal/hyprland-portals.conf".text = ''
+      [preferred]
+      default=hyprland;gtk
+      org.freedesktop.impl.portal.FileChooser=gtk
+      org.freedesktop.impl.portal.Secret=gnome-keyring
+    '';
     # home/desktop/gnome/default.nix sets Nautilus at normal priority, and mimeApps
     # lists merge, so the result would be both, in an unspecified order.
     xdg.mimeApps.defaultApplications."inode/directory" = lib.mkForce [ "com.thisisgm.flea.desktop" ];
