@@ -361,6 +361,9 @@ let
     # this is an assertion about the user rather than about the agent, and why
     # a guard with no door is the worse design.
     case "$cmd" in *P510_DEPLOY_APPROVED=1*) exit 0 ;; esac
+    PATH=${lib.makeBinPath [ pkgs.gnused pkgs.gawk pkgs.coreutils ]}:$PATH
+    . ${./claude-guard-prepare.sh}
+    checked="$(printf '%s' "$cmd" | guard_prepare)" || { echo "BLOCKED: guard could not check this command (guard_prepare failed)." >&2; exit 2; }
 
     # No \b adjacent to the alternation group: GNU grep -E silently fails to
     # match `\b(switch|boot|test)\b[^|;]*\bp510\b` against
@@ -369,13 +372,14 @@ let
     just='just([[:space:]]+(-f|--justfile|-d|--working-directory)[[:space:]]+[^[:space:]]+|[[:space:]]+-[^[:space:]]+|[[:space:]]+[A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*)*[[:space:]]+'
     end='([[:space:];|&)]|$)'
     deploy_verb="nixos-rebuild[[:space:]]+[^|;]*(switch|boot|test)|nh[[:space:]]+os[[:space:]]+(switch|boot|test)|(^|[[:space:]])nhs([[:space:]]|$)|$just[a-z-]*deploy"
+    deploy_verb="$deploy_verb"'|(^|[[:space:]/])update-commit-deploy\.sh([[:space:]]|$)'
     # Also p510-only recipes that change it without "deploy" in the name.
     p510_recipe="$just(p510|p510-clear-sessions)$end|$just(boot-space-clean|fix-agenix-remote)[[:space:]]+[^[:space:]]*p510"
     # Running on p510 itself, a local switch names no host (Codex review, #2951).
     if [ "$(cat /proc/sys/kernel/hostname)" = p510 ]; then
       p510_recipe="$p510_recipe|$just(update|deploy|cleanup|gc|boot-space-clean)$end|$deploy_verb"
     fi
-    if printf '%s' "$cmd" | ${pkgs.gnugrep}/bin/grep -qE "$p510_recipe|($deploy_verb)[^|;]*p510|p510[^|;]*($deploy_verb)"; then
+    if printf '%s' "$checked" | ${pkgs.gnugrep}/bin/grep -qE "$p510_recipe|($deploy_verb)[^|;]*p510|p510[^|;]*($deploy_verb)"; then
       echo "BLOCKED by managed-settings deploy guard: this command would activate a new generation on p510." >&2
       echo "p510 is the headless media server (Plex, *arr, k3d, cloudflared). Deploying it requires the user's explicit approval." >&2
       echo "Ask the user first. Building (nix build .#nixosConfigurations.p510...) and read-only ssh are allowed." >&2
@@ -534,6 +538,9 @@ let
 
     # The agent's own escape hatch, set after it has posted.
     case "$cmd" in *AGENT_BUS_ANNOUNCED=1*) exit 0 ;; esac
+    PATH=${lib.makeBinPath [ pkgs.gnused pkgs.gawk pkgs.coreutils ]}:$PATH
+    . ${./claude-guard-prepare.sh}
+    checked="$(printf '%s' "$cmd" | guard_prepare)" || { echo "BLOCKED: guard could not check this command (guard_prepare failed)." >&2; exit 2; }
 
     # Activating a generation, reclaiming disk, restarting shared services, or
     # taking a machine down. Note `nix build` and `systemctl status` are absent
@@ -550,6 +557,7 @@ let
     end='([[:space:];|&)]|$)'
     disruptive="$disruptive|$just"'[a-z-]*deploy'
     disruptive="$disruptive|$just"'(p510|p620|razer)'"$end"
+    disruptive="$disruptive"'|(^|[[:space:]/])update-commit-deploy\.sh([[:space:]]|$)'
     # Recipes that GC, prune boot entries, touch agenix, end sessions or
     # switch under other names (#2951). Keep in sync with the Justfile.
     disruptive="$disruptive|$just"'(gc|cleanup|boot-space-clean|fix-agenix-remote|p510-clear-sessions|update)'"$end"
@@ -557,7 +565,7 @@ let
     disruptive="$disruptive"'|systemctl[[:space:]]+[^|;]*(restart|stop)'
     disruptive="$disruptive"'|(^|[[:space:]])(reboot|poweroff|shutdown)([[:space:]]|$)'
 
-    if printf '%s' "$cmd" | ${pkgs.gnugrep}/bin/grep -qE "($disruptive)"; then
+    if printf '%s' "$checked" | ${pkgs.gnugrep}/bin/grep -qE "($disruptive)"; then
       echo "BLOCKED: this would disrupt a host other agents may be working on." >&2
       echo "" >&2
       echo "Before running it:" >&2
