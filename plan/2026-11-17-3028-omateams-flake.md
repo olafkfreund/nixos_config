@@ -15,13 +15,16 @@ reviewers:
 
 ## Approved decisions (from the spec)
 
-- **Input.** Add `omateams = { url = "github:olafkfreund/omateams"; inputs.nixpkgs.follows = "nixpkgs"; inputs.home-manager.follows = "home-manager"; }`.
+- **Input.** Add `omateams` with `url = "github:olafkfreund/omateams"`,
+  `inputs.nixpkgs.follows = "nixpkgs"` and
+  `inputs.home-manager.follows = "home-manager"`.
   - It tracks the default branch; `flake.lock` pins the commit.
   - `nixpkgs-qt` is **not** followed: it carries QtWebEngine 6.140.0, the
     QTBUG-142040 fix, and the fork's build refuses an older Qt.
 - **Host module.** `omarchy-omateams.nix` imports
   `inputs.omateams.homeManagerModules.default` for olafkfreund. It sets
-  `programs.omateams = { enable = true; package = <fork package>.override { hyprland = config.programs.hyprland.package; }; }`
+  `programs.omateams.enable = true` and `programs.omateams.package` to the
+  fork package with `.override { hyprland = config.programs.hyprland.package; }`,
   and keeps `local.omarchy.enableOnce = [ "omateams" ]`. The module sets
   `home.packages` and `programs.nixarchy.plugins.omateams.src`.
 - **omaoutlook.** It takes
