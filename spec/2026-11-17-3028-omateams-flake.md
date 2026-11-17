@@ -114,38 +114,77 @@ PR here merges after that.
   module builds it.
 - **Closure.** One more QtWebEngine is accepted until our nixpkgs catches up.
   Dropping `nixpkgs-qt` in the fork is a later change.
-- **Runtime.** The sign-in path is unchanged (`~/.local/share/omateams`), so
-  it survives. The new host binary is version 1.4.1 with PR #1, and the
-  plugin manifest says 1.4.1, so the plugin doesn't replace a running host.
+- **The old host keeps running after the switch.** The sign-in path is
+  unchanged (`~/.local/share/omateams`), so it survives. But the old and new
+  packages both say version 1.4.1, and `Service.qml` replaces a hidden host
+  only when the versions differ. So a switch alone leaves the old,
+  unguarded host process running.
+  - Verification restarts it explicitly.
+  - Bumping the fork's `manifest.json` to 1.4.2 would make the restart
+    automatic. That is a fork change, and out of scope here.
 
 ## Verification
 
-- **Evaluate,** with the override while #2 is open:
+While olafkfreund/omateams#2 is open, every command takes
+`--override-input omateams github:olafkfreund/omateams/feat/nix-flake`.
+
+- **Evaluate** the plugin source for both hosts:
 
   ```bash
-  nix eval .#nixosConfigurations.p620.config.home-manager.users.olafkfreund.programs.nixarchy.plugins.omateams.src
-  nix eval .#nixosConfigurations.razer.config.home-manager.users.olafkfreund.programs.nixarchy.plugins.omateams.src
+  nix eval --raw .#nixosConfigurations.p620.config.home-manager.users.olafkfreund.programs.nixarchy.plugins.omateams.src
+  nix eval --raw .#nixosConfigurations.razer.config.home-manager.users.olafkfreund.programs.nixarchy.plugins.omateams.src
   ```
 
-  Both must end in `/share/omateams/plugin` under the fork's package.
-- **Build** p620 and razer with `nixos-rebuild build`. In each system
-  closure (`nix-store -qR`):
-  - exactly one omateams;
-  - it is the fork's package;
-  - its `.omateams-wrapped` links only `qtwebengine-6.140.0` (check with
-    `ldd`);
-  - omaoutlook's Main.qml contains that same `/bin/omateams` path;
-  - no `qtwebengine-6.140.0-rc` reaches omateams.
-- **Gone:** `grep -rn "customPkgs.omateams\|pkgs/omateams" .` finds nothing.
-- **Runtime on p620,** after `nixos-rebuild switch`, which needs the owner's
-  OK:
-  - Teams is still signed in;
-  - the bar widget shows and the host started hidden;
-  - `omateams status` shows `version: 1.4.1` and `captured: false`;
-  - share and stop 3 times: no `eglCreateSync failed` in
-    `journalctl --user`, and `hostMemory` stays near its start;
-  - a Teams link opened from omaoutlook opens in omateams.
-- **Runtime on razer:** it starts, is signed in, and shows the bar widget.
+  Both must be `<fork package>/share/omateams/plugin`.
+- **Build** each host's `config.system.build.toplevel` with `nix build`.
+  Then, for the omateams in each closure (`nix-store -qR result | grep -- '-omateams-'`):
+  - **One package.** Exactly one omateams path, and it is the fork's
+    (`nix eval` of `programs.omateams.package` gives the same path).
+  - **Qt.** `ldd <pkg>/bin/.omateams-wrapped` lists only
+    `qtwebengine-6.140.0`.
+  - **Memory cap.** `<pkg>/bin/omateams` contains `MemoryHigh=12G`,
+    `MemoryMax=16G` and `MemorySwapMax=0`, plus the unscoped `exec`
+    fallback.
+  - **Hyprland on `PATH`.** The Qt wrapper `<pkg>/bin/omateams-unscoped`
+    puts the host's `config.programs.hyprland.package` on `PATH` (grep for
+    its store path).
+  - **Packaged files.**
+    - `share/applications/omateams.desktop` and the icon exist.
+    - `share/omateams/plugin/ui/BarWidget.qml` has the
+      `(Color.bar && Color.bar.background) || "transparent"` fallback.
+    - `ui/Service.qml` has `checkInstalled()` instead of `ensureHost()`,
+      and points at `<pkg>/bin/omateams`.
+    - `install.sh` is absent.
+  - **omaoutlook.** Its `Main.qml` is compiled into the binary, so the check
+    looks there: the `<pkg>/bin/omateams` path is found in
+    `<omaoutlook>/bin/.omaoutlook-wrapped`, either as UTF-8 or as UTF-16.
+- **Gone.** `test ! -e pkgs/omateams`, and a grep of the `.nix` files for
+  `customPkgs.omateams`, `pkgs/omateams` and `./omateams` finds nothing.
+- **Runtime on p620,** after the owner OKs switching the host:
+  1. Restart omateams: `omateams quit`, then let the bar start it again, or
+     run `omateams --hidden`.
+     `readlink -f /proc/<pid from omateams status>/exe` must be the fork
+     package's `.omateams-wrapped`.
+  2. Teams is still signed in, the bar widget shows, and the restarted host
+     is hidden.
+  3. `omateams status` shows `captured: false` and has the new `overdue`
+     field. That field only exists with the guard, so this proves the
+     guard is running.
+  4. The scope: `systemctl --user show` on the host's `run-*.scope` shows
+     `MemoryHigh` 12G, `MemoryMax` 16G and `MemorySwapMax` 0.
+  5. Share and stop 3 times. Expect no `eglCreateSync failed` in
+     `journalctl --user`. Either `hostMemory` stays bounded, or the guard
+     restarts the process with a "Teams restarted" notice; both are
+     acceptable outcomes.
+  6. A Teams link opened from omaoutlook opens in omateams.
+  7. With `runInBackground` off in the shell UI, after `omateams quit` and a
+     shell reload, the host doesn't start. Then turn it back on.
+  8. The plugin stays enabled, and the enable-once hook doesn't re-enable a
+     plugin the user turned off. This is the hook's existing behaviour, with
+     its marker unchanged.
+- **Runtime on razer:** after the owner's OK for a switch and a restart,
+  Teams starts, is signed in, and shows the bar widget, and the running exe
+  is the fork's package.
 
 ## Open questions
 
