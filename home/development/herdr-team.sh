@@ -936,13 +936,37 @@ LAUNCH
 
 perr=("Usage limit reached" "reached your usage limit" "reached your workspace credit limit" "Selected model is at capacity"
   "service unavailable" "rate limit exceeded" "rate limit reached" "exceeded retry limit" "Quota exceeded"
-  "stream disconnected before completion" "agy error:")
+  "stream disconnected before completion" "agy error:" "hit your usage limit"
+  "Policy-restricted capacity is unavailable" "Flex capacity unavailable")
 marker='■ Conversation interrupted'
 perr_args() {
   pargs=()
   for s in "${perr[@]}"; do pargs+=(-e "$s"); done
 }
-perr_count() { grep -ciF "${pargs[@]}" <<<"$1" || :; }
+perr_lines() {
+  gawk '
+    function emit() { if (active) print error }
+    {
+      line = $0
+      sub(/^[[:space:]]*/, "", line)
+      sub(/[[:space:]]+$/, "", line)
+      if (index(line, "■") == 1 || tolower(substr(line, 1, 10)) == "agy error:") {
+        emit()
+        error = line
+        active = 1
+        continuations = 0
+      } else if (line == "") {
+        emit()
+        active = 0
+      } else if (active && continuations < 6) {
+        error = error " " line
+        continuations++
+      }
+    }
+    END { emit() }
+  ' 2>/dev/null <<<"$1" # gawk warns on invalid UTF-8; callers parse stdout as JSON
+}
+perr_count() { perr_lines "$1" | grep -ciF "${pargs[@]}" || :; }
 reminder() { # state file: the protocol every request file ends with
   printf '\n---\nTeam protocol (herdr-team). Live members of task %s: %s, lead.\n' "$task" "$(live_members "$1" | paste -sd, -)"
   printf 'To address a teammate or the lead, end your reply with exactly these lines:\nTO: <member>\n<message>\nEND\n'
@@ -1073,7 +1097,7 @@ ask() {
     [[ -z $outcome ]] || break
     count=$(perr_count "$screen")
     if ((count > pbase)); then
-      grep -iF "${pargs[@]}" <<<"$screen" >"$work/ans/$n.screen" || :
+      perr_lines "$screen" | grep -iF "${pargs[@]}" >"$work/ans/$n.screen" || :
       outcome=provider_error
       break
     fi
