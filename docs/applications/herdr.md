@@ -399,25 +399,38 @@ always returns the app to its default layout and keys.
 | Gap | Issue |
 | --- | --- |
 | reviewr's send line comments to the agent | #2981 |
-| hintr's run-a-listed-key (`app.help` only lists) | #2982 |
+| hintr's run-a-listed-key: use the palette (`ctrl-shift-p`), which lists and runs commands with their keys; mod commands (lazygit, zoetrope) are not in it | #2982 (won't fix) |
 | Omarchy `nixarchy.herdr` widget still reads the TUI | #2983 |
 | Collie is not wired to hc | #2985 |
 | lazygit opens as a tab, not a float | #2986 |
 | herdr-team's provider-error scan can match its own source on screen | #2988 |
-| hc keeps its first starter's environment (see below) | #2989 |
+| an hc command before login can still start a core with a dirty environment (see below) | #2989 |
 
 ### hc keeps the environment of whoever started it first
 
 The core saves the environment of the process that first started it and reuses it across `hc server restart`
 and updates. If that was a herdr TUI pane or a Claude session, every app terminal inherits `HERDR_ENV=1` and that
 session's variables, and `claude()` / `herdr-team` then act as if they were in the TUI. Plain app shells drop those
-variables (`hcShell` in `home/development/herdr.nix`), and `argv` launches now drop them too, through the guard
-in interactive bash with a user bus. The core's own saved environment stays. Start the app from the launcher,
-never from a TUI pane, and to repair a polluted core run, from outside herdr:
+variables (`hcShell` in `home/development/herdr.nix`), and `argv` launches drop them too, through the guard
+in interactive bash with a user bus. That cleans identities in shells, not credentials or the core's own saved
+environment.
+
+`hc-core-ensure` (package `pkgs/hc-core-ensure`) keeps the core's environment clean. It re-runs itself through
+`systemd-run --user`, so the work happens in the user manager's environment, and it never fails the caller:
+
+- `login` (the `hc-core-ensure` user unit, once per graphical session): restarts a running core with
+  `hc server restart --fresh`, or starts one.
+- `launch` (every `herdr-app` window launch, before the sync): starts the core only if it is not running.
+
+The unit refuses manual starts and is not restarted by a Home Manager switch. Its journal lines are in
+`journalctl --user -t hc-core-ensure`. To repair a polluted core by hand, from any shell:
 
 ```bash
-systemd-run --user --collect --wait -p Type=oneshot hc server restart --fresh
+hc-core-ensure login
 ```
+
+Limit: an hc command run before login, or after the core exits and before the next app launch, can start a core
+from a dirty environment. It stays that way until the next login.
 
 ### Bumping herdr-app or herdr-core
 
