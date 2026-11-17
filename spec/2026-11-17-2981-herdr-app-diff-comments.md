@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2981
 intent: intent/2026-11-17-2981-herdr-app-diff-comments.md
 ---
