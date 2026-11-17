@@ -62,8 +62,12 @@ in
           instructions = [ "${instructionsFile}" ];
         };
 
-        closeFds = ''
-          for f in /proc/self/fd/*; do n=''${f##*/}; [ "$n" -gt 2 ] && eval "exec $n>&-"; done 2>/dev/null || true
+        # exec "$@" with every fd above 2 closed; a shell loop cannot close bash's own script fd
+        closeFdsExec = pkgs.writers.writePython3 "llm-docs-closefds-exec" { } ''
+          import os
+          import sys
+          os.closerange(3, 1 << 20)
+          os.execvp(sys.argv[1], sys.argv[1:])
         '';
 
         # runs inside the sandbox: bridge 127.0.0.1:11434 to the proxy socket, then exec "$@"
@@ -75,8 +79,7 @@ in
             ${pkgs.coreutils}/bin/sleep 0.1
           done
           if [ "$up" != 1 ]; then echo "llm-docs: bridge did not come up" >&2; exit 1; fi
-          ${closeFds}
-          exec "$@"
+          exec ${closeFdsExec} "$@"
         '';
 
         state = "${home}/.local/state/llm-index";
@@ -161,19 +164,20 @@ in
               echo "${name}: dev.tty.legacy_tiocsti must be 0" >&2
               exit 1
             fi
-            run="''${XDG_RUNTIME_DIR:?}/llm-docs"
-            install -d -m 0700 "$run" "${share}"
+            logdir="''${XDG_RUNTIME_DIR:?}/llm-docs"
+            install -d -m 0700 "$logdir" "${share}"
             install -d -m 0700 "${share}/data" "${share}/config" "${share}/cache"
+            # one socket folder per launch: no stale socket, and parallel launches do not collide
+            run=$(mktemp -d "$logdir/run.XXXXXX")
             # its log (method, path, model, status; never bodies) stays out of the TUI
-            ${proxy}/bin/llm-docs-proxy --socket "$run/ollama.sock" --model ${lib.escapeShellArg MODEL} 2>>"$run/proxy.log" &
+            ${proxy}/bin/llm-docs-proxy --socket "$run/ollama.sock" --model ${lib.escapeShellArg MODEL} 2>>"$logdir/proxy.log" &
             proxy_pid=$!
-            trap 'kill "$proxy_pid" 2>/dev/null || true' EXIT
+            trap 'kill "$proxy_pid" 2>/dev/null || true; rm -rf "$run"' EXIT
             for _ in $(seq 1 50); do
               [ -S "$run/ollama.sock" ] && break
               sleep 0.1
             done
             [ -S "$run/ollama.sock" ] || { echo "${name}: proxy did not start" >&2; exit 1; }
-            ${closeFds}
             bwrap_args=(
               ${lib.escapeShellArgs bwrapArgs}
               --bind "$run/ollama.sock" /run/llm-docs.sock
@@ -182,14 +186,20 @@ in
               --setenv COLORTERM "''${COLORTERM:-}"
               --setenv LANG "''${LANG:-C.UTF-8}"
             )
-            bwrap "''${bwrap_args[@]}" ${inner} "''${cmd[@]}"
+            # bwrap runs as a child, not exec, so the EXIT trap can stop the proxy
+            ${closeFdsExec} bwrap "''${bwrap_args[@]}" ${inner} "''${cmd[@]}"
           '';
         };
 
         llm-docs = mkLauncher "llm-docs" ''
+          # output goes only to your terminal: no pipes, files or sockets on fds 0-2
+          if ! { [ -t 0 ] && [ -t 1 ] && [ -t 2 ]; }; then
+            echo "llm-docs: stdin, stdout and stderr must be a terminal" >&2
+            exit 2
+          fi
           case "$#" in
             0) cmd=(${opencode}) ;;
-            2) if [ "$1" = run ]; then cmd=(${opencode} run "$2"); else echo "usage: llm-docs [run <prompt>]" >&2; exit 2; fi ;;
+            2) if [ "$1" = run ] && [ "''${2#-}" = "$2" ]; then cmd=(${opencode} run "$2"); else echo "usage: llm-docs [run <prompt>]" >&2; exit 2; fi ;;
             *) echo "usage: llm-docs [run <prompt>]" >&2; exit 2 ;;
           esac
         '';

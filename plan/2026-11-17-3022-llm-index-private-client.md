@@ -333,6 +333,24 @@ These came up in step 2. The privacy boundary does not change.
   still holds only the method, path, model and status.
 - **Working folder.** bwrap gets `--chdir $HOME` (the tmpfs home), so
   opencode never uses the host's current folder as a project.
+- **Closing fds.** A small Python helper does it: `os.closerange(3, …)`,
+  then `execvp`. The approved bash loop sent stderr to `/dev/null` and could
+  not close bash's own script fd (Codex and Opus review, reproduced). The
+  wrapper runs `bwrap` through the helper, and the inner runner `exec`s
+  through it.
+- **`bwrap` runs as a child, not `exec`,** so the EXIT trap can stop the
+  proxy.
+- **A socket folder per launch.** Each launch uses
+  `$XDG_RUNTIME_DIR/llm-docs/run.XXXXXX`, removed on exit, so a stale socket
+  or a second launch cannot break startup. The shared `proxy.log` stays one
+  level up.
+- **Terminal and prompt checks.** `llm-docs` refuses to run unless fds 0-2
+  are terminals, and refuses a `run` prompt that starts with `-`, so it is
+  never parsed as an opencode flag. `llm-docs-diag` is exempt, because the
+  lead runs it from non-interactive checks. Live check 4 runs `llm-docs`
+  under `script -qec` to get a pty.
+- **Proxy hardening.** `Content-Length` must be all digits. Upstream JSON
+  that is not an object gives 502 instead of a crashed handler.
 - **Policy entry shape,** taken from the 1.18.31 binary:
   `{ action = "provider.use"; resource; effect; }`.
 

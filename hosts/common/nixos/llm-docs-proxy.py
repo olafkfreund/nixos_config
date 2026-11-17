@@ -152,7 +152,10 @@ class Proxy(socketserver.StreamRequestHandler):
             self.reply(400)
             return
         try:
-            length = int(headers["content-length"])
+            raw = headers["content-length"]
+            if not raw.isdigit():
+                raise ValueError("bad Content-Length")
+            length = int(raw)
         except (KeyError, ValueError):
             self.reply(400)
             return
@@ -195,7 +198,13 @@ class Proxy(socketserver.StreamRequestHandler):
                     "Accept": "text/event-stream, application/json",
                 },
             )
-        except (OSError, http.client.HTTPException, ValueError, TypeError):
+        except (
+            OSError,
+            http.client.HTTPException,
+            ValueError,
+            TypeError,
+            AttributeError,
+        ):
             self.reply(502)
             return
         try:
