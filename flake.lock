@@ -2827,17 +2827,17 @@
         "omarchroma": "omarchroma"
       },
       "locked": {
-        "lastModified": 1794912697,
-        "narHash": "sha256-JIG2NS4wYgqKUcMitfZVRE/36AAUjwRzRamNUOnYDTI=",
+        "lastModified": 1794914492,
+        "narHash": "sha256-yv8IVYBX9MD6fgkdVyBOAtiY8BPL5vH1680safBpl0k=",
         "owner": "olafkfreund",
         "repo": "nixarchy-omatheme",
-        "rev": "d37c7fff960d6cae1253683527fe759c59e5c4fc",
+        "rev": "e47e9dd8e9c3ae0cc74e784c246bcf6dff8c8adc",
         "type": "github"
       },
       "original": {
         "owner": "olafkfreund",
         "repo": "nixarchy-omatheme",
-        "rev": "d37c7fff960d6cae1253683527fe759c59e5c4fc",
+        "rev": "e47e9dd8e9c3ae0cc74e784c246bcf6dff8c8adc",
         "type": "github"
       }
     },
