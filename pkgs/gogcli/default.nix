@@ -22,16 +22,16 @@
 # ldflags target that path even though the source lives at openclaw.
 buildGoModule (finalAttrs: {
   pname = "gogcli";
-  version = "0.48.0";
+  version = "0.48.1";
 
   src = fetchFromGitHub {
     owner = "openclaw";
     repo = "gogcli";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-cfgrXmtjAT/xZtw7FOy67Xx+/3J/N5sS6wf3SOU9pVE=";
+    hash = "sha256-jsyXBhLTImA1pIQ/MyHrq672Sp+glj3pYbmxMMRKXd8=";
   };
 
-  vendorHash = "sha256-4hP6LV8A3P5G+37gAmFI8dREWauXuLMFjeFjkjon4ms=";
+  vendorHash = "sha256-18pPtme/0QoeX1PkCdlhWStX3MYJT83ULHSJI3RIOlo=";
 
   subPackages = [ "cmd/gog" ];
 
