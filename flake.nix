@@ -160,7 +160,7 @@
     # nixarchy-llm-index: local document and code index served to agents over MCP;
     # hosts/common/nixos/llm-index.nix (#2882). Pinned by rev so an update cannot move it.
     nixarchy-llm-index = {
-      url = "github:olafkfreund/nixarchy-llm-index/54e0fbebf8a5ce6ea6ccc3056350eb533a95b0f1";
+      url = "github:olafkfreund/nixarchy-llm-index/188bc815bb163159534ad04f5246d9c2dcc07734";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
