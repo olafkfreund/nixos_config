@@ -195,7 +195,7 @@ resolve_tokens() {
     return
   fi
   printf '{}\n' >"$TMP/resolved.json"
-  [ -s "$TMP/tokens.txt" ] || return
+  [ -s "$TMP/tokens.txt" ] || return 0 # no tokens is normal; a bare return would carry the test's failure into set -e
   remaining=$((600 - (SECONDS - AUDIT_START)))
   if [ "$remaining" -le 0 ]; then
     log "resolver unavailable: 600 s budget exhausted"
