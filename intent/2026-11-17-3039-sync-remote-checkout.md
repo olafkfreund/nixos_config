@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3039
 author: olafkfreund
 ---
@@ -52,6 +52,8 @@ checkout alone. A deploy never fails because of this step.
 - Bootloader cleanup (`check-boot-space.sh`'s `switch-to-configuration boot`) is not a deploy and does not sync.
 
 ## Open questions
+
+Owner answers (2026-11-17): the recommendations below, all four.
 
 1. When `nhs` or a deploy uses boot mode (always for p510, sometimes as a fallback), sync the checkout at once or
    only after the reboot? Recommended: at once. The checkout should match the generation that will boot, and that
