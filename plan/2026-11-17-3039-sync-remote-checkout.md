@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3039
 spec: spec/2026-11-17-3039-sync-remote-checkout.md
 coders:
