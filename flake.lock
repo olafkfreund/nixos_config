@@ -708,11 +708,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794937281,
-        "narHash": "sha256-H5mKx2z+iiP47rjYbmMUP+VF7aeOIHwtE3A2xG9S0b0=",
+        "lastModified": 1794943558,
+        "narHash": "sha256-QzR/NXQic12zY/5Hvpcq7KN4lIydtsey6Q2TnZm/Qw0=",
         "owner": "olafkfreund",
         "repo": "nix-gmsg-tui",
-        "rev": "987de7bd9f89a9015d2e5c1f413f25b7a1a39a0c",
+        "rev": "3c8b4b66b7f9729d80c293ef7b788e41f254f60b",
         "type": "github"
       },
       "original": {
