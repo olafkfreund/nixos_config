@@ -1,6 +1,15 @@
 import { View, div } from "gpui-kit";
-import { exec, focused, nextCommand, notify, openOverlay, panes, run, spaces } from "herdr";
+import { exec, focused, layout, nextCommand, notify, openOverlay, panes, run, spaces } from "herdr";
 import { resizeDoc } from "./tree.js";
+
+function find(node, id) {
+  if (node?.id === id) return node;
+  for (const child of node?.children ?? []) {
+    const found = find(child, id);
+    if (found) return found;
+  }
+  return null;
+}
 
 const keys = { left: "h", down: "j", up: "k", right: "l" };
 
@@ -36,6 +45,12 @@ export default class Splits extends View {
           // Same dialog as the + menu's "Open worktree…"; a key can't pass props itself.
           openOverlay({ mod: "worktree", kind: "dialog", width: 560, height: 480,
             props: { space: focused()?.space, folder: panes().find((p) => p.focused)?.cwd, action: "open" } });
+          continue;
+        }
+        if (command === "review-toggle") {
+          const root = layout();
+          if (!find(root, "panel")?.hidden && find(root, "panel-body")?.active === "review") run("layout.hide", { id: "panel" });
+          else { run("layout.select", { stack: "panel-body", child: "review" }); run("layout.show", { id: "panel" }); }
           continue;
         }
         const match = /^(go|resize)-(left|down|up|right)$/.exec(command);

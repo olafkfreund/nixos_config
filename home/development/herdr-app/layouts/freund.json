@@ -180,6 +180,13 @@
                       }
                     },
                     {
+                      "id": "review",
+                      "type": "block",
+                      "content": {
+                        "mod": "reviewer"
+                      }
+                    },
+                    {
                       "id": "issues",
                       "type": "block",
                       "content": {
