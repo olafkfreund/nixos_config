@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2983
 author: olafkfreund
 ---
@@ -137,3 +137,7 @@ Prior art decides the shape, so the spec should reuse it:
    colour in the badge? Recommendation: show an error line, never silence; count `error` with blocked.
 8. Version and release: bump `manifest.json` to 1.1.0 and tag?
    Recommendation: yes, a feature bump, so the pin in this repo names a tagged state.
+
+## Decision
+
+Approved by the owner on 2026-11-17, with the recommendation given for each open question above.
