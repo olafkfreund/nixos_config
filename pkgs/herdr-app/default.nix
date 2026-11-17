@@ -14,6 +14,7 @@
 , pipewire
 , herdr-core
 , herdr-app-sync
+, hc-core-ensure
 , util-linux
 , coreutils
 , linkFarm
@@ -36,6 +37,7 @@ let
   syncOnLaunch = ''
     if [ "$#" -eq 0 ] && [ -z "''${HERDR_APP_SYNC_RUNNING:-}" ]; then
       export HERDR_APP_SYNC_RUNNING=1
+      ${hc-core-ensure}/bin/hc-core-ensure launch || :
       if [ -d "''${HERDR_APP_HOME:-$HOME/.config/herdr-app}" ]; then
         # Never let a hung `herdr-app check` keep the window from opening.
         ${coreutils}/bin/timeout 60 herdr-app-sync || :

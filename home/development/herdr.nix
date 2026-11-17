@@ -80,7 +80,24 @@ in
       fi
     '');
 
-    home.packages = [ pkgs.customPkgs.herdr-claude-teams ];
+    home.packages = [ pkgs.customPkgs.herdr-claude-teams ]
+      ++ lib.optional cfg.enable pkgs.customPkgs.hc-core-ensure;
+
+    # A user oneshot that must act on the user's own hc state, so no system-service hardening applies.
+    systemd.user.services.hc-core-ensure = lib.mkIf cfg.enable {
+      Unit = {
+        Description = "Restart the hc core with a clean environment at login";
+        After = [ "graphical-session.target" ];
+        PartOf = [ "graphical-session.target" ];
+        RefuseManualStart = true;
+        X-RestartIfChanged = false;
+      };
+      Service = {
+        Type = "oneshot";
+        ExecStart = "${pkgs.customPkgs.hc-core-ensure}/bin/hc-core-ensure login";
+      };
+      Install.WantedBy = [ "graphical-session.target" ];
+    };
 
     # Login shell and herdr panes are bash; zsh gets the same function.
     programs.bash.initExtra = claudeLauncher;
