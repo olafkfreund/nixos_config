@@ -32,7 +32,8 @@ Per-host user files in `Users/<user>/` compose the Home Manager config. Home Man
 2. **Every service** gets `DynamicUser = true`, `ProtectSystem = "strict"`,
    `NoNewPrivileges = true`, `ProtectHome = true` (exceptions: Sunshine, see `docs/applications/sunshine.md`;
    Flux's `fluxd` user unit and its `flux-guard` units, see `docs/applications/flux.md`;
-   omaPOD's `omapod-refresh` and `omapod-settings` user units, see `docs/applications/omapod.md`).
+   omaPOD's `omapod-refresh` and `omapod-settings` user units, see `docs/applications/omapod.md`; the
+   `hc-core-ensure` user unit, which must act on the user's own hc core, see `docs/applications/herdr.md`).
 3. **Secrets load at runtime only** — `passwordFile` / agenix paths. Never
    `builtins.readFile` a secret; that puts it in the Nix store.
 4. **No `mkIf cond true`** — assign the boolean directly.
