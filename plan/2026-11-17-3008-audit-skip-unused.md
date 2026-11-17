@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3008
 spec: spec/2026-11-17-3008-audit-skip-unused.md
 coders:
