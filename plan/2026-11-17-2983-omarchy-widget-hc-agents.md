@@ -200,6 +200,15 @@ branch). Line numbers are those of tip `b14b503` and drift as earlier steps land
   events'` after opening and closing the menu (fork spec R5: growth means fall back per D3); razer exit 4 from syncthing
   is cosmetic (see memory).
 
+## Deviations (implementation)
+
+- Step 1: the fork branch is `feat/22-herdr-core-app-2983` (a worktree), so the shared checkout's branch was
+  untouched; it was merged as nixarchy-herdr#27 (`7b678da`, tagged `v1.1.0`) on top of the other session's #26 and #28.
+- Step 10: the bump went to nixarchy `main` (nixarchy#1836), the branch `edge` is published from; a PR to `edge`
+  (#1834) was closed.
+- Step 11: `edge` publishing was blocked, then slow (a docs merge conflict, then a long build), so the approved D5
+  fallback pins `nixarchy/nixarchy-herdr` to `7b678da` in `flake.nix`; it comes out once `edge` carries it.
+
 ## Tests
 
 - Fork, every step: `bash -n` and `shellcheck` on `bin/herdr-sessions`, `bin/herdr-menu-keys`,

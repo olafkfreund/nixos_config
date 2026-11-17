@@ -74,6 +74,10 @@
       inputs.nixarchy-omatheme.url = "github:olafkfreund/nixarchy-omatheme/d37c7fff960d6cae1253683527fe759c59e5c4fc";
       inputs.nixarchy-omatheme.inputs.nixpkgs.follows = "nixpkgs";
       inputs.nixarchy-omatheme.inputs.home-manager.follows = "home-manager";
+      # #2983 herdr widget 1.1.0 (herdr-core / herdr-app agents in the bar, nixarchy-herdr#27); remove once
+      # nixarchy edge pins 7b678da or later (nixarchy#1836 merged, edge publish pending).
+      inputs.nixarchy-herdr.url = "github:olafkfreund/nixarchy-herdr/7b678da44fb6aa8c4d9508cf6552a260949db89f";
+      inputs.nixarchy-herdr.flake = false;
 
       # nixarchy's NixOS module imports home-manager.nixosModules.home-manager
       # itself. From its own pin that is a second copy of nixos/common.nix, and
