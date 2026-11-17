@@ -6,6 +6,7 @@
 // Local changes (plan/2026-11-17-2981-herdr-app-diff-comments.md; filled in as steps land):
 //   - mod.json: "focusable": true.
 //   - Step 4: private-index turn snapshots, snapshot-backed preview and always-mounted tracker.
+//   - Step 7: session-keyed turn drafts, full-quote stale checks and earlier-turn selection.
 //   - Step 3: git is read-only (no committing, message input or button), no "Last commit" scope, no agent send
 //     or start; scopes are Uncommitted, Branch, Last agent turn (stub until turns.js), Commit.
 //
@@ -54,6 +55,9 @@ import { ask } from "./ask.js";
 import { palette } from "./palette.js";
 import { Dialog } from "./dialog.js";
 import { Turns, createTracker, workState, READ, alternates, turnFor } from "./turns.js";
+import { commentState } from "./stale.js";
+
+const SESSION = `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
 
 function location() {
   const space = spaces().find((s) => s.active), f = focused();
@@ -329,7 +333,11 @@ export default class Changes extends View {
         const changedSet = root !== this.root || scope !== this.scope || sha !== this.sha;
         this.root = root; this.on = on; this.hasHead = hasHead; this.scope = scope; this.sha = sha; this.scopeInfo = info; this.range = range;
         // Each scope keeps its own comments: switching swaps the set, the others stay saved.
-        if (changedSet) { this.comments = this.loadDrafts(this.scopeId()); this.composer = null; }
+        if (changedSet || (scope === "turn" && this.turnGen !== info.turn?.gen)) { this.comments = this.loadDrafts(this.scopeId()); this.composer = null; }
+        this.turnGen = info.turn?.gen;
+        for (const path of new Set(this.comments.map((c) => c.path))) {
+          if (!files.some((f) => f.path === path)) files.push({ path, status: "", add: 0, del: 0, noLongerChanged: true });
+        }
         this.files = files; this.limited = changed.size > 1000; this.error = scope === "turn" ? info.turn?.problem ?? null : null;
         this.watch(root, cx);
         if (requested !== null) {
@@ -350,6 +358,7 @@ export default class Changes extends View {
           try { await this.load(this.open, context); }
           catch { if (key() === context) this.setLines(["Cannot preview this diff (too large or unreadable)"]); }
         }
+        await this.checkComments();
       } catch (e) { if (key() === context) this.error = String(e); }
       finally { this.loading = false; cx.notify(); }
     });
@@ -375,7 +384,9 @@ export default class Changes extends View {
   scopeId(scope = this.scope, sha = this.sha) { return scope === "commit" ? `commit:${sha}` : scope; }
   // The draft comments of one scope (by id) of the shown repo. Drafts saved before
   // scopes existed (keyed by repo alone) were all on the uncommitted changes.
-  draftKey(id = this.scopeId()) { return `${this.on ?? ""}:${this.root}:${id}`; }
+  draftKey(id = this.scopeId()) {
+    return `${this.on ?? ""}:${this.root}:${id === "turn" ? `turn:${SESSION}:${this.scopeInfo?.turn?.gen ?? 0}` : id}`;
+  }
   loadDrafts(id) {
     const drafts = { ...(shared(DRAFTS) ?? {}) }, old = `${this.on ?? ""}:${this.root}`;
     if (drafts[old]) { drafts[`${old}:work`] = [...(drafts[`${old}:work`] ?? []), ...drafts[old]]; delete drafts[old]; setShared(DRAFTS, drafts); }
@@ -450,9 +461,9 @@ export default class Changes extends View {
     });
   }
 
-  async load(path, context) {
+  async readRows(path) {
     const file = this.files.find((f) => f.path === path), root = this.root, on = this.on;
-    if (!file) return;
+    if (!file) return null;
     let lines;
     if (this.scope !== "turn" && (file.fresh || (!this.hasHead && file.status === "A"))) {
       const text = await readTextFile(`${root}/${path}`, { on }).catch(() => null);
@@ -479,7 +490,27 @@ export default class Changes extends View {
       }
     }
     if (lines.length > (lines.some((l) => l[0] === "=") ? FILE_LINES + DIFF_LINES : DIFF_LINES)) lines = lines.slice(0, DIFF_LINES);
-    if (key() === context && this.open === path) this.setLines(lines.map(line => line.length > 4000 ? line.slice(0, 4000) + "… (line truncated)" : line), path);
+    return lines.map(line => line.length > 4000 ? line.slice(0, 4000) + "… (line truncated)" : line);
+  }
+
+  async load(path, context) {
+    const lines = await this.readRows(path);
+    if (lines && key() === context && this.open === path) this.setLines(lines, path);
+  }
+
+  async checkComments() {
+    const context = this.context, scope = this.draftKey(), results = new Map();
+    for (const path of new Set(this.comments.filter((c) => !c.whole).map((c) => c.path))) {
+      let rows = null;
+      if (this.files.some((f) => f.path === path)) {
+        try { rows = diffRows(await this.readRows(path), languageOf(path)); } catch { /* An unreadable file cannot confirm a quote. */ }
+      }
+      for (const c of this.comments.filter((c) => c.path === path)) {
+        results.set(c.id, this.scope === "turn" && (!this.scopeInfo?.turn?.objects || !scope.includes(`turn:${SESSION}:`))
+          ? "not rechecked" : commentState(c, rows, (r) => this.quote(r)));
+      }
+    }
+    if (context === this.context && scope === this.draftKey()) { this.commentStates = results; this.rebuild(); }
   }
 
   setLines(lines, path) {
@@ -541,7 +572,7 @@ export default class Changes extends View {
       const it = { key: `c:${c.id}`, kind: "comment", id: c.id, live, text, height: this.commentHeight(text) };
       if (c.whole) { this.items.push({ ...it, whole: true, from: -1, to: -1 }); continue; }
       const from = this.at(c.from), to = this.at(c.to);
-      if (from < 0 || to < 0 || to < from) continue;
+      if (from < 0 || to < 0 || to < from) { this.items.push({ ...it, from: -1, to: -1 }); continue; }
       (under.get(to) ?? under.set(to, []).get(to)).push({ ...it, from, to });
     }
     for (const item of items) { this.items.push(item); if (item.kind === "row") for (const c of under.get(item.i) ?? []) this.items.push(c); }
@@ -630,10 +661,12 @@ export default class Changes extends View {
     const id = c.editing ?? `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
     const comment = c.whole ? { id, path: c.path, whole: true, text } : { id, path: c.path, from: c.from, to: c.to, text };
     const t = this.target();
-    if (t) { comment.from = desc(this.rows[t.from]); comment.to = desc(this.rows[t.to]); comment.quote = this.quote(this.rows.slice(t.from, Math.min(t.to, t.from + 60) + 1)); }
+    if (t) { comment.from = desc(this.rows[t.from]); comment.to = desc(this.rows[t.to]); comment.quote = this.quote(this.rows.slice(t.from, t.to + 1)); }
     else if (c.editing) { const old = this.comments.find((x) => x.id === c.editing); if (old?.quote) comment.quote = old.quote; }
+    if (this.scope === "turn") comment.session = SESSION;
     list.push(comment);
     this.setComments(list);
+    cx.spawn(async (cx) => { await this.checkComments(); cx.notify(); });
     this.closeComposer(cx);
   }
 
@@ -670,30 +703,36 @@ export default class Changes extends View {
     cx.spawn(async (cx) => { try { await ask({ title, context: `${head}\n${this.quote(rows)}` }); } catch (e) { this.note_ = `Ask failed: ${e}`; } cx.notify(); });
   }
 
-  // Every comment, with its lines, as one review message.
-  submit(cx) {
-    if (!this.comments.length || !this.root) return;
-    const list = [...this.comments].sort((a, b) => a.path.localeCompare(b.path) || (a.from?.number ?? -1) - (b.from?.number ?? -1));
+  // Every comment uses the quote saved when it was written, even if its file changed later.
+  formatComments(list, states = new Map()) {
+    list = [...list].sort((a, b) => a.path.localeCompare(b.path) || (a.from?.number ?? -1) - (b.from?.number ?? -1));
     const parts = list.map((c) => {
       if (c.whole) return `### ${c.path}, whole file (${this.describe(c.path)})\n\nComment: ${c.text}`;
-      let body;
-      if (c.path === this.open) {
-        const from = this.at(c.from), to = this.at(c.to);
-        body = from >= 0 && to >= from ? this.quote(this.rows.slice(from, to + 1)) : null;
-      }
       const span = c.from.number === c.to.number ? `line ${c.from.number}` : `lines ${c.from.number}-${c.to.number}`;
-      // Lines gone from the diff: the ones captured when the comment was made.
-      if (body === undefined || body === null) body = c.quote ?? (c.from.text === c.to.text ? `${String(c.from.number).padStart(5)} ${c.from.kind} ${c.from.text}` : `${String(c.from.number).padStart(5)} ${c.from.kind} ${c.from.text}\n      …\n${String(c.to.number).padStart(5)} ${c.to.kind} ${c.to.text}`);
-      return `### ${c.path}, ${span}\n${body}\n\nComment: ${c.text}`;
+      const body = c.quote ?? (c.from.text === c.to.text ? `${String(c.from.number).padStart(5)} ${c.from.kind} ${c.from.text}` : `${String(c.from.number).padStart(5)} ${c.from.kind} ${c.from.text}\n      …\n${String(c.to.number).padStart(5)} ${c.to.kind} ${c.to.text}`);
+      const stale = states.get(c.id) === "lines changed" ? "\n(the lines changed after this comment)" : "";
+      const unchecked = states.get(c.id) === "not rechecked" ? "\n(not rechecked)" : "";
+      return `### ${c.path}, ${span}${stale}${unchecked}\n${body}\n\nComment: ${c.text}`;
     });
-    const n = list.length, title = `Review · ${n} comment${n > 1 ? "s" : ""}`;
-    const context = `Code review of ${this.root}${this.on ? ` (on ${this.on})` : ""}: ${this.scopeWords()}. ${n} comment${n > 1 ? "s" : ""}. Line numbers are new-file numbers; "-" lines are removed.\n\n${parts.join("\n\n")}`;
-    const repo = this.root, scope = this.scopeId(), draftKey = this.draftKey();
+    return parts.join("\n\n");
+  }
+
+  // Every comment, with its lines, as one review message.
+  submit(cx) {
+    if (!this.root) return;
     cx.spawn(async (cx) => {
+    await this.checkComments();
+    const list = [...this.comments], drafts = shared(DRAFTS) ?? {}, prefix = `${this.on ?? ""}:${this.root}:turn:`;
+    const earlier = Object.entries(drafts).filter(([k, v]) => this.scope === "turn" && (k.startsWith(prefix) || k === `${this.on ?? ""}:${this.root}:turn`) && k !== this.draftKey() && v.length)
+      .map(([key, comments]) => ({ key, ids: comments.map((c) => c.id), context: this.formatComments(comments, new Map(comments.map((c) => [c.id, "not rechecked"]))) }));
+    if (!list.length && !earlier.length) return;
+    const n = list.length, title = `Review · ${n} comment${n > 1 ? "s" : ""}`;
+    const context = `Code review of ${this.root}${this.on ? ` (on ${this.on})` : ""}: ${this.scopeWords()}. ${n} comment${n > 1 ? "s" : ""}. Line numbers are new-file numbers; "-" lines are removed.\n\n${this.formatComments(list, this.commentStates)}`;
+    const repo = this.root, scope = this.scopeId(), draftKey = this.draftKey();
       try {
         openOverlay({ mod: "reviewer", kind: "dialog", width: 680, height: 560,
-          props: { dialog: true, title, context, repo, scope,
-            drafts: [{ key: draftKey, ids: list.map((c) => c.id) }] } });
+          props: { dialog: true, title, context, repo, scope, earlier,
+            drafts: list.length ? [{ key: draftKey, ids: list.map((c) => c.id) }] : [] } });
       } catch (e) { this.note_ = `Submit failed: ${e}`; }
       cx.notify();
     });
@@ -769,10 +808,11 @@ export default class Changes extends View {
   item(it, t, colors, target, commented) {
     const width = (this.size?.width ?? 368) - 60;
     if (it.kind === "comment") {
-      const span = it.whole ? "whole file" : it.from === it.to ? `line ${this.rows[it.from].number}` : `lines ${this.rows[it.from].number}–${this.rows[it.to].number}`;
+      const span = it.whole ? "whole file" : it.from < 0 ? "saved lines" : it.from === it.to ? `line ${this.rows[it.from].number}` : `lines ${this.rows[it.from].number}–${this.rows[it.to].number}`;
+      const state = this.commentStates?.get(it.id);
       return div().w_full().h(it.height).flex_none().pl(42).pr(12).py(4).cursor_pointer()
         .child(v_flex().max_w(width).rounded(8).border_1().border_color(it.live ? t.accent : t.accent + "66").bg(t.surface).px(10).py(6).gap(3)
-          .child(div().text_size(10).text_color(it.live ? t.accent : t.dim).child(it.live ? `Comment · ${span} · editing` : `Comment · ${span} · click to edit`))
+          .child(div().text_size(10).text_color(state ? t.ansi1 : it.live ? t.accent : t.dim).child(`Comment · ${span}${state ? ` · ${state}` : ""}${it.live ? " · editing" : " · click to edit"}`))
           .child(div().text_size(this.fontSize).whitespace_normal().text_color(it.text ? t.foreground : t.dim).child(it.text || "(empty)")));
     }
     if (it.kind === "fold") {
@@ -817,6 +857,9 @@ export default class Changes extends View {
     }
     const t = theme(), colors = palette(props()?.palette, t), add = this.files.reduce((n, f) => n + f.add, 0), del = this.files.reduce((n, f) => n + f.del, 0);
     const target = this.target(), n = this.comments.length, canAsk = Boolean(this.open && this.rows.length);
+    const earlierCount = this.scope === "turn" ? Object.entries(shared(DRAFTS) ?? {})
+      .filter(([k]) => k !== this.draftKey() && (k.startsWith(`${this.on ?? ""}:${this.root}:turn:`) || k === `${this.on ?? ""}:${this.root}:turn`))
+      .reduce((sum, [, list]) => sum + list.length, 0) : 0;
     const commented = new Set();
     for (const it of this.items) if (it.kind === "comment") for (let j = it.from; j <= it.to; j++) commented.add(j);
     const perFile = {};
@@ -839,13 +882,13 @@ export default class Changes extends View {
           .tooltip(this.full() ? "Fold the unchanged lines" : "Show the whole file").on_click((_e, cx) => this.toggleFull(cx))
           .child(svg(this.full() ? "mods/reviewer/fold-vertical.svg" : "mods/reviewer/unfold-vertical.svg").size(13))))
         .child(div().text_size(11).text_color(t.ansi2).child(`+${add}`)).child(div().text_size(11).text_color(t.ansi1).child(`−${del}`))
-        .when(n > 0, (e) => e.child(link("review-discard", "Discard", (_e, cx) => this.setComments([], cx))).child(button("review-submit", `Submit review · ${n}`, true, (_e, cx) => this.submit(cx))))
-        .when(n === 0 && canAsk, (e) => e.child(button("ask", "Ask about diff", false, (_e, cx) => this.askAbout(null, cx)))))
+        .when(n > 0 || earlierCount > 0, (e) => e.when(n > 0, (e) => e.child(link("review-discard", "Discard", (_e, cx) => this.setComments([], cx)))).child(button("review-submit", `Submit review · ${n + earlierCount}`, true, (_e, cx) => this.submit(cx))))
+        .when(n === 0 && earlierCount === 0 && canAsk, (e) => e.child(button("ask", "Ask about diff", false, (_e, cx) => this.askAbout(null, cx)))))
       .child(v_flex().id("changes-list").flex_none().h(Math.min(200, Math.max(44, this.files.length * 28 + 12))).overflow_y_scrollbar().p(6).border_b(1).border_color(t.border).children(this.files.map((f) => {
         const parts = f.path.split("/"), name = parts.pop(), k = perFile[f.path];
         return h_flex().id(`change-${f.path}`).h(28).flex_none().px(8).gap(8).items_center().rounded(7).cursor_pointer().when(this.open === f.path, (e) => e.bg(t.selected)).hover((s) => s.bg(t.hover)).on_click((_e, cx) => this.pick(f.path, cx))
           .child(div().w(14).text_size(11).text_color(f.status === "A" ? t.ansi2 : f.status === "D" ? t.ansi1 : f.status === "U" ? t.ansi1 : t.blocked).child(f.status))
-          .child(h_flex().flex_1().min_w(0).child(div().text_color(t.dim).truncate().child(parts.length ? parts.join("/") + "/" : "")).child(div().max_w(260).min_w(0).truncate().child(name)))
+          .child(h_flex().flex_1().min_w(0).child(div().text_color(t.dim).truncate().child(parts.length ? parts.join("/") + "/" : "")).child(div().max_w(260).min_w(0).truncate().child(f.noLongerChanged ? `${name} · No longer changed, with comments` : name)))
           // One speech bubble: the draft count when there are drafts, and a click comments on the whole file.
           .child(h_flex().id(`comment-file-${f.path}`).h(18).min_w(18).px(k ? 5 : 0).gap(3).items_center().justify_center().rounded(4).cursor_pointer()
             .when(Boolean(k), (e) => e.bg(t.accent + "33").text_size(10).text_color(t.foreground))

@@ -17,6 +17,7 @@ export class Dialog {
     const p = props() ?? {};
     this.context = String(p.context ?? ""); this.title = p.title ?? "";
     this.repo = p.repo ?? null; this.scope = p.scope ?? null; this.drafts = p.drafts ?? [];
+    this.earlier = p.earlier ?? []; this.includeEarlier = false;
     this.note = ""; this.pick = null; this.error = null; this.sending = false; this.closed = false; this.confirm = false; this.choosing = false; this.copied = false;
     this.input = TextareaState.new({ placeholder: this.context ? "Your note to the agent (optional)…" : "What do you want to ask?", rows: this.context ? 2 : 3 });
     this.input.set_auto_grow(this.context ? 2 : 3, this.context ? 4 : 6);
@@ -45,16 +46,18 @@ export class Dialog {
     const list = this.candidates();
     return list.find((a) => a.address === this.pick) ?? list.find((a) => a.focused) ?? list.find((a) => a.status === "idle") ?? list[0] ?? null;
   }
-  text() { return [this.note.trim(), this.context.trim()].filter(Boolean).join("\n\n"); }
+  text() { return [this.note.trim(), this.context.trim(), this.includeEarlier ? this.earlier.map((e) => e.context).join("\n\n") : ""].filter(Boolean).join("\n\n"); }
 
   send(cx) {
     if (this.sending) return;
+    if (!this.drafts.length && !this.includeEarlier && this.earlier.length) { this.error = "Select Earlier turns to include their comments"; cx.notify(); return; }
     const text = this.text(), target = this.target();
     if (!text) { this.error = "Type a note first"; cx.notify(); return; }
     if (!target) { this.error = "no agent in this tab"; cx.notify(); return; }
     if (target.status !== "idle") { this.error = `${target.program?.name ?? target.app ?? target.address} is ${target.status}; wait until idle`; cx.notify(); return; }
     const request = { id: `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`,
-      text, target: target.address, repo: this.repo, scope: this.scope, drafts: this.drafts };
+      text, target: target.address, repo: this.repo, scope: this.scope,
+      drafts: [...this.drafts, ...(this.includeEarlier ? this.earlier.map(({ key, ids }) => ({ key, ids })) : [])] };
     this.sending = true; this.error = null; cx.notify();
     // Step 1(a) was skipped: keep this overlay alive while its cx pastes and confirms.
     cx.spawn(async (cx) => {
@@ -104,7 +107,8 @@ export class Dialog {
     const button = (id, text, primary, action, disabled) => h_flex().id(id).h(32).px(14).items_center().rounded(8).border_1()
       .border_color(primary ? t.solid : t.input).bg(primary ? t.solid : t.raised).text_color(primary ? t.solid_foreground : t.foreground).text_size(12.5).font_medium()
       .when(disabled, (e) => e.opacity(0.5)).when(!disabled, (e) => e.cursor_pointer().hover((s) => s.opacity(0.88)).on_click(action)).child(text);
-    const contextLines = this.context.split("\n"), shown = contextLines.slice(0, 600);
+    const shownContext = [this.context, this.includeEarlier ? this.earlier.map((e) => e.context).join("\n\n") : ""].filter(Boolean).join("\n\n");
+    const contextLines = shownContext.split("\n"), shown = contextLines.slice(0, 600);
     const contextWidth = Math.max(...shown.map((l) => l.length)) * 6.7 + 24;
     const link = (id, text, action, icon) => h_flex().id(id).h(20).px(5).gap(4).items_center().rounded(4).text_size(11).text_color(t.dim).cursor_pointer().hover((s) => s.text_color(t.foreground).bg(t.hover)).on_click(action)
       .when(Boolean(icon), (e) => e.child(svg(`mods/reviewer/${icon}.svg`).size(12))).child(text);
@@ -141,19 +145,23 @@ export class Dialog {
                       .child(isTarget(a) ? svg("mods/reviewer/check.svg").size(12).text_color(t.accent) : div().w(12)))))
               : agentBox(agent, false)))
       .child(Textarea.new(this.input).w_full().px(10).py(8).rounded(9).border_1().border_color(t.input).bg(t.background).text_size(12.8).text_color(t.foreground))
+      .when(this.earlier.length > 0, (el) => el.child(h_flex().id("earlier-turns").items_center().gap(8).cursor_pointer()
+        .on_click((_e, cx) => { this.includeEarlier = !this.includeEarlier; cx.notify(); })
+        .child(div().text_color(t.accent).child(this.includeEarlier ? "☑" : "☐"))
+        .child(div().text_size(12).child(`Earlier turns (${this.earlier.reduce((n, e) => n + e.ids.length, 0)} comments)`))))
       // The context, read-only: what the caller built (a review, a hunk). Scrolls both ways.
-      .when(Boolean(this.context), (el) => el.child(v_flex().flex_1().min_h(100).gap(4)
+      .when(Boolean(shownContext), (el) => el.child(v_flex().flex_1().min_h(100).gap(4)
         .child(h_flex().items_center().gap(6)
           .child(div().text_size(11).text_color(t.dim).child(`Sent after your note · ${contextLines.length} lines · read-only`))
           .child(div().flex_1())
-          .child(link("context-copy", this.copied ? "Copied" : "Copy", (_e, cx) => { try { cx.write_to_clipboard(this.context); this.copied = true; } catch (e) { this.error = `Copy failed: ${e}`; } cx.notify(); }, this.copied ? "check" : "copy")))
+          .child(link("context-copy", this.copied ? "Copied" : "Copy", (_e, cx) => { try { cx.write_to_clipboard(shownContext); this.copied = true; } catch (e) { this.error = `Copy failed: ${e}`; } cx.notify(); }, this.copied ? "check" : "copy")))
         .child(div().id("ask-context-x").flex_1().min_h(0).rounded(8).border_1().border_color(t.border).bg(t.background).overflow_x_scrollbar()
           .child(v_flex().id("ask-context").h_full().min_w(contextWidth).overflow_y_scrollbar().p(8)
             .font_family(settings().font_family ?? "JetBrains Mono").text_size(11).text_color(t.muted).whitespace_nowrap()
             .children(shown.map((l) => div().h(16).flex_none().child(l || " ")))
             .when(contextLines.length > shown.length, (el) => el.child(div().text_color(t.dim).child(`… ${contextLines.length - shown.length} more lines are sent too`)))))))
       // A long paste can be slow, or cut short by some agents: say so above 8 KB.
-      .when(this.context.length > 8000, (el) => el.child(div().text_size(11).text_color(t.blocked).whitespace_normal().child(`This is ${(this.context.length / 1024).toFixed(0)} KB of text pasted into the agent's terminal; some agents are slow or cut it short at this size. Consider sending fewer comments at a time.`)))
+      .when(shownContext.length > 8000, (el) => el.child(div().text_size(11).text_color(t.blocked).whitespace_normal().child(`This is ${(shownContext.length / 1024).toFixed(0)} KB of text pasted into the agent's terminal; some agents are slow or cut it short at this size. Consider sending fewer comments at a time.`)))
       .when(Boolean(this.error), (el) => el.child(div().text_size(11.5).text_color(t.ansi1).child(this.error)))
       .child(h_flex().items_center().gap(8)
         .child(div().flex_1().min_w(0).truncate().text_size(11.5).text_color(this.confirm ? t.blocked : t.dim)
