@@ -180,6 +180,13 @@
                       }
                     },
                     {
+                      "id": "review",
+                      "type": "block",
+                      "content": {
+                        "mod": "reviewer"
+                      }
+                    },
+                    {
                       "id": "issues",
                       "type": "block",
                       "content": {
@@ -235,6 +242,19 @@
               "type": "block",
               "content": {
                 "mod": "splits"
+              },
+              "size": {
+                "px": 1
+              }
+            },
+            {
+              "id": "review-turns",
+              "type": "block",
+              "content": {
+                "mod": "reviewer",
+                "props": {
+                  "turns": true
+                }
               },
               "size": {
                 "px": 1

@@ -1,6 +1,6 @@
 import { View, div, svg, image } from "gpui-kit";
 import { h_flex, ScrollHandle } from "gpui-base";
-import { spaces, panes, run, openOverlay, theme, window, shared, layout, settings } from "herdr";
+import { spaces, panes, run, openOverlay, theme, window, shared, layout, settings, setWindowTitle, exec } from "herdr";
 
 function find(node, id) {
   if (node?.id === id) return node;
@@ -27,13 +27,39 @@ function label(tab, lead) {
   return (tab.name === prog || !tab.named) && telling ? live : base;
 }
 
+export function titleFor(space, host) {
+  if (!space) return null;
+  const machine = space.machine ?? host;
+  return machine == null ? space.name : `${machine}: ${space.name}`;
+}
+
 export default class Tabs extends View {
   init() {
+    this.closed = false; this.host = null; this.title = undefined;
+    exec("hostname", ["-s"]).then(r => {
+      if (this.closed) return;
+      this.host = r.stdout.trim() || null;
+      this.retitle();
+    }).catch(() => {});
     this.pressed = null;
     this.scroll = ScrollHandle.new();
     try { this.panels = JSON.parse(localStorage.getItem("panels") ?? "{}"); } catch { this.panels = {}; }
     if (!this.panels || typeof this.panels !== "object" || Array.isArray(this.panels)) this.panels = {};
     this.swipe = { acc: 0, steps: 0, at: 0, last: 0 };
+  }
+
+  retitle() {
+    if (this.closed) return;
+    const want = titleFor(this.activeSpace, this.host);
+    if (want === this.title) return;
+    this.title = want;
+    setWindowTitle(want);
+  }
+
+  async close() {
+    this.closed = true;
+    this.title = undefined;
+    setWindowTitle(null);
   }
 
   // One tab per wheel notch. A touchpad or smooth-scrolling mouse sends many
@@ -90,6 +116,8 @@ export default class Tabs extends View {
   render() {
     const t = theme();
     const space = spaces().find(p => p.active);
+    this.activeSpace = space;
+    this.retitle();
     const shown = space?.tabs ?? [];
     const active = shown.findIndex(tab => tab.active);
     const selected = shown[active]?.id;
@@ -132,7 +160,7 @@ export default class Tabs extends View {
     // GitLab (mods/gitlab) sits in the same stack as Files and Changes; Issues has its own button block.
     const enabled = [...(shared("workspace.panels") ?? ["files", "changes"]), "gitlab"];
     // Issues and Plans have their own buttons (not in `enabled`), but a space must still restore them.
-    this.syncPanel(space, panel, body, [...enabled, "issues", "plans"]);
+    this.syncPanel(space, panel, body, [...enabled, "issues", "plans", "review"]);
     const panelButton = (id, label, icon) => {
       const on = panel && !panel.hidden && body?.active === id;
       return h_flex().id(`panel-${id}`).h(26).px(8).gap(5).flex_none().items_center().rounded(6)
