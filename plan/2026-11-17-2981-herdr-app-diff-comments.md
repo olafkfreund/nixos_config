@@ -173,6 +173,10 @@ break the `freund` layout; the sync checks layouts with `jq`, and `ctrl+alt+shif
   description and here. Result (a) fails: step 6 keeps the dialog open until its step 6. Result (b) fails: do
   step 10. Check: the owner reports the observations; `herdr-app status` shows no mod errors.
   Traps: no `hc send`, `hc keys` or Enter in the probe; the probe never targets a real agent pane; no deploy.
+  Deviation (owner, 2026-11-17): skipped for now. Both results are taken as failed, so the safe paths apply:
+  step 6 keeps the dialog open until the paste is confirmed, and step 10's turns-only block is built (inside
+  step 4, as that step says). The probes can still be run later to simplify.
+
 - **Step 2:** `home/development/herdr-app/mods/reviewer/`: copy `mods/reviewer/` from
   `/tmp/claude-1000/spec-2981/vr` at the pinned SHA (`git -C ... rev-parse HEAD` must print
   `01e6d108a8fcc6aeaa07df5c068af59bdd642117`): `main.js`, `dialog.js`, `ask.js`, `highlight.js`, `palette.js`,
