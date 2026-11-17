@@ -362,6 +362,10 @@ so nothing there is a store symlink.
 | settings | `theme = "omarchy"` (Omarchy keeps `themes/omarchy.json` current), sounds on | `[theme] name = "terminal"` |
 | hc config | `history_mb = 48`, `restore_screen = true`, per-shell systemd scope | scrollback, pane history, #2959 |
 
+`argv` launches (menu agents, `tab.new --argv`, `terminal.open`, splits) skip `hcShell` and would share one
+`hc-hold-*` unit, so a bashrc guard (`home/development/hc-argv-guard.bash`) re-execs them into their own
+`herdr-pane` scope (#2959, #2987).
+
 ### Keys
 
 | Key | Action |
@@ -397,7 +401,6 @@ always returns the app to its default layout and keys.
 | window title has no host or workspace | #2984 |
 | Collie is not wired to hc | #2985 |
 | lazygit opens as a tab, not a float | #2986 |
-| agents started from the + menu share one `hc-hold-*` unit (no per-pane scope, #2959) | #2987 |
 | herdr-team's provider-error scan can match its own source on screen | #2988 |
 | hc keeps its first starter's environment (see below) | #2989 |
 
@@ -406,7 +409,8 @@ always returns the app to its default layout and keys.
 The core saves the environment of the process that first started it and reuses it across `hc server restart`
 and updates. If that was a herdr TUI pane or a Claude session, every app terminal inherits `HERDR_ENV=1` and that
 session's variables, and `claude()` / `herdr-team` then act as if they were in the TUI. Plain app shells drop those
-variables (`hcShell` in `home/development/herdr.nix`), but `argv` launches do not. Start the app from the launcher,
+variables (`hcShell` in `home/development/herdr.nix`), and `argv` launches now drop them too, through the guard
+in interactive bash with a user bus. The core's own saved environment stays. Start the app from the launcher,
 never from a TUI pane, and to repair a polluted core run, from outside herdr:
 
 ```bash
