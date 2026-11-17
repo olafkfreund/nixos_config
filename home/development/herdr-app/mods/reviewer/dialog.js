@@ -2,16 +2,13 @@
 //   openOverlay({ mod: "reviewer", kind: "dialog", width, height, props: { dialog: true, title, context, sent } })
 // (main.js hands the copy over to this class when props().dialog is set).
 // `context` is text the caller already formatted (a file, lines, a hunk);
-// `title` is the short label at the top; `sent` (optional) is a shared key
-// the dialog sets to the send time once the text went out, so the caller
-// can react (the panel clears its comments).
-// Sending is a stub until plan step 6 (paste into an agent of the tab); no
-// agent is started and nothing is typed into a terminal. The context is
-// read-only: it scrolls both ways and can be copied.
+// `title` is the short label at the top. The context is read-only: it scrolls
+// both ways and can be copied. The dialog stays mounted through confirmation.
 // Esc closes. Commands: "reviewer.send", "reviewer.close".
 import { div, svg } from "gpui-kit";
 import { v_flex, h_flex, TextareaState, Textarea, Popover } from "gpui-base";
-import { agents, focused, props, closeOverlay, theme, settings, nextCommand } from "herdr";
+import { agents, focused, hc, run, shared, setShared, props, closeOverlay, theme, settings, nextCommand } from "herdr";
+import { confirmed } from "./paste.js";
 
 const DOT = { working: "working", blocked: "blocked", done: "done", idle: "idle" };
 
@@ -19,6 +16,7 @@ export class Dialog {
   init(_props, cx) {
     const p = props() ?? {};
     this.context = String(p.context ?? ""); this.title = p.title ?? "";
+    this.repo = p.repo ?? null; this.scope = p.scope ?? null; this.drafts = p.drafts ?? [];
     this.note = ""; this.pick = null; this.error = null; this.sending = false; this.closed = false; this.confirm = false; this.choosing = false; this.copied = false;
     this.input = TextareaState.new({ placeholder: this.context ? "Your note to the agent (optional)…" : "What do you want to ask?", rows: this.context ? 2 : 3 });
     this.input.set_auto_grow(this.context ? 2 : 3, this.context ? 4 : 6);
@@ -37,7 +35,7 @@ export class Dialog {
     });
   }
 
-  close() { this.closed = true; closeOverlay(props().overlay); }
+  close(done = false) { if (this.sending && !done) return; this.closed = true; closeOverlay(props().overlay); }
   // The agents in the focused tab; the picked one, else the focused, else an idle one, else the first.
   candidates() {
     const tab = focused()?.tab;
@@ -49,11 +47,55 @@ export class Dialog {
   }
   text() { return [this.note.trim(), this.context.trim()].filter(Boolean).join("\n\n"); }
 
-  // Stub (plan step 6): builds the text and does nothing else.
   send(cx) {
     if (this.sending) return;
-    if (!this.text()) { this.error = "Type a note first"; cx.notify(); return; }
-    this.error = "Sending is not wired yet"; cx.notify();
+    const text = this.text(), target = this.target();
+    if (!text) { this.error = "Type a note first"; cx.notify(); return; }
+    if (!target) { this.error = "no agent in this tab"; cx.notify(); return; }
+    if (target.status !== "idle") { this.error = `${target.program?.name ?? target.app ?? target.address} is ${target.status}; wait until idle`; cx.notify(); return; }
+    const request = { id: `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`,
+      text, target: target.address, repo: this.repo, scope: this.scope, drafts: this.drafts };
+    this.sending = true; this.error = null; cx.notify();
+    // Step 1(a) was skipped: keep this overlay alive while its cx pastes and confirms.
+    cx.spawn(async (cx) => {
+      let pasted = false;
+      try {
+        setShared("reviewer.send", request);
+        if (shared("reviewer.handled") === request.id) return;
+        setShared("reviewer.handled", request.id);
+        setShared("reviewer.send", null);
+        const current = agents().find((a) => a.address === request.target && a.tab === focused()?.tab);
+        if (!current) { this.error = "agent is gone"; return; }
+        if (current.status !== "idle") { this.error = `${current.status}; agent is not idle`; return; }
+        const before = await hc(["read", request.target, "--lines", "0"]);
+        if (before.code !== 0) throw new Error(before.stderr || "Could not read the agent screen");
+        const clipboard = cx.read_from_clipboard();
+        cx.write_to_clipboard(text);
+        run("pane.focus", { terminal: request.target });
+        if (focused()?.terminal !== request.target) { this.error = "Could not focus the agent; your comments are kept; the review is on the clipboard"; return; }
+        run("terminal.paste"); pasted = true;
+        let landed = false;
+        for (let i = 0; i < 5; i++) {
+          await new Promise((resolve) => setTimeout(resolve, 400));
+          const after = await hc(["read", request.target, "--lines", "0"]);
+          if (after.code === 0 && confirmed(before.stdout, after.stdout, text)) { landed = true; break; }
+        }
+        if (!landed) { this.error = "Could not confirm the paste; your comments are kept; the review is on the clipboard"; return; }
+        const drafts = { ...(shared("reviewer.drafts") ?? {}) };
+        for (const entry of request.drafts) {
+          const ids = new Set(entry.ids);
+          const remaining = (drafts[entry.key] ?? []).filter((comment) => !ids.has(comment.id));
+          if (remaining.length) drafts[entry.key] = remaining; else delete drafts[entry.key];
+        }
+        setShared("reviewer.drafts", drafts);
+        setShared("reviewer.cleared", { id: request.id, drafts: request.drafts });
+        if (clipboard !== undefined) cx.write_to_clipboard(clipboard);
+        cx.push_toast({ title: `Pasted into ${current.program?.name ?? current.app ?? current.address}; press Enter there to submit`, level: "success" });
+        this.close(true);
+      } catch (e) {
+        this.error = pasted ? "Could not confirm the paste; your comments are kept; the review is on the clipboard" : `Paste failed: ${e}; your comments are kept`;
+      } finally { this.sending = false; if (!this.closed) cx.notify(); }
+    });
   }
 
   render(cx) {
@@ -117,6 +159,6 @@ export class Dialog {
         .child(div().flex_1().min_w(0).truncate().text_size(11.5).text_color(this.confirm ? t.blocked : t.dim)
           .child(agent ? `goes to ${name(agent)} as one message` : "No agent in this tab"))
         .child(button("ask-cancel", "Cancel", false, () => this.close()))
-        .child(button("ask-send", this.sending ? "Sending…" : "Send", true, (_e, cx) => this.send(cx), this.sending)));
+      .child(button("ask-send", this.sending ? "Pasting…" : "Paste", true, (_e, cx) => this.send(cx), this.sending)));
   }
 }

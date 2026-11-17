@@ -48,7 +48,7 @@
 //          base: the branch reviews are against (default: origin/HEAD, else main, else master) }.
 import { View, div, svg } from "gpui-kit";
 import { v_flex, h_flex, TextareaState, Textarea, Scrollbar, v_virtual_list, VirtualListScrollHandle, Popover } from "gpui-base";
-import { spaces, panes, agents, focused, exec, readTextFile, watchFolder, theme, settings, nextCommand, props, shared, setShared } from "herdr";
+import { spaces, panes, agents, focused, exec, readTextFile, watchFolder, openOverlay, theme, settings, nextCommand, props, shared, setShared } from "herdr";
 import { tokenize, languageOf } from "./highlight.js";
 import { ask } from "./ask.js";
 import { palette } from "./palette.js";
@@ -63,7 +63,7 @@ function location() {
 }
 const key = () => JSON.stringify(location());
 const countLines = (text) => text ? text.split("\n").length - Number(text.endsWith("\n")) : 0;
-const NONE = "#00000000", SENT = "reviewer.sent", DRAFTS = "reviewer.drafts", SCOPE = "reviewer.scope";
+const NONE = "#00000000", DRAFTS = "reviewer.drafts", SCOPE = "reviewer.scope";
 // The review scopes, in picker order; "commit" (one picked commit vs its
 // parent) is chosen from the log, not cycled; "turn" is the last agent turn. A scope's id is its name, or
 // "commit:<sha>" for a picked commit: the id keys the remembered scope and the drafts.
@@ -154,6 +154,8 @@ export default class Changes extends View {
     this.note.on("submit", (e, cx) => { if (!e?.shift) this.addComment(cx); });
     this.note.on("change", (_e, cx) => { this.noteText = this.note.value(); if (this.composer?.editing) this.rebuild(); cx.notify(); });
     this.noteText = "";
+    // A request left by a previous app session must never replay.
+    setShared("reviewer.send", null);
     this.refresh(cx);
     cx.timer.every(10000, (cx) => this.refresh(cx));
     cx.spawn(async (cx) => {
@@ -686,10 +688,13 @@ export default class Changes extends View {
     });
     const n = list.length, title = `Review · ${n} comment${n > 1 ? "s" : ""}`;
     const context = `Code review of ${this.root}${this.on ? ` (on ${this.on})` : ""}: ${this.scopeWords()}. ${n} comment${n > 1 ? "s" : ""}. Line numbers are new-file numbers; "-" lines are removed.\n\n${parts.join("\n\n")}`;
-    this.submitting = Date.now();
+    const repo = this.root, scope = this.scopeId(), draftKey = this.draftKey();
     cx.spawn(async (cx) => {
-      try { const r = await ask({ title, context, sent: SENT }); if (r === "sent") this.setComments([], cx); else if (r === "none") this.submitting = null; }
-      catch (e) { this.note_ = `Submit failed: ${e}`; this.submitting = null; }
+      try {
+        openOverlay({ mod: "reviewer", kind: "dialog", width: 680, height: 560,
+          props: { dialog: true, title, context, repo, scope,
+            drafts: [{ key: draftKey, ids: list.map((c) => c.id) }] } });
+      } catch (e) { this.note_ = `Submit failed: ${e}`; }
       cx.notify();
     });
   }
@@ -804,9 +809,12 @@ export default class Changes extends View {
     if (size !== this.fontSize) { this.fontSize = size; this.row = rowOf(size); this.measure(); }
     // "Full file" may have been switched in another copy of the panel.
     else if (this.full() !== this.builtFull) this.rebuild();
-    // The dialog reports a sent review through a shared key; the draft goes.
-    const sentAt = shared(SENT);
-    if (this.submitting && typeof sentAt === "number" && sentAt >= this.submitting) { this.submitting = null; cx.timer.after(1, (cx) => this.setComments([], cx)); }
+    const cleared = shared("reviewer.cleared");
+    if (cleared?.id !== this.cleared && cleared?.drafts?.some((d) => d.key === this.draftKey())) {
+      this.cleared = cleared.id;
+      this.comments = shared(DRAFTS)?.[this.draftKey()] ?? [];
+      this.rebuild();
+    }
     const t = theme(), colors = palette(props()?.palette, t), add = this.files.reduce((n, f) => n + f.add, 0), del = this.files.reduce((n, f) => n + f.del, 0);
     const target = this.target(), n = this.comments.length, canAsk = Boolean(this.open && this.rows.length);
     const commented = new Set();
