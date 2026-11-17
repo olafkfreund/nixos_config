@@ -7,7 +7,7 @@ let
   hostCfg = config.local.llmIndex;
 in
 {
-  imports = [ ./omarchy-enable-once.nix ];
+  imports = [ ./omarchy-enable-once.nix ./llm-docs.nix ];
 
   options.local.llmIndex = {
     sourcePath = lib.mkOption {
