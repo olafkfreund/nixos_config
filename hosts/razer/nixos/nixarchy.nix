@@ -38,7 +38,7 @@
     ../../common/nixos/omarchy-microvm.nix
     ../../common/nixos/omarchy-omadroid.nix
     ../../common/nixos/omarchy-omapod.nix
-    ../../common/nixos/omarchy-shelfish.nix
+    ../../common/nixos/omarchy-pocket.nix
     ../../common/nixos/omarchy-expose.nix
     ../../common/nixos/omarchy-omateams.nix
     ../../common/nixos/omarchy-omaoutlook.nix
