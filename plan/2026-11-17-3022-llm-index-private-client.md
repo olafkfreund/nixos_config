@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3022
 spec: spec/2026-11-17-3022-llm-index-private-client.md
 coders:
