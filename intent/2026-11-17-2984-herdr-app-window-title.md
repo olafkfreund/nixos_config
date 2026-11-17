@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2984
 author: olafkfreund
 ---
@@ -106,3 +106,7 @@ way to run a headless mod without a layout block, would remove the 1px block. On
    upstream bug to file, and the verdict becomes "upstream-first".
 7. Is a comment on upstream #589 wanted? Recommendation: yes, one short comment after the mod works, with
    the 1px-block finding. Low priority and the owner's call.
+
+## Decision
+
+Approved by the owner on 2026-11-17, with the recommendation given for each open question above.
