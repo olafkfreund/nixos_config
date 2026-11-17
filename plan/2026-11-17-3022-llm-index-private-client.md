@@ -315,6 +315,27 @@ nix build -o /tmp/claude-diag .#nixosConfigurations.p620.config.home-manager.use
   `llm-docs-diag ls /proc/self/fd` lists only 0, 1, 2 and the listing's own
   fd.
 
+## Deviations during implementation
+
+These came up in step 2. The privacy boundary does not change.
+
+- **flake8 ignores.** `flakeIgnore` is `[ "E501" "E265" "W503" ]`.
+  `writePython3Bin` prepends its own shebang, so the file's `#!` line trips
+  E265, and the ruff-formatted proxy breaks lines before operators, which
+  trips W503.
+- **No `$schema` key** in the generated opencode config. It is optional, and
+  shellcheck flags the literal `$schema` (SC2016).
+- **`instructions` is a file path.** opencode takes file paths there, so
+  `agentInstructions` is written with `pkgs.writeText` and its store path is
+  passed.
+- **Proxy log location.** The log goes to `$XDG_RUNTIME_DIR/llm-docs/proxy.log`
+  (0700, tmpfs) rather than the terminal, where it would garble the TUI. It
+  still holds only the method, path, model and status.
+- **Working folder.** bwrap gets `--chdir $HOME` (the tmpfs home), so
+  opencode never uses the host's current folder as a project.
+- **Policy entry shape,** taken from the 1.18.31 binary:
+  `{ action = "provider.use"; resource; effect; }`.
+
 ## Tests
 
 | Command | Expected |
