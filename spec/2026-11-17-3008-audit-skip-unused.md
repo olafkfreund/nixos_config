@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3008
 intent: intent/2026-11-17-3008-audit-skip-unused.md
 ---
