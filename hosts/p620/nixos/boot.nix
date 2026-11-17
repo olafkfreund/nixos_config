@@ -26,11 +26,15 @@
   #
   # / is a 916G NVMe with 300G+ free, so builds get somewhere effectively
   # unbounded and fast, and ENOSPC stops being a thing that looks like a full
-  # disk while `df /` says otherwise. cleanOnBoot keeps the clear-on-restart
-  # behaviour tmpfs gave for free.
+  # disk while `df /` says otherwise.
+  #
+  # No cleanOnBoot: deleting /tmp file by file blocked sysinit for 79 s per
+  # boot (agents leave tens of thousands of nix-shell files). The default
+  # `q /tmp 10d` rule still ages files out, run by systemd-tmpfiles-clean.timer
+  # 15 min after boot in the background.
   boot.tmp = {
     useTmpfs = false;
-    cleanOnBoot = true;
+    cleanOnBoot = false;
   };
   boot.initrd.kernelModules = [ "amdgpu" ];
   boot.blacklistedKernelModules = [ "nvidia" "nouveau" "nova_core" ];
