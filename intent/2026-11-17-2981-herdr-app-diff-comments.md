@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2981
 author: olafkfreund
 ---
@@ -137,3 +137,7 @@ path at least, so "adopt as is" is not on offer. Which route is open question 1.
    calls and a Rust build for something not in the issue.
 6. Which key? Recommend `ctrl-shift-d` or the mod's default, checked against
    `keys.json` in `herdr-app.nix:42-51` and the TUI's `prefix+alt+d`.
+
+## Decision
+
+Approved by the owner on 2026-11-17, with the recommendation given for each open question above.
