@@ -147,5 +147,6 @@ Owner by hand (the lead must not drive the app UI):
 - **O7** Close the app and confirm no stale title in the bar or alt-tab.
 
 After A1 to A6, L1 to L3 and O1 to O7 pass: post one short comment on upstream Issue #589
-(the mod works on Linux/Wayland; a declarative `{host}: {space}` template, or a headless mod without a layout block, would drop the need for a hosted mod). The lead
+(the mod works on Linux/Wayland; a declarative `{host}: {space}` template, or a headless mod without a layout block,
+would drop the need for a hosted mod). The lead
 writes the comment text to a file and posts it only after the owner says so.
