@@ -363,7 +363,20 @@ the CPU, pushing other models out of the GPU. You chose `qwen3:14b` instead:
 the proxy and opencode config follow from that one `let`. Live check 4 is
 re-run with it.
 
-## Tests
+## Fix after first real use (2026-11-17)
+
+Your first question got an empty answer. A replay of the exact request,
+with no document data, explains it: under opencode's coding-agent system
+prompt, `qwen3:14b` planned the `private_search` call in its reasoning, then
+emitted no tool call and no text. Turning thinking off did not help. A short
+document-focused prompt did, 4 out of 4 times. Also, the `instructions` file
+was never loaded, so the llm-index rules were missing from the prompt.
+
+- **Prompt:** `agent.build.prompt` now holds that short prompt plus
+  `agentInstructions`, and `instructions` is removed. A capture shows the
+  prompt replaces opencode's 10k-character prompt.
+- **socat:** its stderr is silenced. It logged a harmless "Connection reset"
+  each time opencode dropped a finished connection.
 
 | Command | Expected |
 | --- | --- |

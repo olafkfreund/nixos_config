@@ -21,8 +21,16 @@ in
         proxy = pkgs.writers.writePython3Bin "llm-docs-proxy" { flakeIgnore = [ "E501" "E265" "W503" ]; }
           (builtins.readFile ./llm-docs-proxy.py);
 
-        # opencode's `instructions` takes file paths, so the text goes through the store
-        instructionsFile = pkgs.writeText "llm-docs-instructions.md" llmIndex.agentInstructions;
+        # Replaces opencode's coding-agent prompt: with it, qwen3:14b planned the search in its
+        # reasoning but emitted no tool call; a short document prompt makes it call the tools.
+        # The `instructions` file option was not loaded at all.
+        prompt = ''
+          You answer questions about the user's own documents. Always call private_search
+          (or private_recent / private_get) to find the answer before replying; never answer
+          from memory. Reply briefly and name the file.
+
+          ${llmIndex.agentInstructions}
+        '';
 
         opencodeConfig = builtins.toJSON {
           provider.ollama = {
@@ -59,7 +67,7 @@ in
           autoupdate = false;
           snapshot = false;
           plugin = [ ];
-          instructions = [ "${instructionsFile}" ];
+          agent.build.prompt = prompt;
         };
 
         # exec "$@" with every fd above 2 closed; a shell loop cannot close bash's own script fd
@@ -72,7 +80,8 @@ in
 
         # runs inside the sandbox: bridge 127.0.0.1:11434 to the proxy socket, then exec "$@"
         inner = pkgs.writeShellScript "llm-docs-inner" ''
-          ${pkgs.socat}/bin/socat TCP-LISTEN:11434,bind=127.0.0.1,fork,reuseaddr UNIX-CONNECT:/run/llm-docs.sock &
+          # socat logs a harmless reset each time opencode drops a finished connection
+          ${pkgs.socat}/bin/socat TCP-LISTEN:11434,bind=127.0.0.1,fork,reuseaddr UNIX-CONNECT:/run/llm-docs.sock 2>/dev/null &
           up=0
           for _ in $(seq 1 50); do
             if (exec 3<>/dev/tcp/127.0.0.1/11434) 2>/dev/null; then up=1; break; fi
@@ -142,7 +151,6 @@ in
         env = {
           HOME = home;
           PATH = lib.makeBinPath [ pkgs.coreutils ];
-          OPENCODE_CONFIG_CONTENT = opencodeConfig;
           OPENCODE_DISABLE_PROJECT_CONFIG = "1";
           OPENCODE_DISABLE_AUTOUPDATE = "1";
           OPENCODE_DISABLE_SHARE = "1";
@@ -182,6 +190,8 @@ in
               ${lib.escapeShellArgs bwrapArgs}
               --bind "$run/ollama.sock" /run/llm-docs.sock
               ${lib.escapeShellArgs setenvArgs}
+              # read from the store at run time: the prompt text is not shell-safe inline
+              --setenv OPENCODE_CONFIG_CONTENT "$(cat ${pkgs.writeText "llm-docs-opencode.json" opencodeConfig})"
               --setenv TERM "''${TERM:-xterm}"
               --setenv COLORTERM "''${COLORTERM:-}"
               --setenv LANG "''${LANG:-C.UTF-8}"
