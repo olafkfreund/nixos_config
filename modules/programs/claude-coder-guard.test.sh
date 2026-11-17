@@ -88,6 +88,9 @@ git branch -D x
 git update-ref refs/heads/x HEAD
 git restore file
 git clean -fdx
+./scripts/sync-remote-checkout.sh sync razer abc
+bash scripts/sync-remote-checkout.sh around razer -- true
+just status _x sync-remote-checkout
 BLOCK
 
 while IFS= read -r c; do t 0 "$c"; done <<'ALLOW'

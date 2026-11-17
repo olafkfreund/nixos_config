@@ -165,6 +165,9 @@ test-guards:
     @python3 ./scripts/test-p510-deploy-guard.py
     @python3 ./scripts/test-bus-guard.py
     @bash ./scripts/test-nixos-issue-audit.sh
+    @bash ./scripts/test-sync-remote-checkout.sh
+    @bash ./scripts/test-nhs-checkout-sync.sh
+    @bash ./modules/programs/claude-coder-guard.test.sh
 
 # Check for available updates
 [group('update')]
@@ -276,7 +279,7 @@ check-syntax:
 # Deploy to razer laptop (Intel/NVIDIA) - OPTIMIZED
 [group('deploy')]
 razer: _require-main (_sign-drv "razer")
-    nixos-rebuild switch --flake .#razer --target-host razer --build-host razer --sudo --no-reexec --keep-going
+    ./scripts/sync-remote-checkout.sh around razer -- nixos-rebuild switch --flake .#razer --target-host razer --build-host razer --sudo --no-reexec --keep-going
 
 # Deploy to p620 workstation (AMD) - OPTIMIZED
 [group('deploy')]
@@ -287,7 +290,7 @@ p620: _require-main
 [group('deploy')]
 p510: _require-main
     just p510-clear-sessions
-    nixos-rebuild switch --flake .#p510 --target-host p510 --build-host p510 --sudo --no-reexec --keep-going
+    ./scripts/sync-remote-checkout.sh around p510 -- nixos-rebuild switch --flake .#p510 --target-host p510 --build-host p510 --sudo --no-reexec --keep-going
 
 # Guarded by name (#2951): bus hook (announce), coder guard (blocked), p510 guard. Rename it in the guards too.
 
@@ -389,6 +392,7 @@ quick-deploy HOST: _require-main
         || { echo "❌ Build failed for {{ HOST }}, not deploying"; exit 1; }; \
     if [ "$(ssh {{ HOST }} readlink /run/current-system 2>/dev/null)" = "$new" ]; then \
         echo "🔄 No changes detected for {{ HOST }}, skipping deployment"; \
+        ./scripts/sync-remote-checkout.sh around {{ HOST }} -- true; \
     else \
         echo "📝 Changes detected, deploying to {{ HOST }}..."; \
         just {{ HOST }}; \
@@ -426,7 +430,7 @@ fix-agenix-remote HOST:
 [group('deploy')]
 deploy-local-build HOST: _require-main
     @echo "🏗️ Building {{HOST}} locally, deploying remotely..."
-    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --sudo --no-reexec --keep-going
+    ./scripts/sync-remote-checkout.sh around {{HOST}} -- nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --sudo --no-reexec --keep-going
 
 # Guarded by name (#2951): coder guard (blocked: signs with the host key). Rename it in the guards too.
 
@@ -459,7 +463,7 @@ deploy-via-p620 HOST: _require-main (_sign-drv HOST)
     if [ "$(hostname)" = "{{HOST}}" ]; then \
         sudo nixos-rebuild switch --flake .#{{HOST}} --no-reexec; \
     else \
-        nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --sudo --no-reexec --keep-going; \
+        ./scripts/sync-remote-checkout.sh around {{HOST}} -- nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --sudo --no-reexec --keep-going; \
     fi
     @echo "✅ Deployment complete! {{HOST}} is using P620's cache."
 
