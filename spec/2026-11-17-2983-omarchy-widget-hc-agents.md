@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2983
 intent: intent/2026-11-17-2983-omarchy-widget-hc-agents.md
 ---
