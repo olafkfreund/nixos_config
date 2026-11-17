@@ -132,6 +132,7 @@
   # herdr-app — native Herdr desktop app, wrapped to use herdr-core.
   herdr-app = pkgs.callPackage ./herdr-app { inherit (pkgs.customPkgs) herdr-core herdr-app-sync; };
   herdr-app-sync = pkgs.callPackage ./herdr-app-sync { };
+  hc-core-ensure = pkgs.callPackage ./hc-core-ensure { inherit (pkgs.customPkgs) herdr-core; };
   herdr-agent-plans = pkgs.callPackage ./herdr-agent-plans { };
 
   # FlyCrys — GTK4-native GUI for Claude Code (Rust). Not in nixpkgs yet;
