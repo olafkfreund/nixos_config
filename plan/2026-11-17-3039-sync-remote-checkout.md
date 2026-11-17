@@ -127,6 +127,10 @@ Branch `fix/3039-sync-remote-checkout`, worktree `~/.config/nixos-shelfish`.
   current". Commit per step, PR linking intent, spec and plan (who did which step), Opus review of the diff, Codex
   review, `@codex review`.
 
+Deviation (step 3, recorded at commit): two existing shellcheck findings in
+`scripts/update-commit-deploy.sh` were fixed alongside (an SC2029 disable comment and one quoted `date -d`
+argument), so the file is shellcheck-clean.
+
 ## Tests
 
 - `just test-guards` (now also the sync, nhs-sync and coder-guard suites); `just check-syntax`.
