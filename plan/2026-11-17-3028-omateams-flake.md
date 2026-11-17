@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3028
 spec: spec/2026-11-17-3028-omateams-flake.md
 coders:
