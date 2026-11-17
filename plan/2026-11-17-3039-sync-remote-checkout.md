@@ -131,6 +131,12 @@ Deviation (step 3, recorded at commit): two existing shellcheck findings in
 `scripts/update-commit-deploy.sh` were fixed alongside (an SC2029 disable comment and one quoted `date -d`
 argument), so the file is shellcheck-clean.
 
+Deviation (after the Opus review, recorded at commit): the sync's ssh call gets `BatchMode`, a 10 s connect
+timeout and a 120 s overall `timeout`, the remote git runs with `GIT_TERMINAL_PROMPT=0`, and the remote script is
+wrapped in a function; `around` re-checks the source after COMMAND and skips if it changed; nhs records a tree only
+from a clean checkout (a staged `flake.lock` is deployed but is not HEAD's tree). Tests added for detached HEAD,
+an edit during COMMAND, nothing-to-do with `--no-deploy`, and a staged lock. Docs note that exit 4 skips the sync.
+
 ## Tests
 
 - `just test-guards` (now also the sync, nhs-sync and coder-guard suites); `just check-syntax`.

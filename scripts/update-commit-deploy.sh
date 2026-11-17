@@ -275,7 +275,7 @@ fi
 # --- 6. Nothing-to-do exit --------------------------------------------------
 if [ $LOCK_CHANGED -eq 0 ] && [ $HOST_STALE -eq 0 ]; then
   ok "no lock changes AND ${HOST} already on ${expected##*/} — nothing to do."
-  if [ "$MODE" = remote ] && [ "$NO_DEPLOY" -eq 0 ]; then
+  if [ "$MODE" = remote ] && [ "$NO_DEPLOY" -eq 0 ] && [ -z "$(git status --porcelain 2>/dev/null)" ]; then
     "${NHS_SYNC_CMD:-$REPO_ROOT/scripts/sync-remote-checkout.sh}" sync "$HOST" "$(git rev-parse 'HEAD^{tree}')" || true
   fi
   exit 0
@@ -678,7 +678,8 @@ case "$MODE" in
     # closure (wrong baseline — shows this host's packages as removed). Suppress
     # it; the correct remote diff (target-old vs target-new) is done by nvd in
     # show_pkg_diff below.
-    DEPLOYED_TREE=$(git rev-parse 'HEAD^{tree}') || true
+    # A dirty tree (e.g. a staged flake.lock) is deployed but is not HEAD's tree: record nothing.
+    [ -n "$(git status --porcelain 2>/dev/null)" ] || DEPLOYED_TREE=$(git rev-parse 'HEAD^{tree}') || true
     if ! nh_switch_or_boot --diff never --hostname "$HOST" --target-host "$HOST" .; then
       rollback_and_close_pr "remote nh os switch on ${HOST} failed (see output above)"
     fi

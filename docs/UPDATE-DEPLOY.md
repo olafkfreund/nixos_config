@@ -147,10 +147,13 @@ It is skipped, with a one-line reason, when:
 - the target checkout is not on `main`, is dirty, or has local commits
 - the target is p620 or the deploy is to the same host
 
-The sync never fails a deploy. To do it by hand on the remote host:
+The sync never fails a deploy. It runs only when the activation exits 0, so a deploy that ends in exit 4 (a unit
+that failed to restart, common on p510) leaves the checkout alone. To do it by hand on the remote host, with the
+commit that was deployed:
 
 ```bash
-git -C ~/.config/nixos merge --ff-only origin/main
+git -C ~/.config/nixos fetch origin
+git -C ~/.config/nixos merge --ff-only --no-overwrite-ignore <deployed-commit>
 ```
 
 ## The `nhs` shortcut

@@ -23,7 +23,9 @@ sync_checkout() {
     return 0
   fi
   if output=$(
-    ssh "$host" bash -s -- "$commit" <<'REMOTE'
+    timeout 120 ssh -o BatchMode=yes -o ConnectTimeout=10 "$host" env GIT_TERMINAL_PROMPT=0 bash -s -- "$commit" <<'REMOTE'
+# Wrapped in a function so bash reads the whole script before running any of it.
+main() {
 set -uo pipefail
 cd "$HOME/.config/nixos" 2>/dev/null || { printf 'could not sync: checkout unavailable\n'; exit 1; }
 branch=$(git symbolic-ref -q --short HEAD) || branch=
@@ -58,6 +60,8 @@ if ! git merge --ff-only --no-overwrite-ignore --no-autostash -q "$1" >/dev/null
   exit 1
 fi
 printf 'fast-forwarded %s..%s (%s commits)\n' "$old" "$1" "$count"
+}
+main "$@"
 REMOTE
   ); then
     say "${output//$'\n'/ }"
@@ -98,6 +102,9 @@ case ${1:-} in
     result=$?
     if ((result != 0)); then
       say 'command failed; skipped'
+    elif [[ -z $reason && -n $(git status --porcelain 2>/dev/null) ]]; then
+      # An edit while the command ran may have been deployed but is not in the recorded tree.
+      say 'source changed during the command; skipped'
     elif [[ -n $reason ]]; then
       say "$reason"
     else

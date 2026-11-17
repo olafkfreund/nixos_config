@@ -52,7 +52,7 @@ case "$*" in
   *'readlink -f /nix/var/nix/profiles/system'*)
     if [[ -e $RUN_DIR/activated ]]; then printf '/nix/store/new\n'; else printf '/nix/store/old\n'; fi ;;
   *'readlink /run/current-system'*)
-    if [[ $CASE == noop || ( -e $RUN_DIR/activated && $CASE != boot ) ]]; then
+    if [[ $CASE == noop || $CASE == noop_no_deploy || $CASE == noop_staged || ( -e $RUN_DIR/activated && $CASE != boot ) ]]; then
       printf '/nix/store/new\n'
     else
       printf '/nix/store/old\n'
@@ -143,7 +143,11 @@ SH
   [[ $CASE != boot ]] || host=p510
   [[ $CASE != local ]] || host=testhost
   local args=("$host" all)
-  [[ $CASE != no_deploy_unchanged && $CASE != no_deploy_changed ]] || args+=(--no-deploy)
+  [[ $CASE != no_deploy_unchanged && $CASE != no_deploy_changed && $CASE != noop_no_deploy ]] || args+=(--no-deploy)
+  if [[ $CASE == noop_staged ]]; then
+    printf '\n' >>"$RUN_DIR/src/flake.lock"
+    "$real_git" -C "$RUN_DIR/src" add flake.lock
+  fi
   if [[ $CASE == changed || $CASE == no_deploy_changed || $CASE == merge_fail || $CASE == pull_fail || $CASE == health_fail ]]; then
     # The branch name is derived from the changed lock; the stub needs it after the push.
     local changed_lock
@@ -178,6 +182,6 @@ SH
   printf 'ok %s\n' "$CASE"
 }
 
-for case_name in no_pr changed noop boot activation_fail health_fail no_deploy_unchanged no_deploy_changed local merge_fail pull_fail recorder_fail; do
+for case_name in no_pr changed noop noop_no_deploy noop_staged boot activation_fail health_fail no_deploy_unchanged no_deploy_changed local merge_fail pull_fail recorder_fail; do
   run_case "$case_name"
 done

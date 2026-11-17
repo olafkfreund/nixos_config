@@ -11,6 +11,7 @@ cat >"$tmp/bin/ssh" <<'SSH'
 #!/usr/bin/env bash
 printf x > "$TEST_SSH_MARKER"
 [[ ${TEST_SSH_FAIL:-} == 1 ]] && exit 255
+while [[ ${1:-} == -o ]]; do shift 2; done
 shift
 HOME=$TEST_HOME "$@"
 SSH
@@ -175,6 +176,25 @@ setup
 advance newer
 TEST_SSH_FAIL=1 run sync razer "$newer_tree"
 check 'ssh failed' "$base" 'could not sync: ssh failed'
+
+setup
+advance newer
+g -C "$tmp/src" switch -q --detach origin/main
+run around razer -- true
+check 'detached at origin/main' "$(g -C "$tmp/src" rev-parse HEAD)" "fast-forwarded $base..$(g -C "$tmp/src" rev-parse HEAD) (1 commits)"
+
+setup
+advance newer
+g -C "$tmp/src" switch -q --detach "$base"
+run around razer -- true
+check 'detached elsewhere' "$base" 'source not on main or origin/main; skipped'
+[[ ! -e $TEST_SSH_MARKER ]]
+
+setup
+advance newer
+run around razer -- bash -c 'printf edit > tracked'
+check 'edited during command' "$base" 'source changed during the command; skipped'
+[[ ! -e $TEST_SSH_MARKER ]]
 
 setup
 run sync p620 "$base_tree"
