@@ -18,6 +18,9 @@ block() {
   exit 2
 }
 
+# The remote checkout sync runs inside a deploy; it is not the coder's to run.
+case "$cmd" in *sync-remote-checkout*) block "remote checkout sync (part of a deploy)" ;; esac
+
 set -f
 segments="$(printf '%s\n' "$cmd" \
   | sed -E 's/(^|[[:space:]])(bash|sh|zsh)[[:space:]]+-[a-z]*c[[:space:]]+/\n/g; s/(\$\(|[;&|()`{}]|\n)+/\n/g; s/["'\'']//g')"

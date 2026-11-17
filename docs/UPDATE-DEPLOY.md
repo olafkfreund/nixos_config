@@ -135,6 +135,24 @@ and finalizes the merge anyway — but you lose the rollback safety net.
   p620/razer/p510)
 - SSH key loaded in `ssh-agent` (no password prompts)
 
+## Remote checkout sync
+
+After a successful deploy to a remote host, its `~/.config/nixos` is fast-forwarded to the `main` commit that was
+deployed, so the remote checkout matches the running system.
+
+It is skipped, with a one-line reason, when:
+
+- the deploying checkout is dirty or not on `main`
+- the deployed commit is not on `origin/main`
+- the target checkout is not on `main`, is dirty, or has local commits
+- the target is p620 or the deploy is to the same host
+
+The sync never fails a deploy. To do it by hand on the remote host:
+
+```bash
+git -C ~/.config/nixos merge --ff-only origin/main
+```
+
 ## The `nhs` shortcut
 
 `nhs` is a zsh function defined in `home/shell/zsh.nix`. It wraps `just update-commit-deploy` so the muscle-memory
