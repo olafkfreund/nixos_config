@@ -119,7 +119,7 @@ case ${1:-} in
       # Activated with a failed unit: sync only if the target runs exactly what the recorded tree evaluates to.
       if ! source_unmoved; then
         say 'exit 4; source moved during the command; skipped'
-      elif ! expected=$(nix eval --raw ".#nixosConfigurations.$host.config.system.build.toplevel" 2>/dev/null) || [[ -z $expected ]]; then
+      elif ! expected=$(timeout 300 nix eval --raw ".#nixosConfigurations.$host.config.system.build.toplevel" 2>/dev/null) || [[ -z $expected ]]; then
         say 'exit 4; could not evaluate the deployed system; skipped'
       elif ! source_unmoved; then
         say 'exit 4; source moved during the command; skipped'
