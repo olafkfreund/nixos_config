@@ -53,7 +53,7 @@
   # Exposé: window overview for the Omarchy shell (#2723).
   expose-plugin = pkgs.callPackage ./expose-plugin { };
   hello-lock = pkgs.callPackage ./hello-lock { };
-  shelfish = pkgs.callPackage ./shelfish { };
+  omarchy-pocket = pkgs.callPackage ./omarchy-pocket { };
   # Omaoutlook: Microsoft Outlook web in an Omarchy-themed window (#2602).
   omaoutlook = pkgs.callPackage ./omaoutlook { omateams = throw "omaoutlook needs omateams; see hosts/common/nixos/omarchy-omaoutlook.nix"; };
 
