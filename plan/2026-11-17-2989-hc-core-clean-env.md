@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2989
 spec: spec/2026-11-17-2989-hc-core-clean-env.md
 coders:
