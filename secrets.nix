@@ -330,4 +330,17 @@ in
   # imported here, so it was already sealed to olafkfreund + p510 before this
   # entry existed — declaring it is what makes it rekeyable from now on.
   "secrets/factory-secret-minio-kms.age".publicKeys = allUsers ++ [ p510 p620 ];
+
+  # RFactory desktops (#3, KubeVirt in k3d): CA, runner/guard/client mTLS, profile master key
+  "secrets/rfactory-desktops-ca-crt.age".publicKeys = allUsers ++ [ p620 ];
+  "secrets/rfactory-desktops-ca-key.age".publicKeys = allUsers ++ [ p620 ];
+  "secrets/rfactory-guard-tls-crt.age".publicKeys = allUsers ++ [ p620 ];
+  "secrets/rfactory-guard-tls-key.age".publicKeys = allUsers ++ [ p620 ];
+  "secrets/rfactory-profile-key.age".publicKeys = allUsers ++ [ p620 ];
+  "secrets/rfactory-runner-client-crt.age".publicKeys = allUsers ++ [ p620 ];
+  "secrets/rfactory-runner-client-key.age".publicKeys = allUsers ++ [ p620 ];
+  "secrets/rfactory-runner-tls-crt.age".publicKeys = allUsers ++ [ p620 ];
+  "secrets/rfactory-runner-tls-key.age".publicKeys = allUsers ++ [ p620 ];
+  "secrets/rfactory-web-client-crt.age".publicKeys = allUsers ++ [ p620 ];
+  "secrets/rfactory-web-client-key.age".publicKeys = allUsers ++ [ p620 ];
 }
