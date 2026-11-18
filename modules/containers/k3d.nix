@@ -600,10 +600,12 @@ let
       ${optionalString cfg.argocd.enable ''
       # 5. Apply the GitOps bootstrap. Expected to install ArgoCD + the
       #    App-of-Apps root Application from ${cfg.argocd.gitopsRepo}.
-      #    Idempotent: re-applies cleanly if anything drifts.
+      #    Idempotent: re-applies cleanly if anything drifts. Server-side,
+      #    because ArgoCD 3.3+ CRDs are too big for client-side apply
+      #    (factory-gitops #387).
       BOOTSTRAP_URL="${cfg.argocd.gitopsRepo}//${cfg.argocd.bootstrapPath}?ref=${cfg.argocd.gitopsRef}"
       echo "[k3d-bootstrap] Applying $BOOTSTRAP_URL"
-      if ! kubectl apply -k "$BOOTSTRAP_URL"; then
+      if ! kubectl apply --server-side --force-conflicts -k "$BOOTSTRAP_URL"; then
         echo "[k3d-bootstrap] WARN: kustomize apply failed (repo may not exist yet)." \
              "Once ${cfg.argocd.gitopsRepo} has the bootstrap/ kustomization," \
              "re-run: systemctl restart k3d-cluster-bootstrap"
