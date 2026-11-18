@@ -231,6 +231,30 @@ CASES += [
     ("anVzdCAtLXN1bW1hcnkgcDUxMA==", 2, "#3047 unchanged: --summary still blocked"),
 ]
 
+CASES += [
+    (
+        "c3NoIHA1MTAgJ2NkIC9ldGMvbml4b3MgJiYgc3VkbyBuaXhvcy1yZWJ1aWxkIHN3aXRjaCc=",
+        2,
+        "#3047 review: ssh host then && switch",
+    ),
+    (
+        "c3NoIHA1MTAgImNkIC9ldGMvbml4b3MgJiYgc3VkbyBuaCBvcyBzd2l0Y2ggLiI=",
+        2,
+        "#3047 review: ssh host then && nh os switch",
+    ),
+    ("SD1wNTEwICYmIG5ocyAkSA==", 2, "#3047 review: host in a variable then &&"),
+    (
+        "anVzdCAtLWp1c3RmaWxlPSJKdXN0ZmlsZSIgcDUxMA==",
+        2,
+        "#3047 review: quoted --justfile value",
+    ),
+    (
+        "anVzdCAtZiBqZiAtLXNoZWxsLWFyZyAtbiBwNTEw",
+        2,
+        "#3047 review: --shell-arg value looks like -n",
+    ),
+]
+
 # A guard whose prepare step fails must deny, not allow (#3047).
 fd, broken_prepare = tempfile.mkstemp(suffix=".sh")
 os.write(fd, b"guard_prepare() { return 1; }\n")

@@ -32,6 +32,23 @@ Branch `fix/3047-deploy-guard-gaps`, worktree `~/.config/nixos-shelfish`.
 - `--no-deploy` gets no exception; `nhsb` / `just update-commit` unchanged; `--evaluate`/`--summary` not allowed.
 - Escape checks (`AGENT_BUS_ANNOUNCED=1`, `P510_DEPLOY_APPROVED=1`) stay first, on the raw text, unchanged.
 
+## Deviation after review (2026-11-18)
+
+The Codex and Opus reviews found three bypasses that the guards on main block; each now has a regression case in
+both suites and fails against the original prepare step.
+
+- Split only to decide what to drop. Kept segments are printed with their original `&&`, `||`, `;`, `|` and
+  newlines, so `ssh p510 'cd /etc/nixos && sudo nixos-rebuild switch'` and `H=p510 && nhs $H` still match the
+  host-plus-verb patterns (they passed the p510 guard when the split was printed as lines).
+- Quotes are deleted, as the shell removes them, instead of becoming spaces; `$`, `(`, `)` and backticks still
+  become spaces. `just --justfile="Justfile" p510` passed both guards when the quotes became spaces.
+- The word walk drops a line only for `-f`/`--justfile`/`-d`/`--working-directory X` and the inspection flags;
+  any other option ends the walk and keeps the line, because its value may look like `-n`
+  (`just --shell-arg -n p510` runs the recipe).
+
+Known limits, not regressions (main behaves the same): an option value the recipe patterns cannot skip
+(`just --shell-arg 0 p510`), and words split by quotes (`nh''s p510`).
+
 ## Steps
 
 - **Step 1:** `modules/programs/claude-guard-prepare.sh` and `modules/programs/claude-guard-prepare.test.sh` (new).

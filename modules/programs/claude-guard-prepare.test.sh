@@ -23,13 +23,14 @@ host=p510
 other=razer
 verb=nhs
 
-check "$verb $host && $runner $other" "$verb $host "$'\n'" $runner $other"
-check "$verb $host || $runner $other" "$verb $host "$'\n'" $runner $other"
-check "$verb $host;$runner $other" "$verb $host"$'\n'"$runner $other"
-check "$verb $host|$runner $other" "$verb $host"$'\n'"$runner $other"
+# Split points are kept in the output; only dropped segments disappear.
+check "$verb $host && $runner $other" "$verb $host && $runner $other"
+check "$verb $host || $runner $other" "$verb $host || $runner $other"
+check "$verb $host;$runner $other" "$verb $host;$runner $other"
+check "$verb $host|$runner $other" "$verb $host|$runner $other"
 check "$verb $host"$'\n'"$runner $other" "$verb $host"$'\n'"$runner $other"
+check "ssh $host 'cd /etc/nixos && $verb'" "ssh $host cd /etc/nixos && $verb"
 check "$verb 2>&1 $host" "$verb 2>&1 $host"
-
 check "$runner -n $other" ''
 check "$runner --dry-run $host" ''
 check "$runner -s $other" ''
@@ -41,28 +42,31 @@ check "$runner -f Justfile -n $host" ''
 check "$runner --justfile Justfile --dry-run $host" ''
 check "$runner -d . -s $other" ''
 check "$runner --working-directory . --show $host" ''
-check "$runner --unknown -n $host" ''
+# Any other option ends the walk: its value may look like -n.
+check "$runner --unknown -n $host" "$runner --unknown -n $host"
+check "$runner --shell-arg -n $host" "$runner --shell-arg -n $host"
 check "$runner -f -n $host" "$runner -f -n $host"
 check "sudo $runner -n $host" "sudo $runner -n $host"
 check "env X=1 $runner -n $host" "env X=1 $runner -n $host"
-check "$runner -n \"\$($verb $host)\"" "$runner -n    $verb $host  "
+check "$runner -n \"\$($verb $host)\"" "$runner -n   $verb $host "
 check "$runner -n \`$verb $host\`" "$runner -n  $verb $host "
 check "$runner -n <($verb $host)" "$runner -n < $verb $host "
 check "$runner -n >($verb $host)" "$runner -n > $verb $host "
 check "$runner -n $other & $runner $host" "$runner -n $other & $runner $host"
 check "$runner $host -n" "$runner $host -n"
-check "$runner -n $other && $runner $other" " $runner $other"
-check "$runner -n $other || $runner $other" " $runner $other"
-check "$runner -n $other;$runner $other" "$runner $other"
-check "$runner -n $other|$runner $other" "$runner $other"
+check "$runner -n $other && $runner $other" "&& $runner $other"
+check "$runner -n $other || $runner $other" "|| $runner $other"
+check "$runner -n $other;$runner $other" ";$runner $other"
+check "$runner -n $other|$runner $other" "|$runner $other"
 check "$runner -n $other"$'\n'"$runner $other" "$runner $other"
-
-check "'$verb' $host" " $verb  $host"
-check "\"$verb\" $host" " $verb  $host"
+# Quotes are removed, as the shell removes them; $ ( ) and backticks become spaces.
+check "'$verb' $host" "$verb $host"
+check "\"$verb\" $host" "$verb $host"
 check "($verb $host)" " $verb $host "
 check "\$($verb $host)" "  $verb $host "
-check "bash -c '$verb $host'" "bash -c  $verb $host "
-check "$runner '$host'" "$runner  $host "
+check "bash -c '$verb $host'" "bash -c $verb $host"
+check "$runner '$host'" "$runner $host"
+check "$runner --justfile=\"Justfile\" $host" "$runner --justfile=Justfile $host"
 
 temp_dir=$(mktemp -d)
 trap 'rm -rf "$temp_dir"' EXIT

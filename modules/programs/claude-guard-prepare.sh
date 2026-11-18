@@ -1,9 +1,15 @@
 # shellcheck shell=bash
+# Segments are split only to decide which to drop; kept ones are re-joined with their
+# separators so the patterns still see a host and a verb across `&&` (#3047 review).
 guard_prepare() (
   set -o pipefail
-  sed -e 's/&&/\n/g' -e 's/||/\n/g' -e 's/[;|]/\n/g' \
+  sed -e 's/&&/\n\x01A/g' -e 's/||/\n\x01O/g' -e 's/;/\n\x01S/g' -e 's/|/\n\x01P/g' \
     | awk '
+      BEGIN { sep["A"] = "&&"; sep["O"] = "||"; sep["S"] = ";"; sep["P"] = "|" }
       {
+        lead = ""
+        if (substr($0, 1, 1) == "\001") { lead = sep[substr($0, 2, 1)]; $0 = substr($0, 3) }
+        else if (out) printf "\n"
         drop = 0
         if (index($0, "$(") == 0 && index($0, "`") == 0 &&
             index($0, "<(") == 0 && index($0, ">(") == 0 && index($0, "&") == 0) {
@@ -20,14 +26,18 @@ guard_prepare() (
               else if (word == "-n" || word == "--dry-run" ||
                        word == "-s" || word == "--show" ||
                        word == "-l" || word == "--list") { drop = 1; break }
-              else if (word !~ /^-/) break
+              # Any other option may take a value that looks like -n (--shell-arg -n): keep.
+              else break
             }
           }
         }
+        printf "%s", lead; if (lead != "") out = 1
         if (!drop) {
-          gsub(/[\047"()`$]/, " ")
-          print
+          gsub(/[\047"]/, "")
+          gsub(/[()`$]/, " ")
+          printf "%s", $0; out = 1
         }
       }
+      END { if (out) printf "\n" }
     '
 )
