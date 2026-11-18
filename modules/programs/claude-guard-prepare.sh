@@ -13,7 +13,9 @@ guard_prepare() (
         else if (out) printf "\n"
         drop = 0
         if (index($0, "$(") == 0 && index($0, "`") == 0 &&
-            index($0, "<(") == 0 && index($0, ">(") == 0 && index($0, "&") == 0) {
+            index($0, "<(") == 0 && index($0, ">(") == 0 && index($0, "&") == 0 &&
+            # Quotes and backslashes change word boundaries that this split cannot see.
+            index($0, "\047") == 0 && index($0, "\"") == 0 && index($0, "\\") == 0) {
           line = $0
           sub(/^[[:space:]]+/, "", line)
           count = split(line, words, /[[:space:]]+/)
@@ -26,7 +28,12 @@ guard_prepare() (
                   word == "-d" || word == "--working-directory") i++
               else if (word == "-n" || word == "--dry-run" ||
                        word == "-s" || word == "--show" ||
-                       word == "-l" || word == "--list") { drop = 1; break }
+                       word == "-l" || word == "--list") {
+                # An option after the flag may switch mode (--command runs despite -n): keep.
+                drop = 1
+                for (j = i + 1; j <= count; j++) if (words[j] ~ /^-/) drop = 0
+                break
+              }
               # Any other option may take a value that looks like -n (--shell-arg -n): keep.
               else break
             }

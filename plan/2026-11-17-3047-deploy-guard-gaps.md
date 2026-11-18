@@ -47,6 +47,10 @@ both suites and fails against the original prepare step.
   any other option ends the walk and keeps the line, because its value may look like `-n`
   (`just --shell-arg -n p510` runs the recipe).
 
+- A segment is dropped only if it has no quote or backslash (they change word boundaries the split cannot see:
+  `LABEL="text just -n p510" nhs p510`) and no option word after the inspection flag (`just -n --command nhs
+  p510` runs the command despite `-n`).
+
 Known limits, not regressions (main behaves the same): an option value the recipe patterns cannot skip
 (`just --shell-arg 0 p510`), and words split by quotes (`nh''s p510`).
 

@@ -261,6 +261,25 @@ CASES += [
     ("dHJ1ZTtyZWJvb3Q=", 2, "#3047 review 2: unspaced ; before reboot"),
 ]
 
+CASES += [
+    (
+        "anVzdCAtbiAtLWNvbW1hbmQgbmhzIHA1MTA=",
+        2,
+        "#3047 review 3: --command after -n runs anyway",
+    ),
+    ("anVzdCAtbiAtYyBuaHMgcDUxMA==", 2, "#3047 review 3: -c after -n runs anyway"),
+    (
+        "TEFCRUw9InRleHQganVzdCAtbiBwNTEwIiBuaHMgcDUxMA==",
+        2,
+        "#3047 review 3: just -n inside a quoted assignment",
+    ),
+    (
+        "anVzdCAtbiBwNTEwIFw7IG5ocyBwNTEw",
+        2,
+        "#3047 review 3: backslash in a dry-run line",
+    ),
+]
+
 # A guard whose prepare step fails must deny, not allow (#3047).
 fd, broken_prepare = tempfile.mkstemp(suffix=".sh")
 os.write(fd, b"guard_prepare() { return 1; }\n")

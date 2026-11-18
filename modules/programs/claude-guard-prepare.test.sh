@@ -49,6 +49,10 @@ check "$runner --working-directory . --show $host" ''
 # Any other option ends the walk: its value may look like -n.
 check "$runner --unknown -n $host" "$runner --unknown -n $host"
 check "$runner --shell-arg -n $host" "$runner --shell-arg -n $host"
+# An option after the flag may switch mode; quotes and backslashes hide word boundaries.
+check "$runner -n --command $verb $host" "$runner -n --command $verb $host"
+check "LABEL=\"text $runner -n $host\" $verb $host" "LABEL=text $runner -n $host $verb $host"
+check "$runner -n \\x $host" "$runner -n \\x $host"
 check "$runner -f -n $host" "$runner -f -n $host"
 check "sudo $runner -n $host" "sudo $runner -n $host"
 check "env X=1 $runner -n $host" "env X=1 $runner -n $host"
