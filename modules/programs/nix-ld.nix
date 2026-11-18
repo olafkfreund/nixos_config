@@ -8,6 +8,7 @@
       nss
       openssl
       zlib
+      icu # .NET binaries (azmcp) abort without libicu
     ];
   };
 }
