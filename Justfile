@@ -61,6 +61,7 @@ update-commit-deploy HOST="$(hostname)" SCOPE="all":
 
 # Guarded by name (#2951): coder guard (blocked: it commits and pushes). Rename it in the guards too.
 
+# Deploy guards drop this as non-disruptive (claude-guard-prepare.sh, #3083).
 # Stage 1 of split deploy: bump lock + build + commit + PR-merge, no switch.
 # Use when you want to update + build + commit but defer the actual switch
 # (e.g. target host is offline, or you want to switch on your own schedule
@@ -70,12 +71,14 @@ update-commit-deploy HOST="$(hostname)" SCOPE="all":
 update-commit HOST="$(hostname)" SCOPE="all":
     ./scripts/update-commit-deploy.sh {{HOST}} {{SCOPE}} --no-deploy
 
+# Deploy guards drop this as non-disruptive (claude-guard-prepare.sh, #3083).
 # Preview updates with detailed package changes (before building)
 [group('update')]
 preview-updates HOST="$(hostname)":
     @echo "🔍 Previewing updates for {{HOST}}..."
     ./scripts/preview-updates.sh {{HOST}}
 
+# Deploy guards drop this as non-disruptive (claude-guard-prepare.sh, #3083).
 # Show what the LAST update changed: Added / Removed / Upgraded packages
 # between the two most recent system generations (nvd-backed; local or remote).
 # Complements nh's built-in diff, which is version-level only and skips remote
@@ -127,12 +130,14 @@ test-all-parallel:
     failed=0; wait "$p620_pid" || failed=1; wait "$razer_pid" || failed=1; wait "$p510_pid" || failed=1; \
     [ "$failed" -eq 0 ] || exit 1; echo "✅ All parallel tests completed!"
 
+# Deploy guards drop this as non-disruptive (claude-guard-prepare.sh, #3083).
 # Test specific host configuration
 [group('test')]
 test-host HOST:
     @echo "🧪 Testing {{HOST}} configuration..."
     nix build .#nixosConfigurations.{{HOST}}.config.system.build.toplevel --show-trace
 
+# Deploy guards drop this as non-disruptive (claude-guard-prepare.sh, #3083).
 # Check a host's EFI System Partition has room for another generation.
 # The bootloader writes the new kernel+initrd BEFORE pruning the old ones, so
 # "not full" is not the same as "can deploy". Read-only by default.
@@ -169,6 +174,7 @@ test-guards:
     @bash ./scripts/test-nhs-checkout-sync.sh
     @bash ./modules/programs/claude-coder-guard.test.sh
     @bash ./modules/programs/claude-guard-prepare.test.sh
+    @bash ./scripts/test-guard-safe-recipes.sh
 
 # Check for available updates
 [group('update')]
@@ -176,6 +182,7 @@ check-updates:
     @echo "📦 Checking for available updates..."
     ./scripts/check-nixos-updates.sh
 
+# Deploy guards drop this as non-disruptive (claude-guard-prepare.sh, #3083).
 # Dry-run rebuild to see what would change
 [group('test')]
 dry-run HOST="p620":
@@ -334,6 +341,7 @@ p510-clear-sessions:
     echo "  terminated $killed stale session(s); user manager: $(systemctl --user is-system-running 2>&1)"
     REMOTE
 
+# Deploy guards drop this as non-disruptive (claude-guard-prepare.sh, #3083).
 # Show configuration diff between current and new build
 [group('test')]
 diff HOST:
@@ -409,6 +417,7 @@ secrets:
 secrets-status:
     ./scripts/manage-secrets.sh status
 
+# Deploy guards drop this as non-disruptive (claude-guard-prepare.sh, #3083).
 # Check secrets status on specific host
 [group('secrets')]
 secrets-status-host HOST:
@@ -435,6 +444,7 @@ deploy-local-build HOST: _require-main
 
 # Guarded by name (#2951): coder guard (blocked: signs with the host key). Rename it in the guards too.
 
+# Deploy guards drop this as non-disruptive (claude-guard-prepare.sh, #3083).
 # Sign the .drv closure so an untrusted --build-host accepts the upload (#2758).
 [group('private')]
 _sign-drv HOST:
@@ -470,6 +480,7 @@ deploy-via-p620 HOST: _require-main (_sign-drv HOST)
 
 # Guarded by name (#2951): coder guard (blocked: signs with the host key). Rename it in the guards too.
 
+# Deploy guards drop this as non-disruptive (claude-guard-prepare.sh, #3083).
 # Build on P620 for target host (build only, no deployment)
 [group('deploy')]
 build-on-p620 HOST: (_sign-drv HOST)
