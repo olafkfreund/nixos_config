@@ -92,6 +92,17 @@ in
       '';
     };
 
+    gpuOverhead = lib.mkOption {
+      type = lib.types.nullOr lib.types.ints.positive;
+      default = null;
+      example = 3 * 1024 * 1024 * 1024;
+      description = ''
+        Value for OLLAMA_GPU_OVERHEAD: bytes of VRAM per GPU that Ollama leaves free. Layers that do not
+        fit the rest run on the CPU. Set it on a desktop whose compositor shares the GPU: without it a
+        model that fills VRAM makes the compositor fail to allocate framebuffers and crash.
+      '';
+    };
+
     contextLength = lib.mkOption {
       type = lib.types.nullOr lib.types.int;
       default = null;
@@ -177,6 +188,9 @@ in
       }
       // lib.optionalAttrs (cfg.contextLength != null) {
         OLLAMA_CONTEXT_LENGTH = toString cfg.contextLength;
+      }
+      // lib.optionalAttrs (cfg.gpuOverhead != null) {
+        OLLAMA_GPU_OVERHEAD = toString cfg.gpuOverhead;
       };
     };
 
