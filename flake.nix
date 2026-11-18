@@ -74,10 +74,13 @@
       inputs.nixarchy-omatheme.url = "github:olafkfreund/nixarchy-omatheme/e47e9dd8e9c3ae0cc74e784c246bcf6dff8c8adc";
       inputs.nixarchy-omatheme.inputs.nixpkgs.follows = "nixpkgs";
       inputs.nixarchy-omatheme.inputs.home-manager.follows = "home-manager";
-      # #2983 herdr widget 1.1.0 (herdr-core / herdr-app agents in the bar, nixarchy-herdr#27); remove once
-      # nixarchy edge pins 7b678da or later (nixarchy#1836 merged, edge publish pending).
-      inputs.nixarchy-herdr.url = "github:olafkfreund/nixarchy-herdr/7b678da44fb6aa8c4d9508cf6552a260949db89f";
+      # herdr widget 1.2.0 (#2983, nixarchy-herdr#27); remove once nixarchy edge pins c16db87 or later.
+      # Pins live here, not only in flake.lock: `nix flake update` re-resolves a lock-only pin (#3080).
+      inputs.nixarchy-herdr.url = "github:olafkfreund/nixarchy-herdr/c16db877ca17ede13dea4a7e3b19a55d734fdd96";
       inputs.nixarchy-herdr.flake = false;
+      # gltui v1.6.0 ahead of edge (#3070); remove once nixarchy pins 823472f or later.
+      inputs.nixarchy-gltui.url = "github:olafkfreund/nixarchy-gltui/823472f99beafcfc187df78d99b222f09ce29245";
+      inputs.nixarchy-gltui.inputs.nixpkgs.follows = "nixarchy/nixpkgs";
 
       # nixarchy's NixOS module imports home-manager.nixosModules.home-manager
       # itself. From its own pin that is a second copy of nixos/common.nix, and
