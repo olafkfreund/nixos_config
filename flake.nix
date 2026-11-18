@@ -132,6 +132,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # nixarchy-omabroadcast: OmaBroadcast (28allday/omabroadcast) live video app,
+    # auto-updated nightly upstream; p620 only, hosts/p620/nixos/omabroadcast.nix (#3087).
+    nixarchy-omabroadcast = {
+      url = "github:olafkfreund/nixarchy-omabroadcast";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # nixarchy-pixelbuds: Pixel Buds battery + ANC bar plugin (fork of
     # rdoupe/omarchy-pixelbuds); hosts/common/nixos/omarchy-pixelbuds.nix.
     nixarchy-pixelbuds = {
