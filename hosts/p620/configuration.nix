@@ -28,6 +28,7 @@ in
     ./nixos/load.nix
     ./themes/stylix.nix # Re-enabled after upstream cache fix
     ./nixos/nixarchy.nix # Omarchy desktop, as an extra session
+    ./nixos/omabroadcast.nix # OmaBroadcast live video app, testing (#3087)
     ../common/nixos/dev-workstation.nix
 
     # P620-specific additional modules

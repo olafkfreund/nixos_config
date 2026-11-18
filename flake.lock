@@ -2816,6 +2816,26 @@
         "type": "github"
       }
     },
+    "nixarchy-omabroadcast": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795016716,
+        "narHash": "sha256-tH6qrE5xKn0RpiHhLBCTOkxa+fiIYlsXMPvc99JfQ4M=",
+        "owner": "olafkfreund",
+        "repo": "nixarchy-omabroadcast",
+        "rev": "08b964fa4b5b2776f524a30c77e27d9be4a1a91b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "repo": "nixarchy-omabroadcast",
+        "type": "github"
+      }
+    },
     "nixarchy-omatheme": {
       "inputs": {
         "home-manager": [
@@ -3826,6 +3846,7 @@
           "nixarchy",
           "nixarchy-microvm"
         ],
+        "nixarchy-omabroadcast": "nixarchy-omabroadcast",
         "nixarchy-pixelbuds": "nixarchy-pixelbuds",
         "nixarchy-pkg": [
           "nixarchy",
