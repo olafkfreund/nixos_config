@@ -12,10 +12,10 @@ guard_prepare() (
         if (substr($0, 1, 1) == "\001") { lead = " " sep[substr($0, 2, 1)] " "; $0 = substr($0, 3) }
         else if (out) printf "\n"
         drop = 0
-        if (index($0, "$(") == 0 && index($0, "`") == 0 &&
-            index($0, "<(") == 0 && index($0, ">(") == 0 && index($0, "&") == 0 &&
-            # Quotes and backslashes change word boundaries that this split cannot see.
-            index($0, "\047") == 0 && index($0, "\"") == 0 && index($0, "\\") == 0) {
+        # Allow-list, not deny-list: a segment can only be a dry run if every character is
+        # plain. Quotes, $, parentheses, backticks, backslashes, &, < and > can all hide a
+        # command or move a word boundary that this split cannot see (#3047 reviews 1-4).
+        if ($0 ~ /^[[:alnum:]_=.\/:,+[:blank:]-]*$/) {
           line = $0
           sub(/^[[:space:]]+/, "", line)
           count = split(line, words, /[[:space:]]+/)

@@ -280,6 +280,24 @@ CASES += [
     ),
 ]
 
+CASES += [
+    (
+        "JCgKanVzdCAtbiBwNTEwKSBuaHMgcDUxMA==",
+        2,
+        "#3047 review 4: closing ) of a multiline $( ends a dry run",
+    ),
+    (
+        "YApqdXN0IC1uIHA1MTBgIG5ocyBwNTEw",
+        2,
+        "#3047 review 4: closing backtick of a multiline substitution",
+    ),
+    (
+        "anVzdCAtbiBwNTEwID54OyBuaHMgcDUxMA==",
+        2,
+        "#3047 review 4: redirect in a dry-run line",
+    ),
+]
+
 # A guard whose prepare step fails must deny, not allow (#3047).
 fd, broken_prepare = tempfile.mkstemp(suffix=".sh")
 os.write(fd, b"guard_prepare() { return 1; }\n")

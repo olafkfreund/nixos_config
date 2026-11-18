@@ -51,6 +51,11 @@ both suites and fails against the original prepare step.
   `LABEL="text just -n p510" nhs p510`) and no option word after the inspection flag (`just -n --command nhs
   p510` runs the command despite `-n`).
 
+- Review 4 found a segment that ends a multiline substitution (`$(` newline `just -n p510) nhs p510`). The
+  drop rule became an allow-list: a segment is droppable only if every character is a letter, digit, blank or
+  one of `_ = . / : , + -`. Every other character keeps the line and its patterns run as before. This
+  replaces the deny-list of `$(`, backticks, `<(`, `>(`, `&`, quotes and backslashes.
+
 Known limits, not regressions (main behaves the same): an option value the recipe patterns cannot skip
 (`just --shell-arg 0 p510`), and words split by quotes (`nh''s p510`).
 

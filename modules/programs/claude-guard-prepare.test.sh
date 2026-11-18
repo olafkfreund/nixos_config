@@ -53,6 +53,10 @@ check "$runner --shell-arg -n $host" "$runner --shell-arg -n $host"
 check "$runner -n --command $verb $host" "$runner -n --command $verb $host"
 check "LABEL=\"text $runner -n $host\" $verb $host" "LABEL=text $runner -n $host $verb $host"
 check "$runner -n \\x $host" "$runner -n \\x $host"
+# Only plain characters make a segment droppable: a closing ) or ` of a multiline substitution keeps it.
+check "\$("$'\n'"$runner -n $host) $verb $host" "  "$'\n'"$runner -n $host  $verb $host"
+check "$runner -n $host >x" "$runner -n $host >x"
+check "$runner -n $other,$host" ''
 check "$runner -f -n $host" "$runner -f -n $host"
 check "sudo $runner -n $host" "sudo $runner -n $host"
 check "env X=1 $runner -n $host" "env X=1 $runner -n $host"
