@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3083
 spec: spec/2026-11-18-3083-guard-option-values.md
 coders:
