@@ -168,6 +168,7 @@ test-guards:
     @bash ./scripts/test-sync-remote-checkout.sh
     @bash ./scripts/test-nhs-checkout-sync.sh
     @bash ./modules/programs/claude-coder-guard.test.sh
+    @bash ./modules/programs/claude-guard-prepare.test.sh
 
 # Check for available updates
 [group('update')]
