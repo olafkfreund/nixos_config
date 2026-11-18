@@ -281,6 +281,22 @@ tested procedure.
 sudo journalctl -u k3d-cluster-bootstrap -b | grep datastore
 ```
 
+### Upgrading k3s
+
+The cluster runs `rancher/k3s:v1.35.10-k3s1` (the `k3sImage` default, #3071). k3d does not upgrade nodes in
+place, so changing the image means a recreate. The PV data stays on disk and comes back through the PV snapshot,
+the agenix Secret seed and ArgoCD. The runbook is in `plan/2026-11-18-3071-k3s-1-35.md` (steps 4-8). In brief:
+
+1. Reread the new image's default sqlite DSN (`strings bin/k3s | grep _journal_mode=WAL`) and set it, plus
+   `_auto_vacuum=full`, in the create call in `modules/containers/k3d.nix`.
+2. Take fresh backups and check each produced a new file: keycloak, skillai and the `factory-cli-creds` snapshot.
+3. Take a fresh PV snapshot (`systemctl restart k3d-cluster-bootstrap` on the live cluster), copy it to a dated
+   file, and check that every `local.path` in it has its directory under the storage dir.
+4. `systemctl stop k3d-cluster-bootstrap`, `k3d cluster delete factory`, switch, then
+   `systemctl start k3d-cluster-bootstrap`. A switch does not start the stopped oneshot.
+
+"Full reset" below deletes the PV data. It is not the upgrade path.
+
 ### Full reset
 
 Destroys the cluster and all in-cluster PVC data. ArgoCD will re-sync
