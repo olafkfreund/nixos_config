@@ -4,49 +4,67 @@ issue: 3083
 author: olafkfreund
 ---
 
-# Intent: deploy guards miss just options that take a value
+# Intent: deploy guards miss a recipe that is not the first word after just's options
 
 ## Problem
 
-The bus-announcement guard and the p510-approval guard (`modules/programs/claude-code-managed.nix`) find a deploy by
-matching `just`, then any options, then a recipe name. The option part of the pattern knows that only `-f`,
-`--justfile`, `-d` and `--working-directory` take a separate value. Any other option that takes one, such as
-`--shell-arg 0`, leaves its value behind as a word. The pattern then reads the value as the recipe, sees that it is not
-a deploy recipe, and lets the whole command through.
+The bus-announcement guard and the p510-approval guard (`modules/programs/claude-code-managed.nix`, the `just=`
+patterns at lines 372 and 556) find a deploy by matching `just`, then options, then a recipe name. They check only the
+first word after the options. Any form that puts something else in that position gets a deploy recipe past both
+guards.
 
-Checked on 2026-11-18 against the installed guards on p620, with nothing executed. `just --shell-arg 0 p510` exits 0
-in both guards, and `just p510` exits 2 in both.
+Checked on 2026-11-18 against the installed guards on p620, with payloads fed straight to the guards and nothing
+executed:
 
-just 1.59 has 24 options that take a value. 22 of them are not handled, `--set` among them, and `--set` takes two values.
+| Form | Example | Both guards |
+| --- | --- | --- |
+| option with a separate value | `just --shell-arg 0 p510` | exit 0, missed |
+| `--set` (two values) | `just --set A B p510` | exit 0, missed |
+| quoted value with a space | `just -f "a b" p510` | exit 0, missed |
+| second recipe in one call | `just check-syntax p510` | exit 0, missed |
+| module path | `just mod::p510` | exit 0, missed |
+| plain deploy | `just p510` | exit 2, blocked |
+| `=` form, attached short value, `--` | `--shell-arg=0`, `-fFILE`, `-- p510` | exit 2, blocked |
+
+just 1.59 has 24 options in its Options section that take a value. The patterns skip a separate value for only two of
+them, `-f`/`--justfile` and `-d`/`--working-directory`. just runs every recipe named in one call, in order (checked
+with a test justfile), so the second-recipe form deploys.
 
 Main had this gap before #3047, so it is not a regression. #3047 listed it as a known limit.
 
+There is a smaller problem the other way round. Two dry runs that the spec of #3047 meant to allow are blocked:
+`just --color=always -n p510` and `just -fFILE -n p510`. The preparer's word walk (`claude-guard-prepare.sh`, lines
+27 to 38) stops at the first option it doesn't know, before it reaches `-n`.
+
 ## Proposed outcome
 
-- Any `just` option that takes a value, in its separate or `=` form, no longer hides the recipe after it from either
-  guard. That includes `--set NAME VALUE`.
-- The forms the guards already block are still blocked.
-- `just` dry runs (`-n`, `--dry-run`, `-s`, `--show`, `-l`, `--list`) still pass, as the spec of #3047 allows.
-- `just test-guards` has cases for the new forms.
+- A `just` call that would run a deploy recipe is blocked by both guards, wherever the recipe appears. That covers
+  all five missed forms above.
+- The forms blocked today stay blocked, and no command in the existing suites becomes less strict. This is checked
+  against main, as in #3047.
+- `just test-guards` has a case for every row of the table.
+- Optional: the two blocked dry runs pass. An option value such as `--shell-arg -n` must still not count as a dry
+  run.
 
 ## Affected users and systems
 
 - Claude Code sessions on p620, razer and p510, through the managed PreToolUse hooks.
-- The files: `modules/programs/claude-code-managed.nix` (both copies of the `just` pattern),
-  `modules/programs/claude-guard-prepare.sh` (its word walk knows the same four options), and both test suites.
+- `modules/programs/claude-code-managed.nix` (both `just=` patterns), `modules/programs/claude-guard-prepare.sh`, and
+  both test suites (`scripts/test-bus-guard.py`, `scripts/test-p510-deploy-guard.py`).
 
 ## Constraints
 
-- Fail closed. If a command is ambiguous, block it rather than allow it.
-- Don't make the guards less strict on any command in the existing suites. Compare them against main, as #3047 did.
-- Deploy with the usual announcement. p510 needs the owner's OK.
+- Fail closed: if a command is ambiguous, block it.
+- Deploy with the usual bus announcement. p510 needs the owner's OK.
 
 ## Open questions
 
-1. Should the guard list just's value-taking options by name? That is exact, but the list needs updating when just
-   adds an option. The other way is to read every unknown option both ways, as a flag and as taking a value, and
-   block when either reading finds a deploy recipe. That fails closed. Its cost is that a safe command whose option
-   value happens to be a recipe name is blocked too, such as `just --color p510 --list`, though such a command is
-   unlikely.
-2. Should a just upgrade that adds a new value-taking option be detected? For example, a test could compare
-   `just --help` against the list.
+1. How should the guard decide? There are two ways:
+   - **Any word:** block when any word of a `just` segment is a deploy recipe name, ignoring where it sits. This is
+     the smallest change and fails closed. It covers module paths too if the `::` suffix is matched. Its cost is
+     blocking a safe call whose option value happens to be a recipe name, such as `just --list-heading p510 --list`,
+     which is blocked today anyway.
+   - **Parse just's arguments:** know each option's arity (including `--set`'s two values), keep quoted values whole,
+     and check every recipe argument. This is exact, but it is more code and needs updating when just adds an option.
+2. Fix the two blocked dry runs in this task, or leave them?
+3. Should a test catch a just upgrade that adds a value-taking option? This matters only for the parse approach.
