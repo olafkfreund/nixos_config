@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3083
 author: olafkfreund
 ---
@@ -68,3 +68,9 @@ There is a smaller problem the other way round. Two dry runs that the spec of #3
      and check every recipe argument. This is exact, but it is more code and needs updating when just adds an option.
 2. Fix the two blocked dry runs in this task, or leave them?
 3. Should a test catch a just upgrade that adds a value-taking option? This matters only for the parse approach.
+
+## Decisions (owner, 2026-11-18)
+
+- Question 1: any word. Block when any word of a `just` segment is a deploy recipe name.
+- Question 2: fix the two blocked dry runs in this task.
+- Question 3: not needed, since the parse approach was not chosen.
