@@ -1,6 +1,7 @@
 # shellcheck shell=bash
 # Segments are split only to decide which to drop; kept ones are re-joined with their
-# separators so the patterns still see a host and a verb across `&&` (#3047 review).
+# separators, padded with spaces, so the patterns still see a host and a verb across `&&`
+# and a word right after `;` still starts a word (#3047 review).
 guard_prepare() (
   set -o pipefail
   sed -e 's/&&/\n\x01A/g' -e 's/||/\n\x01O/g' -e 's/;/\n\x01S/g' -e 's/|/\n\x01P/g' \
@@ -8,7 +9,7 @@ guard_prepare() (
       BEGIN { sep["A"] = "&&"; sep["O"] = "||"; sep["S"] = ";"; sep["P"] = "|" }
       {
         lead = ""
-        if (substr($0, 1, 1) == "\001") { lead = sep[substr($0, 2, 1)]; $0 = substr($0, 3) }
+        if (substr($0, 1, 1) == "\001") { lead = " " sep[substr($0, 2, 1)] " "; $0 = substr($0, 3) }
         else if (out) printf "\n"
         drop = 0
         if (index($0, "$(") == 0 && index($0, "`") == 0 &&

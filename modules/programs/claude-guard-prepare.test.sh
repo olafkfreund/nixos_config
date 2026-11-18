@@ -24,13 +24,17 @@ other=razer
 verb=nhs
 
 # Split points are kept in the output; only dropped segments disappear.
-check "$verb $host && $runner $other" "$verb $host && $runner $other"
-check "$verb $host || $runner $other" "$verb $host || $runner $other"
-check "$verb $host;$runner $other" "$verb $host;$runner $other"
-check "$verb $host|$runner $other" "$verb $host|$runner $other"
+check "$verb $host && $runner $other" "$verb $host  &&  $runner $other"
+check "$verb $host || $runner $other" "$verb $host  ||  $runner $other"
+check "$verb $host;$runner $other" "$verb $host ; $runner $other"
+check "$verb $host|$runner $other" "$verb $host | $runner $other"
 check "$verb $host"$'\n'"$runner $other" "$verb $host"$'\n'"$runner $other"
-check "ssh $host 'cd /etc/nixos && $verb'" "ssh $host cd /etc/nixos && $verb"
+check "ssh $host 'cd /etc/nixos && $verb'" "ssh $host cd /etc/nixos  &&  $verb"
 check "$verb 2>&1 $host" "$verb 2>&1 $host"
+# A word right after an unspaced separator still starts a word.
+check "true;$verb $host" "true ; $verb $host"
+check "true&&$verb $host" "true && $verb $host"
+check "true|$verb $host" "true | $verb $host"
 check "$runner -n $other" ''
 check "$runner --dry-run $host" ''
 check "$runner -s $other" ''
@@ -54,10 +58,10 @@ check "$runner -n <($verb $host)" "$runner -n < $verb $host "
 check "$runner -n >($verb $host)" "$runner -n > $verb $host "
 check "$runner -n $other & $runner $host" "$runner -n $other & $runner $host"
 check "$runner $host -n" "$runner $host -n"
-check "$runner -n $other && $runner $other" "&& $runner $other"
-check "$runner -n $other || $runner $other" "|| $runner $other"
-check "$runner -n $other;$runner $other" ";$runner $other"
-check "$runner -n $other|$runner $other" "|$runner $other"
+check "$runner -n $other && $runner $other" " &&  $runner $other"
+check "$runner -n $other || $runner $other" " ||  $runner $other"
+check "$runner -n $other;$runner $other" " ; $runner $other"
+check "$runner -n $other|$runner $other" " | $runner $other"
 check "$runner -n $other"$'\n'"$runner $other" "$runner $other"
 # Quotes are removed, as the shell removes them; $ ( ) and backticks become spaces.
 check "'$verb' $host" "$verb $host"

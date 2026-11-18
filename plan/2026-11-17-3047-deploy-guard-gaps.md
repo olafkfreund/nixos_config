@@ -37,7 +37,8 @@ Branch `fix/3047-deploy-guard-gaps`, worktree `~/.config/nixos-shelfish`.
 The Codex and Opus reviews found three bypasses that the guards on main block; each now has a regression case in
 both suites and fails against the original prepare step.
 
-- Split only to decide what to drop. Kept segments are printed with their original `&&`, `||`, `;`, `|` and
+- Split only to decide what to drop. Kept segments are printed with their original `&&`, `||`, `;`, `|` (padded
+  with a space each side, so `true;nhs p510` still has `nhs` as a word) and
   newlines, so `ssh p510 'cd /etc/nixos && sudo nixos-rebuild switch'` and `H=p510 && nhs $H` still match the
   host-plus-verb patterns (they passed the p510 guard when the split was printed as lines).
 - Quotes are deleted, as the shell removes them, instead of becoming spaces; `$`, `(`, `)` and backticks still

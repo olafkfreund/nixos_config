@@ -255,6 +255,12 @@ CASES += [
     ),
 ]
 
+CASES += [
+    ("dHJ1ZTtuaHMgcDUxMA==", 2, "#3047 review 2: unspaced ; before nhs"),
+    ("dHJ1ZSYmbmhzIHA1MTA=", 2, "#3047 review 2: unspaced && before nhs"),
+    ("dHJ1ZTtyZWJvb3Q=", 2, "#3047 review 2: unspaced ; before reboot"),
+]
+
 # A guard whose prepare step fails must deny, not allow (#3047).
 fd, broken_prepare = tempfile.mkstemp(suffix=".sh")
 os.write(fd, b"guard_prepare() { return 1; }\n")
