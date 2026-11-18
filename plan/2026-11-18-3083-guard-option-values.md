@@ -35,24 +35,32 @@ Self-contained: the approved decisions from the intent and spec, then the steps.
   The rule for being on the list: the recipe takes a host argument, main lets it through today, and it neither
   activates a generation, collects garbage, restarts a service nor reboots. The recipes are not all read-only.
 - **No command becomes less strict than main**, checked by running every suite command through main's guards and
-  the branch's.
+  the branch's, except the two approved dry runs (cases 21 and 22).
 
 ## Steps
 
 1. **`modules/programs/claude-guard-prepare.sh`**:
-   - Add a first `awk` pass before the `sed` split (`RS = "^$"`, gawk). It walks the command one character at a time
-     and tracks quote state: none, single, `$'…'`, double. Inside quotes, `;`, `&`, `|` and newline become spaces;
-     outside quotes, so does a backslash followed by one of them.
+   - Add a first `awk` pass before the `sed` split (`RS = "^$"`, gawk). It walks the command one character at a
+     time and tracks quote state: none, single, `$'…'` (a `'` right after `$`), or double.
+     - **Inside quotes:** `;`, `&`, `|` and newline become spaces. In double quotes and `$'…'`, a backslash
+       escapes the next character.
+     - **Outside quotes:** a backslash followed by `;`, `&`, `|` or newline keeps the backslash, and the separator
+       after it becomes a space. The backslash must stay: the plain-character allow-list then keeps the segment.
+       The suites' `#3047 review 3: backslash in a dry-run line` case needs this.
+   - In the word walk, also strip trailing whitespace, not only leading:
+     `sub(/^[[:space:]]+/, "", line); sub(/[[:space:]]+$/, "", line)`. Otherwise `just test-host p510` counts an
+     empty last field as an argument.
    - In the word walk, before the `-f`/`-d` test, add:
      `if ((word ~ /^--[a-z-]+=/ && word !~ /^--command=/) || word ~ /^-[fdEF]./) continue`.
-   - Add the safe-recipe drop: after the `NAME=value` skip, if `words[i] == "just"` and `words[i+1]` is in the
-     table, drop the segment when `count - (i + 1) <= max` and no remaining word starts with `-`. Keep it inside
-     the existing plain-character `if`. Put the table at the top of that awk program, with a comment stating the
-     rule for being on the list.
+   - Add the safe-recipe drop. After the `NAME=value` skip, when `words[i] == "just"` and `words[i+1]` is in the
+     table, drop the segment if `count - (i + 1) <= max` and no remaining word starts with `-`.
+     - Keep it inside the existing plain-character `if`.
+     - Put the table at the top of that awk program, with a comment stating the rule for being on the list.
 
-   A working prototype of the first two parts is at
-   `/tmp/claude-1000/-home-olafkfreund--config-nixos/ee8128ca-3f78-4bb7-893d-460e9ec96134/scratchpad/proto3083/prepare.sh`.
-   It may have been cleared; the description above is complete without it.
+   A working prototype of the quote pass and the attached-value skip passes every case below and the comparison in
+   step 5. It is at
+   `/tmp/claude-1000/-home-olafkfreund--config-nixos/ee8128ca-3f78-4bb7-893d-460e9ec96134/scratchpad/proto3083/prepare.sh`,
+   but may have been cleared; the description above is complete without it.
 
    **Verify:** `bash modules/programs/claude-guard-prepare.test.sh` passes after step 3's test changes, and
    `shellcheck modules/programs/claude-guard-prepare.sh` is clean.
@@ -76,34 +84,57 @@ Self-contained: the approved decisions from the intent and spec, then the steps.
    - This is a Nix `''` string: `''` and `${` need escaping, and none appear here.
    - The patterns that build on `$just` stay as they are.
 
-3. **Tests:**
+3. **Tests.** Every guard-suite case is added in base64, as the files already do, so the harness doesn't trip the
+   live hook. The p510 suite runs each case in both contexts, off p510 and on p510. In the bus suite the same
+   commands are used as written: the bus guard blocks `just p510` as well.
+
+   **Cases**, with the expected exit in every context (bus, p510-off, p510-on):
+
+   | # | Command | Exit |
+   | --- | --- | --- |
+   | 1 | `just --shell-arg 0 p510` | 2 |
+   | 2 | `just --set A B p510` | 2 |
+   | 3 | `just -f "a b" p510` | 2 |
+   | 4 | `just check-syntax p510` | 2 |
+   | 5 | `just mod::p510` | 2 |
+   | 6 | `just ../p510` | 2 |
+   | 7 | `just --command=sudo -n just p510` | 2 |
+   | 8 | `just test-host p620 p510` | 2 |
+   | 9 | `just --list-heading 'a&b' p510` | 2 |
+   | 10 | `just --list-heading 'a;b' p510` | 2 |
+   | 11 | `just --list-heading "a\|b" p510` (a literal `\|` inside double quotes) | 2 |
+   | 12 | `just --list-heading a\;b p510` | 2 |
+   | 13 | `just --list-heading $'a\';b' p510` | 2 |
+   | 14 | `just --list-heading 'a` newline `b' p510` | 2 |
+   | 15 | `just --shell-arg=0 p510` (already blocked; regression) | 2 |
+   | 16 | `just -fFILE p510` (already blocked; regression) | 2 |
+   | 17 | `just -- p510` (already blocked; regression) | 2 |
+   | 18 | `just test-host p510` | 0 |
+   | 19 | `just test-host p510` (trailing space) | 0 |
+   | 20 | `just -n p510` | 0 |
+   | 21 | `just --color=always -n p510` | 0 |
+   | 22 | `just -fFILE -n p510` | 0 |
+   | 23 | `just check-syntax ; ssh p510 uptime` | 0 |
+   | 24 | `just --shell-arg -n p510` | 2 |
+
    - **`modules/programs/claude-guard-prepare.test.sh`:**
-     - change the `ssh $host 'cd /etc/nixos && $verb'` expectation to
-       `ssh $host cd /etc/nixos    $verb` (the `&&` is inside quotes);
-     - add cases for `'a;b'`, `"a|b"`, `'a&b'`, `a\;b`, `$'a\';b'`, and a newline inside quotes;
-     - add each dropped shape: `just -n …` behind `--color=always` and `-fFILE`, and each safe recipe at its
-       maximum argument count;
-     - add each near miss that must be kept: one argument too many, an argument starting with `-`, an option before
-       the recipe, `--shell-arg -n`, and `--command=sudo -n`.
-   - **`scripts/test-bus-guard.py` and `scripts/test-p510-deploy-guard.py`:** add base64 cases, as the files already
-     do, so the harness doesn't trip the live hook.
-     - Blocked (exit 2): `just --shell-arg 0 p510`, `just --set A B p510`, `just -f "a b" p510`,
-       `just check-syntax p510`, `just mod::p510`, `just ../p510`, `just --command=sudo -n just p510`,
-       `just test-host p620 p510`, and the five quoted or escaped `--list-heading … p510` forms.
-     - Allowed (exit 0): `just test-host p510`, `just -n p510`, `just --color=always -n p510`,
-       `just -fFILE -n p510`, and `just check-syntax ; ssh p510 uptime`.
-     - The p510 suite covers both contexts, off p510 and on p510. In the bus suite, use `p620` or `razer` where a
-       host is needed.
-   - **Arity check:** a new `scripts/test-guard-safe-recipes.sh`. It reads `just --dump --dump-format json` and
-     the table from `claude-guard-prepare.sh`, and fails if a listed recipe is missing or its parameter count
-     differs from its max. Add it to the `test-guards` recipe in the `Justfile`.
+     - change the `ssh $host 'cd /etc/nixos && $verb'` expectation to `ssh $host cd /etc/nixos    $verb`, because
+       the `&&` is inside quotes;
+     - add the prepare output for cases 9 to 14, where the separator becomes a space and the segment is not split;
+     - add the dropped shapes: cases 18 to 22, and each of the ten safe recipes at its maximum argument count;
+     - add near misses that must be kept: one argument too many (case 8), an argument starting with `-`
+       (`just test-host -x`), an option before the recipe (`just -q test-host p510`), case 24, and case 7.
+   - **`scripts/test-bus-guard.py` and `scripts/test-p510-deploy-guard.py`:** cases 1 to 24.
+   - **Arity check:** a new `scripts/test-guard-safe-recipes.sh`, added to the `test-guards` recipe in the
+     `Justfile`. It reads `just --dump --dump-format json` and the table from `claude-guard-prepare.sh`. It fails
+     if a listed recipe is missing, or if its parameter count differs from the table's max.
 
    **Verify:** `just test-guards` passes.
 
    **Traps:**
-   - Never put a deploy-shaped command in plain text in a command line; use base64 in the suites. The live guard
-     reads command text.
-   - The arity script must not run any recipe.
+   - Never put a deploy-shaped command in plain text on a command line: the live guard reads command text. Use
+     base64 in the suites, and files for anything else.
+   - The arity script must not run any recipe; `--dump` only parses.
 
 4. **`Justfile`:** above each of the ten listed recipes, add
    `# Deploy guards drop this as non-disruptive (claude-guard-prepare.sh, #3083).`
@@ -113,20 +144,30 @@ Self-contained: the approved decisions from the intent and spec, then the steps.
    **Traps:** none.
 
 5. **Lead: compare, build, review, PR.**
-   - Run the comparison against main: every suite command through main's and the branch's guards. It must report
-     nothing more permissive.
+   - Commit `scripts/compare-guards.py`. It takes `MAIN_NIX MAIN_PREPARE BRANCH_NIX BRANCH_PREPARE`, runs from the
+     branch checkout, and prints every suite command where the branch's guard exits lower than main's, in each of
+     the three contexts.
+   - Create the main side with `git show origin/main:modules/programs/claude-code-managed.nix > <tmp>/main.nix`, and
+     the same for `claude-guard-prepare.sh`.
+   - Run it with the branch's two files. Expected output: exactly the dry runs from cases 21 and 22, in all three
+     contexts, and nothing else. Cases 21 and 22 are the approved exceptions from intent question 2. Any other line
+     fails the step.
    - Build the p620 and razer toplevels.
    - Codex reviews the diff (`codex review --base origin/main`), with `git status --porcelain` checked before and
      after.
    - Open the PR, linking intent, spec and plan, and post `@codex review`.
 
 6. **Lead: deploy and live probe.** After the merge, deploy p620 (local switch) and razer
-   (`just deploy-via-p620 razer`), announcing on the bus first. Then feed payloads to the installed guards, with
-   nothing executed:
-   - every blocked case above must exit 2 in both guards;
-   - `just test-host p510`, `just -n p510` and `just --color=always -n p510` must exit 0.
+   (`just deploy-via-p620 razer`), announcing on the bus first.
 
-   p510 is deployed only with the owner's OK.
+   Then run `scripts/probe-installed-guards.sh` in the scratchpad (not committed). It finds the installed guard
+   scripts in `/etc/claude-code/managed-settings.json`, under the `command` keys matching
+   `claude-(bus-announce|p510-deploy)-guard.sh`. Then it reads the cases from a file, one per line, with `<NL>` for
+   a newline. It feeds each one as `{"tool_input":{"command":…}}` to each guard, using `env -u AGENT_BUS_ANNOUNCED -u
+   P510_DEPLOY_APPROVED`, and prints the exit codes. Nothing is executed.
+   - **Expected on p620 and razer** (off p510): cases 1 to 17 and 24 exit 2 in both guards; cases 18 to 23 exit 0.
+
+   p510 is deployed only with the owner's OK, and is then probed the same way.
 
 ## Tests
 
@@ -134,8 +175,9 @@ Self-contained: the approved decisions from the intent and spec, then the steps.
 | --- | --- |
 | `just test-guards` | passes (prepare test, both suites, arity script) |
 | `shellcheck modules/programs/claude-guard-prepare.sh scripts/test-guard-safe-recipes.sh` | clean |
-| comparison against main | no command more permissive |
+| `scripts/compare-guards.py` against main | only cases 21 and 22 |
 | `nix build .#nixosConfigurations.{p620,razer}.config.system.build.toplevel` | builds |
+| live probe | as in step 6 |
 
 ## Rollback
 
