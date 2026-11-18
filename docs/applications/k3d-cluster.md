@@ -258,7 +258,7 @@ activate DNS fix (K3D_FIX_DNS) when there's a file mounted at
 
 ### Slow start: the datastore size line
 
-The kine/SQLite datastore (`server/db/state.db` in the server's volume)
+The kine/SQLite datastore (`server/state.db` in the server's volume; `server/db/` before k3s 1.35)
 uses `auto_vacuum = FULL`, so the file shrinks when k3s compacts old
 revisions. Without it the file only grows. On p620 it reached 11.5 GB, 99.8%
 of it free pages, which k3s read at every start, so the cluster took 15+

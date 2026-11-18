@@ -237,7 +237,7 @@ let
         local vol db wal db_mib wal_mib largest_root incremental mode
         vol=$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/var/lib/rancher/k3s"}}{{.Source}}{{end}}{{end}}' \
           "k3d-$CLUSTER-server-0" 2>/dev/null) || vol=
-        db=$vol/server/db/state.db
+        db=$vol/server/state.db
         wal=$db-wal
         if [ -z "$vol" ] || [ ! -f "$db" ]; then
           echo "[k3d-bootstrap] datastore: not found" || return 0
@@ -312,6 +312,8 @@ let
         # #1497 rehearsal.
         # --datastore-endpoint below is k3s v1.35.10's default sqlite DSN (read from the
         # pinned k3sImage binary) plus _auto_vacuum=full (#2676); reread it when k3sImage changes.
+        # The file is server/state.db, not the default server/db/state.db: with an explicit
+        # endpoint k3s 1.35 never creates server/db and removes it at start (#3071).
         ${pinned}k3d cluster create "$CLUSTER" \
           --image "${cfg.k3sImage}" \
           --api-port "${cfg.apiHostBind}:$API_PORT" \
@@ -319,7 +321,7 @@ let
           --agents "${toString cfg.agents}" \
           --k3s-arg "--disable=traefik@server:*" \
           --k3s-arg "--disable=servicelb@server:*" \
-          --k3s-arg "--datastore-endpoint=sqlite:///var/lib/rancher/k3s/server/db/state.db?_journal_mode=WAL&_busy_timeout=30000&_synchronous=NORMAL&_txlock=immediate&_stmt_cache_size=20&cache=shared&_auto_vacuum=full@server:0" \
+          --k3s-arg "--datastore-endpoint=sqlite:///var/lib/rancher/k3s/server/state.db?_journal_mode=WAL&_busy_timeout=30000&_synchronous=NORMAL&_txlock=immediate&_stmt_cache_size=20&cache=shared&_auto_vacuum=full@server:0" \
           --volume "$STORAGE_DIR:/var/lib/rancher/k3s/storage@server:*;agent:*" \
           --volume "${resolvStateFile}:/etc/resolv.conf@server:*;agent:*" \
           --volume "${resolvStateFile}:/etc/rancher/k3s/resolv.conf@all:*" \
