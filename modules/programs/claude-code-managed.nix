@@ -368,8 +368,8 @@ let
     # No \b adjacent to the alternation group: GNU grep -E silently fails to
     # match `\b(switch|boot|test)\b[^|;]*\bp510\b` against
     # "nixos-rebuild switch --flake .#p510". Verified against 13 cases.
-    # `just` options and NAME=value words before the recipe must not hide it (#2951).
-    just='just([[:space:]]+(-f|--justfile|-d|--working-directory)[[:space:]]+[^[:space:]]+|[[:space:]]+-[^[:space:]]+|[[:space:]]+[A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*)*[[:space:]]+'
+    # Any word before a `just` recipe is skipped so options cannot hide it (#3083).
+    just='(^|[^[:alnum:]_-])just([[:space:]]+[^[:space:];|&]+)*[[:space:]]+([^[:space:];|&]*(::|/))?'
     end='([[:space:];|&)]|$)'
     deploy_verb="nixos-rebuild[[:space:]]+[^|;]*(switch|boot|test)|nh[[:space:]]+os[[:space:]]+(switch|boot|test)|(^|[[:space:]])nhs([[:space:]]|$)|$just[a-z-]*deploy"
     deploy_verb="$deploy_verb"'|(^|[[:space:]/])update-commit-deploy\.sh([[:space:]]|$)'
@@ -551,9 +551,8 @@ let
     # `just deploy-*` and also `just <host>`: the deploy recipes here are
     # named after the machine (`just p510`), so a deploy-only pattern misses
     # the most common way anyone actually deploys.
-    # `just` may carry -f/--justfile/-d/--working-directory X or NAME=value
-    # words before the recipe; they must not hide it.
-    just='just([[:space:]]+(-f|--justfile|-d|--working-directory)[[:space:]]+[^[:space:]]+|[[:space:]]+-[^[:space:]]+|[[:space:]]+[A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*)*[[:space:]]+'
+    # Any word before the recipe is skipped, including options (#3083).
+    just='(^|[^[:alnum:]_-])just([[:space:]]+[^[:space:];|&]+)*[[:space:]]+([^[:space:];|&]*(::|/))?'
     end='([[:space:];|&)]|$)'
     disruptive="$disruptive|$just"'[a-z-]*deploy'
     disruptive="$disruptive|$just"'(p510|p620|razer)'"$end"

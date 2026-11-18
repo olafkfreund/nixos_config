@@ -29,7 +29,7 @@ check "$verb $host || $runner $other" "$verb $host  ||  $runner $other"
 check "$verb $host;$runner $other" "$verb $host ; $runner $other"
 check "$verb $host|$runner $other" "$verb $host | $runner $other"
 check "$verb $host"$'\n'"$runner $other" "$verb $host"$'\n'"$runner $other"
-check "ssh $host 'cd /etc/nixos && $verb'" "ssh $host cd /etc/nixos  &&  $verb"
+check "ssh $host 'cd /etc/nixos && $verb'" "ssh $host cd /etc/nixos    $verb"
 check "$verb 2>&1 $host" "$verb 2>&1 $host"
 # A word right after an unspaced separator still starts a word.
 check "true;$verb $host" "true ; $verb $host"
@@ -79,6 +79,37 @@ check "\$($verb $host)" "  $verb $host "
 check "bash -c '$verb $host'" "bash -c $verb $host"
 check "$runner '$host'" "$runner $host"
 check "$runner --justfile=\"Justfile\" $host" "$runner --justfile=Justfile $host"
+
+# Quoted and escaped separators stay inside one segment.
+check "$runner --list-heading 'a&b' $host" "$runner --list-heading a b $host"
+check "$runner --list-heading 'a;b' $host" "$runner --list-heading a b $host"
+check "$runner --list-heading \"a\\|b\" $host" "$runner --list-heading a\\ b $host"
+check "$runner --list-heading a\\;b $host" "$runner --list-heading a\\ b $host"
+check "$runner --list-heading \$'a\';b' $host" "$runner --list-heading  a\\ b $host"
+check "$runner --list-heading 'a"$'\n'"b' $host" "$runner --list-heading a b $host"
+
+# Dry runs and safe recipes disappear only in their plain, bounded forms.
+check "$runner test-host $host" ''
+check "$runner test-host $host " ''
+check "$runner -n $host" ''
+check "$runner --color=always -n $host" ''
+check "$runner -fFILE -n $host" ''
+check "$runner diff $host" ''
+check "$runner secrets-status-host $host" ''
+check "$runner build-on-p620 $host" ''
+check "$runner _sign-drv $host" ''
+check "$runner dry-run $host" ''
+check "$runner boot-space $host" ''
+check "$runner system-diff $host" ''
+check "$runner preview-updates $host" ''
+check "$runner update-commit $host all" ''
+
+# A second argument, a flag, or an option before the recipe keeps the segment.
+check "$runner test-host $other $host" "$runner test-host $other $host"
+check "$runner test-host -x" "$runner test-host -x"
+check "$runner -q test-host $host" "$runner -q test-host $host"
+check "$runner --shell-arg -n $host" "$runner --shell-arg -n $host"
+check "$runner --command=sudo -n $runner $host" "$runner --command=sudo -n $runner $host"
 
 temp_dir=$(mktemp -d)
 trap 'rm -rf "$temp_dir"' EXIT
