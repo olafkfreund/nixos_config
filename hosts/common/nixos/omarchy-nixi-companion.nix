@@ -103,7 +103,6 @@
       sfx = true;
       size = 0.75;
       speak_max_chars = 600;
-      stt_hint = "Hey Nixi, Claude, Claude Code, Nixi, git, commit, README, Python, JavaScript, npm, pacman, sudo, Arch Linux, Hyprland, folder, directory, file, terminal, config, server, function, bug, refactor.";
       stt_prewarm = true;
       trust = "trust";
       tts = "elevenlabs";
