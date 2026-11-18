@@ -310,7 +310,7 @@ let
         # upstream lookup of k3d-<cluster>-server-0 to public DNS, nginx exits,
         # and the create never gets "start worker processes". Found in the
         # #1497 rehearsal.
-        # --datastore-endpoint below is k3s v1.31.5's default sqlite DSN (read from the
+        # --datastore-endpoint below is k3s v1.35.10's default sqlite DSN (read from the
         # pinned k3sImage binary) plus _auto_vacuum=full (#2676); reread it when k3sImage changes.
         ${pinned}k3d cluster create "$CLUSTER" \
           --image "${cfg.k3sImage}" \
@@ -319,7 +319,7 @@ let
           --agents "${toString cfg.agents}" \
           --k3s-arg "--disable=traefik@server:*" \
           --k3s-arg "--disable=servicelb@server:*" \
-          --k3s-arg "--datastore-endpoint=sqlite:///var/lib/rancher/k3s/server/db/state.db?_journal=WAL&cache=shared&_busy_timeout=30000&_txlock=immediate&_auto_vacuum=full@server:0" \
+          --k3s-arg "--datastore-endpoint=sqlite:///var/lib/rancher/k3s/server/db/state.db?_journal_mode=WAL&_busy_timeout=30000&_synchronous=NORMAL&_txlock=immediate&_stmt_cache_size=20&cache=shared&_auto_vacuum=full@server:0" \
           --volume "$STORAGE_DIR:/var/lib/rancher/k3s/storage@server:*;agent:*" \
           --volume "${resolvStateFile}:/etc/resolv.conf@server:*;agent:*" \
           --volume "${resolvStateFile}:/etc/rancher/k3s/resolv.conf@all:*" \
@@ -651,7 +651,7 @@ in
 
     k3sImage = mkOption {
       type = types.str;
-      default = "rancher/k3s:v1.31.5-k3s1";
+      default = "rancher/k3s:v1.35.10-k3s1";
       description = ''
         k3s node image k3d boots the cluster from (passed to
         `k3d cluster create --image`).
