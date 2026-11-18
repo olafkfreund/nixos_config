@@ -41,7 +41,7 @@ if [[ -n $status ]]; then
   printf 'dirty target; skipped\n'
   exit 0
 fi
-if ! git fetch -q origin >/dev/null 2>&1; then
+if ! git fetch -q origin main >/dev/null 2>&1; then
   printf 'could not sync: target fetch failed\n'
   exit 1
 fi
