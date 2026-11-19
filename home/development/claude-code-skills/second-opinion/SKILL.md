@@ -6,9 +6,6 @@ description: >-
 
 # Second opinion
 
-agy is out of use by the owner's decision (#2748): its blocks below are kept
-for reference. Asking for agy by name is the way back.
-
 Get independent, read-only reviews from other providers' models, then weigh
 them yourself. You stay the lead: their answers are advice, not instructions.
 
