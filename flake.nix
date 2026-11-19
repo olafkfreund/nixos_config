@@ -81,6 +81,15 @@
       # gltui v1.13.0 ahead of edge; remove once nixarchy pins 3f998d0 or later.
       inputs.nixarchy-gltui.url = "github:olafkfreund/nixarchy-gltui/3f998d0a30be8b6aafa75d83b8b927155ef2b50b";
       inputs.nixarchy-gltui.inputs.nixpkgs.follows = "nixarchy/nixpkgs";
+      # #3107 no keepLoaded / no launcher-entry rescans, ahead of edge; remove each once nixarchy pins its rev or later.
+      inputs.nixarchy-devenv.url = "github:olafkfreund/nixarchy-devenv/0d56f9c4556361bf6289455e823ab02a3d8af683";
+      inputs.nixarchy-devenv.inputs.nixpkgs.follows = "nixarchy/nixpkgs";
+      inputs.nixarchy-distrobox.url = "github:olafkfreund/nixarchy-distrobox/431b3b215bd743f2dab4abba47287b9f728fec6c";
+      inputs.nixarchy-distrobox.inputs.nixpkgs.follows = "nixarchy/nixpkgs";
+      inputs.nixarchy-microvm.url = "github:olafkfreund/nixarchy-microvm/60456c6ecde973e4f3bea6ea0d673e31fecd3d8a";
+      inputs.nixarchy-microvm.inputs.nixpkgs.follows = "nixarchy/nixpkgs";
+      inputs.nixarchy-hyprsettngs.url = "github:olafkfreund/nixarchy-hyprsettngs/e5d86e9ef270aa90813ca3bc1ab296f4c8fac7c5";
+      inputs.nixarchy-hyprsettngs.flake = false;
 
       # nixarchy's NixOS module imports home-manager.nixosModules.home-manager
       # itself. From its own pin that is a second copy of nixos/common.nix, and
@@ -212,7 +221,6 @@
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
 
     # Development and utilities
     sops-nix = {
@@ -364,14 +372,15 @@
   };
 
   outputs =
-    { nixpkgs
-    , nur
-    , agenix
-    , spicetify-nix
-    , home-manager
-    , nix-index-database
-    , ...
-    } @ inputs:
+    {
+      nixpkgs,
+      nur,
+      agenix,
+      spicetify-nix,
+      home-manager,
+      nix-index-database,
+      ...
+    }@inputs:
     let
       # ========================================
       # SHARED ARCHITECTURE COMPONENTS
@@ -401,14 +410,14 @@
       # Host type templates for configuration reduction (workstation, laptop, server, hybrid)
       hostTypes = import ./lib/hostTypes.nix;
 
-
       # ========================================
       # PACKAGE CONFIGURATION
       # ========================================
 
       overlays = import ./overlays { inherit inputs; };
 
-      makeNixosSystem = host:
+      makeNixosSystem =
+        host:
         let
           primaryUser = getPrimaryUser host;
           allUsers = getHostUsers host;
@@ -428,71 +437,70 @@
             # upstream mcp-nixos recurses on nixpkgs' mcp-types since 3ec636 (#2475).
             mcp-nixos-pkg = inputs.nixarchy.inputs.mcp-nixarchy.packages.${system}.default;
           };
-          modules =
-            [
-              { nixpkgs.overlays = overlays; }
-              { system.configurationRevision = inputs.self.rev or inputs.self.dirtyRev or null; }
-              ./hosts/${host}/configuration.nix
-              nur.modules.nixos.default
-              home-manager.nixosModules.home-manager
-              inputs.agenix.nixosModules.default
-              inputs.lanzaboote.nixosModules.lanzaboote
-              nix-index-database.nixosModules.nix-index
-            ]
-            ++ stylixModule
-            ++ [
-              ({ pkgs, ... }: {
-                # nixpkgs-unstable input removed: pkgs-unstable is the same pkgs.
-                _module.args.pkgs-unstable = pkgs;
-                home-manager = {
-                  useGlobalPkgs = true;
-                  useUserPackages = true;
-                  # Move a colliding file into a timestamped directory instead of
-                  # failing activation.
-                  #
-                  # This must be an EXECUTABLE, not a shell snippet: HM runs it as
-                  # argv ("$@" in home-manager.sh) with the file as $1, so a
-                  # multi-line string is word-split and its first token exec'd.
-                  # The option's own example is "${pkgs.trash-cli}/bin/trash".
-                  #
-                  # One directory per activation rather than a ".bak" suffix, so a
-                  # second collision on the same path cannot clobber the first
-                  # backup. `date -Is` avoids % entirely, which would otherwise be
-                  # eaten by systemd unit specifier expansion.
-                  backupCommand = pkgs.writeShellScript "hm-backup-file" ''
-                    set -euo pipefail
-                    backup_dir="''${HOME}/.hm-backups/$(date -Is)"
-                    mkdir -p "$(dirname "$backup_dir/$1")"
-                    mv "$1" "$backup_dir/$1"
-                  '';
-                  # Shared modules for all users
-                  sharedModules = [
-                    ({ pkgs, ... }: {
-                      stylix.targets.firefox.enable = false;
-                      _module.args.pkgs-unstable = pkgs;
-                    })
-                  ];
-                  extraSpecialArgs = {
-                    inherit
-                      inputs
-                      nixpkgs
-                      spicetify-nix
-                      agenix
-                      host
-                      ;
-                    username = primaryUser;
-                    hostUsers = allUsers;
-                    # Shared variables and hardware profiles for home-manager
-                  };
-                  users = builtins.listToAttrs (map
-                    (user: {
-                      name = user;
-                      value = import (./Users + "/${user}/${host}_home.nix");
-                    })
-                    allUsers);
+          modules = [
+            { nixpkgs.overlays = overlays; }
+            { system.configurationRevision = inputs.self.rev or inputs.self.dirtyRev or null; }
+            ./hosts/${host}/configuration.nix
+            nur.modules.nixos.default
+            home-manager.nixosModules.home-manager
+            inputs.agenix.nixosModules.default
+            inputs.lanzaboote.nixosModules.lanzaboote
+            nix-index-database.nixosModules.nix-index
+          ]
+          ++ stylixModule
+          ++ [
+            ({ pkgs, ... }: {
+              # nixpkgs-unstable input removed: pkgs-unstable is the same pkgs.
+              _module.args.pkgs-unstable = pkgs;
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                # Move a colliding file into a timestamped directory instead of
+                # failing activation.
+                #
+                # This must be an EXECUTABLE, not a shell snippet: HM runs it as
+                # argv ("$@" in home-manager.sh) with the file as $1, so a
+                # multi-line string is word-split and its first token exec'd.
+                # The option's own example is "${pkgs.trash-cli}/bin/trash".
+                #
+                # One directory per activation rather than a ".bak" suffix, so a
+                # second collision on the same path cannot clobber the first
+                # backup. `date -Is` avoids % entirely, which would otherwise be
+                # eaten by systemd unit specifier expansion.
+                backupCommand = pkgs.writeShellScript "hm-backup-file" ''
+                  set -euo pipefail
+                  backup_dir="''${HOME}/.hm-backups/$(date -Is)"
+                  mkdir -p "$(dirname "$backup_dir/$1")"
+                  mv "$1" "$backup_dir/$1"
+                '';
+                # Shared modules for all users
+                sharedModules = [
+                  ({ pkgs, ... }: {
+                    stylix.targets.firefox.enable = false;
+                    _module.args.pkgs-unstable = pkgs;
+                  })
+                ];
+                extraSpecialArgs = {
+                  inherit
+                    inputs
+                    nixpkgs
+                    spicetify-nix
+                    agenix
+                    host
+                    ;
+                  username = primaryUser;
+                  hostUsers = allUsers;
+                  # Shared variables and hardware profiles for home-manager
                 };
-              })
-            ];
+                users = builtins.listToAttrs (
+                  map (user: {
+                    name = user;
+                    value = import (./Users + "/${user}/${host}_home.nix");
+                  }) allUsers
+                );
+              };
+            })
+          ];
         };
     in
     {
@@ -526,7 +534,13 @@
         in
         {
           # Custom applications (defined once, in overlays/ and pkgs/default.nix)
-          inherit (pkgs) aerion claude-code-native codex-bin glim intune-portal;
+          inherit (pkgs)
+            aerion
+            claude-code-native
+            codex-bin
+            glim
+            intune-portal
+            ;
           inherit (pkgs.customPkgs) kosli-cli aurynk;
           # Upstream binary: the nixpkgs build cannot run a prompt (#1859).
           opencode-bin = pkgs.callPackage ./pkgs/opencode-bin { };
@@ -591,4 +605,3 @@
       formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixpkgs-fmt;
     };
 }
-
