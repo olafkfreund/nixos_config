@@ -11,6 +11,10 @@
   m4b-tool = pkgs.callPackage ./m4b-tool { };
   audiobook-mcp = pkgs.callPackage ./audiobook-mcp { };
   ollama-mcp = pkgs.callPackage ./ollama-mcp { };
+  # No leiden extra: graspologic pulls future, which is broken on py3.14.
+  graphify = pkgs.graphify.overridePythonAttrs (o: {
+    dependencies = o.dependencies ++ o.optional-dependencies.mcp ++ o.optional-dependencies.pdf;
+  });
 
   # media-bot — Telegram bot front-end for the *arr stack on p510.
   # Hybrid menu commands + local-LLM (Ollama) natural-language fallback.

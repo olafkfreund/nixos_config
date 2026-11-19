@@ -24,6 +24,7 @@
 }:
 let
   cfg = config.programs.antigravityConfig;
+  dev = config.features.development;
 
   geminiDir = "${config.home.homeDirectory}/.gemini";
 
@@ -83,6 +84,13 @@ let
   // lib.optionalAttrs notebooklmEnabled {
     notebooklm = {
       command = "${pkgs.customPkgs.notebooklm-mcp-cli}/bin/notebooklm-mcp";
+      args = [ ];
+    };
+  }
+  # Profile path, not a store path: the file syncs between hosts.
+  // lib.optionalAttrs (dev.enable && dev.graphify) {
+    graphify = {
+      command = "${config.home.profileDirectory}/bin/graphify-mcp";
       args = [ ];
     };
   };

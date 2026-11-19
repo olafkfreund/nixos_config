@@ -68,6 +68,7 @@ let inherit (lib) mkEnableOption; in {
       languages = mkEnableOption "Enable language support and tooling";
       workflow = mkEnableOption "Enable development workflow tools";
       productivity = mkEnableOption "Enable project management and productivity";
+      graphify = mkEnableOption "graphify knowledge-graph CLI, skill and MCP (#3122)";
     };
   };
 }

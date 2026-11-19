@@ -47,13 +47,13 @@ let
       (lib.filter (lib.hasPrefix "${folder}/${subdir}/") (lib.attrNames config.home.file))));
 
   # Hand-made skill links whose target exists on only some hosts: omgato's
-  # plugin is on p620 only, herdr's skill on p620 + razer, and test-skill's
+  # plugin is on p620 only, herdr's and graphify's skills on p620 + razer, and test-skill's
   # source tree on razer only. Synced, each dangled on the other hosts, and
   # deleting a dangling copy would sync the deletion to the host where it
   # works. Ignored, every host keeps its own copy (or none).
   hostLocalSkillIgnores = subdir:
     lib.concatMapStrings (name: "/${subdir}/${name}\n")
-      [ "herdr" "omarchy-omgato" "test-skill" ];
+      [ "herdr" "omarchy-omgato" "test-skill" "graphify" ];
 
   # nixarchy relinks every skill in its omarchy tree into ~/.claude/skills on
   # each activation (modules/home.nix, "agent skills relinked on every
