@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3109
 spec: spec/2026-11-19-3109-docker-volumes-nvme.md
 coders: {}   # two small Nix edits: the lead writes them (below the hand-off threshold)
