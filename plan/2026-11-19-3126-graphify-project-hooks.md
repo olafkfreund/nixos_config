@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3126
 spec: spec/2026-11-19-3126-graphify-project-hooks.md
 coders: {}   # two small edits: the lead writes them (below the hand-off threshold)
