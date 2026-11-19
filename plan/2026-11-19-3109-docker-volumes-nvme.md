@@ -23,6 +23,7 @@ recipe is `sudo nixos-rebuild switch --flake .#p620` and requires `main`.
 ## Steps
 
 1. `hosts/p620/nixos/hardware-configuration.nix`, after `fileSystems."/mnt/img_pool"`: add
+
    ```nix
    # Docker's volumes (the whole k3d cluster) on nvme0: sdd saturated under factory Jobs (#3109).
    # Bound over the old directory, which stays on sdd untouched until it is deleted on purpose.
@@ -32,6 +33,7 @@ recipe is `sudo nixos-rebuild switch --flake .#p620` and requires `main`.
      options = [ "bind" "nofail" "x-systemd.requires-mounts-for=/home" ];
    };
    ```
+
    → verify: `just check-syntax`. Traps: `nofail` only keeps boot going; step 2 is what stops docker.
 2. `hosts/p620/configuration.nix`, `docker.unitConfig.RequiresMountsFor`: add
    `"/mnt/img_pool/docker/volumes"` (the k3d module adds `/mnt/code/k3d/storage`; NixOS merges the lists).
