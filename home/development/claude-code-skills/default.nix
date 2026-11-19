@@ -7,6 +7,15 @@
 let
   inherit (lib) mkIf mkEnableOption;
   cfg = config.programs.claude-code-skills;
+  dev = config.features.development;
+
+  graphifySkill = variant: md: pkgs.runCommand "skill-graphify-${variant}" { } ''
+    g=${pkgs.customPkgs.graphify}/${pkgs.python3.sitePackages}/graphify
+    test -e $g/${md} && test -d $g/skills/${variant}/references
+    mkdir -p $out
+    ln -s $g/${md} $out/SKILL.md
+    ln -s $g/skills/${variant}/references $out/references
+  '';
 
   # Upstream's own NotebookLM skill ships inside the package. python3.sitePackages
   # rather than a hard-coded python3.14, so a default-Python bump does not
@@ -116,6 +125,12 @@ in
           # Replaces the regular files these skills were before they moved here.
           force = true;
         }))
-      localSkills);
+      localSkills
+    ++ [
+      (lib.optionalAttrs (dev.enable && dev.graphify) {
+        "${agentDirs.claude}/graphify" = { source = graphifySkill "claude" "skill.md"; recursive = true; force = true; };
+        "${agentDirs.agents}/graphify" = { source = graphifySkill "agents" "skill-agents.md"; recursive = true; force = true; };
+      })
+    ]);
   };
 }

@@ -14,6 +14,7 @@
 
     # AI-powered development tools
     ./codex-cli.nix
+    ./graphify.nix
     ./agent-run.nix
     ./agent-rules.nix # Global AGENTS.md for Codex + Antigravity (#1832)
     ./claude-desktop

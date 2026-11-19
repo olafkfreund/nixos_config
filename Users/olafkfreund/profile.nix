@@ -133,6 +133,7 @@ in
       languages = true;
       workflow = true;
       productivity = true;
+      graphify = true;
     };
   };
 

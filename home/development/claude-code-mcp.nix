@@ -21,6 +21,7 @@ let
   linkedinEnabled = mcpCfg.linkedin.enable or false;
   whatsappEnabled = mcpCfg.whatsapp.enable or false;
   notebooklmEnabled = mcpCfg.notebooklm.enable or false;
+  dev = config.features.development;
   retiredMcpServers = [ "atlassian" ];
 
   reconcileJq = ''
@@ -84,7 +85,15 @@ let
       # each rebuild, like the two above (#1933). The jq merge only adds
       # and replaces: an app dropped later needs `claude mcp remove <app>`.
       // lib.mapAttrs (_: s: s // { type = "stdio"; })
-        (osConfig.programs.craftapps.mcp.servers or { });
+        (osConfig.programs.craftapps.mcp.servers or { })
+      # Dropping the flag needs "graphify" in retiredMcpServers.
+      // lib.optionalAttrs (dev.enable && dev.graphify) {
+        graphify = {
+          type = "stdio";
+          command = "${pkgs.customPkgs.graphify}/bin/graphify-mcp";
+          args = [ ];
+        };
+      };
     });
 
   # Helper function to create shell script wrappers
