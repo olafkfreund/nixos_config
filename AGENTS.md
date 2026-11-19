@@ -166,16 +166,20 @@ never built or deployed without asking.
 ## graphify
 
 On p620 and razer (#3122), `graphify-out/graph.json` is a local, gitignored code graph. Build it with
-`graphify extract . --code-only`. It covers shell, Python, Lua and JS plus docs. It doesn't cover `.nix`, which graphify
-cannot parse.
+`graphify extract . --code-only`. That covers shell, Python, Lua and JS code only: no docs, and no `.nix`, which
+graphify cannot parse.
 
 - When the graph exists, run `graphify query "<question>"` before grep or reading source. Use `graphify path "<A>" "<B>"`
   for relationships and `graphify explain "<name>"` for one symbol. Then read raw files only for the lines the graph
   pointed to.
-- After changing indexed code, run `graphify update .` to keep it current (AST only, no LLM).
-- Claude Code enforces this with a strict PreToolUse hook (`.claude/settings.json`, #3126). The first Read of an indexed
-  file per session is denied unless a query ran. To drop to soft nudges, export `GRAPHIFY_HOOK_STRICT=0` before starting
-  Claude Code. The hook does nothing where graphify isn't installed (p510).
+- Where graphify is installed, run `graphify update .` after changing indexed code to keep the graph current (AST only,
+  no LLM).
+- Claude Code enforces this with two PreToolUse hooks (`.claude/settings.json`, #3126):
+  - `Read|Glob` is strict. The first Read or Glob of an indexed file per session is denied, unless a `graphify query`
+    ran in the last 30 minutes.
+  - `Bash|Grep` only adds a nudge to grep and rg searches.
+- To drop the deny and keep the nudges, export `GRAPHIFY_HOOK_STRICT=0` before starting Claude Code. Both hooks do
+  nothing where graphify isn't installed (p510).
 
 ## Layout
 
