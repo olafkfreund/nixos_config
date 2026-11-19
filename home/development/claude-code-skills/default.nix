@@ -11,6 +11,7 @@ let
 
   graphifySkill = variant: md: pkgs.runCommand "skill-graphify-${variant}" { } ''
     g=${pkgs.customPkgs.graphify}/${pkgs.python3.sitePackages}/graphify
+    test -e $g/${md} && test -d $g/skills/${variant}/references
     mkdir -p $out
     ln -s $g/${md} $out/SKILL.md
     ln -s $g/skills/${variant}/references $out/references

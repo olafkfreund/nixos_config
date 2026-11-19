@@ -6,7 +6,6 @@ in
 {
   config = lib.mkIf (dev.enable && dev.graphify) {
     home.packages = [ pkgs.customPkgs.graphify ];
-    home.sessionVariables.GRAPHIFY_BACKEND = "none";
     programs.git.ignores = [ "graphify-out/" ];
 
     # Never `exit` in an activation entry: they are concatenated into one script.
