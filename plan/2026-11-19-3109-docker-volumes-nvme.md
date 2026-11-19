@@ -100,3 +100,21 @@ run image GC from 85 % used; the `p620` recipe is `sudo nixos-rebuild switch --f
   owner's explicit acceptance of that loss.
 - The old directory stays on `sdd` until the owner agrees to delete it; to reach it later, bind-mount
   `/mnt/img_pool` non-recursively at a temporary path.
+
+## Deviations and results (2026-11-19, executed)
+
+- **Step 5.1, runtime masks**: `systemctl mask --runtime` had no effect. NixOS units live in
+  `/etc/systemd/system`, which outranks `/run/systemd/system`, so the units stayed `loaded`. The masks were
+  removed. The barrier that held: the three timers stopped, `k3d-cluster-bootstrap` stopped, docker and its
+  socket stopped, and the journal showed no docker start between the stop and the bind mount. A later plan
+  needing a hard block on NixOS should use a drop-in or `systemctl disable --now` on the socket instead.
+- **Step 7.3**: the switch started `docker.service`, `docker.socket` and the three timers itself, and adopted
+  the hand-made bind mount (`mnt-img_pool-docker-volumes.mount` active, `What=/dev/nvme0n1p1`).
+- Copy: 85 GB in 750 s (about 108 MiB/s, read from `sdd`, mostly small files); the checksum pass took 872 s,
+  exit 0, no differences.
+- After: both nodes Ready, 54 docker volumes (unchanged), 16/16 PVCs Bound, 45/45 ArgoCD apps Synced/Healthy
+  once the four CronJob runs that fired during the restart (11:00) had run again (11:15).
+- Step 9: the RFactory profiles rollback rehearsal, which failed twice before the move (desktop boot past the
+  runner's window), passed in 112 s. Still to check: IO pressure during the next TFactory Job; SMART on nvme0
+  in a week (baseline 0 % used, 3.67 TB written).
+- The old `volumes/` stays on `sdd` under the mount until the owner agrees to delete it.
