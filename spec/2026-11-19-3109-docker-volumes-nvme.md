@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3109
 intent: intent/2026-11-19-3109-docker-volumes-nvme.md
 ---
