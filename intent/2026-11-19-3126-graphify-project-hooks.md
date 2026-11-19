@@ -17,9 +17,12 @@ reach for grep and Read first. The owner asked for
 In Claude Code sessions in this repo, where a local `graphify-out/graph.json`
 exists:
 
-- the first Read of a file the graph indexes is denied once per session until
-  a `graphify query` runs;
-- searches get a nudge toward the graph.
+- The first Read or Glob of a file the graph indexes is denied once per
+  session. A `graphify query` in the last 30 minutes avoids the deny, and the
+  retry is allowed.
+- grep/rg searches get a nudge toward the graph.
+- No hook ever returns `allow`, so permission prompts and the managed bus
+  guard are unaffected.
 
 Codex and agy get the same guidance as text in `AGENTS.md`.
 
@@ -34,7 +37,8 @@ changes.
   `.claude/settings.json` is shared by every checkout.
 - Don't commit a second copy of the skill. The user-level skill is
   Nix-managed (#3122).
-- `graphify-out/` stays local and gitignored.
+- `graphify-out/` stays local and gitignored. A fresh worktree has no graph,
+  so the hooks stay silent there until one is built.
 - graphify can't parse `.nix`, so the hooks only gate sh/py/lua/js and docs
   files. That's expected.
 

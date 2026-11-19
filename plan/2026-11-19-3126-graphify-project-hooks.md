@@ -14,39 +14,67 @@ Decisions (from the spec):
 
 - Strict PreToolUse hooks in `.claude/settings.json`, each guarded by
   `command -v graphify`.
-- The rules text goes into `AGENTS.md`.
+- The rules text goes into `AGENTS.md`, after "Build / test / deploy".
 - No skill copy, no CLAUDE.md, no backup file.
 
 ## Steps
 
-1. `.claude/settings.json`: add `hooks.PreToolUse` next to the existing
-   `PostToolUse`, keeping it untouched. Two entries, each `timeout: 10`:
+1. `.claude/settings.json`: add `hooks.PreToolUse` beside the existing
+   `PostToolUse`, keeping that untouched. It uses the same nested shape as
+   `PostToolUse`:
 
-   - `matcher: "Bash|Grep"`:
-     `command -v graphify >/dev/null 2>&1 || exit 0; exec graphify hook-guard search`
-   - `matcher: "Read|Glob"`:
-     `command -v graphify >/dev/null 2>&1 || exit 0; exec graphify hook-guard read --strict`
+   ```json
+   "PreToolUse": [
+     { "matcher": "Bash|Grep", "hooks": [ { "type": "command", "timeout": 10,
+       "command": "command -v graphify >/dev/null 2>&1 || exit 0; exec graphify hook-guard search" } ] },
+     { "matcher": "Read|Glob", "hooks": [ { "type": "command", "timeout": 10,
+       "command": "command -v graphify >/dev/null 2>&1 || exit 0; exec graphify hook-guard read --strict" } ] }
+   ]
+   ```
 
-   → verify: `jq -e '.hooks.PreToolUse | length == 2' .claude/settings.json`,
-   and `.hooks.PostToolUse` is unchanged against origin/main.
-2. `AGENTS.md`: add a short `## graphify` section after "Commands". It covers:
-   query first when `graphify-out/graph.json` exists; `path`/`explain`; read
-   raw files only for the located lines; `graphify update .` after code
-   changes; .nix isn't indexed; the strict hook and `GRAPHIFY_HOOK_STRICT=0`.
+   → verify with the `jq` checks in Tests.
+   Traps: don't reorder or reformat `PostToolUse`.
+2. `AGENTS.md`: add a short `## graphify` section after "Build / test / deploy".
+   It covers:
+   - when `graphify-out/graph.json` exists, run `graphify query` before grep
+     or Read;
+   - `path` / `explain`;
+   - read raw files only for the lines already located;
+   - after code changes, run `graphify update .` (when graphify is installed);
+   - .nix isn't indexed;
+   - the strict hook, and `GRAPHIFY_HOOK_STRICT=0` exported before starting
+     Claude Code.
+
    → verify: markdownlint.
-3. Lead: replay the hooks against a worktree graph (deny, then allow; `.nix`
-   passes; no graphify on PATH → exit 0 with no output). Commit, PR, review,
-   merge. This is not a host switch: the shared checkout picks it up on its
-   next pull.
+3. Lead: run the Tests replay, then commit, PR, review and merge. This is not a
+   host switch: the shared checkout picks it up on its next pull. Then run the
+   live `claude -p` check from the spec.
 
 ## Tests
 
 ```bash
-jq -e '.hooks.PreToolUse | length == 2' .claude/settings.json
+jq -e '.hooks.PreToolUse | length == 2
+  and all(.[]; .hooks[0].type == "command" and .hooks[0].timeout == 10)
+  and (map(.matcher) == ["Bash|Grep","Read|Glob"])' .claude/settings.json
+diff <(git show origin/main:.claude/settings.json | jq .hooks.PostToolUse) \
+     <(jq .hooks.PostToolUse .claude/settings.json)
 nix run nixpkgs#markdownlint-cli -- -c .markdownlint.json AGENTS.md
-# replay (see spec): deny, then allow, .nix silent; PATH without graphify → rc 0, no output
+graphify extract . --code-only   # local graph for the replay
 ```
+
+Replay each hook command from `.claude/settings.json` with `sh -c`. Feed it a
+PreToolUse JSON (`session_id`, `tool_name`, `tool_input`, `cwd`) on stdin and
+expect:
+
+- Read of `scripts/compare-guards.py`: deny the first time, then allowed.
+- Read of `flake.nix`: no output.
+- Bash `git status`: no output. Bash `grep -rn x scripts`: `additionalContext`
+  only.
+- With `PATH=/usr/bin:/bin`: rc 0 and no output.
+- No output anywhere contains `"allow"`.
 
 ## Rollback
 
-Revert the PR, or set `GRAPHIFY_HOOK_STRICT=0` to drop to soft nudges.
+- Revert the PR: removes the hooks and the AGENTS.md section.
+- Or export `GRAPHIFY_HOOK_STRICT=0` before starting Claude Code: keeps the
+  soft nudges and drops only the deny.
