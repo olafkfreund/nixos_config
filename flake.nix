@@ -79,7 +79,7 @@
       inputs.nixarchy-herdr.url = "github:olafkfreund/nixarchy-herdr/c16db877ca17ede13dea4a7e3b19a55d734fdd96";
       inputs.nixarchy-herdr.flake = false;
       # gltui v1.13.0 ahead of edge; remove once nixarchy pins 3f998d0 or later.
-      inputs.nixarchy-gltui.url = "github:olafkfreund/nixarchy-gltui/3f998d0a30be8b6aafa75d83b8b927155ef2b50b";
+      inputs.nixarchy-gltui.url = "github:olafkfreund/nixarchy-gltui/c4017003b6c8bf79a418fadfc878b07e0657cbbe";
       inputs.nixarchy-gltui.inputs.nixpkgs.follows = "nixarchy/nixpkgs";
       # #3107 no keepLoaded / no launcher-entry rescans, ahead of edge; remove each once nixarchy pins its rev or later.
       inputs.nixarchy-devenv.url = "github:olafkfreund/nixarchy-devenv/0d56f9c4556361bf6289455e823ab02a3d8af683";
