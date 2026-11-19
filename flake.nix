@@ -78,8 +78,8 @@
       # Pins live here, not only in flake.lock: `nix flake update` re-resolves a lock-only pin (#3080).
       inputs.nixarchy-herdr.url = "github:olafkfreund/nixarchy-herdr/c16db877ca17ede13dea4a7e3b19a55d734fdd96";
       inputs.nixarchy-herdr.flake = false;
-      # gltui v1.12.0 ahead of edge; remove once nixarchy pins 21bfde5 or later.
-      inputs.nixarchy-gltui.url = "github:olafkfreund/nixarchy-gltui/21bfde5b5fcf5f1380628484cfab686a905b8153";
+      # gltui v1.13.0 ahead of edge; remove once nixarchy pins 3f998d0 or later.
+      inputs.nixarchy-gltui.url = "github:olafkfreund/nixarchy-gltui/3f998d0a30be8b6aafa75d83b8b927155ef2b50b";
       inputs.nixarchy-gltui.inputs.nixpkgs.follows = "nixarchy/nixpkgs";
 
       # nixarchy's NixOS module imports home-manager.nixosModules.home-manager
