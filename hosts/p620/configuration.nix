@@ -538,7 +538,11 @@ in
       fwupd.serviceConfig.LimitNOFILE = 524288;
 
       # Refuse to start on a blank data-root on / when its disk is missing.
-      docker.unitConfig.RequiresMountsFor = [ "/mnt/img_pool" ];
+      # ...and on the NVMe copy of its volumes (#3109).
+      docker.unitConfig.RequiresMountsFor = [
+        "/mnt/img_pool"
+        "/mnt/img_pool/docker/volumes"
+      ];
       containerd.unitConfig.RequiresMountsFor = [ "/mnt/img_pool" ];
     };
 

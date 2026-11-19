@@ -101,6 +101,19 @@
     ];
   };
 
+  # Docker's volumes (the whole k3d cluster) on nvme0: sdd saturated under factory Jobs (#3109).
+  # Bound over the old directory, which stays on sdd untouched until it is deleted on purpose.
+  # Docker requires this mount (configuration.nix), so it never starts on the old copy.
+  fileSystems."/mnt/img_pool/docker/volumes" = {
+    device = "/home/docker-volumes";
+    fsType = "none";
+    options = [
+      "bind"
+      "nofail"
+      "x-systemd.requires-mounts-for=/home"
+    ];
+  };
+
   swapDevices = [ ];
 
   # SSD I/O scheduler optimization
