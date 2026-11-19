@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3126
 intent: intent/2026-11-19-3126-graphify-project-hooks.md
 ---
