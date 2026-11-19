@@ -2704,11 +2704,11 @@
         "systems": "systems_8"
       },
       "locked": {
-        "lastModified": 1795046196,
-        "narHash": "sha256-7Zqgr7VhIY0zG1M2tZPHPbEAYxtkf3eWbTDFt0u38kc=",
+        "lastModified": 1795103279,
+        "narHash": "sha256-hnfN7AzX05RQDgNqzpTTYjt4W84eVFaYrLbIxobK5iA=",
         "owner": "olafkfreund",
         "repo": "nixarchy-meetingai",
-        "rev": "8966879ed4897031d8d299d40667db8a4bea2143",
+        "rev": "76a9aac7d131a62ac83686d8230e55cf3c030f96",
         "type": "github"
       },
       "original": {
