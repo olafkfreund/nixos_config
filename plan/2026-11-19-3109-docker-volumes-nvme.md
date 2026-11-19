@@ -118,4 +118,3 @@ run image GC from 85 % used; the `p620` recipe is `sudo nixos-rebuild switch --f
   runner's window), passed in 112 s. Still to check: IO pressure during the next TFactory Job; SMART on nvme0
   in a week (baseline 0 % used, 3.67 TB written).
 - The old `volumes/` stays on `sdd` under the mount until the owner agrees to delete it.
-
