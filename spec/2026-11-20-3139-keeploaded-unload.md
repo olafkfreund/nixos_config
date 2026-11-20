@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3139
 intent: intent/2026-11-20-3139-keeploaded-unload.md
 ---
