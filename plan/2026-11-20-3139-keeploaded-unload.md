@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3139
 spec: spec/2026-11-20-3139-keeploaded-unload.md
 coders:
