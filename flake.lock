@@ -2230,11 +2230,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795155714,
-        "narHash": "sha256-C0Gea+2hOVeuzL0pkx6/LeMojjS6KccCLyJhtnjFC8k=",
+        "lastModified": 1795183662,
+        "narHash": "sha256-UP+ydc5vV4grqIiBuX/Wi6dRSXwA2DkUxSEZcDDtMoM=",
         "owner": "olafkfreund",
         "repo": "nixarchy",
-        "rev": "6157f87d72dabfa98d4ebb87540bed617d05e54b",
+        "rev": "0525029524d33e7b9715ba08e877b32398fd7564",
         "type": "github"
       },
       "original": {
@@ -2441,17 +2441,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1794905617,
-        "narHash": "sha256-87gSBbHl9QUOAGK7G3zTW92044GLCCF99yaL1v3x604=",
+        "lastModified": 1795195362,
+        "narHash": "sha256-P4miF9u8tfOIm2iVUztURic5OYpVk3asxTSGuX75EPY=",
         "owner": "olafkfreund",
         "repo": "nixarchy-ghtui",
-        "rev": "7b6f6f5acfe93f422b20b7e300650f3a7ec2d4ac",
+        "rev": "53b1b0acaeb82d6ac513ce79950b915a60486da7",
         "type": "github"
       },
       "original": {
         "owner": "olafkfreund",
         "repo": "nixarchy-ghtui",
-        "rev": "7b6f6f5acfe93f422b20b7e300650f3a7ec2d4ac",
+        "rev": "53b1b0acaeb82d6ac513ce79950b915a60486da7",
         "type": "github"
       }
     },
@@ -2540,17 +2540,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1795159194,
-        "narHash": "sha256-cEHwnCcx76dv2Fuck59RzZMjIcM/aVRuIqSFXdW+iTs=",
+        "lastModified": 1795188730,
+        "narHash": "sha256-zyqehjzLinWZxgY2Gw/QHswOduUS2ttzZR2ntcH4TMU=",
         "owner": "olafkfreund",
         "repo": "nixarchy-gltui",
-        "rev": "c71049a469a10e993f71887b3c82d1835e3a1a66",
+        "rev": "81be1989835bab8131341673e3efed4e23693789",
         "type": "github"
       },
       "original": {
         "owner": "olafkfreund",
         "repo": "nixarchy-gltui",
-        "rev": "c71049a469a10e993f71887b3c82d1835e3a1a66",
+        "rev": "81be1989835bab8131341673e3efed4e23693789",
         "type": "github"
       }
     },
