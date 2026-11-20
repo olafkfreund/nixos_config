@@ -1,5 +1,5 @@
 ---
-status: approved
+status: draft
 issue: 3139
 intent: intent/2026-11-20-3139-keeploaded-unload.md
 ---
@@ -35,16 +35,21 @@ that is the whole session.
 
 1. **`HerdrActions.qml`, a singleton.** It has `pragma Singleton` and is
    listed in a new `qmldir` as `singleton HerdrActions 1.0 HerdrActions.qml`,
-   the same pattern as nixarchy-devenv's `DevenvState`. It owns four
-   processes, one per *surface × kind*:
-   - surface: `menu` (the `remote: true` model) or `bar`;
-   - kind: `action` or `kill`.
+   the same pattern as nixarchy-devenv's `DevenvState`. It owns one
+   `action` process and one `kill` process **per registered model**. It
+   creates them as child objects when a model registers. Each model has a
+   surface: `menu` for the `remote: true` model, or `bar`.
 
-   This keeps today's concurrency exactly. A slow menu action never makes a
-   bar click answer `busy:`, and a kill and an action can still overlap.
-   Each process body is today's `actionProc` / `killProc`, moved unchanged.
+   This keeps today's concurrency exactly. The bar builds one model per
+   monitor (`Panel.qml:64-67`), and each keeps its own pair, as it does now.
+   A slow menu action never makes a bar click answer `busy:`, and a kill and
+   an action can still overlap. Each process body is today's `actionProc`
+   or `killProc`, moved unchanged. The slots are QML objects with real
+   properties (`running`, `open`, `meta`), so bindings to them update.
 2. **Each run carries its own metadata.** `HerdrActions.start(owner, surface,
-   kind, command, meta)` refuses with `busy:` when that slot is running. It
+   kind, command, meta)` returns false while that slot is `running || open`
+   (stdout and exit arrive in either order, `HerdrModel.qml:235-256`). The
+   caller then shows today's `busy: <action> is still running`. It
    stores, per run and before the process starts:
    - `owner`;
    - `actionName`, `actionDismiss` and `pendingKey` or `killPendingKey`;
@@ -65,17 +70,23 @@ that is the whole session.
      - `dismiss()` and `actionFinished(action, ok)` for actions;
      - the changed-cascade re-confirm for kills;
      - `settleTimer.restart()`.
-   - **The owner is gone** (the menu unloaded). The parsed result is stored
-     in `unclaimed[surface][kind]`, one slot each, so a kill and an action
-     that both finish while closed are both kept.
-4. **Only the menu claims, and only when it is shown.** A model claims
-   `unclaimed[its surface]`, so a bar model never takes a menu result. It
+   - **The owner is gone** (the menu unloaded). Its process pair stays
+     alive until the run completes, then is destroyed. The parsed result is
+     stored in `unclaimed.menu[kind]`, one slot per kind, so a kill and an
+     action that both finish while closed are both kept. A result of a
+     destroyed *bar* model (a monitor unplugged) is dropped: no bar
+     surface claims. `unclaimed` is replaced, never mutated, so its change
+     signal fires.
+4. **Only the menu claims, and only when it is shown.** Only a
+   `remote: true` model claims, so no bar model takes a menu result. It
    claims in `onOpenedChanged` after the existing `actionError = ""`
    (`:1298-1300`), and again on `unclaimedChanged` while it is open. That
    second path covers a menu reopened before the old run finished.
 
    Claiming does these things:
-   - sets `actionError` to the error, or to the note on success;
+   - sets `actionError` from both kinds' results at once. Non-empty
+     messages are kept and joined with a semicolon, so a success with no note
+     never erases a failure;
    - restarts `settleTimer` and runs `appRunList()`, so both the session
      list and the app list refresh. `Menu.open()` has already started
      `listProc`, so a bare `refresh()` would be a no-op;
@@ -87,8 +98,9 @@ that is the whole session.
    confirmation.
 5. **Pending rows.** `HerdrModel` keeps the `pendingKey` and
    `killPendingKey` properties that `Card.qml:321-322` binds to. They are
-   now read-only bindings to its own surface's slots in `HerdrActions`, so a
-   reopened menu still dims the row whose action is running.
+   now read-only bindings to its own slots in `HerdrActions`. A reopened
+   menu is a new model with new slots, so it does not dim the row of an
+   orphaned run. That run's result arrives through `unclaimed` instead.
 6. **`manifest.json`:** drop `"keepLoaded": true` and bump the version to
    1.3.0. Update every comment, README line and test that says the menu
    stays loaded.
@@ -120,8 +132,10 @@ Nothing else changes here.
   the menu is still built at login, and its `hc events` subscription runs
   for the rest of the session once opened. Both go against the approved
   outcome. It is the fallback if the singleton proves unworkable.
-- **One slot per kind across the plugin.** Simpler, but a slow menu action
-  would make bar clicks answer `busy:`, which is a behaviour change.
+- **Shared slots per surface and kind.** This was in the first approved
+  draft. Rejected because the bar has one model per monitor, so bar actions
+  on different monitors would have answered `busy:` for each other, which
+  is a behaviour change.
 - **Run actions with `Quickshell.execDetached`.** This loses the JSON
   result that `new`'s pending line, the cascade re-check and `actionError`
   depend on.
