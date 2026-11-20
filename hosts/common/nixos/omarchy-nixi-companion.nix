@@ -148,6 +148,10 @@
       o.bind("SUPER + CTRL + ALT + code:21", "Nixi companion: bigger", "nixi-companion size up")
       o.bind("SUPER + CTRL + ALT + code:20", "Nixi companion: smaller", "nixi-companion size down")
       o.bind("SUPER + CTRL + ALT + code:19", "Nixi companion: normal size", "nixi-companion size reset")
+      -- card text (nixoarchy-snowflake#109): the same keys with SHIFT
+      o.bind("SUPER + CTRL + ALT + SHIFT + code:21", "Nixi companion: bigger card text", "nixi-companion text up")
+      o.bind("SUPER + CTRL + ALT + SHIFT + code:20", "Nixi companion: smaller card text", "nixi-companion text down")
+      o.bind("SUPER + CTRL + ALT + SHIFT + code:19", "Nixi companion: normal card text", "nixi-companion text reset")
       -- Start him with the session: activation only restarts a running one, so a fresh host never got him.
       o.exec_on_start("nixi-companion show")
     '';

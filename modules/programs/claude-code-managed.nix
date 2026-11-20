@@ -844,6 +844,7 @@ let
         CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH = "1";
         PONYTAIL_DEFAULT_MODE = "lite";
         CLAUDE_CODE_SUBAGENT_MODEL = "sonnet"; # subagents with no model: (#2831)
+        CLAUDE_CODE_EXPERIMENTAL_CODE_MODE = "1"; # (#3141)
       } // (cfg.settings.env or { });
       enabledPlugins = (cfg.settings.enabledPlugins or { }) // disabledPlugins;
       # Per-event list concatenation (NOT shallow //) so hook sets that share
