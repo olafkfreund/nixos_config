@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3144
 spec: spec/2026-11-20-3144-plugins-unload.md
 coders:
