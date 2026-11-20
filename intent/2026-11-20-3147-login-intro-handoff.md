@@ -82,17 +82,12 @@ Contributing load, not the cause: in the first 8 s the probe records three
 - The probe remains temporary and stays out of the repo. #3118 removes it
   when it is settled.
 
-## Open questions
+## Decisions (owner, 2026-11-20)
 
-1. **Order of fixes.** First match upstream's `--prepare-intro` wiring in
-   nixarchy, then measure, and change anything else (shell IPC latency at
-   login, cover reveal) only if the gap stays above the target. Or include
-   a shell-side change in the same round?
-2. **When the intro isn't ready in time:** lift the cover onto the still
-   and skip the intro for that login, or wait up to a short cap for its
-   first frame to avoid a still → video jump?
-3. **Verification on razer:** copy the probe there temporarily, which
-   means a login on razer and screenshots kept locally, or accept the p620
-   result plus an `owed` journal check on razer?
-4. **The login `.desktop` and `mimeinfo.cache` churn:** out of scope here,
-   or a separate issue?
+1. **Wiring first.** Match upstream's `--prepare-intro` wiring in nixarchy,
+   then measure. Change the shell or IPC only if the gap stays above about
+   2 s.
+2. **A late intro is skipped.** If the intro isn't ready in time, the cover
+   lifts onto the still and that login has no intro.
+3. **The probe goes on razer** temporarily for one verification login.
+4. **The login churn is a separate issue.**
