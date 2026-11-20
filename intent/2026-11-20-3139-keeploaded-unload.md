@@ -12,31 +12,50 @@ Follow-up to #3107 (shell startup) and #3118 (login still slow).
 
 Five Omarchy shell plugins still set `"keepLoaded": true`: nixarchy.herdr,
 nixarchy.pkg, nixarchy.podman, olafkfreund.govee and nixarchy.flatsnap.
-The shell builds every keepLoaded panel at startup, so all five load and run their models at
-login, even though each is only opened from a keybind or bar click.
+The shell builds the menu of every keepLoaded plugin at startup, although
+each menu is only opened on demand (a keybind or `nixarchy-plugin <id>`).
 
-The #3107 audit kept them on purpose. Each one runs a child process, or
-holds the queue for one, inside the menu view. Quickshell kills a child when
-its `Process` object is destroyed (`process.cpp:31-37`, quickshell v0.3.2),
-so unloading the view on a toggle-close would kill work in flight:
+What that costs at login differs:
 
-| Plugin | Work that lives in the view |
+- **herdr** is the only one that does work at login. Its menu builds its own
+  `HerdrModel`, whose `Component.onCompleted: appStart()`
+  (`HerdrModel.qml:1482`) spawns `hc events --json`, starts a watchdog,
+  runs `herdr-sessions app-list --remote` on events and opens three
+  `FileView`s. The bar widget (`Panel.qml:54-57`) already runs a second,
+  separate `HerdrModel`.
+- **pkg, podman, flatsnap and govee** only build their QML tree at login.
+  None starts a process or timer until `open()`.
+
+The #3107 audit kept all five loaded on purpose. Quickshell kills a child
+process when its `Process` object is destroyed (`process.cpp:31-37`,
+quickshell v0.3.2), and each menu owns processes that change state:
+
+| Plugin | Menu-owned processes that would die on unload |
 |---|---|
-| pkg | an in-panel apply runs `nixarchy-apply` as a menu child process |
-| podman | stop and prune run in the menu's own `PodmanState` instance |
-| flatsnap | `_apply` (`FlatsnapModel.qml:401`, owned by `Menu.qml:44`) can die before `systemd-run` hands the build to its unit |
-| herdr | session creation runs `actionProc` in the menu's `HerdrModel` (`HerdrModel.qml:1400-1412`) |
-| govee | `GoveeClient` (its queue and running command) is a menu child; every close calls `shell.hide` (`GoveeMenu.qml:45-48,126`) |
+| pkg | `_writer` (writes flake and package files), `_reindexer` (a cache rebuild of several minutes), `_check` with an apply deferred behind it, the in-panel apply, `_applyTerm` (a `Process`, not `execDetached`) |
+| podman | `actionProcess` in the menu's own `PodmanState` (start, stop, restart, remove, prune, stop-all), `copyProcess` |
+| flatsnap | `_writer` (`add`/`rm` in `flatsnap.nix`), `_apply` before `systemd-run` takes over (`FlatsnapModel.qml:401`), `_ack` |
+| herdr | `actionProc` (new, open, focus, delete, app-new, app-focus, app-interrupt), `killProc` (kill, app-kill) |
+| govee | `GoveeClient`: the running command and the rest of its queue |
 
 ## Proposed outcome
 
-- None of the five is built at login. Each loads on first open, as
-  devenv, distrobox, microvm and winvm do since #3107.
-- Closing a panel mid-action, whether by toggle-close, `shell hide` or Esc, never kills the
-  action. An apply, container stop or prune, flatsnap build, herdr
-  session creation and queued Govee command all run to completion, and
-  reopening the panel shows their current state.
-- The bar widgets keep working while their menus are unloaded.
+- At login no menu of the five is built, and herdr's menu-side `hc events`
+  process and its remote app list no longer start.
+- What unloads a menu is the same as for the #3107 plugins. A toggle-close
+  or `shell hide` unloads it. Esc or a click-away hides it if it has been
+  opened once. When a menu unloads, nothing in the table above dies. The
+  work runs to completion, and when the menu is reopened it shows the
+  result: the refreshed state, plus any error that arrived while it was
+  closed.
+- Deliberate cancellation stays. herdr's close still cancels an open prompt
+  (`cancelInput()`, `Menu.qml:89-94`) and its remote host polls.
+- Bar widgets and their IPC keep working before the first menu open and
+  after an unload. This covers herdr's IPC target and podman's bar-side
+  `stopAll`.
+- It is observable in two ways. A login shows no menu-side `hc events`
+  process for herdr. A shell log or probe shows that none of the five menus
+  is constructed before the first open.
 
 ## Affected users and systems
 
@@ -44,26 +63,35 @@ so unloading the view on a toggle-close would kill work in flight:
   nixarchy-flatsnap and omagovee. The installed govee plugin
   (`~/.config/omarchy/plugins/olafkfreund.govee`, copied by hand) is
   identical to `omagovee/plugin`.
-- This repo: `flake.nix` pins for the four nixarchy plugins ahead of edge
-  (the #3107 override pattern), and a way to install the updated govee plugin.
-- Hosts: p620 and razer run these plugins. p510 runs the Omarchy desktop
-  too, but it is never built or deployed without the owner's OK.
+- This repo: `flake.nix` pins the four nixarchy plugins ahead of edge (the
+  #3107 override pattern), and something must install the updated govee
+  plugin.
+- Hosts: p620 and razer. p510 runs the Omarchy desktop too, but it is never
+  built or deployed without the owner's OK.
 
 ## Constraints
 
 - Changes to the plugins go to their own repos as PRs (the owner chose this
   for #3107), not as patches applied here at install time.
-- No behaviour loss beyond what each PR states. A known loss is allowed
-  only when no caller depends on it (#3107 accepted `status` answering
+- No behaviour loss beyond what each PR states. A known loss is allowed only
+  when no caller depends on it (#3107 accepted `status` answering
   `unknown` until first open).
-- Login timing is measured with the #3118 startup probe, before and after.
 - The usual repo rules apply: worktrees only, a bus announcement before a
   switch, and p510 only with the owner's OK.
 
 ## Open questions
 
-1. herdr is the heaviest to change (`HerdrModel` is large). Ship all five in
-   one task, or herdr in its own follow-up?
-2. govee is not packaged: it is a hand copy of `omagovee/plugin`. Package it
-   as a flake input like the others, or keep copying it by hand after the
-   PR merges?
+1. **Scope.** herdr is the only plugin of the five that does work at login,
+   and it is also the hardest to change. For the other four, the saving is
+   only QML construction time, which is unmeasured and probably small. The
+   options are:
+   - all five;
+   - herdr only;
+   - herdr first, the other four in a follow-up.
+2. **govee unload.** `GoveeMenu.qml` calls `shell.hide` on Esc and on a
+   click-away (`dismiss()`, lines 44-47, called at 63 and 153). Without
+   `keepLoaded` it would unload on every close and build again on every
+   open. Should it keep that, or hide like the other menus?
+3. **govee install.** govee is a hand copy of `omagovee/plugin`. Should it
+   be packaged as a flake input like the others, or keep being copied by
+   hand after its PR merges?
