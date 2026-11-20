@@ -79,19 +79,12 @@ quickshell v0.3.2), and each menu owns processes that change state:
 - The usual repo rules apply: worktrees only, a bus announcement before a
   switch, and p510 only with the owner's OK.
 
-## Open questions
+## Decisions (owner, 2026-11-20)
 
-1. **Scope.** herdr is the only plugin of the five that does work at login,
-   and it is also the hardest to change. For the other four, the saving is
-   only QML construction time, which is unmeasured and probably small. The
-   options are:
-   - all five;
-   - herdr only;
-   - herdr first, the other four in a follow-up.
-2. **govee unload.** `GoveeMenu.qml` calls `shell.hide` on Esc and on a
-   click-away (`dismiss()`, lines 44-47, called at 63 and 153). Without
-   `keepLoaded` it would unload on every close and build again on every
-   open. Should it keep that, or hide like the other menus?
-3. **govee install.** govee is a hand copy of `omagovee/plugin`. Should it
-   be packaged as a flake input like the others, or keep being copied by
-   hand after its PR merges?
+1. **Scope: herdr first.** This task makes nixarchy.herdr safe to unload and
+   drops its `keepLoaded`. pkg, podman, flatsnap and govee move to a
+   follow-up issue with this intent's table as its starting point.
+2. **govee hides like the other menus** (follow-up): Esc and click-away
+   hide it, and only a toggle-close or `shell hide` unloads it.
+3. **govee becomes a flake input** (follow-up), like the nixarchy plugins,
+   instead of a hand copy.
