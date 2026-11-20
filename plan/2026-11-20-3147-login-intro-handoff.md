@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3147
 spec: spec/2026-11-20-3147-login-intro-handoff.md
 coders:
