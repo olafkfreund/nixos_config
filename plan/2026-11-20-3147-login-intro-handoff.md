@@ -15,7 +15,12 @@ reviewers:
 
 - nixarchy's `owed` user unit (`modules/home.nix:1527-1546`) gets two
   changes:
-  - `ExecStart = "${pkgs.bash}/bin/bash -c 'exec ${owe}/bin/owed --prepare-intro \"$(${omarchyPath}/bin/omarchy-theme-bg-boot-intro --resolve-startup 2>/dev/null)\"'"`;
+  - `ExecStart` as below;
+
+    ```nix
+    ExecStart = "${pkgs.bash}/bin/bash -c 'exec ${owe}/bin/owed --prepare-intro \"$(${omarchyPath}/bin/omarchy-theme-bg-boot-intro --resolve-startup 2>/dev/null)\"'";
+    ```
+
   - `KillMode = "mixed"`, with a comment citing upstream's
     `systemd/owed.service`.
 
