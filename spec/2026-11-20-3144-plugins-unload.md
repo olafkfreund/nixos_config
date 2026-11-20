@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3144
 intent: intent/2026-11-20-3144-plugins-unload.md
 ---
