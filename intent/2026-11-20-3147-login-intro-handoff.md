@@ -12,81 +12,87 @@ Follow-up to #3118 (login feels slow) and #3139 (herdr menu unloads).
 
 On p620 the screen stays black for about 11 s after login, although the
 Omarchy shell and both bars are up about 3 s in. The startup probe
-(`~/.local/state/startup-probe/1795185318.log`, with screenshots) measured
-the 2026-11-20 14:35 login. Times are from the probe start:
+(`~/.local/state/startup-probe/1795185318.log`) and the owed journal
+measured the 2026-11-20 14:35 login. Times are from the probe start.
 
 | t | Event (source) |
 |---|---|
-| +2.9 s | shell background and both bars mapped; the shell's login cover starts |
-| +3.0 s | owed logs `intro preparing …/intros/1-retro-stripes-fan.mp4`; `owe-render` maps an opaque `owe-background` |
-| +3.0 → +9.7 s | owed asks the starting shell to suspend its background (`src/daemon/shell.c`: `omarchy-shell background setSuspended true`, 5 s timeout, then a `setPluginEnabled` fallback). It succeeds at +9.7 s (`shell background disabled`) |
-| +9.7 → +10.8 s | the intro plays and fades straight to the still (`intro finished`) |
-| +10.8 → +14.2 s | owed keeps the background on purpose for a "startup window" (`intro_finish`, `src/daemon/main.c:530-534`), then logs `shell background enabled` |
-| +14.2 s | the shell background is back. The login cover (`shell/services/BackgroundIntro.qml`) reveals only when the shell's own background is active and ready (`backgroundReady`), or after its 10 s fallback |
-| +14.8 s | the first screenshot with wallpaper and bars. Every earlier one is black |
+| +2.9 s | Both bars map (layer 2). The shell's **login cover** maps above them on both outputs: `omarchy-background` at layer 3 (Overlay), a full-screen black surface (`BackgroundIntro.qml:291-314`) |
+| +3.0 s | owed logs `intro preparing …/intros/1-retro-stripes-fan.mp4` and starts the clip offscreen at once. It then asks the still-starting shell to suspend its background (`shell.c:44-62`: `omarchy-shell background setSuspended true` with a 4 s IPC timeout inside a 5 s spawn, then a `setPluginEnabled` fallback) |
+| +9.7 s | That IPC returns (`shell background disabled`), 6.7 s later. By then the clip has reached its end. `intro playing` and `intro fading to still` are logged 1 ms apart, so the intro is never seen, and the shell's reveal-on-moving-video path (`BackgroundIntro.qml:114-118`, `framePoll`) has nothing to catch |
+| +10.8 s | `intro finished`. `intro_finish()` re-enables the shell background at once (`main.c:530-534` → `switch_to_shell()`), with no deliberate hold |
+| +14.2 s | That IPC returns (`shell background enabled`), 3.4 s later. The shell's background maps (layer 0) and the login cover closes. The cover lifts on a ready shell background (`backgroundReady`), or after its own 10 s fallback |
 
-So the shell's login cover waits for the shell's background, which owe has
-suspended for the intro. owe waits on a shell that is still starting to
-accept the suspend, and then holds the background on purpose after the
-intro. The result is about 11 s of black screen, even though the desktop
-behind it is ready.
+What keeps the screen black is the shell's login cover, and it stays up
+for two reasons:
 
-Contributing load: at login, `.desktop` entries and `mimeinfo.cache` are
-rebuilt five times in the first 8 s (hyprchroma, `omarchy-agent-*.desktop`).
+1. **nixarchy starts owed differently from upstream.** Upstream's unit
+   (`omacom/owe` `systemd/owed.service:9`) runs
+   `owed --prepare-intro "$(omarchy-theme-bg-boot-intro --resolve-startup)"`.
+   With that flag, owed "answers at once and leaves the still with the
+   shell". The clip plays from its start only once the shell asks and is
+   free to reveal it (owe README, `main.c:1602-1610`). nixarchy's `owed`
+   user unit (`modules/home.nix`) runs plain `owed`. So at login owe starts
+   the clip early and blocks on the shell, and the intro is lost.
+2. **Each owe → shell IPC takes 3.4-6.7 s while the shell is starting.**
+   The same call takes 0.13 s once the shell is up.
+
+Contributing load, not the cause: in the first 8 s the probe records three
+`omarchy-agent-*.desktop` writes and three `mimeinfo.cache` rebuilds.
 
 ## Proposed outcome
 
-- After login, the desktop (wallpaper and bars) is visible within about
-  1 s of the shell being up, measured by the same probe, instead of about
-  11 s later.
-- The theme's login intro is kept. It plays where it can, and it never
-  holds the desktop hidden.
-- This holds on every nixarchy host with a theme intro: p620 and razer,
-  and p510 once the owner allows a deploy there.
-- The fix lives where the behaviour lives: owe (omacom/owe) and/or the
-  Omarchy shell (omacom/omarchy). It is carried in nixarchy
-  (olafkfreund/nixarchy) as a numbered patch, its existing pattern, until
-  upstream has it. This repo only moves its nixarchy pin.
+- At login the cover closes within about 2 s of both bars mapping. The
+  probe measures this from its layer events, both `omarchy-bar` mapped →
+  the layer-3 `omarchy-background` closed, and a screenshot after the
+  close confirms wallpaper and bars. Today the gap is 11.3 s.
+- The intro is kept and actually seen. It plays from its start under the
+  shell's reveal, as upstream designed, or it is skipped for that login if
+  it isn't ready in time. It never holds the desktop hidden. The existing
+  intro and animation toggles and the once-per-session rule are unchanged.
+- Theme switches, which use the same handoff (`BackgroundSwitch.qml`),
+  still end on the correct still with no visible gap.
+- This holds on p620 and razer, each verified with the probe after a
+  login. On p510, only with the owner's OK.
 
 ## Affected users and systems
 
-- Hosts: p620, razer and p510. All three run the Omarchy desktop via
-  nixarchy, and owe is on wherever `programs.nixarchy.owe.enable` is set.
+- Hosts: p620, razer and p510 run the Omarchy desktop via nixarchy, and
+  owe runs wherever `programs.nixarchy.owe.enable` is set.
 - Repos:
-  - olafkfreund/nixarchy: `pkgs/apps/owe.nix`, `pkgs/omarchy/default.nix`
-    and its patches;
-  - upstream omacom/owe and omacom/omarchy;
-  - this repo's `flake.nix` nixarchy pin.
-- The startup probe (a temporary user unit from #3118) is the measuring
-  tool, and it runs on p620 only.
+  - **olafkfreund/nixarchy:** the `owed` user unit in `modules/home.nix`
+    and `pkgs/apps/owe.nix`. Shell patches in `pkgs/omarchy/` only if still
+    needed.
+  - **This repo:** the nixarchy pin in `flake.nix`.
+  - **Upstream omacom/owe and omacom/omarchy:** only if a source change
+    turns out to be needed.
+- The startup probe: a temporary user unit from #3118, today on p620 only.
+  It needs a copy on razer to verify there.
 
 ## Constraints
 
-- Do not disable the intro to get the speed. The owner asked for a real
+- Don't disable the intro to get the speed. The owner asked for a real
   fix.
+- Prefer matching upstream's wiring over patching sources. Any source patch
+  in nixarchy follows its numbered `--fuzz=0` pattern.
 - Upstream PRs to omacom repos are public and outside the owner's control.
   Draft them, and file one only with the owner's OK.
-- Keep nixarchy's patch discipline: numbered patches applied with
-  `--fuzz=0`, which fail the build when upstream moves.
-- p510 needs the owner's OK before any build or deploy. Bus announcements
-  before switching p620 or razer.
-- Theme switches use the same owe/shell intro handoff
-  (`BackgroundSwitch.qml`), and they must not get worse.
+- p510 needs the owner's OK before any build or deploy. Post a bus
+  announcement before switching p620 or razer.
+- The probe remains temporary and stays out of the repo. #3118 removes it
+  when it is settled.
 
 ## Open questions
 
-1. **Where to fix first.** The candidates are:
-   - the shell's login cover, which could reveal on the bars and
-     whichever background is showing instead of waiting for its own
-     background;
-   - owe, which could skip the post-intro hold at login and stop blocking
-     on a starting shell;
-   - both.
-
-   The spec will pick the smallest change that meets the outcome and
-   doesn't affect theme switches.
-2. **Upstream.** Should the fix also be offered upstream (omacom/owe,
-   omacom/omarchy) once it is proven in nixarchy, or kept as a nixarchy
-   patch only?
-3. **The login rebuild churn** (`.desktop` and `mimeinfo.cache`): fix it in
-   this task, or in a separate issue? It is load, not the cause.
+1. **Order of fixes.** First match upstream's `--prepare-intro` wiring in
+   nixarchy, then measure, and change anything else (shell IPC latency at
+   login, cover reveal) only if the gap stays above the target. Or include
+   a shell-side change in the same round?
+2. **When the intro isn't ready in time:** lift the cover onto the still
+   and skip the intro for that login, or wait up to a short cap for its
+   first frame to avoid a still → video jump?
+3. **Verification on razer:** copy the probe there temporarily, which
+   means a login on razer and screenshots kept locally, or accept the p620
+   result plus an `owed` journal check on razer?
+4. **The login `.desktop` and `mimeinfo.cache` churn:** out of scope here,
+   or a separate issue?
