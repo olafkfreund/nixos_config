@@ -244,6 +244,21 @@ reviewers:
 
    Verify: every check passes, and the comment is posted.
 
+## Progress
+
+- Steps 1-4 done in olafkfreund/nixarchy-herdr#33, merged as
+  `ef6387f11458c8b6ce0ff145f3b29f0b83c566f6`.
+  - Step 1 was written by Codex. The lead switched the owner tokens to
+    strings and the singleton root to `Singleton`.
+  - Steps 2-3 were written by the coder agent. Its one deviation: the QML
+    harnesses append `HerdrModel 1.0 HerdrModel.qml` to their temporary
+    copy of `qmldir`, because otherwise a `qmldir` that lists only the
+    singleton hides `HerdrModel` from the test's root file. The real
+    `qmldir` stays one line.
+  - The diff reviews found a `claimMenu()` recursion, which is fixed.
+    `unload.sh` now fails on any logged JS error.
+- Step 5 done in this branch.
+
 ## Tests
 
 | Where | Command | Expected |

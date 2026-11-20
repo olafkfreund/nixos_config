@@ -74,9 +74,9 @@
       inputs.nixarchy-omatheme.url = "github:olafkfreund/nixarchy-omatheme/e47e9dd8e9c3ae0cc74e784c246bcf6dff8c8adc";
       inputs.nixarchy-omatheme.inputs.nixpkgs.follows = "nixpkgs";
       inputs.nixarchy-omatheme.inputs.home-manager.follows = "home-manager";
-      # herdr widget 1.2.0 (#2983, nixarchy-herdr#27); remove once nixarchy edge pins c16db87 or later.
+      # herdr 1.3.0: menu unloads safely, no keepLoaded (#3139, nixarchy-herdr#33); remove once nixarchy edge pins ef6387f or later.
       # Pins live here, not only in flake.lock: `nix flake update` re-resolves a lock-only pin (#3080).
-      inputs.nixarchy-herdr.url = "github:olafkfreund/nixarchy-herdr/c16db877ca17ede13dea4a7e3b19a55d734fdd96";
+      inputs.nixarchy-herdr.url = "github:olafkfreund/nixarchy-herdr/ef6387f11458c8b6ce0ff145f3b29f0b83c566f6";
       inputs.nixarchy-herdr.flake = false;
       # gltui v1.16.0 ahead of edge; remove once nixarchy pins c71049a or later.
       inputs.nixarchy-gltui.url = "github:olafkfreund/nixarchy-gltui/c71049a469a10e993f71887b3c82d1835e3a1a66";
