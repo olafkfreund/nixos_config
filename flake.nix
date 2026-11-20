@@ -93,6 +93,14 @@
       inputs.nixarchy-microvm.inputs.nixpkgs.follows = "nixarchy/nixpkgs";
       inputs.nixarchy-hyprsettngs.url = "github:olafkfreund/nixarchy-hyprsettngs/e5d86e9ef270aa90813ca3bc1ab296f4c8fac7c5";
       inputs.nixarchy-hyprsettngs.flake = false;
+      # #3144 menus safe to unload, no keepLoaded, ahead of edge; remove each once nixarchy pins its rev or later.
+      inputs.nixarchy-pkg.url = "github:olafkfreund/nixarchy-pkg/637b174cecab517d12434d871cd3f59c157b6d88";
+      inputs.nixarchy-pkg.inputs.nixpkgs.follows = "nixarchy/nixpkgs";
+      inputs.nixarchy-podman.url = "github:olafkfreund/nixarchy-podman/20cbdf74bd6b0253aa865fc31f102b9a0649f1c1";
+      inputs.nixarchy-podman.inputs.nixpkgs.follows = "nixarchy/nixpkgs";
+      inputs.nixarchy-flatsnap.url = "github:olafkfreund/nixarchy-flatsnap/d266d7fa4da7305fd6e19b936842f2e200e88fef";
+      inputs.nixarchy-flatsnap.inputs.nixpkgs.follows = "nixarchy/nixpkgs";
+      inputs.nixarchy-flatsnap.inputs.nix-flatpak.follows = "nixarchy/nix-flatpak";
 
       # nixarchy's NixOS module imports home-manager.nixosModules.home-manager
       # itself. From its own pin that is a second copy of nixos/common.nix, and
@@ -105,6 +113,13 @@
     # for the same reason nixarchy does: the package wraps ~10 desktop tools
     # onto PATH, and a second nixpkgs would be a second copy of every one.
     nixarchy-voice.follows = "nixarchy/nixarchy-voice";
+
+    # Govee lights plugin for the Omarchy shell (#3144), installed through
+    # programs.nixarchy.plugins by hosts/common/nixos/omarchy-govee.nix.
+    omagovee = {
+      url = "github:olafkfreund/omagovee/9b97dcc60aaf176952df4d08a016ac72ce3766f0";
+      flake = false;
+    };
 
     # nixarchy-pkg: the Omarchy menu for managing nixpkgs packages, services
     # and NixOS options. Follows this flake's nixpkgs for the same reason the

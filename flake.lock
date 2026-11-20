@@ -2347,17 +2347,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1792493857,
-        "narHash": "sha256-rQzS6x43AR2SXJGev0lb6zJ22DGa/9evujk9tgkdIIQ=",
+        "lastModified": 1795196928,
+        "narHash": "sha256-3t/Zd6RpXGtSHILH1BrA7qcJMptB9Ya42LUqp+9c86I=",
         "owner": "olafkfreund",
         "repo": "nixarchy-flatsnap",
-        "rev": "e9532c33f40b765b01d7fc683bc92a2364e45913",
+        "rev": "d266d7fa4da7305fd6e19b936842f2e200e88fef",
         "type": "github"
       },
       "original": {
         "owner": "olafkfreund",
         "repo": "nixarchy-flatsnap",
-        "rev": "e9532c33f40b765b01d7fc683bc92a2364e45913",
+        "rev": "d266d7fa4da7305fd6e19b936842f2e200e88fef",
         "type": "github"
       }
     },
@@ -2918,17 +2918,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1794919353,
-        "narHash": "sha256-z6S86VSHYn1NFgrctv5f/H7Cc/v8ix+ZaGsvf+Q/M2g=",
+        "lastModified": 1795194120,
+        "narHash": "sha256-ntf7XT1vKlsomK8KQUTehHZVGLeO/jeG3sGGDsl43Yc=",
         "owner": "olafkfreund",
         "repo": "nixarchy-pkg",
-        "rev": "08be59bbf18fba347910e6ec014e7cba828884c7",
+        "rev": "637b174cecab517d12434d871cd3f59c157b6d88",
         "type": "github"
       },
       "original": {
         "owner": "olafkfreund",
         "repo": "nixarchy-pkg",
-        "rev": "08be59bbf18fba347910e6ec014e7cba828884c7",
+        "rev": "637b174cecab517d12434d871cd3f59c157b6d88",
         "type": "github"
       }
     },
@@ -3008,17 +3008,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1792493903,
-        "narHash": "sha256-3++q4bp4O7yakGcYHFNJfndTyA3BzURQztBE+1OPzaw=",
+        "lastModified": 1795196922,
+        "narHash": "sha256-/OgfN/6uP/2CL6Gghesg92PJbdC8ydudhe0LegfmdWk=",
         "owner": "olafkfreund",
         "repo": "nixarchy-podman",
-        "rev": "e1aaf126343eb0c408357cf86f5b5ae25a940c3e",
+        "rev": "20cbdf74bd6b0253aa865fc31f102b9a0649f1c1",
         "type": "github"
       },
       "original": {
         "owner": "olafkfreund",
         "repo": "nixarchy-podman",
-        "rev": "e1aaf126343eb0c408357cf86f5b5ae25a940c3e",
+        "rev": "20cbdf74bd6b0253aa865fc31f102b9a0649f1c1",
         "type": "github"
       }
     },
@@ -3629,6 +3629,23 @@
         "type": "github"
       }
     },
+    "omagovee": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1795196932,
+        "narHash": "sha256-kGLYemEfiwxEN2dVwxpnkgPY9t5kHexyjDsBpDo+yY8=",
+        "owner": "olafkfreund",
+        "repo": "omagovee",
+        "rev": "9b97dcc60aaf176952df4d08a016ac72ce3766f0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "repo": "omagovee",
+        "rev": "9b97dcc60aaf176952df4d08a016ac72ce3766f0",
+        "type": "github"
+      }
+    },
     "omapod": {
       "inputs": {
         "home-manager": [
@@ -3863,6 +3880,7 @@
         "nixos-tfm": "nixos-tfm",
         "nixpkgs": "nixpkgs_7",
         "nur": "nur",
+        "omagovee": "omagovee",
         "omapod": "omapod",
         "omateams": "omateams",
         "rust-overlay": "rust-overlay_3",
