@@ -64,11 +64,10 @@ The existing `Restart`, `RestartSec`, `Environment` (`PATH`,
 `OMARCHY_PATH`) and `PartOf`/`After`/`WantedBy` stay unchanged. The
 comment cites upstream's unit and this issue.
 
-A test in nixarchy's eval-time checks asserts that the generated unit's
-`ExecStart` contains `--prepare-intro` and `--resolve-startup`, and that
-`KillMode` is `mixed`. The file is `tests/options.nix` or wherever the
-`owed` unit is already checked, and the plan names it. This catches a
-future drift from upstream.
+In nixarchy's `tests/options.nix`, the existing `oweService` case
+(`:941-955`) asserts the **complete** generated `ExecStart` string and
+`KillMode = "mixed"`. Two substring checks would pass with broken quoting.
+This catches a future drift from upstream.
 
 ### Change in this repo
 
@@ -76,11 +75,29 @@ Move the `nixarchy` pin in `flake.lock` to the PR's merge, through the
 existing flake bump for nixarchy (as in #3130 and #3137). Nothing else
 changes here.
 
+### What this fixes, and what it does not (from the Codex and agy review)
+
+- **Fixes the lost intro.** With a prepared clip, the shell's boot-intro
+  request sets `intro_release_first` (`main.c:710-711,744`). The clip stays
+  paused until the shell has let go, then plays from its start. Today it
+  plays to its end while owed is blocked.
+- **Takes the post-intro handback (3.4 s) off the cover's path.** The
+  cover can reveal on the moving intro (`BackgroundIntro.qml:114-118`)
+  instead of waiting for `intro_finish()` → `switch_to_shell()`.
+- **Does not remove the 6.7 s shell IPC block.** In
+  `owed_app_poll_intro()`, `intro_release_first` still calls
+  `activate_renderer()` → `owed_shell_plugin_set(false)` (`main.c:848-860`,
+  `:273`) before it sends `intro-start`, and the cover waits for that.
+
+Expected result: the cover lifts at about +9.8 s instead of +14.2 s, still
+above the 2 s target. Per owner decision 1, that block is the next change
+(verification step 6), not part of this one.
+
 ## Alternatives rejected
 
-- **Patch owe so it never blocks on a starting shell.** That is a source
-  change upstream, while upstream's own wiring already avoids the blocking
-  path. It comes back only if the measured gap stays above about 2 s.
+- **Patch owe so it never blocks on a starting shell, in the same round.**
+  The owner chose wiring first. This is the likely next step, because the
+  block remains on the prepared path.
 - **Patch the shell's login cover so it reveals without its background.**
   Same reason. The cover's logic is upstream's design for the prepared
   path.
@@ -101,6 +118,13 @@ changes here.
 - **`KillMode=mixed`:** on stop, only owed gets SIGTERM, and `owe-render`
   is stopped by owed after the handback. This matches upstream. A hung
   renderer is still killed at the end of `TimeoutStopSec`.
+- **`prepare_intro()` runs before owed enters its event loop**
+  (`main.c:1592-1620`). On a slow renderer start (up to 7 s), the shell's
+  boot-intro helper gives up after 5 s of `owe status` polling, and that
+  login simply has no intro. On p620 the renderer starts in 150 ms.
+- **A second start of owed mid-session** (after a crash, or by hand)
+  prepares the intro again and holds the still with the shell for up to
+  15 s. This matches upstream.
 - **Hosts:** p620 and razer, through the nixarchy pin. p510 runs nixarchy
   too and gets it only with the owner's OK.
 
@@ -108,24 +132,22 @@ changes here.
 
 1. **In nixarchy, eval-time:** the new unit assertion passes, and the
    existing checks pass.
-2. **In nixarchy, VM before and after:** run `checks.coexist`
-   (`tests/coexist.nix`) on main and on the PR branch, and compare the
-   attempt on which the desktop first matches its wallpaper. On CI today
-   that is attempts 9-16 of 24 at 5 s each, "first paint waits for owed's
-   shell enable/disable cycle" (#1537). A lower attempt number on the
-   branch is evidence that does not depend on p620's hardware. A VM has no
-   GPU, so its absolute times are not comparable with p620's, only the
-   difference between main and the branch.
+2. **In nixarchy, VM smoke test only:** `checks.coexist` still passes:
+   the session boots and paints. It is not a timing measure. Its 5 s
+   sampling, its 9-16 attempt spread on unchanged code, and its comparison
+   with the final still's colour make it unfit for a before/after.
 3. **On p620, after the pin bump and a fresh login, with the probe:**
    - owed logs `login intro prepared`, and no
      `shell not up yet, the still waits for it`;
-   - the cover closes within about 2 s of both `omarchy-bar` mapping,
-     against 11.3 s today;
-   - the intro is seen: at least one probe screenshot during the playback
-     window is neither black nor the final still. If the clip is too short
-     to catch at the 2.4 s sampling, the owed journal's `intro playing` →
-     `intro finished` span shows a real playback length instead of today's
-     1 ms.
+   - record the gap from both `omarchy-bar` mapped to the cover closed.
+     Expected about 7 s, against 11.3 s today, and still above the 2 s
+     target;
+   - the intro is seen: owed's `intro playing` → `intro fading to still`
+     span is the clip's length, not today's 1 ms. A probe screenshot inside
+     it, if one lands there, is neither black nor the final still;
+   - `systemctl --user cat owed` shows the new `ExecStart` and
+     `KillMode=mixed`, and one stop and start of the unit leaves the
+     wallpaper on screen with no stray `owe-render`.
 4. **On razer:** the same checks, with a temporary copy of the probe for
    one login. Remove it afterwards.
 5. **Theme switch on p620:** switch to a theme with an intro and back. The
