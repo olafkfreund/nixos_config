@@ -46,6 +46,7 @@
     ../../common/nixos/omarchy-omateams.nix
     ../../common/nixos/omarchy-gmessages.nix
     ../../common/nixos/omarchy-omaoutlook.nix
+    ../../common/nixos/omarchy-govee.nix
     ../../common/nixos/omarchy-omamail.nix
     ../../common/nixos/omarchy-pixelbuds.nix
     ../../common/nixos/omarchy-meeting-mode.nix
