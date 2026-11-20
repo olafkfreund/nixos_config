@@ -81,6 +81,9 @@
       # gltui v1.17.0 ahead of edge; remove once nixarchy pins 81be198 or later.
       inputs.nixarchy-gltui.url = "github:olafkfreund/nixarchy-gltui/81be1989835bab8131341673e3efed4e23693789";
       inputs.nixarchy-gltui.inputs.nixpkgs.follows = "nixarchy/nixpkgs";
+      # ghtui v1.1.1 ahead of edge; remove once nixarchy pins 53b1b0a or later.
+      inputs.nixarchy-ghtui.url = "github:olafkfreund/nixarchy-ghtui/53b1b0acaeb82d6ac513ce79950b915a60486da7";
+      inputs.nixarchy-ghtui.inputs.nixpkgs.follows = "nixarchy/nixpkgs";
       # #3107 no keepLoaded / no launcher-entry rescans, ahead of edge; remove each once nixarchy pins its rev or later.
       inputs.nixarchy-devenv.url = "github:olafkfreund/nixarchy-devenv/0d56f9c4556361bf6289455e823ab02a3d8af683";
       inputs.nixarchy-devenv.inputs.nixpkgs.follows = "nixarchy/nixpkgs";
