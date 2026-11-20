@@ -6,8 +6,8 @@ author: olafkfreund
 
 # Intent: make pkg, podman, flatsnap and govee safe to unload
 
-Split from #3139 by the owner's decision of 2026-11-20. herdr was done in
-# 3139.
+Split from #3139 by the owner's decision of 2026-11-20 (herdr was done
+there).
 
 ## Problem
 
