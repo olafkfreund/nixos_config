@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3147
 intent: intent/2026-11-20-3147-login-intro-handoff.md
 ---
