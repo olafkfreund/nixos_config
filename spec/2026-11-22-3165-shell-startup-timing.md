@@ -31,11 +31,14 @@ The 2026-11-21 08:47 login, read from `log.log` (seconds past 08:47):
 
 Two leads come out of it:
 
-- Five of those plugins log `Handler was registered but will not be used
-  because another handler is registered`, so their `IpcHandler` is created
-  twice. Either a panel is instantiated twice at startup (the
-  `syncPanelEntries` rebuilds that `shell.qml:1351` mentions) or the panel and
-  the bar widget claim the same target. Either way it is work done twice.
+- Eight plugins log `Handler was registered but will not be used because
+  another handler is registered`. For the three bar widgets (webcam,
+  omarchroma, promaa.clock) that is expected: `Bar.qml` builds every widget
+  once per screen and p620 has two. The five panels (omarecorder,
+  gliff-manager, pixelbuds, rebuild, omadroid) are not per screen, so either a
+  panel is created twice at startup (the `syncPanelEntries` rebuilds the
+  comment near `syncPanelEntries` in `shell.qml` describes) or the panel and
+  its bar widget claim the same IPC target. Hook 8 below settles which.
 - Neither the 1.65 s silence nor the 2.9 s after 55.08 is explained by what
   is logged today. That is what the patch is for.
 
@@ -50,55 +53,81 @@ p620-only way to ship it.
 
 ### Where the lines go
 
-All in the package's `share/omarchy/shell` (paths below are relative to it).
-Each line is `startup-timing <event> <id>`, so `grep startup-timing log.log`
-gives the timeline.
+All in the package's `share/omarchy/shell`. Hook points are named by function
+or object, not line number: main now carries `omarchy-edge-20261122-48138d9`
+(#3176), newer than the 20261117 build the 08:47 login ran, and the plan
+records the exact lines in that version. Each line is
+`startup-timing <event> <id> [value]`, so `grep startup-timing log.log` gives
+the timeline.
 
-1. `shell.qml` `Component.onCompleted` (line 178): `shell-completed`.
-2. `PluginRegistry.qml`: `scan-start` in `rescan()` (line 752) and
-   `scan-end` where `scanning = false` (line 672), with the plugin count.
-3. `shell.qml`: `onPluginReloadingChanged` and `onBarChanged`
-   (`bar-set <id>`).
-4. `shell.qml` `ensureService` (line 953): `service-begin <key>` before
+1. `shell.qml` root `Component.onCompleted`: `shell-completed`.
+2. `PluginRegistry.qml`: `scan-start` in `rescan()` after its
+   `if (scanning) return` guard (it is called from two places), and
+   `scan-end <count>` where `scanning = false`.
+3. `shell.qml`: `reloading <bool>` on `onPluginReloadingChanged` and
+   `bar-set <id>` on `onBarChanged`.
+4. `shell.qml` `ensureService`: `service-begin <key>` before
    `Qt.createComponent`, `service-compiled <key>` at the top of `finalize`,
-   `service-created <key>` after `createObject`. Services are compiled with
-   `PreferSynchronous`, so begin→compiled is main-thread time.
-5. `shell.qml` `loadPluginWidget` (line 1636): `widget-begin <key>` and
-   `widget-ready <key>` in `finalize`.
-6. `shell.qml` panel loader delegate (line 1436): `panel-active <id>` on
-   `onActiveChanged`, `panel-loaded <id>` in `onLoaded`, and
-   `panel-entry-created <id>` in the delegate's `Component.onCompleted`. A
-   second `panel-entry-created` for the same id proves the double creation.
-7. `plugins/bar/Bar.qml`: `bar-completed <screen>` per bar window.
-8. `services/BackgroundIntro.qml`: `desktop-ready <bool>` on
-   `onDesktopReadyChanged`, `media-ready <bool>` on
-   `onStartupMediaReadyChanged`, and `fade-start` where `startupFade.start()`
-   runs (lines 66 and 181).
-9. A stall marker in `shell.qml`: a `Timer` (interval 50 ms, repeat, active
-   while gated and for the first 20 s) that logs `stall <ms>` when more than
-   150 ms passed since its last tick. That tells main-thread blocking apart
-   from asynchronous wall-clock time.
+   `service-created <key>` right after `createObject`, and `service-wired <key>`
+   at the end of `finalize`, after the property injection and the `_services`
+   reassignment, whose bindings can cost time of their own. Services compile
+   with `PreferSynchronous`, so begin to compiled is main-thread time.
+5. `shell.qml` `loadPluginWidget`: `widget-begin <key>`, and in `finalize`
+   `widget-compiled <key>` before and `widget-registered <key>` after
+   `barWidgetRegistry.register(…)`.
+6. `plugins/bar/Bar.qml` `WidgetHost`: `widget-instance-begin <id> <screen>`
+   when its registry or component loader goes active and
+   `widget-instance-done <id> <screen>` in its `onLoaded`. These loaders are
+   synchronous and run once per screen, so this is where the about 30 widgets
+   on two monitors actually cost main-thread time.
+7. `plugins/bar/Bar.qml` `BarPanel` `Component.onCompleted` (the existing
+   handler, extended): `bar-completed <screen>`.
+8. `shell.qml` panel delegate: `panel-entry-created <id> <keepLoaded>` in the
+   delegate's `Component.onCompleted`, `panel-loader <id> <active>` in the
+   loader's `Component.onCompleted` (a `keepLoaded` panel starts active, so
+   `onActiveChanged` never fires for it), `panel-active <id> <active>` on later
+   changes, and `panel-loaded <id>` in `onLoaded`. A second
+   `panel-entry-created` for one id proves a double creation.
+9. `shell.qml` IPC: `ipc-ready` when the shell's IPC socket server is
+   listening (its `Component.onCompleted`, or its listening property if it has
+   one).
+10. `services/BackgroundIntro.qml`: extend the existing
+    `onDesktopReadyChanged: revealStartup()` handler (a second handler is a
+    compile error) with `desktop-ready <bool>` and the three inputs (reloading,
+    scanning, bar present); `media-ready <bool>` on
+    `onStartupMediaReadyChanged`; `fade-start normal` at the reveal call and
+    `fade-start timeout` at the 10 s fallback.
+11. A stall marker in `shell.qml`: a `Timer` (interval 50 ms, `repeat: true`,
+    `running` while the gate is on and for the first 20 s) that logs
+    `stall <ms>` when more than 150 ms passed since its last tick. That tells
+    main-thread blocking apart from asynchronous wall-clock time.
 
 ### How it ships, p620 only
 
 - The patch file lives at `hosts/p620/nixos/omarchy-startup-timing.patch`,
-  made against the installed tree of the current nixarchy edge
-  (`omarchy-edge-20261117-9f68da8`).
+  made against the installed tree of the package main builds today
+  (`omarchy-edge-20261122-48138d9`).
 - `hosts/p620/nixos/nixarchy.nix` sets:
 
   ```nix
   programs.nixarchy.package =
     (pkgs.extend inputs.nixarchy.overlays.default).omarchy.overrideAttrs (o: {
-      postInstall = (o.postInstall or "")
-        + "patch -d $out/share/omarchy -p1 < ${./omarchy-startup-timing.patch}";
+      postInstall = (o.postInstall or "") + ''
+        patch -d $out/share/omarchy -p1 --forward --fuzz=0 \
+          < ${./omarchy-startup-timing.patch}
+      '';
     });
   ```
 
   The package's `installPhase` ends with `runHook postInstall` (nixarchy
   `pkgs/omarchy/default.nix:2245`), and patching the installed tree means the
   patch is cut against exactly what runs, after nixarchy's own edits.
-  `programs.nixarchy.tree` defaults to the package's tree, and the HM module
-  reads `osConfig.programs.nixarchy.tree`, so both follow.
+  The tree nixarchy's apps module builds (`modules/apps.nix`, `omarchyTree`)
+  mirrors `${cfg.package}/share/omarchy`, and the HM module reads
+  `osConfig.programs.nixarchy.tree`, so both follow. No file in this repo sets
+  `programs.nixarchy.package` today, so there is no option conflict.
+  `--forward --fuzz=0` matches nixarchy's own `patch` calls: a drifted patch
+  fails the build instead of applying in the wrong place.
 - `environment.sessionVariables.OMARCHY_STARTUP_TIMING = "1"` on p620, in
   the same file. Dropping the variable turns the logs off without a rebuild
   of the shell; dropping the commit removes everything.
@@ -123,8 +152,10 @@ as a table. Ponytail: a one-off read does not need a tool.
   marker answer the question that matters (which plugin, which phase).
 - `Date.now()` stamps in each message: not needed, `log.log` has them.
 - A file flag instead of an environment variable: the session environment is
-  the documented switch, and `environment.sessionVariables` reaches the
-  Hyprland session through PAM.
+  the documented switch. `environment.sessionVariables` reaches the shell
+  through `/etc/set-environment`: the running shell already carries
+  `NIXOS_OZONE_WL` and `__NIXOS_SET_ENVIRONMENT_DONE`, and p620 already
+  passes `NIXPKGS_QT6_QML_IMPORT_PATH` to quickshell the same way.
 
 ## Risks
 
@@ -148,8 +179,10 @@ as a table. Ponytail: a one-off read does not need a tool.
    toplevel as main (unchanged).
 2. Offscreen QML load of the patched `shell.qml`, `PluginRegistry.qml`,
    `Bar.qml` and `BackgroundIntro.qml` reports no errors.
-3. After deploy, `grep startup-timing log.log` is empty in the running shell
-   (variable not yet in this session), proving the gate.
+3. The gate: the offscreen load of the patched `shell.qml` without
+   `OMARCHY_STARTUP_TIMING` logs no `startup-timing` line, and with it set to
+   `1` logs `shell-completed`. (The shell running at deploy time still runs
+   the old store path, so its log proves nothing.)
 4. After the owner's logout and login: the grep shows `shell-completed`,
    `scan-start`/`scan-end`, one `service-*` triple per service, the panel and
    widget lines, `desktop-ready true` and `fade-start`. The timeline is
