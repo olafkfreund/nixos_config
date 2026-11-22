@@ -158,7 +158,8 @@ for every per-screen cover to have drawn two frames (`readyFrames < 2`, line
    - `rm -rf work/`.
    Traps: write the patch with a file, not a heredoc through `git commit -m`.
 
-4. **Lead: `hosts/p620/nixos/nixarchy.nix`.** After the `imports` list, add:
+4. **Lead: `hosts/p620/nixos/nixarchy.nix`.** Next to the existing
+   `environment.sessionVariables` (above `NIXPKGS_QT6_QML_IMPORT_PATH`), add:
 
    ```nix
    # Temporary startup timing for #3165; remove with the patch file.
