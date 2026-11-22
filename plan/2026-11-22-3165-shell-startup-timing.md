@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3165
 spec: spec/2026-11-22-3165-shell-startup-timing.md
 coders:
