@@ -47,7 +47,7 @@ reviewers:
 |---|---|---|---|
 | 0 | root properties, next to `property bool pluginReloading` | 67 | add the `startupTiming` gate property |
 | 1 | root `Component.onCompleted`, first statement | 178 | `shell-completed` |
-| 3 | new root handlers `onPluginReloadingChanged` and `onBarChanged` (none exist today) | near 67 / 223 | `reloading <bool>`, `bar-set <bar ? "yes" : "null">` |
+| 3 | new root handlers `onPluginReloadingChanged` and `onBarChanged` (none exist today) | near 67 / 223 | `reloading <bool>`, `bar-set <bar ? shell.activeBarId : "null">` |
 | 4 | `ensureService`: before `Qt.createComponent` | 966 | `service-begin <key>` |
 | 4 | `finalize`: first statement | 968 | `service-compiled <key> <comp.status>` |
 | 4 | `finalize`: after `createObject` and its null check | 975-979 | `service-created <key>` |
@@ -95,11 +95,16 @@ measures the gap; the log line's own timestamp places it.
 | 0 | a root property | top of root | gate property |
 | 6 | `WidgetHost` `componentLoader`, `registryLoader`, `qmlLoader`: new `onActiveChanged: if (active && root.startupTiming) …` | 2710, 2723, 2736 | `widget-instance-begin <host.key> <component\|registry\|qml>` |
 | 6 | same three loaders, first statement of `onLoaded` | 2716, 2729, 2742 | `widget-instance-done <host.key> <component\|registry\|qml>` |
-| 7 | `BarPanel` `Component.onCompleted` (line 1722), turned into a block that keeps the existing statement | 1722 | `bar-completed <screen.name>` |
+| 7 | `BarPanel` `Component.onCompleted` (line 1722), turned into a block that keeps the existing statement | 1722 | `bar-completed <screen ? screen.name : "">` |
 
 For synchronous loaders, `onActiveChanged` may fire after the load, so
 begin/done can read 0 ms apart; the stall marker then carries the cost. A key
 logged twice is one widget per screen (expected on two monitors).
+
+Deviation from spec hook 6: the spec logs `<id> <screen>`, but `WidgetHost`
+has no screen property (it lives in a pool and is reparented to a slot), so
+the plan logs the loader kind instead. Duplicate keys still show the
+per-screen copies.
 
 `services/BackgroundIntro.qml` (root id `root`):
 
@@ -110,7 +115,7 @@ logged twice is one widget per screen (expected on two monitors).
 | 10 | new `onStartupMediaReadyChanged` | near 19 | `media-ready <startupMediaReady>` |
 | 10 | `revealStartup()`, right before `startupFade.start()` | 66 | `fade-start normal` |
 | 10 | 10 s fallback `Timer.onTriggered`, before `startupFade.start()` | 181 | `fade-start timeout` |
-| 10 | cover `FrameAnimation.onTriggered`, inside `if (readyFrames === 2)` | 320 | `cover-frames-ready <modelData.name>` |
+| 10 | cover `FrameAnimation.onTriggered`, inside `if (readyFrames === 2)` | 320 | `cover-frames-ready <modelData ? modelData.name : "">` |
 
 The last row is an addition to the spec's list: `revealStartup()` also waits
 for every per-screen cover to have drawn two frames (`readyFrames < 2`, line
@@ -139,7 +144,8 @@ for every per-screen cover to have drawn two frames (`readyFrames < 2`, line
 
 3. **Lead: compile check and cut the patch.**
    - Compile check: a throwaway offscreen harness (as used in #3147's
-     timing work) with `QT_QPA_PLATFORM=offscreen`, `HOME` and
+     timing work), run with `qs -p` at the copied `shell/` directory so the
+     `qs.Commons` and `qs.Ui` imports resolve, with `QT_QPA_PLATFORM=offscreen`, `HOME` and
      `XDG_RUNTIME_DIR` set to a temp dir and `DBUS_SESSION_BUS_ADDRESS`
      unset, that `Qt.createComponent`s each patched file from a copy of the
      full `$S/shell` tree with the four files swapped in, and prints
@@ -178,15 +184,21 @@ for every per-screen cover to have drawn two frames (`readyFrames < 2`, line
    - `nix eval --raw .#nixosConfigurations.razer.config.system.build.toplevel.outPath`
      equals the same eval on `origin/main` → razer unchanged.
    - `grep -c startup-timing <built tree>/shell/shell.qml` is non-zero.
-   - Gate check, isolated (temp `HOME` and `XDG_RUNTIME_DIR`, no
-     `WAYLAND_DISPLAY`, no `DBUS_SESSION_BUS_ADDRESS`, so it cannot reach the
-     live shell's socket, polkit or the compositor):
-     `QT_QPA_PLATFORM=offscreen timeout 20 qs -p <built tree>/shell`, once
-     without and once with `OMARCHY_STARTUP_TIMING=1`; grep its log.
-     Expect no `startup-timing` line without, and `shell-completed` with.
-     If the isolated shell will not start at all, report that and rely on the
-     compile check plus the built-file grep; do not run it against the live
-     session.
+   - Gate check, isolated, under `env -i` so nothing from the live session
+     leaks: only `PATH`, `HOME=<tmp>`, `XDG_RUNTIME_DIR=<tmp>`,
+     `QT_QPA_PLATFORM=offscreen`, `DBUS_SYSTEM_BUS_ADDRESS=unix:path=/nonexistent`
+     and `OMARCHY_PATH=` (empty). With an empty `OMARCHY_PATH` the IPC
+     `SocketServer` stays inactive (`shell.qml:1746`) and no first-party
+     service (polkit, lock, idle) loads, but the root
+     `Component.onCompleted` still runs. No `WAYLAND_DISPLAY`,
+     `HYPRLAND_INSTANCE_SIGNATURE`, `OMARCHY_SESSION_ID` or
+     `DBUS_SESSION_BUS_ADDRESS`. Run it in its own process group
+     (`setsid timeout 20 qs -p <built tree>/shell`) and afterwards kill any
+     `inotifywait` left in that group. Once without and once with
+     `OMARCHY_STARTUP_TIMING=1`; grep its log. Expect no `startup-timing`
+     line without, and `shell-completed` with. If the isolated shell will not
+     start at all, report that and rely on the compile check plus the
+     built-file grep; never run it against the live session.
    Traps: p510 is not built.
 
 6. **Lead: commit, PR, review, merge, deploy p620.**
