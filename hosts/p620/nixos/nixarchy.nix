@@ -103,6 +103,16 @@
   # else in the closure pulls psmisc in, so the plugin fails at runtime rather
   # than at install with a message about a missing binary.
   environment.systemPackages = [ pkgs.qt6.qtmultimedia pkgs.psmisc ];
+  # Temporary startup timing for #3165; remove together with the patch file.
+  programs.nixarchy.package =
+    (pkgs.extend inputs.nixarchy.overlays.default).omarchy.overrideAttrs (o: {
+      postInstall = (o.postInstall or "") + ''
+        patch -d $out/share/omarchy -p1 --forward --fuzz=0 \
+          < ${./omarchy-startup-timing.patch}
+      '';
+    });
+  environment.sessionVariables.OMARCHY_STARTUP_TIMING = "1";
+
   environment.sessionVariables.NIXPKGS_QT6_QML_IMPORT_PATH =
     "${pkgs.qt6.qtmultimedia}/lib/qt-6/qml";
 
