@@ -88,15 +88,13 @@
   # Plymouth is left alone deliberately: nixarchy only mkDefaults its own
   # splash, so stylix keeps this machine on 'stylix' with no mkForce needed.
 
-  # Temporary for #3181: reaper check fix + startup timing; removed in plan steps 6 and 8.
+  # Temporary for #3181: reaper check fix; removed in plan step 8 once nixarchy carries it.
   programs.nixarchy.package =
     (pkgs.extend inputs.nixarchy.overlays.default).omarchy.overrideAttrs (o: {
       postInstall = (o.postInstall or "") + ''
         patch -d $out/share/omarchy -p1 --forward --fuzz=0 < ${./omarchy-3181-reaper-check.patch}
-        patch -d $out/share/omarchy -p1 --forward --fuzz=0 < ${./omarchy-startup-timing.patch}
       '';
     });
-  environment.sessionVariables.OMARCHY_STARTUP_TIMING = "1";
 
   # QtMultimedia for Omarchy shell plugins that want a camera preview
   # (io.github.kristoferlund.webcam). quickshell's wrapper injects only
