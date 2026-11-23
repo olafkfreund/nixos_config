@@ -19,6 +19,7 @@
 # evening.
 let
   cfg = config.services.nixarchy-runner;
+  suffix = i: lib.optionalString (i > 1) "-${toString i}";
 in
 {
   options.services.nixarchy-runner = {
@@ -155,26 +156,56 @@ in
     # A running VM writes its image, so its mtime stays fresh; -xdev keeps the
     # walk off anything mounted beneath the directory.
     systemd = {
-      services.nixarchy-vm-image-prune = lib.mkIf (cfg.vmImageDir != null) {
-        description = "Prune old VM disk images under ${cfg.vmImageDir}";
-        unitConfig.ConditionPathIsDirectory = cfg.vmImageDir;
-        serviceConfig = {
-          Type = "oneshot";
-          User = "olafkfreund";
-          ExecStart = "${pkgs.findutils}/bin/find ${cfg.vmImageDir} -xdev -type f ( -name *.qcow2 -o -name *.img -o -name *.raw ) -mtime +${toString cfg.vmImageMaxAgeDays} -print -delete";
-          ProtectSystem = "strict";
-          ReadWritePaths = [ cfg.vmImageDir ];
-          ProtectHome = true;
-          PrivateTmp = true;
-          PrivateNetwork = true;
-          NoNewPrivileges = true;
-          ProtectKernelTunables = true;
-          ProtectKernelModules = true;
-          ProtectControlGroups = true;
-          RestrictSUIDSGID = true;
-          CapabilityBoundingSet = "";
-        };
-      };
+      services = lib.mkMerge [
+        {
+          nixarchy-vm-image-prune = lib.mkIf (cfg.vmImageDir != null) {
+            description = "Prune old VM disk images under ${cfg.vmImageDir}";
+            unitConfig = {
+              ConditionPathIsDirectory = cfg.vmImageDir;
+              # Never prune the hidden fallback copy when the VM mount is absent.
+              RequiresMountsFor = [ cfg.vmImageDir ];
+            };
+            serviceConfig = {
+              Type = "oneshot";
+              User = "olafkfreund";
+              ExecStart = "${pkgs.findutils}/bin/find ${cfg.vmImageDir} -xdev -type f ( -name *.qcow2 -o -name *.img -o -name *.raw ) -mtime +${toString cfg.vmImageMaxAgeDays} -print -delete";
+              ProtectSystem = "strict";
+              ReadWritePaths = [ cfg.vmImageDir ];
+              ProtectHome = true;
+              PrivateTmp = true;
+              PrivateNetwork = true;
+              NoNewPrivileges = true;
+              ProtectKernelTunables = true;
+              ProtectKernelModules = true;
+              ProtectControlGroups = true;
+              RestrictSUIDSGID = true;
+              CapabilityBoundingSet = "";
+            };
+          };
+
+          # Both of these, and the second is the one that actually decides it now.
+          #
+          # TMPDIR on the nix-daemon unit was the whole answer until nix grew a
+          # `build-dir` setting, which defaults to /nix/var/nix/builds -- on the root
+          # filesystem -- and takes precedence. On p510 that made the TMPDIR line go
+          # quietly inert across a nix bump: it still read as correct, /home/nix-build
+          # had zero entries after months, and every build had moved back to /. The
+          # symptom was CI dying of ENOSPC on a machine with three disks, and the
+          # error surfaced four levels above the cause as a failed ESP assertion
+          # (#1643).
+          #
+          # Keep both. TMPDIR still governs anything that reads the environment
+          # rather than the setting, and dropping it would move that half back to /
+          # without any error saying so.
+          nix-daemon.environment.TMPDIR = cfg.buildDir;
+        }
+        (lib.listToAttrs (map
+          (i: lib.nameValuePair "github-runner-nixarchy${suffix i}" {
+            # A missing build disk must stop CI instead of sending builds to /.
+            unitConfig.RequiresMountsFor = [ cfg.buildDir ];
+          })
+          (lib.range 1 cfg.instances)))
+      ];
       timers.nixarchy-vm-image-prune = lib.mkIf (cfg.vmImageDir != null) {
         wantedBy = [ "timers.target" ];
         timerConfig = {
@@ -183,29 +214,13 @@ in
           RandomizedDelaySec = "1h";
         };
       };
+      # Root-owned and 0755: the daemon writes here as root, and nix refuses a
+      # world-writable build directory outright.
+      tmpfiles.rules = [
+        "d ${cfg.buildDir} 0755 root root -"
+      ];
     };
 
-    # Root-owned and 0755: the daemon writes here as root, and nix refuses a
-    # world-writable build directory outright.
-    systemd.tmpfiles.rules = [
-      "d ${cfg.buildDir} 0755 root root -"
-    ];
-
-    # Both of these, and the second is the one that actually decides it now.
-    #
-    # TMPDIR on the nix-daemon unit was the whole answer until nix grew a
-    # `build-dir` setting, which defaults to /nix/var/nix/builds -- on the root
-    # filesystem -- and takes precedence. On p510 that made the TMPDIR line go
-    # quietly inert across a nix bump: it still read as correct, /home/nix-build
-    # had zero entries after months, and every build had moved back to /. The
-    # symptom was CI dying of ENOSPC on a machine with three disks, and the
-    # error surfaced four levels above the cause as a failed ESP assertion
-    # (#1643).
-    #
-    # Keep both. TMPDIR still governs anything that reads the environment
-    # rather than the setting, and dropping it would move that half back to /
-    # without any error saying so.
-    systemd.services.nix-daemon.environment.TMPDIR = cfg.buildDir;
     nix.settings.build-dir = cfg.buildDir;
 
     # The caches nixarchy CI pulls from, trusted at the SYSTEM level, which is
@@ -256,13 +271,10 @@ in
       map
         (
           i:
-          let
-            suffix = lib.optionalString (i > 1) "-${toString i}";
-          in
-          lib.nameValuePair "nixarchy${suffix}" {
+          lib.nameValuePair "nixarchy${suffix i}" {
             inherit (cfg) url tokenFile extraLabels;
             enable = true;
-            name = "${config.networking.hostName}-nixarchy${suffix}";
+            name = "${config.networking.hostName}-nixarchy${suffix i}";
 
             # No workDir. It is tempting to move this too and it is the wrong
             # lever: the work directory holds a git checkout, and the sixteen

@@ -67,9 +67,9 @@ in
     vmImageDir = "/mnt/data/vmtest";
     enable = true;
 
-    # Its own 480 GB SSD (Issue #2182). Two runners peaked at about 64 GB;
-    # drop to 3 if four push the peak past about 350 GB.
-    buildDir = "/var/lib/nix-build";
+    # Lexar EQ790 1 TB NVMe (#3194). Two runners peaked at about 64 GB;
+    # still four runners, drop to 3 if the peak nears the disk size.
+    buildDir = "/mnt/build/nix";
     instances = 4;
   };
 
@@ -544,7 +544,12 @@ in
         "/mnt/img_pool/docker/volumes"
       ];
       containerd.unitConfig.RequiresMountsFor = [ "/mnt/img_pool" ];
+
+      # Never prune the old copy under a missing /mnt/build bind (#3194).
+      nixarchy-vm-image-prune.unitConfig.ConditionPathIsMountPoint = "/mnt/data/vmtest";
     };
+
+    tmpfiles.rules = [ "d /mnt/build/vmtest 0755 olafkfreund users -" ];
 
   };
 
