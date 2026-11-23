@@ -120,14 +120,19 @@
 
   # The agents' VM workspace (#3194) lives on /mnt/build but keeps the path
   # nixarchy's AGENTS.md hardcodes. If the build disk is missing this bind
-  # fails and the old copy underneath shows; reconcile with
-  # `rsync -n -a /mnt/build/vmtest/ <old copy>` before it is hidden again.
+  # fails and the old copy underneath shows. When the disk is back, stop
+  # nixarchy-vm-image-prune.timer first (it would pull the mounts back in),
+  # then list fallback work with `rsync -n -a -i <old copy>/ /mnt/build/vmtest/`
+  # and copy it over before mounting the bind again.
+  # nosuid and nodev: what the old path inherited from /mnt/data's `users`.
   fileSystems."/mnt/data/vmtest" = {
     device = "/mnt/build/vmtest";
     fsType = "none";
     options = [
       "bind"
       "nofail"
+      "nosuid"
+      "nodev"
       "x-systemd.requires-mounts-for=/mnt/build"
     ];
   };
