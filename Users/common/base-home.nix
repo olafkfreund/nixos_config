@@ -64,6 +64,7 @@
     kde.enable = false;
     qt.enable = false; # Qt theming handled by home/desktop/theme/qt.nix
     rofi.enable = false; # rofi is on no host (Omarchy's menu replaced it); its target only adds a rename warning
+    wayprompt.enable = false; # Home Manager removed programs.wayprompt; Stylix 44aafe27 still sets it, which fails eval
   };
 
   # Common programs for all users
