@@ -77,15 +77,19 @@
     options = [ "noatime" ];
   };
 
-  # 480GB SATA SSD: nix build-dir and nixarchy runner VMs (Issue #2182).
-  # nofail on purpose: builds fall back to / so the host can still rebuild.
-  fileSystems."/var/lib/nix-build" = {
-    device = "/dev/disk/by-uuid/c084fd70-c039-4724-8ebc-0cc78113eb30";
+  # Lexar EQ790 1 TB NVMe (#3194): nix build-dir and the agents' VM workspace.
+  # nofail so p620 can still rebuild on / if it dies; the two x-systemd.before
+  # make tmpfiles and the daemon wait for the mount attempt (nofail drops
+  # Before=local-fs.target), so neither creates or builds on / under it.
+  fileSystems."/mnt/build" = {
+    device = "/dev/disk/by-uuid/06f7240e-8946-4547-90fc-3fbc8e711309";
     fsType = "ext4";
     options = [
-      "nofail"
       "noatime"
+      "nofail"
       "x-systemd.device-timeout=10s"
+      "x-systemd.before=systemd-tmpfiles-setup.service"
+      "x-systemd.before=nix-daemon.service"
     ];
   };
 
@@ -114,6 +118,25 @@
     ];
   };
 
+  # The agents' VM workspace (#3194) lives on /mnt/build but keeps the path
+  # nixarchy's AGENTS.md hardcodes. If the build disk is missing this bind
+  # fails and the old copy underneath shows. When the disk is back, stop
+  # nixarchy-vm-image-prune.timer first (it would pull the mounts back in),
+  # then list fallback work with `rsync -n -a -i <old copy>/ /mnt/build/vmtest/`
+  # and copy it over before mounting the bind again.
+  # nosuid and nodev: what the old path inherited from /mnt/data's `users`.
+  fileSystems."/mnt/data/vmtest" = {
+    device = "/mnt/build/vmtest";
+    fsType = "none";
+    options = [
+      "bind"
+      "nofail"
+      "nosuid"
+      "nodev"
+      "x-systemd.requires-mounts-for=/mnt/build"
+    ];
+  };
+
   swapDevices = [ ];
 
   # SSD I/O scheduler optimization
@@ -124,7 +147,7 @@
 
     # Automatically set 'none' scheduler for non-rotational drives (SSDs)
     ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="none"
-    # BFQ on both NVMe disks so I/O priorities apply. Matched by pattern: the
+    # BFQ on all three NVMe disks so I/O priorities apply. Matched by pattern: the
     # names swap when a disk is added (Issue #2182).
     ACTION=="add|change", KERNEL=="nvme[0-9]n1", ATTR{queue/scheduler}="bfq"
   '';
