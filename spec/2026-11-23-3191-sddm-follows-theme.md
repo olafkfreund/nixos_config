@@ -8,154 +8,188 @@ intent: intent/2026-11-23-3191-sddm-follows-theme.md
 
 ## Decisions on the intent's open questions
 
-The intent was approved without answers, so this spec takes a default for each. Change any of them at this
-review.
+The intent was approved without answers, so this spec takes a default for each. Change any of them at this review.
 
 1. **When:** live. The next greeter after a theme change uses it, with no rebuild.
-2. **Wallpaper:** shown. The theme's current background sits behind the form. A wallpaper-only change
-   (`omarchy-theme-bg-set` and friends run no hook) is picked up at the next theme set or the next login, not
-   at once.
-3. **Logo and failed state:** the logo is tinted to the theme's accent. The lock icon, field frame and bullets
-   use the theme's foreground. A wrong password uses the theme's red.
-4. **Where:** in nixarchy, on by default whenever `programs.nixarchy.user` is set, with an option to turn it
-   off. This repo only bumps the pin.
-5. **Whose theme:** `programs.nixarchy.user`'s, and only that user's. Unset means today's look.
-6. **`omarchy-refresh-sddm`:** runs the same sync once, then says what it did.
+2. **Wallpaper:** shown. The theme's current background sits behind the form.
+   - A wallpaper-only change (`omarchy-theme-bg-set` and friends, which run no hook) is picked up at the next theme
+     set or the next login, not at once.
+   - So is a headless theme set (`THEME_HEADLESS=1` skips the `theme-set` hook).
+3. **Logo and failed state:**
+   - The logo is tinted to the theme's accent.
+   - The lock icon and the field frame use the theme's foreground, and the bullets are drawn in it.
+   - A wrong password turns the lock and frame to the theme's red until the next key press.
+4. **Where:** in nixarchy, as an opt-in option, `programs.nixarchy.greeterThemeUser`. It follows nixarchy's
+   `browserThemeUser`: naming the desktop user in `programs.nixarchy.user` must not, on its own, let them change what
+   every user sees at login. This repo sets it to `olafkfreund` on all three hosts.
+5. **Whose theme:** `greeterThemeUser`'s, and only that user's. Unset means today's look.
+6. **`omarchy-refresh-sddm`:** asks for a publish now, then says whether the next login screen will use the
+   theme, or why not.
 
 ## Design
 
-The greeter keeps loading the theme from the Nix store. Only two things in it come from outside the store,
-through symlinks to a directory the desktop user owns. A hook that runs as that user on every theme change
-fills that directory. No root helper, no polkit rule, no mutable QML.
+The greeter reads only files that a hardened system service wrote. The user's side drops raw theme data into an
+inbox. The service, triggered by a path unit, validates the data, re-encodes the wallpaper in its own sandbox, and
+swaps in a complete new generation in one rename. The theme's QML loads anything new (the effects) through a
+`Loader` that falls back to today's images, so a QML failure in the new part cannot stop the greeter.
 
 ```mermaid
 flowchart LR
-  A[omarchy theme set] --> B[theme-set.d hook, as the user]
-  P[login: post-boot.d hook] --> B
-  B -->|validated colours| C[/var/lib/nixarchy-greeter/theme.conf/]
-  B -->|copied image| D[/var/lib/nixarchy-greeter/background/]
-  C -. theme.conf.user symlink .-> E[SDDM omarchy theme, in the store]
-  D -. background symlink .-> E
+  A[theme-set.d hook] --> S[nixarchy-greeter-sync, as the user]
+  P[post-boot.d hook] --> S
+  S -->|colors.toml + wallpaper, then ready| I[/var/lib/nixarchy-greeter/inbox/]
+  I --> U[path unit]
+  U --> V[publish service, user nixarchy-greeter]
+  V -->|validated theme.conf + PNG, one rename| C[/var/lib/nixarchy-greeter/out/current/]
+  C -. theme.conf.user and background symlinks .-> G[SDDM omarchy theme, in the store]
 ```
 
 ### 1. The SDDM theme (nixarchy package, `share/sddm/themes/omarchy`)
 
-- **`theme.conf`** gains today's look as defaults:
-  - `background=#1a1b26`
-  - `foreground=#a9b1d6`
-  - `accent=#9ece6a`
-  - `failed=#f7768e`
+v4.5.0 and quattro ship the same `Main.qml` today, so one change fits both pins.
 
-  These are the colours of today's PNG images, so an unthemed greeter looks as it does now. The plan confirms the
-  exact values from the PNG images.
-- **`theme.conf.user`** is a symlink to `/var/lib/nixarchy-greeter/theme.conf`. SDDM 0.21 reads
-  `<ConfigFile>.user` after the theme's own file; the `.user` lookup is in `sddm-greeter-qt6`. A missing
-  target means no overrides.
-- **`background`** is a symlink to `/var/lib/nixarchy-greeter/background`.
-- **`Main.qml`**:
-  - **Colours:** each one is read through one helper that accepts only `#rrggbb` and otherwise returns the
-    default. A bad value cannot make the colour invalid.
-  - **Wallpaper:** an `Image` of `background`, with `PreserveAspectCrop` and `asynchronous`, behind the
-    existing form. It shows only when `status === Image.Ready`, so a missing or broken image leaves the
-    colour.
-  - **Recolouring:** the logo, lock, field frame and bullets are recoloured with `MultiEffect` from
-    `QtQuick.Effects`, using the PNG's alpha as the shape and the chosen colour as the fill. This works for
-    any source luminance; plain colorization keeps luminance, and dark sources stay dark. `QtQuick.Effects`
-    ships in qtdeclarative 6.12, which is already on the greeter's QML path.
-  - **Wrong password:** the failed state switches the colour to `failed`, instead of the `*-failed.png`
-    images.
-  - **Legibility:** over the wallpaper, the form keeps a translucent panel in the background colour, so the
-    field stays readable on a busy or light image.
+- **`metadata.desktop`:** gains `ConfigFile=theme.conf`, instead of relying on SDDM's default.
+- **`theme.conf`:** gains today's look as defaults, taken from today's PNG images in the plan:
+  - `background`: `#1a1b26`, as now;
+  - `foreground`;
+  - `accent`: the logo's green;
+  - `failed`: the red of the `*-failed.png` images.
 
-### 2. The directory (nixarchy NixOS module)
+  So an unthemed greeter looks as it does today.
+- **Two symlinks:**
+  - `theme.conf.user` points to `/var/lib/nixarchy-greeter/out/current/theme.conf`;
+  - `background` points to `/var/lib/nixarchy-greeter/out/current/background.png`.
 
-When `programs.nixarchy.user` is set and the new option `programs.nixarchy.greeterFollowsTheme` (default
-`true`) is on, a `systemd.tmpfiles` rule creates `/var/lib/nixarchy-greeter`:
+  SDDM 0.21 reads `<ConfigFile>.user` after the theme's own file; the `.user` lookup is in `sddm-greeter-qt6`. A
+  missing target means no overrides and no image.
+- **`Main.qml`** keeps its imports (`QtQuick`, `SddmComponents`) and the password field, Enter handling and focus as
+  they are. Changes:
+  - **Colours:** one helper reads each value from `config` and accepts only `#rrggbb`; anything else gives the
+    built-in default.
+  - **Wallpaper:** an `Image` of `background`, with `asynchronous: true`, `PreserveAspectCrop` and `sourceSize`
+    bound to the screen size, behind the form. It shows only when `status === Image.Ready`. A translucent panel
+    in the background colour sits behind the form so it stays legible.
+  - **Bullets:** drawn as small `Rectangle`s in the foreground colour, with no effect per bullet.
+  - **Logo, lock and field frame:** each is a `Loader` of a small component file in the theme, `Tinted.qml`. That
+    file imports `QtQuick.Effects` and uses `MultiEffect` with the PNG's alpha as a mask over a solid colour, at the
+    PNG's own size and alignment. If the `Loader` reports `Loader.Error`, a plain `Image` of today's PNG is shown
+    instead, and the `*-failed.png` images for the failed state. `QtQuick.Effects` ships in qtdeclarative 6.12,
+    which is on the greeter's QML path, but the fallback does not depend on that.
+  - **Wrong password:** `onLoginFailed` clears the field first and then sets `loginFailed`. The flag resets on the
+    next key press, not on the text change caused by the clear. Today's code sets the flag, and the clear's
+    `onTextChanged` resets it at once, so the failed look never shows.
 
-- owned by that user;
-- group `root`, mode `0755`, so the `sddm` user can read it and nobody else can write it.
+### 2. The NixOS module (nixarchy)
 
-Otherwise no directory exists. The symlinks then dangle, and the greeter shows today's look.
+When `programs.nixarchy.displayManager` is on and `greeterThemeUser` is set:
+
+- **The inbox:** `/var/lib/nixarchy-greeter/inbox`, from tmpfiles: owned by `greeterThemeUser`, mode `0755`.
+  A `d` rule also corrects the owner when the user changes.
+- **The publish output:** `/var/lib/nixarchy-greeter/out/current` and its generations, owned by a static system user
+  `nixarchy-greeter`. The parent `/var/lib/nixarchy-greeter` is `root`, mode `0755`. The greeter (`sddm`) can read
+  everything; the desktop user can write only the inbox.
+- **`nixarchy-greeter-publish.path`:** `PathChanged=/var/lib/nixarchy-greeter/inbox/ready`.
+- **`nixarchy-greeter-publish.service`,** a oneshot run as `nixarchy-greeter`. It is hardened per the repo
+  pattern, with a static user instead of `DynamicUser`, because the greeter must traverse into its output and
+  DynamicUser state sits under `/var/lib/private` (mode 0700). It has:
+  - `ProtectSystem=strict`, `ProtectHome=true`, `NoNewPrivileges=true`;
+  - `ReadWritePaths=/var/lib/nixarchy-greeter/out` only, and no network;
+  - `MemoryMax` and `RuntimeMaxSec`, which bound a hostile image.
+
+  It does this:
+  1. Open each inbox file without following symlinks, and accept only regular files under a size cap: 64 KB for
+     `colors.toml`, 50 MB for the image.
+  2. Parse `background`, `foreground`, `accent` and `red` from `colors.toml`, keeping only `#rrggbb` values. Write
+     `theme.conf` with `red` as `failed`.
+  3. Decode the image with ImageMagick under resource limits, inside this service, and write
+     `background.png` at most 3840×2160. Any failure gives a generation with no image.
+  4. Write the new generation into `out/<timestamp>/`, with files mode 0644. Then point `current` at it with one
+     atomic symlink rename, and delete older generations. The greeter sees the whole old pair or the whole new
+     one, never a mix.
+  5. Any failure leaves `current` as it was.
+- **Turning it off:** setting `greeterThemeUser` back to null, or turning off `displayManager`, adds a tmpfiles `R`
+  rule for `/var/lib/nixarchy-greeter`. NixOS runs tmpfiles with `--remove` on every switch, so the old theme does
+  not linger. The theme's symlinks then dangle, which means today's look.
 
 ### 3. The sync (nixarchy Home Manager module)
 
-`nixarchy-greeter-sync` is a packaged script, installed as:
+`nixarchy-greeter-sync` is a packaged script. It is installed as `theme-set.d/20-greeter`, beside nixarchy's
+`cursor` and `10-owe-sync` hooks, and as `post-boot.d/20-greeter`. Omarchy's `autostart.lua` calls `post-boot` at
+every login on both pins. It runs as the user:
 
-- `~/.config/omarchy/hooks/theme-set.d/20-greeter`, the same extension point as nixarchy's `cursor` and
-  `10-owe-sync` hooks;
-- `~/.config/omarchy/hooks/post-boot.d/20-greeter`, so a login syncs the theme that is already active,
-  including the first one.
+1. If the inbox is missing or not writable, exit 0. A theme switch never fails over the greeter.
+2. Take `flock` on a lock file in `$XDG_RUNTIME_DIR`, so overlapping theme switches run one at a time and the
+   last one wins.
+3. Copy `~/.local/state/omarchy/current/theme/colors.toml`, and the file behind
+   `~/.local/state/omarchy/current/background` when it is an image Omarchy accepts (png, jpg, jpeg, gif, bmp or
+   webp; not a video), into the inbox. Each file goes to a temporary name, is set to mode 0644, and is then renamed
+   into place. A video or missing background removes the inbox image.
+4. Touch `inbox/ready` last, which triggers the publish.
+5. A trap removes temporary files on exit.
 
-It runs as the user and does this:
-
-1. Exit 0 without changes if `/var/lib/nixarchy-greeter` is missing or not writable. A theme switch never
-   fails over the greeter.
-2. Read `background`, `foreground`, `accent` and `red` from
-   `~/.local/state/omarchy/current/theme/colors.toml`. Keep only values matching `^#[0-9a-fA-F]{6}$`; anything
-   else is left out, and the greeter falls back to the default for it.
-3. Write `theme.conf` (`[General]` and those keys) to a temporary file in the same directory, then `mv` it
-   into place, so the greeter never reads half a file.
-4. Resolve `~/.local/state/omarchy/current/background`. If it is a regular file with a PNG or JPEG extension
-   and is at most 25 MB, copy it to a temporary file and `mv` it to `background`. Anything else, including a
-   video background or no background, removes `background`, and the greeter shows the colour.
-5. Copy only those two files. The script reads the user's own files, so it gains nothing by following a
-   symlink in them. Nothing privileged reads the home directory.
+A theme set that is still running when the user logs out can miss this greeter. The next login's `post-boot`
+catches up.
 
 ### 4. `omarchy-refresh-sddm`
 
-nixarchy's NixOS stub runs `nixarchy-greeter-sync` and prints whether the next login screen will use the
-theme, or why not (the option is off, or the directory is missing).
+nixarchy's NixOS stub runs `nixarchy-greeter-sync` and then reports whether `nixarchy-greeter-publish.path` exists
+(the option is on) and whether `current` changed.
 
 ### 5. This repo
 
-Bump the nixarchy pin. All three hosts already set `programs.nixarchy.user = "olafkfreund"`, so the feature is
-on with no host change.
+- Bump the nixarchy pin.
+- Set `programs.nixarchy.greeterThemeUser = "olafkfreund"` for p620, razer and p510.
 
 ## Alternatives rejected
 
-- **Recolour at rebuild through Stylix,** like Plymouth and GRUB: it needs a rebuild after every theme change.
-  The rest of a theme change is live.
-- **A root service, path unit or polkit-allowed unit** that copies the theme out of the user's home: it adds a
-  privileged reader of user-controlled files (the symlink risk) for data the user can write themselves.
-- **Point `ThemeDir` at a mutable directory:** the greeter would then run QML the user can edit. That is code
-  as the `sddm` user, not data.
-- **A generated QML file loaded with `Loader`,** or reading the file with `XMLHttpRequest`: the same code
-  problem, or it needs `QML_XHR_ALLOW_FILE_READ` set in the greeter's environment.
+- **Recolour at rebuild through Stylix,** like Plymouth and GRUB: it needs a rebuild after every theme change. The
+  rest of a theme change is live.
+- **The greeter reads a user-owned directory directly** (the first draft): the user could swap in a symlink, a FIFO
+  or a huge image and hang or exhaust the greeter. That would be a login denial for every user of the machine.
+- **A root service that reads the user's home:** a privileged reader of user-controlled paths. The inbox keeps the
+  service out of `$HOME`, and the service is not root.
+- **`DynamicUser` for the publish service:** its state sits under `/var/lib/private` (mode 0700), which the greeter
+  cannot traverse.
+- **Point `ThemeDir` at a mutable directory,** or load generated QML: the greeter would run code the user can edit.
+- **Read the file from QML with `XMLHttpRequest`:** this needs `QML_XHR_ALLOW_FILE_READ` in the greeter's
+  environment, and it still opens user files.
+- **On by default whenever `programs.nixarchy.user` is set:** that contradicts nixarchy's own `browserThemeUser`
+  reasoning on shared machines.
 - **Only in this repo:** nixarchy ships the theme, and every nixarchy user has the same mismatch.
 
 ## Risks
 
-- **A QML error stops the greeter:** for example a `QtQuick.Effects` import that fails, or a typo. SDDM gives
-  up after six failed starts, which leaves a host with no login manager. Mitigation:
-  - a nixarchy VM check that boots to the greeter, once with no theme data and once with a theme and a
-    wallpaper, and takes a screenshot of each;
-  - razer is deployed before p620;
-  - the rollback is the previous generation, chosen at boot.
-- **A large wallpaper** slows the greeter's first frame. The 25 MB cap and `asynchronous` loading keep it off
-  the critical path, and a decode failure shows the colour.
-- **Another user on a multi-user machine** sees `programs.nixarchy.user`'s wallpaper on the login screen. This
-  is documented on the option. Users who don't want it set it to `false`.
-- **The user can write anything into `/var/lib/nixarchy-greeter`.** The greeter reads only `#rrggbb` strings
-  and one image from it, and a bad image means no image.
-- **Edge and stable pins:** nixarchy main builds Omarchy v4.5.0 and edge builds quattro. The SDDM theme
-  differs between the two, so the change is built and checked under both pins.
+- **A QML error stops the greeter.** SDDM gives up after six failed starts, which leaves a host with no login
+  manager. Mitigation:
+  - `Main.qml` adds no new imports;
+  - the new effect code sits behind a `Loader` with a PNG fallback;
+  - a nixarchy VM check logs in through the real greeter (below);
+  - razer is deployed first;
+  - the previous generation stays available at boot.
+- **The publish service fails or is slow.** `current` stays as it was, so the greeter shows the last good theme or
+  today's look. A hung decode is killed by `RuntimeMaxSec`.
+- **On a shared machine, others see `greeterThemeUser`'s wallpaper.** This is documented on the option, which is
+  opt-in.
+- **The inbox fills `/var`.** Bounded by the size caps on what is published. The inbox is the user's own write, and
+  only its latest two files are kept.
+- **Edge and stable pins:** the theme files are the same on both today. The change is built and checked under both
+  pins.
 - **p510:** built and deployed only with the owner's OK.
 
 ## Verification
 
 - **nixarchy:** `nix build .#omarchy` under both pins.
-  - New VM check: no theme data gives today's colours. A theme with a wallpaper gives the theme's colours and
-    the image. A bad value in `theme.conf` (for example `background=red;`) still shows the default, and login
-    still works.
-  - Existing checks pass.
-- **Sync script:** a shell test over fixtures covers:
-  - a valid theme;
-  - bad hex values;
-  - a missing `colors.toml`;
-  - a video background;
-  - an oversized image;
-  - a directory that is missing or not writable (the script exits 0 and changes nothing);
-  - output that is only ever replaced whole.
+- **New VM check, through the real `sddm-greeter-qt6` under Hyprland as in `omarchy-sddm.nix`.** For each case it
+  takes a screenshot, then types the password and checks that the session starts:
+  - no theme data: today's colours and no image;
+  - a theme with a wallpaper: the theme's colours and the image;
+  - a bad `colors.toml` (`background = "red;"`): the default colour, and login works;
+  - a FIFO, a symlink and a 60 MB file dropped into the inbox: the publish refuses them, `current` is unchanged,
+    and login works;
+  - `Tinted.qml` replaced with a broken one: the PNG fallback shows, and login works;
+  - a wrong password: the red state shows after the field clears.
+- **Sync script:** a shell test over fixtures covers a valid theme, a missing `colors.toml`, a video background,
+  two overlapping runs, and a missing or read-only inbox (exit 0, no change).
 - **This repo:**
   - `just test-host p620` and `just test-host razer`.
   - Deploy razer, then p620. On each:
