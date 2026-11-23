@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3191
 intent: intent/2026-11-23-3191-sddm-follows-theme.md
 ---
