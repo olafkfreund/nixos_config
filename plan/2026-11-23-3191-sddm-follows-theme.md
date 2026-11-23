@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3191
 spec: spec/2026-11-23-3191-sddm-follows-theme.md
 coders:
