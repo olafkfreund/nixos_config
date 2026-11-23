@@ -57,6 +57,10 @@
     ../../common/nixos/omarchy-desktop.nix
   ];
 
+  # Phone calls on this host through Nixi's handset (nixoarchy-snowflake#115).
+  # p620 first; razer after the live call test passes.
+  features.nixiCalls.enable = true;
+
   local.llmIndex.sourcePath = "/mnt/code/Source-home"; # real path; ~/Source is a symlink
   local.llmIndex.privateClient.enable = true;
 

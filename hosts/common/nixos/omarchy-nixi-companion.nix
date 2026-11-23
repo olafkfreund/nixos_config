@@ -6,7 +6,10 @@
 # generation that stops providing the file. SUPER+ALT+S is Omarchy's scratchpad (#2714).
 { inputs, pkgs, ... }:
 {
-  imports = [ ../../../modules/programs/nixi-agent-hooks.nix ];
+  imports = [
+    ../../../modules/programs/nixi-agent-hooks.nix
+    ./nixi-calls.nix # phone calls through the handset (nixoarchy-snowflake#115); off unless a host enables it
+  ];
   features.nixiAgentHooks.enable = true;
 
   home-manager.users.olafkfreund = {
