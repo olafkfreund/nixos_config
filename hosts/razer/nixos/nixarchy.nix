@@ -62,6 +62,9 @@
   # same line for the same reason.
   environment.systemPackages = [ pkgs.psmisc ];
 
+  # The SDDM login screen follows this user's Omarchy theme (#3191, nixarchy#1927).
+  programs.nixarchy.greeterThemeUser = "olafkfreund";
+
   # gliff-server defaults to renderD128, the NVIDIA card; Hyprland renders on
   # the Intel iGPU, so capture fails there (#2251). by-path is PCI-stable.
   environment.variables.GLIFF_RENDER_NODE = "/dev/dri/by-path/pci-0000:00:02.0-render";

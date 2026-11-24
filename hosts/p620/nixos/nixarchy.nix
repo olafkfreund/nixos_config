@@ -80,6 +80,9 @@
   # Nix, which is how the two drifted apart in the first place.
   programs.nixarchy.defaultAgent = "claude";
 
+  # The SDDM login screen follows this user's Omarchy theme (#3191, nixarchy#1927).
+  programs.nixarchy.greeterThemeUser = "olafkfreund";
+
   # Omarchroma Icons (nixarchy-omatheme#66): installs Reversal and Yaru and the
   # image helpers; the panel's Icons page turns it on. Removing this reverts it.
   programs.nixarchyThemeEngine.icons.enable = true;

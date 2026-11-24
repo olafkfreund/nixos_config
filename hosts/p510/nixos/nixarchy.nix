@@ -66,6 +66,9 @@
   # Omarchy -- nothing is removed from the login menu, the default just moves.
   programs.nixarchy.displayManager = true;
 
+  # The SDDM login screen follows this user's Omarchy theme (#3191, nixarchy#1927).
+  programs.nixarchy.greeterThemeUser = "olafkfreund";
+
   # Boot to Omarchy's splash. The option forces boot.plymouth.theme and
   # themePackages together on purpose: forcing the name alone leaves NixOS
   # asserting a theme that is not in the package list, which fails the build.
