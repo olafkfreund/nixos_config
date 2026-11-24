@@ -50,7 +50,7 @@ reviewers:
    - `systemd.timers.docker-gc = mkIf cfg.gc.enable`: `wantedBy = [ "timers.target" ];
      timerConfig = { OnCalendar = cfg.gc.dates; Persistent = false; };`.
 
-   → **Verify:** `just check-syntax`; `nix eval .#nixosConfigurations.razer.config.systemd.services ---apply
+   → **Verify:** `just check-syntax`; `nix eval .#nixosConfigurations.razer.config.systemd.services --apply
    'x: x ? docker-gc'` is `false`.
    **Traps:** never `container`, `volume` or `system prune` (stopped k3d nodes). `ProtectSystem=strict` still
    allows the socket (`/run`). No `with lib` beyond the file's own `inherit`. Keep `restartTriggers`.
