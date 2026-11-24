@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3208
 spec: spec/2026-11-24-3208-docker-build-disk.md
 coders:
