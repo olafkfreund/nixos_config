@@ -98,11 +98,11 @@ let
 in
 stdenv.mkDerivation {
   pname = "antigravity-hub";
-  version = "2.34.0-5887025308631040";
+  version = "2.35.0-6394266482769920";
 
   src = fetchurl {
-    url = "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.34.0-5887025308631040/linux-x64/Antigravity.tar.gz";
-    hash = "sha256-R4xo+Gye9hpQIYWjnpzuxmsSdqalOxkaGbDZzoaYNts=";
+    url = "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.35.0-6394266482769920/linux-x64/Antigravity.tar.gz";
+    hash = "sha256-uIcZy9X0CMASHud9KXQBGidIMGslkdNG60iKILxR7Ck=";
   };
 
   nativeBuildInputs = [
