@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3208
 author: olafkfreund
 ---
@@ -73,3 +73,9 @@ The new Lexar NVMe (`/mnt/build`, #3194) is faster and 1% used.
    builds directly.
 5. **Time and catch-up:** daily at 04:00. If p620 was off at 04:00, run it at boot (`Persistent = true`) or
    wait for the next 04:00? Recommendation: wait, so it never runs in the middle of the workday.
+
+## Decisions
+
+Owner, 2026-11-24: all five recommendations. Move both containerd's root and Docker's `data-root`; copy the
+store, recreating the nodes only if the copy does not start; a new daily `docker-gc` job, with `k3d-image-gc`
+staying weekly; keep 200 GB of `/mnt/build` free; daily at 04:00 with no catch-up at boot.
