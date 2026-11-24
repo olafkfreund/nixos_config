@@ -461,3 +461,20 @@ These resolve points the spec left open or contradictory. They change no decisio
 
 - **A greeter that will not start:** choose the previous generation at boot, then revert.
 - **nixarchy:** revert the PR. The option goes away, and the theme goes back to upstream's files.
+
+## Deviations
+
+Recorded during implementation in nixarchy (#1927):
+
+- **Wrong owner publishes the defaults.** Inbox files owned by another uid (a previous `greeterThemeUser`, or root)
+  publish an empty generation with the theme defaults, instead of keeping the last theme. Someone else's colours and
+  wallpaper never stay on the login screen.
+- **The path unit also watches the inbox directory.** `PathChanged` on `inbox/ready` alone missed a `ready` that the
+  sync re-created by rename; the unit now watches `inbox/ready` and `inbox/`.
+- **The publisher waits for a sync to finish.** An input newer than `ready`, or inputs with no `ready`, mean a sync is
+  still writing; the publisher waits up to 15 s and then publishes, because systemd drops a trigger that lands while
+  the service runs.
+- **`omarchy-refresh-sddm` waits for its own request.** `nixarchy-greeter-sync` prints its nonce; refresh waits up to
+  150 s for `out/current/request` to match, refuses root, and exits 1 on failure or timeout.
+- **VM test setup.** The greeter VM seeds Hyprland's `lastVersion` so the "updated" news window does not cover the
+  greeter, and resets display-manager's start limit before each restart.
