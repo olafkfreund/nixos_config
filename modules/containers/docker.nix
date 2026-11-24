@@ -40,6 +40,19 @@ in
         MB/s, which starves image pulls and database fsyncs alike.
       '';
     };
+
+    gc = {
+      enable = mkEnableOption "daily Docker build cache and dangling image cleanup";
+      dates = mkOption {
+        type = types.str;
+        default = "04:00";
+      };
+      minFreeSpace = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        example = "200GB";
+      };
+    };
   };
 
   config = mkIf cfg.enable {
@@ -87,7 +100,47 @@ in
         # unkillable) that only a reboot could clear. Requires swarm off.
         live-restore = true;
       }
-      // lib.optionalAttrs (cfg.dataRoot != null) { data-root = cfg.dataRoot; };
+      // lib.optionalAttrs (cfg.dataRoot != null) { data-root = cfg.dataRoot; }
+      // lib.optionalAttrs (cfg.gc.enable && cfg.gc.minFreeSpace != null) {
+        builder.gc = {
+          enabled = true;
+          policy = [{ minFreeSpace = cfg.gc.minFreeSpace; all = true; }];
+        };
+      };
+    };
+
+    systemd.services.docker-gc = mkIf cfg.gc.enable {
+      description = "Prune old Docker build cache and dangling images";
+      requisite = [ "docker.service" ];
+      after = [ "docker.service" ];
+      path = [ config.virtualisation.docker.package pkgs.util-linux ];
+      environment.DOCKER_CONFIG = "/tmp/docker-config";
+      serviceConfig = {
+        Type = "oneshot";
+        # Docker socket access requires root; the docker group is root-equivalent.
+        User = "root";
+        NoNewPrivileges = true;
+        ProtectHome = true;
+        ProtectSystem = "strict";
+        PrivateTmp = true;
+      };
+      script = ''
+        set -eu
+        exec 9>/run/docker-prune.lock
+        flock 9
+        docker builder prune -af --filter until=24h
+        ${lib.optionalString (cfg.gc.minFreeSpace != null) "docker builder prune -af --min-free-space ${lib.escapeShellArg cfg.gc.minFreeSpace}"}
+        docker image prune -f
+        docker system df
+      '';
+    };
+
+    systemd.timers.docker-gc = mkIf cfg.gc.enable {
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnCalendar = cfg.gc.dates;
+        Persistent = false;
+      };
     };
 
     # nixpkgs puts daemon.json in *reloadTriggers*, so a settings change only
