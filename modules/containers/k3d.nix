@@ -1262,11 +1262,14 @@ in
         # runs as root rather than DynamicUser — same reasoning as the
         # bootstrap unit above.
         User = "root";
+        # The lock directory docker-gc shares (docker.nix).
+        RuntimeDirectory = "docker-prune";
+        RuntimeDirectoryPreserve = true;
         ExecStart = pkgs.writeShellScript "k3d-image-gc" ''
           set -uo pipefail
 
           # Shared with docker-gc so the two never prune at once.
-          exec 9>/run/docker-prune.lock
+          exec 9>/run/docker-prune/lock
           flock 9
 
           # `crictl rmi --prune` only removes images no pod references, so it is

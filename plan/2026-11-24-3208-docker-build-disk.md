@@ -35,6 +35,10 @@ reviewers:
   on a failed unit. Instead the copy, the rewrite and their checks finish before the switch (5.4–5.5), and the
   generated mount requirements order the bind before Docker. Step 5.6 verifies the result right after the switch.
 
+- **Deviation (implementation, Codex review):** `ProtectSystem=strict` makes `/run` read-only too, so the
+  shared lock lives in `RuntimeDirectory = "docker-prune"` (with `RuntimeDirectoryPreserve`), declared by both
+  `docker-gc` and `k3d-image-gc`, at `/run/docker-prune/lock`. Step 1's trap note about `/run` was wrong.
+
 ## Steps
 
 1. **`modules/containers/docker.nix`** (codex).
@@ -65,7 +69,7 @@ reviewers:
        ProtectSystem = "strict"; PrivateTmp = true; };`
      - A comment explains why it runs as root and not `DynamicUser`: the Docker socket, and the `docker` group is
        root-equivalent. `k3d-image-gc` has the same exception.
-   - **Script:** `set -eu`, then `exec 9>/run/docker-prune.lock; flock 9`, shared with `k3d-image-gc`. Then:
+   - **Script:** `set -eu`, then `exec 9>/run/docker-prune/lock; flock 9`, shared with `k3d-image-gc`. Then:
      1. `docker builder prune -af --filter until=24h`;
      2. if `minFreeSpace` is set, `docker builder prune -af --min-free-space ${lib.escapeShellArg cfg.gc.minFreeSpace}`;
      3. `docker image prune -f`;
@@ -83,7 +87,7 @@ reviewers:
 
 2. **`modules/containers/k3d.nix`** (coder).
    - Line 1256: `after = [ "docker.service" "k3d-cluster-bootstrap.service" "docker-gc.service" ];`.
-   - At the start of the script, take the same lock: `exec 9>/run/docker-prune.lock; flock 9`. Add
+   - At the start of the script, take the same lock: `exec 9>/run/docker-prune/lock; flock 9`. Add
      `pkgs.util-linux` to its `path`.
    - Line 1288: `docker image prune -af | tail -1`. Update the comment above it: unused tagged images go weekly,
      and images a container uses (stopped ones too) stay.

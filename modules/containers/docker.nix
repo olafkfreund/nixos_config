@@ -123,10 +123,14 @@ in
         ProtectHome = true;
         ProtectSystem = "strict";
         PrivateTmp = true;
+        # ProtectSystem=strict makes /run read-only; systemd keeps this one writable.
+        # Shared with k3d-image-gc, so both keep it between runs.
+        RuntimeDirectory = "docker-prune";
+        RuntimeDirectoryPreserve = true;
       };
       script = ''
         set -eu
-        exec 9>/run/docker-prune.lock
+        exec 9>/run/docker-prune/lock
         flock 9
         docker builder prune -af --filter until=24h
         ${lib.optionalString (cfg.gc.minFreeSpace != null) "docker builder prune -af --min-free-space ${lib.escapeShellArg cfg.gc.minFreeSpace}"}
