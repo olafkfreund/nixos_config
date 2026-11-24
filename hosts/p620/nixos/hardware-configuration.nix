@@ -93,8 +93,8 @@
     ];
   };
 
-  # Micron 256GB SATA SSD: Docker data-root (Issue #2182). Docker requires it,
-  # see configuration.nix.
+  # Micron 256GB SATA SSD: holds only the old Docker store until it is deleted
+  # (#3208); Docker no longer requires it.
   fileSystems."/mnt/img_pool" = {
     device = "/dev/disk/by-uuid/82b43c59-ec6c-4f10-9100-e18372db2337";
     fsType = "ext4";
@@ -105,16 +105,18 @@
     ];
   };
 
-  # Docker's volumes (the whole k3d cluster) on nvme0: sdd saturated under factory Jobs (#3109).
-  # Bound over the old directory, which stays on sdd untouched until it is deleted on purpose.
-  # Docker requires this mount (configuration.nix), so it never starts on the old copy.
-  fileSystems."/mnt/img_pool/docker/volumes" = {
+  # Docker's volumes (the whole k3d cluster) on nvme0 (#3109), bound into the
+  # new store on the build disk (#3208). The old copy on the Micron stays
+  # untouched until it is deleted on purpose.
+  # Docker requires this mount (configuration.nix), so it never starts without it.
+  fileSystems."/mnt/build/docker/volumes" = {
     device = "/home/docker-volumes";
     fsType = "none";
     options = [
       "bind"
       "nofail"
       "x-systemd.requires-mounts-for=/home"
+      "x-systemd.requires-mounts-for=/mnt/build"
     ];
   };
 

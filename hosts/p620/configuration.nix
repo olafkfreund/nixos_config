@@ -297,8 +297,9 @@ in
 
     # Per-commit factory images otherwise fill the disk: 651GB was reclaimed by
     # hand on p510 on 2026-08-13. This host is tighter than p510 was — Docker's
-    # real store is /var/lib/containerd on /, which had grown to 168GB before a
-    # 143GB build-cache prune on 2026-08-20. Saturday keeps it off p510's
+    # real store used to be /var/lib/containerd on /, which had grown to 168GB
+    # before a 143GB build-cache prune on 2026-08-20. It is now on the Lexar
+    # build disk (/mnt/build, #3208). Saturday keeps it off p510's
     # Sunday window so the two hosts do not GC simultaneously.
     imageGc = {
       enable = true;
@@ -339,12 +340,16 @@ in
     enable = true;
     users = hostUsers; # Use all users for this host
     rootless = false;
-    # Preserves the path this host has always used — 81 volumes live here.
-    # /mnt/img_pool is its own disk since Issue #2182.
-    dataRoot = "/mnt/img_pool/docker";
+    # The store lives on the Lexar build disk (#3208); the 81 volumes are
+    # bound in from NVMe at /mnt/build/docker/volumes.
+    dataRoot = "/mnt/build/docker";
+    gc = {
+      enable = true;
+      minFreeSpace = "200GB";
+    };
   };
   # Docker uses containerd's image store, which ignores dataRoot (Issue #2182).
-  virtualisation.containerd.settings.root = "/mnt/img_pool/containerd";
+  virtualisation.containerd.settings.root = "/mnt/build/containerd";
 
   # Create system users for all host users
   users.users = lib.genAttrs hostUsers (username: {
@@ -540,10 +545,10 @@ in
       # Refuse to start on a blank data-root on / when its disk is missing.
       # ...and on the NVMe copy of its volumes (#3109).
       docker.unitConfig.RequiresMountsFor = [
-        "/mnt/img_pool"
-        "/mnt/img_pool/docker/volumes"
+        "/mnt/build"
+        "/mnt/build/docker/volumes"
       ];
-      containerd.unitConfig.RequiresMountsFor = [ "/mnt/img_pool" ];
+      containerd.unitConfig.RequiresMountsFor = [ "/mnt/build" ];
 
       # Never prune the old copy under a missing /mnt/build bind (#3194).
       nixarchy-vm-image-prune.unitConfig.ConditionPathIsMountPoint = "/mnt/data/vmtest";

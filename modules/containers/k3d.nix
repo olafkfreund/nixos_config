@@ -1253,17 +1253,24 @@ in
 
     systemd.services.k3d-image-gc = mkIf cfg.imageGc.enable {
       description = "Drop unreferenced k3d container images and orphaned Docker volumes";
-      after = [ "docker.service" "k3d-cluster-bootstrap.service" ];
+      after = [ "docker.service" "docker-gc.service" "k3d-cluster-bootstrap.service" ];
       requires = [ "docker.service" ];
-      path = with pkgs; [ docker-client coreutils ];
+      path = with pkgs; [ docker-client coreutils util-linux ];
       serviceConfig = {
         Type = "oneshot";
         # Needs the Docker socket and `docker exec` into the k3d nodes, so it
         # runs as root rather than DynamicUser — same reasoning as the
         # bootstrap unit above.
         User = "root";
+        # The lock directory docker-gc shares (docker.nix).
+        RuntimeDirectory = "docker-prune";
+        RuntimeDirectoryPreserve = true;
         ExecStart = pkgs.writeShellScript "k3d-image-gc" ''
           set -uo pipefail
+
+          # Shared with docker-gc so the two never prune at once.
+          exec 9>/run/docker-prune/lock
+          flock 9
 
           # `crictl rmi --prune` only removes images no pod references, so it is
           # safe against a live cluster: ArgoCD re-pulls on the next rollout.
@@ -1282,10 +1289,12 @@ in
           # virtualisation.docker.autoPrune): that also removes STOPPED
           # containers, and this host has a history of k3d nodes wedging
           # mid-reboot. Deleting such a node would take its state volume with
-          # it. These three only ever touch things no container references.
+          # it. These three only touch what no container references. With -a,
+          # unused tagged images go weekly too; an image any container uses,
+          # even a stopped one, stays.
           docker volume prune -f | tail -1
           docker builder prune -f | tail -1
-          docker image prune -f | tail -1
+          docker image prune -af | tail -1
 
           docker system df
         '';
