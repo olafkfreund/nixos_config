@@ -246,9 +246,8 @@ in
       };
 
       # GNOME Tweaks integration (settings that Tweaks would normally handle)
-      # Note: Animations disabled for better remote desktop performance
       "org/gnome/desktop/interface" = {
-        enable-animations = false; # Disabled for better remote performance
+        enable-animations = true; # on: WebKitGTK apps (Nixi) read false as reduced motion
         enable-hot-corners = false; # Disabled for remote desktop
         gtk-enable-primary-paste = true;
         locate-pointer = false;
