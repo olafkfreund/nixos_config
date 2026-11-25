@@ -1904,17 +1904,17 @@
         "spectrum": "spectrum_2"
       },
       "locked": {
-        "lastModified": 1794529892,
-        "narHash": "sha256-m5iXk3ILiCuRpCgqYWNiGVFmu8YLh2FNxxaZj/Auc10=",
+        "lastModified": 1795298370,
+        "narHash": "sha256-mruPu1cqOVBxPiRwrh6r1tnX1OAzMggy+rDk6YuqhK8=",
         "owner": "microvm-nix",
         "repo": "microvm.nix",
-        "rev": "194a254693f49af939a2b53d04982bd4b276fdb3",
+        "rev": "430a46d03ef15f1b8b715fafa85f21847960b783",
         "type": "github"
       },
       "original": {
         "owner": "microvm-nix",
         "repo": "microvm.nix",
-        "rev": "194a254693f49af939a2b53d04982bd4b276fdb3",
+        "rev": "430a46d03ef15f1b8b715fafa85f21847960b783",
         "type": "github"
       }
     },
@@ -2230,11 +2230,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795557649,
-        "narHash": "sha256-jIU/P4LmYExFd50YQQsdX8LJr7Sfy03qtIHstRCZh4E=",
+        "lastModified": 1795600890,
+        "narHash": "sha256-IVZYR/V2n0oGDNY3kIs5D7Q+EymnhwUhrrznN4F6bnk=",
         "owner": "olafkfreund",
         "repo": "nixarchy",
-        "rev": "cee9f014d722ca65cfe7cf0db3637b05a52bd91d",
+        "rev": "5b10160f1a750841ab4b242328cbc620ef1530f2",
         "type": "github"
       },
       "original": {
