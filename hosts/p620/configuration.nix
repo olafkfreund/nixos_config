@@ -22,6 +22,7 @@ in
     ./nixos/usb-power-fix.nix # Fix USB mouse freezing issues
     ./nixos/aqc107-link-pin.nix # Pin Aquantia AQC107 to 1G to dodge AER flapping
     ./nixos/dns-fallback.nix # systemd-resolved with public DNS fallback (issue #564)
+    ./nixos/schedule-watchdog.nix # starts nixarchy workflows GitHub skipped (nixarchy#1942)
     ./nixos/tailscale-serve.nix # Tailscale Serve for /router (LiteLLM, Phase 2)
     ./nixos/cpu.nix
     ./nixos/memory.nix
