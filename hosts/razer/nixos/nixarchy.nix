@@ -50,6 +50,7 @@
     ../../common/nixos/omarchy-sole-hyprland.nix
     ../../common/nixos/omarchy-stylix-theme.nix
     ../../common/nixos/omarchy-desktop.nix
+    ../../../modules/desktop/hyprimate.nix
   ];
 
   # WhatsApp in Nixi (nixoarchy-snowflake#126): the bridge unit, started by Nixi's setting. razer pairs as its own linked device.
@@ -57,6 +58,8 @@
     enable = true;
     package = inputs.nixi-companion.packages.${pkgs.stdenv.hostPlatform.system}.nixi-whatsapp-bridge;
   };
+
+  features.hyprimate.enable = true;
 
   local.llmIndex.sourcePath = "/extdisk/Source"; # real path; ~/Source is a symlink; /extdisk is the second NVMe from fstab
   local.llmIndex.excludePaths = [ "/extdisk/Source/password" ];
