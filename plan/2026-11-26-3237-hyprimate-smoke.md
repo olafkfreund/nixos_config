@@ -17,8 +17,8 @@ reviewers:
 Approved decisions (from the spec): install upstream hyprimate through its own flake, with `inputs.hyprland.follows =
 "nixarchy/hyprland"`, pinned to a full rev. A module `modules/desktop/hyprimate.nix` behind
 `features.hyprimate.enable` (default off) writes `~/.config/hypr/hyprimate.lua` for `olafkfreund`; that file disables
-wobble, loads the plugin by its store path only if `plugin.hyprimate.window.style` is not yet registered, then sets
-`style = "liquid"` and `window.options.liquid.duration = 200`, and notifies on any failure. `autostart.lua` (written by
+wobble (errors ignored on purpose), loads the plugin by its store path only if `plugin.hyprimate.window.style` is not yet registered, then sets
+`style = "liquid"` and `window.options.liquid.duration = 200`, and notifies if the load fails or the plugin is not registered. `autostart.lua` (written by
 `hosts/common/nixos/omarchy-layouts.nix`) requires it in the `hypr.repo-keys` form. Enabled on p620 and razer only.
 p510 is never built or deployed.
 
@@ -30,16 +30,16 @@ p510 is never built or deployed.
    # hyprimate: window animations as a Hyprland plugin (#3237). Must build against the
    # compositor the session runs, so its Hyprland follows nixarchy's; the plugin rev is pinned.
    hyprimate = {
-     url = "github:JustinBacher/hyprimate/9e667f9…";   # full 40-char rev of upstream 9e667f9
+     url = "github:JustinBacher/hyprimate/9e667f972bf94fd6be33e0158ea3da280e0b134e";
      inputs.hyprland.follows = "nixarchy/hyprland";
    };
    ```
 
-   Get the full rev with `git ls-remote https://github.com/JustinBacher/hyprimate HEAD` (must start `9e667f9`).
-   Then `nix flake lock` (adds only the hyprimate node; check `git diff --stat flake.lock` touches no other input).
-   → verify: `nix eval --raw .#inputs…` is not available; instead
-   `nix eval --raw --impure --expr '(builtins.getFlake (toString ./.)).inputs.hyprimate.inputs.hyprland.packages.x86_64-linux.hyprland.outPath'`
-   prints `/nix/store/1i0bfzzp3zcgqwzhbli22his8l2xdp6c-hyprland-0.57.0+date=2026-11-04_64bde62`.
+   Then `nix flake lock`. Read the full `git diff flake.lock`: only a new `hyprimate` node (and any new transitive
+   nodes it needs) plus `root.inputs.hyprimate`; no existing node's `locked` changes, and the hyprimate node's
+   `inputs.hyprland` is `["nixarchy", "hyprland"]`.
+   → verify: `nix eval --raw --impure --expr 'let f = builtins.getFlake (toString ./.); in f.inputs.hyprimate.inputs.hyprland.packages.x86_64-linux.hyprland.outPath == f.inputs.nixarchy.inputs.hyprland.packages.x86_64-linux.hyprland.outPath'`
+   prints `true`, and the path is `/nix/store/1i0bfzzp3zcgqwzhbli22his8l2xdp6c-hyprland-0.57.0+date=2026-11-04_64bde62`.
    Traps: never `nix flake update` (bumps everything); comment explains why, not what.
 
 2. New `modules/desktop/hyprimate.nix`:
@@ -119,20 +119,26 @@ p510 is never built or deployed.
    push, PR linking intent, spec and plan, `Closes #3237`. Review: fresh Opus agent (plan + diff only) and the
    `reviewers:` above. Merge.
 
-6. (Claude) Deploy from `~/.config/nixos` on `main` after merge: bus `read_new` + `post`, then `just p620`, then
-   `just deploy-via-p620 razer` (both with `AGENT_BUS_ANNOUNCED=1`). Then the p620 live reload check; the owner logs
+6. (Claude) Deploy after merge: in `~/.config/nixos` (on `main`, check `nhs` is not running), `git pull --ff-only` and
+   confirm `git log -1` is the merge commit. Bus: `read_new("#agents:freundcloud.org.uk")`; if someone is mid-flight,
+   wait or ask; else `post` "deploying p620 then razer (via p620), ~20 min". Then `just p620`, then
+   `just deploy-via-p620 razer` (both with `AGENT_BUS_ANNOUNCED=1`). The same pull, bus and build steps apply to a
+   rollback deploy. Then the p620 live reload check; the owner logs
    in again on both hosts for the full check.
 
 ## Tests
 
 - `nix eval .#nixosConfigurations.p620.config.features.hyprimate.enable` → `true`; same for razer.
 - `nix eval --impure --expr '(builtins.getFlake (toString ./.)).nixosConfigurations.p510.config.features ? hyprimate'`
-  → `false`; and p510's `home-manager.users.olafkfreund.home.file` has no `.config/hypr/hyprimate.lua` attribute.
+  → `false`; and
+  `nix eval --impure --expr '(builtins.getFlake (toString ./.)).nixosConfigurations.p510.config.home-manager.users.olafkfreund.home.file ? ".config/hypr/hyprimate.lua"'`
+  → `false`.
 - p620 and razer toplevels build.
 - After p620 deploy, before re-login: `hyprctl reload`; `hyprctl -j plugin list | jq '[.[]|select(.name=="hyprimate")]|length'`
   → `1`; `hyprctl getoption plugin:hyprimate:window:options:liquid:duration` → `float: 200.000000`;
   `hyprctl getoption plugin:hyprimate:window:style` → `str: liquid`.
-- After re-login on each host: the same three, plus `decoration:wobble:enabled` false and no hyprimate notification.
+- After re-login on each host: the same three, plus `hyprctl getoption decoration:wobble:enabled` → `bool: false`, no
+  hyprimate notification, and the owner opens, closes and moves a window (razer: on its normal hybrid-GPU setup).
 
 ## Rollback
 
