@@ -1,10 +1,12 @@
 ---
-status: draft
+status: approved
 issue: 3237
 intent: intent/2026-11-26-3237-hyprimate-smoke.md
 ---
 
 # Spec: hyprimate window animations, Liquid by default, on p620 and razer
+
+Approved under the owner's fast-track (2026-11-26): "commit and merge and deploy", "Fast-track, cite me".
 
 ## Design
 
