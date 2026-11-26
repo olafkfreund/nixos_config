@@ -2,13 +2,16 @@ import unittest
 
 from guarded_upgrade import (
     ac_safe,
+    deploy_conflict,
     failed_units_regressed,
     idle_safe,
     may_activate,
     promotion_safe,
     rollback_target,
     runners_safe,
+    session_regressed,
     should_start,
+    user_sessions,
 )
 from check_edge_promotion import promoted
 
@@ -80,6 +83,89 @@ class GuardedUpgradeFixtures(unittest.TestCase):
         self.assertFalse(may_activate(None))
         self.assertFalse(may_activate("true"))
         self.assertTrue(may_activate(True))
+
+    def test_manual_deploy_blocks_activation(self):
+        own = {100, 101}
+        rebuild = "nixos-" + "rebuild"
+        stc = "/nix/store/x-nixos-system/bin/switch-to-" + "configuration"
+        ng = [
+            "/nix/store/p-python3/bin/python3",
+            "/nix/store/r/bin/" + rebuild,
+            "switch",
+        ]
+        self.assertTrue(
+            deploy_conflict([(200, [rebuild, "switch", "--flake", ".#razer"])], own)
+        )
+        self.assertTrue(deploy_conflict([(201, [stc, "switch"])], own))
+        self.assertTrue(
+            deploy_conflict([(202, ["nh", "--verbose", "os", "switch"])], own)
+        )
+        self.assertTrue(deploy_conflict([(203, ng)], own))
+        # Its own ancestry, and processes that only mention a switch, never block.
+        self.assertFalse(deploy_conflict([(100, [stc, "switch"])], own))
+        self.assertFalse(deploy_conflict([(204, ["man", rebuild])], own))
+        self.assertFalse(
+            deploy_conflict([(205, ["vim", "notes-on-" + rebuild + ".md"])], own)
+        )
+        self.assertFalse(deploy_conflict([(206, [])], own))
+        # nixpkgs' .X-wrapped names, and interpreter flags before the script.
+        self.assertTrue(
+            deploy_conflict([(207, ["/nix/store/n/bin/.nh-wrapped", "os"])], own)
+        )
+        self.assertTrue(
+            deploy_conflict(
+                [
+                    (
+                        208,
+                        ["perl", "-w", "/nix/store/s/bin/switch-to-" + "configuration"],
+                    )
+                ],
+                own,
+            )
+        )
+        self.assertTrue(
+            deploy_conflict([(209, ["/usr/bin/env", rebuild, "switch"])], own)
+        )
+
+    def test_people_not_the_greeter_count_as_sessions(self):
+        props = {
+            "1": {"Class": "greeter", "State": "active", "Type": "wayland"},
+            "2": {"Class": "user", "State": "active", "Type": "wayland"},
+            "3": {"Class": "user", "State": "online", "Type": "tty"},
+            "4": {"Class": "user", "State": "closing", "Type": "wayland"},
+        }
+        self.assertEqual(user_sessions(props), {"2", "3"})
+        self.assertEqual(user_sessions({"1": props["1"]}), set())
+
+    def test_session_must_survive_the_switch(self):
+        self.assertTrue(session_regressed({"3"}, set()))
+        # A session that crashed and was replaced by a new login is still lost.
+        self.assertTrue(session_regressed({"3"}, {"4"}))
+        self.assertFalse(session_regressed({"3"}, {"3"}))
+        self.assertFalse(session_regressed({"3"}, {"3", "4"}))
+        self.assertFalse(session_regressed(set(), {"4"}))
+
+    def test_deploy_lock_refuses_when_a_manual_hold_has_it(self):
+        import fcntl
+        import tempfile
+        from pathlib import Path
+
+        import guarded_upgrade
+
+        with tempfile.TemporaryDirectory() as tmp:
+            lock = Path(tmp) / "nixos-deploy.lock"
+            original = guarded_upgrade.DEPLOY_LOCK
+            guarded_upgrade.DEPLOY_LOCK = lock
+            try:
+                with guarded_upgrade.deploy_lock():
+                    pass  # free: taken and released
+                with lock.open("a") as held:
+                    fcntl.flock(held, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    with self.assertRaises(RuntimeError):
+                        with guarded_upgrade.deploy_lock():
+                            pass
+            finally:
+                guarded_upgrade.DEPLOY_LOCK = original
 
     def test_rollback_target_selection(self):
         old = "/nix/store/" + "a" * 32 + "-old"
