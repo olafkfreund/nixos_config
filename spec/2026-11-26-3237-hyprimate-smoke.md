@@ -30,7 +30,8 @@ Approved under the owner's fast-track (2026-11-26): "commit and merge and deploy
 2. **Module `modules/desktop/hyprimate.nix`**, the repo's module shape, everything under `mkIf cfg.enable`:
    - `options.features.hyprimate.enable = mkEnableOption …` (default off).
    - `home-manager.users.olafkfreund.home.file.".config/hypr/hyprimate.lua"` (`force = true`), with the plugin's store
-     path interpolated (`${pkg}/lib/hyprimate.so`, `pkg = inputs.hyprimate.packages.${pkgs.stdenv.hostPlatform.system}.default`).
+     path interpolated (`${pkg}/lib/hyprimate.so`,
+     `pkg = inputs.hyprimate.packages.${pkgs.stdenv.hostPlatform.system}.default`).
      No `environment.systemPackages` entry is needed.
 
    ```lua
@@ -71,7 +72,8 @@ Approved under the owner's fast-track (2026-11-26): "commit and merge and deploy
 
 ### Why this is safe across switches and reloads
 
-The guard is "already registered", not "same path". Checked live on p620: `hl.get_config("plugin.hyprimate.window.style")`
+The guard is "already registered", not "same path". Checked live on p620:
+`hl.get_config("plugin.hyprimate.window.style")`
 is non-nil once the plugin is loaded and nil for an unknown plugin. So a config reload in a running session never calls
 `hl.plugin.load` again, whatever store path the drop-in now names; the new build loads at the next login. On p620's
 first deploy the hand-loaded test copy is already registered, so it is not doubled. If Hyprland and the plugin were
