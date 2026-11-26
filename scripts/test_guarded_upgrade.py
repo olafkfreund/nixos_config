@@ -11,6 +11,7 @@ from guarded_upgrade import (
     runners_safe,
     session_regressed,
     should_start,
+    user_sessions,
 )
 from check_edge_promotion import promoted
 
@@ -107,6 +108,34 @@ class GuardedUpgradeFixtures(unittest.TestCase):
             deploy_conflict([(205, ["vim", "notes-on-" + rebuild + ".md"])], own)
         )
         self.assertFalse(deploy_conflict([(206, [])], own))
+        # nixpkgs' .X-wrapped names, and interpreter flags before the script.
+        self.assertTrue(
+            deploy_conflict([(207, ["/nix/store/n/bin/.nh-wrapped", "os"])], own)
+        )
+        self.assertTrue(
+            deploy_conflict(
+                [
+                    (
+                        208,
+                        ["perl", "-w", "/nix/store/s/bin/switch-to-" + "configuration"],
+                    )
+                ],
+                own,
+            )
+        )
+        self.assertTrue(
+            deploy_conflict([(209, ["/usr/bin/env", rebuild, "switch"])], own)
+        )
+
+    def test_people_not_the_greeter_count_as_sessions(self):
+        props = {
+            "1": {"Class": "greeter", "State": "active", "Type": "wayland"},
+            "2": {"Class": "user", "State": "active", "Type": "wayland"},
+            "3": {"Class": "user", "State": "online", "Type": "tty"},
+            "4": {"Class": "user", "State": "closing", "Type": "wayland"},
+        }
+        self.assertEqual(user_sessions(props), {"2", "3"})
+        self.assertEqual(user_sessions({"1": props["1"]}), set())
 
     def test_session_must_survive_the_switch(self):
         self.assertTrue(session_regressed({"3"}, set()))

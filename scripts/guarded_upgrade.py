@@ -66,27 +66,57 @@ def failed_units_regressed(before, after):
     return bool(after - before)
 
 
-DEPLOY_PROGRAMS = {"nixos-rebuild", "nixos-rebuild-ng", "switch-to-configuration", "nh"}
+DEPLOY_PROGRAMS = {
+    "nixos-rebuild",
+    "nixos-rebuild-ng",
+    "switch-to-configuration",
+    "switch-to-configuration-ng",
+    "nh",
+}
+INTERPRETERS = ("python", "bash", "sh", "perl", "env")
+
+
+def program_name(path):
+    """nixpkgs wraps programs as .<name>-wrapped; that is the same program."""
+    name = os.path.basename(path)
+    if name.startswith(".") and name.endswith("-wrapped"):
+        name = name[1 : -len("-wrapped")]
+    return name
 
 
 def deploy_conflict(cmdlines, own_pids):
     """Another process is running a switch program.
 
-    Matched on the program's own name (argv[0], or the script an interpreter runs),
-    never on arguments, so `man nixos-rebuild` or an editor on a note does not block.
-    A backstop only: the deploy lock is what excludes a deploy started elsewhere.
+    Matched on the program's own name (argv[0], or the script an interpreter runs,
+    past its flags), never on other arguments, so `man nixos-rebuild` or an editor
+    on a note does not block. A backstop: the deploy lock is what excludes a deploy
+    started on another machine.
     """
     for pid, argv in cmdlines:
         if pid in own_pids or not argv:
             continue
-        names = {os.path.basename(argv[0])}
-        if len(argv) > 1 and os.path.basename(argv[0]).startswith(
-            ("python", "bash", "sh", "perl")
-        ):
-            names.add(os.path.basename(argv[1]))
+        names = {program_name(argv[0])}
+        if program_name(argv[0]).startswith(INTERPRETERS):
+            script = next((a for a in argv[1:] if not a.startswith("-")), None)
+            if script:
+                names.add(program_name(script))
         if names & DEPLOY_PROGRAMS:
             return True
     return False
+
+
+def user_sessions(props_by_id):
+    """logind ids of active or online sessions that belong to a person.
+
+    Class=user leaves out the display manager's greeter, which is its own Wayland
+    session whenever nobody is logged in; any Type counts, so an SSH or console
+    login blocks a switch just as a desktop does.
+    """
+    return {
+        sid
+        for sid, props in props_by_id.items()
+        if props.get("Class") == "user" and props.get("State") in ("active", "online")
+    }
 
 
 def session_regressed(before, after):
@@ -224,17 +254,35 @@ def own_pids():
 
 
 def graphical_sessions():
-    """logind ids of open Wayland sessions (the compositor's own process name is
-    .Hyprland-wrapped on NixOS, so a process-name test does not see it)."""
-    ids = set()
+    """Ids of people's open sessions, from logind (the compositor's own process
+    name is .Hyprland-wrapped on NixOS, so a process-name test does not see it)."""
+    props_by_id = {}
     for line in run("loginctl", "list-sessions", "--no-legend").splitlines():
         sid = line.split()[0] if line.split() else ""
         if not sid:
             continue
-        props = run("loginctl", "show-session", sid, "-p", "Type", "-p", "State")
-        if "Type=wayland" in props and "State=closing" not in props:
-            ids.add(sid)
-    return ids
+        # A session can close between the listing and this read; that is not a failure.
+        shown = subprocess.run(
+            [
+                "loginctl",
+                "show-session",
+                sid,
+                "-p",
+                "Class",
+                "-p",
+                "State",
+                "-p",
+                "Type",
+            ],
+            text=True,
+            capture_output=True,
+        )
+        if shown.returncode:
+            continue
+        props_by_id[sid] = dict(
+            line.split("=", 1) for line in shown.stdout.splitlines() if "=" in line
+        )
+    return user_sessions(props_by_id)
 
 
 def ac_power():
@@ -259,9 +307,12 @@ def gate(host):
     # Nothing writes the idle report yet, so a host with an open session waits.
     if datetime.now().hour != 4:
         raise RuntimeError("outside 04:00–05:00 activation window")
-    if graphical_sessions():
-        signal = read("idle")
-        if not signal or not idle_safe(
+    live = graphical_sessions()
+    if live:
+        signal = read("idle") or {}
+        # The report must be about a session that is open now, and every open
+        # session must be the one it vouches for.
+        if live != {signal.get("session")} or not idle_safe(
             signal.get("session"),
             signal.get("reported_session"),
             signal.get("status"),
@@ -394,21 +445,38 @@ def activate(host, sha, candidate):
         "failed": sorted(failed_units()),
         "sessions": sorted(graphical_sessions()),
     }
+    # A GC root for the rollback target, so pruning generations mid-transaction
+    # cannot delete the system this would roll back to.
+    run("nix-store", "--realise", old, "--add-root", str(STATE / "rollback-root"))
     save("transaction", record)
     try:
         run("nix-env", "-p", str(PROFILE), "--set", candidate)
-        run(str(Path(candidate) / "bin/switch-to-configuration"), "switch", check=False)
+        switched = subprocess.run(
+            [str(Path(candidate) / "bin/switch-to-configuration"), "switch"],
+            text=True,
+            capture_output=True,
+        )
+        if switched.returncode:
+            raise RuntimeError(
+                f"switch-to-configuration exited {switched.returncode}: "
+                f"{switched.stderr.strip()[:300]}"
+            )
         time.sleep(30)
         if current_closure() != candidate or str(PROFILE.resolve()) != candidate:
             raise RuntimeError("activation did not select candidate")
         verify_local(host, set(record["failed"]))
         if session_regressed(record["sessions"], graphical_sessions()):
-            raise RuntimeError("a graphical session open before the switch is gone")
+            raise RuntimeError("a session open before the switch is gone")
     except Exception as error:
         rollback(record, str(error))
-        raise
+        raise RolledBack(str(error)) from error
     (STATE / "transaction").unlink(missing_ok=True)
+    (STATE / "rollback-root").unlink(missing_ok=True)
     save("verified", {"sha": sha, "candidate": candidate})
+
+
+class RolledBack(RuntimeError):
+    """Activation failed and the old system was restored: a failure, not a deferral."""
 
 
 def may_activate(auto_activate):
@@ -495,9 +563,10 @@ def main(host, auto_activate):
         if json.loads(canary).get("sha") != sha:
             raise RuntimeError("p620 canary has not verified this SHA")
         gate(host)
-        post = bus_announce(host, sha)
         with deploy_lock():
             gate(host)
+            # Announced only once nothing else can stop the switch.
+            post = bus_announce(host, sha)
             activate(host, sha, candidate)
         post("#agents:freundcloud.org.uk", f"Guarded upgrade: {host} {sha} verified")
         return 0
@@ -511,6 +580,9 @@ if __name__ == "__main__":
         # host may be between generations, so the unit must show as failed.
         if (STATE / "transaction").exists():
             log(f"failed with a transaction open: {error}")
+            sys.exit(1)
+        if isinstance(error, RolledBack):
+            log(f"failed and rolled back: {error}")
             sys.exit(1)
         log(f"deferred: {error}")
         sys.exit(0)
