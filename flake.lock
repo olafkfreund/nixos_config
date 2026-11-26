@@ -1140,6 +1140,33 @@
         "type": "github"
       }
     },
+    "hyprimate": {
+      "inputs": {
+        "hyprland": [
+          "nixarchy",
+          "hyprland"
+        ],
+        "nixpkgs": [
+          "hyprimate",
+          "hyprland",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795644048,
+        "narHash": "sha256-XB5lUHkE+aOgAiM1dRvEC40syK1w42Rj9vj9oPJWD/o=",
+        "owner": "JustinBacher",
+        "repo": "hyprimate",
+        "rev": "9e667f972bf94fd6be33e0158ea3da280e0b134e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "JustinBacher",
+        "repo": "hyprimate",
+        "rev": "9e667f972bf94fd6be33e0158ea3da280e0b134e",
+        "type": "github"
+      }
+    },
     "hyprland": {
       "inputs": {
         "aquamarine": "aquamarine",
@@ -3843,6 +3870,7 @@
         "gscratch": "gscratch",
         "herdr": "herdr",
         "home-manager": "home-manager",
+        "hyprimate": "hyprimate",
         "lan-mouse": "lan-mouse",
         "lanzaboote": "lanzaboote",
         "microvm": "microvm",

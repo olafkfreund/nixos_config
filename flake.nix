@@ -131,6 +131,13 @@
     #   omarchy plugin enable nixarchy.pkg
     nixarchy-pkg.follows = "nixarchy/nixarchy-pkg";
 
+    # hyprimate: window animations as a Hyprland plugin (#3237). Must build against the
+    # compositor the session runs, so its Hyprland follows nixarchy's; the plugin rev is pinned.
+    hyprimate = {
+      url = "github:JustinBacher/hyprimate/9e667f972bf94fd6be33e0158ea3da280e0b134e";
+      inputs.hyprland.follows = "nixarchy/hyprland";
+    };
+
     # nixarchy-distrobox: distrobox on the Omarchy bar and a key -- list,
     # create (every distrobox create flag), enter, start, stop, upgrade and
     # delete boxes, with create and upgrade streamed into the panel. QML only;

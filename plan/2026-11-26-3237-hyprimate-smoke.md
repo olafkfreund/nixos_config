@@ -40,7 +40,7 @@ p510 is never built or deployed.
    Then `nix flake lock`. Read the full `git diff flake.lock`: only a new `hyprimate` node (and any new transitive
    nodes it needs) plus `root.inputs.hyprimate`; no existing node's `locked` changes, and the hyprimate node's
    `inputs.hyprland` is `["nixarchy", "hyprland"]`.
-   → verify: `nix eval --raw --impure --expr 'let f = builtins.getFlake (toString ./.); in f.inputs.hyprimate.inputs.hyprland.packages.x86_64-linux.hyprland.outPath == f.inputs.nixarchy.inputs.hyprland.packages.x86_64-linux.hyprland.outPath'`
+   → verify: `nix eval --json --impure --expr 'let f = builtins.getFlake (toString ./.); in f.inputs.hyprimate.inputs.hyprland.packages.x86_64-linux.hyprland.outPath == f.inputs.nixarchy.inputs.hyprland.packages.x86_64-linux.hyprland.outPath'`
    prints `true`, and the path is `/nix/store/1i0bfzzp3zcgqwzhbli22his8l2xdp6c-hyprland-0.57.0+date=2026-11-04_64bde62`.
    Traps: never `nix flake update` (bumps everything); comment explains why, not what.
 
