@@ -11,6 +11,28 @@ test('denies the two footguns', () => {
   expect(classify('cd ~ && home-manager --flake . switch').kind).toBe('deny')
 })
 
+test('denies an unthrottled gh watch, wherever it sits in the command', () => {
+  expect(classify('gh run watch 123').kind).toBe('deny')
+  expect(classify('gh run watch 123 --exit-status').kind).toBe('deny')
+  expect(classify('cd wt && gh run watch $id --exit-status >/dev/null').kind).toBe('deny')
+  expect(classify('gh run watch 123 --interval 5').kind).toBe('deny')
+  expect(classify('gh run watch 123 -i 10').kind).toBe('deny')
+  expect(classify('gh pr checks 42 --watch').kind).toBe('deny')
+  expect(classify('x; gh pr checks 42 --watch --interval 10').kind).toBe('deny')
+  expect(classify('gh run watch 1 --interval 60; gh run watch 2').kind).toBe('deny')
+})
+
+test('passes a throttled watch, a plain checks call, and the words in prose', () => {
+  expect(classify('gh run watch 123 --interval 60').kind).toBe('pass')
+  expect(classify('gh run watch 123 --interval=30 --exit-status').kind).toBe('pass')
+  expect(classify('gh run watch 123 -i 45').kind).toBe('pass')
+  expect(classify('gh pr checks 42').kind).toBe('pass')
+  expect(classify('gh pr checks 42 --json name,state').kind).toBe('pass')
+  expect(classify('gh pr checks 42 --watch --interval 60').kind).toBe('pass')
+  expect(classify('grep -rn "gh run watch" docs').kind).toBe('pass')
+  expect(classify('gh run view 123 --log-failed').kind).toBe('pass')
+})
+
 test('passes everything else, deploys included (the managed guards own those)', () => {
   expect(classify('nix build .#nixosConfigurations.p620.config.system.build.toplevel').kind).toBe('pass')
   expect(classify('systemctl status sshd').kind).toBe('pass')
