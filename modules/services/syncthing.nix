@@ -1,7 +1,7 @@
 { config, lib, ... }:
 
 let
-  inherit (lib) mkOption mkIf mkEnableOption types listToAttrs filter;
+  inherit (lib) mkOption mkIf mkEnableOption types listToAttrs filter elem;
   cfg = config.features.syncthing;
 
   # Host device IDs - obtained from each host's Syncthing installation
@@ -71,6 +71,12 @@ in
       description = "Sync ~/.gemini directory";
     };
 
+    themeHosts = mkOption {
+      type = types.listOf types.str;
+      default = [ "p620" "razer" ];
+      description = "Hosts that share ~/.config/omarchy/themes (1.1 GB, so not p510)";
+    };
+
     guiAddress = mkOption {
       type = types.str;
       default = "127.0.0.1:8384";
@@ -126,6 +132,17 @@ in
                 maxAge = "2592000"; # 30 days in seconds
               };
             };
+          };
+
+          # Omarchy themes, so a theme added on one host can be set on the other (#3247)
+          "omarchy-themes" = mkIf (elem config.networking.hostName cfg.themeHosts) {
+            path = "/home/${cfg.user}/.config/omarchy/themes";
+            devices = filter (h: elem h cfg.themeHosts) otherHosts;
+            id = "omarchy-themes";
+            label = "Omarchy Themes";
+            type = "sendreceive";
+            rescanIntervalS = 300;
+            fsWatcherEnabled = true;
           };
 
           # Gemini configuration sync
