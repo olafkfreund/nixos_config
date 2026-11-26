@@ -23,7 +23,7 @@ in
         if ok and style ~= nil then -- registered: the parse after Hyprland loaded it
           hl.config({ plugin = { hyprimate = { window = {
             style = "liquid",
-            options = { liquid = { duration = 200 } },
+            options = { liquid = { duration = 500 } },
           } } } })
         end
       '';
