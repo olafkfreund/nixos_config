@@ -479,6 +479,27 @@ class RolledBack(RuntimeError):
     """Activation failed and the old system was restored: a failure, not a deferral."""
 
 
+STAGE_HOST = "guarded-stage@p620"
+
+
+def stage_ssh(command):
+    """One of the forced command's three allowed operations on p620, with the
+    agenix key, so razer's root needs no general login there."""
+    return run(
+        "ssh",
+        "-i",
+        os.environ["STAGE_KEY_FILE"],
+        "-o",
+        "IdentitiesOnly=yes",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=10",
+        STAGE_HOST,
+        command,
+    )
+
+
 def may_activate(auto_activate):
     # Every host's switch is gated on its own flag; razer's path once ignored it.
     return auto_activate is True
@@ -524,6 +545,8 @@ def main(host, auto_activate):
             if not baseline or baseline.get("sha") != sha:
                 baseline = {"sha": sha, "failed": sorted(failed_units())}
                 save("baseline", baseline)
+            # Staging builds two whole systems; not while CI's VM jobs share the box.
+            runner_gate()
             candidate = build_candidate(sha, "p620")
             build_candidate(sha, "razer")
             if resolve_main() != sha:
@@ -548,18 +571,17 @@ def main(host, auto_activate):
             "--raw",
             f"{REPO}/{sha}#nixosConfigurations.razer.config.system.build.toplevel.outPath",
         )
-        candidate = run(
-            "ssh", "p620", "readlink", "-f", "/var/lib/guarded-upgrade/stage-razer"
-        )
+        candidate = stage_ssh("readlink -f /var/lib/guarded-upgrade/stage-razer")
         if candidate != expected:
             raise RuntimeError("p620 staged a different razer closure")
-        run("nix", "copy", "--from", "ssh://p620", candidate)
+        key = os.environ["STAGE_KEY_FILE"]
+        run("nix", "copy", "--from", f"ssh://{STAGE_HOST}?ssh-key={key}", candidate)
         link = STATE / "stage-razer"
         link.unlink(missing_ok=True)
         link.symlink_to(candidate)
         if resolve_main() != sha:
             raise RuntimeError("main advanced during staging")
-        canary = run("ssh", "p620", "cat", "/var/lib/guarded-upgrade/verified")
+        canary = stage_ssh("cat /var/lib/guarded-upgrade/verified")
         if json.loads(canary).get("sha") != sha:
             raise RuntimeError("p620 canary has not verified this SHA")
         gate(host)
