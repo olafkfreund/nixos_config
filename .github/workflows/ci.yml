@@ -8,6 +8,21 @@ on:
   workflow_dispatch:
 
 jobs:
+  nixarchy-promotion:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Require promoted edge for a nixarchy pin change
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          old=$(git show origin/main:flake.lock | jq -r '.nodes.nixarchy.locked.rev')
+          new=$(jq -r '.nodes.nixarchy.locked.rev' flake.lock)
+          if [ "$old" != "$new" ]; then python scripts/check_edge_promotion.py "$new"; fi
+
   check-configurations:
     runs-on: ubuntu-latest
     strategy:

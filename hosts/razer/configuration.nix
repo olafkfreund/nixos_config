@@ -33,11 +33,15 @@ in
     ../../modules/secrets/api-keys.nix
     ../../modules/containers/docker.nix
     ../../modules/services/meeting-transcribe.nix # meet CLI (client; offloads processing to p620)
+    ../../modules/nix/guarded-upgrade.nix
     ../../modules/programs/agent-voice.nix
     ../../modules/programs/claude-swarm-reaper.nix
   ];
 
   host.class = "laptop";
+  # Off until the guarded upgrade has its session/rollback checks and the
+  # lock shared with manual deploys (nixarchy#1946).
+  features.guarded-upgrade.enable = false;
 
   # NOPASSWD sudo for wheel members on razer.
   # Remote deploys (`nhs razer` / `just update-commit-deploy razer`, see

@@ -1,0 +1,92 @@
+name: Follow promoted nixarchy edge
+
+on:
+  schedule:
+    - cron: '20 1 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: follow-nixarchy-edge
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    if: ${{ vars.PAUSE_NIXARCHY_EDGE_BUMP != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+      - uses: cachix/install-nix-action@v31.11.1
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+      - name: Verify promotion
+        id: promotion
+        env:
+          GH_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+        run: |
+          echo "sha=$(python scripts/check_edge_promotion.py)" >> "$GITHUB_OUTPUT"
+      - name: Update nixarchy only
+        env:
+          EXPECTED_SHA: ${{ steps.promotion.outputs.sha }}
+          GH_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+        run: |
+          nix flake update nixarchy
+          python scripts/check_edge_promotion.py "$EXPECTED_SHA"
+          python - <<'PY'
+          import json, os, subprocess
+          old = json.loads(subprocess.check_output(['git', 'show', 'HEAD:flake.lock']))
+          new = json.load(open('flake.lock'))
+          nodes = new['nodes']
+          root = nodes['root']['inputs']['nixarchy']
+          allowed = set()
+          def walk(name):
+              if isinstance(name, list):
+                  name = nodes['root']['inputs'][name[0]]
+              if name in allowed:
+                  return
+              allowed.add(name)
+              for child in nodes[name].get('inputs', {}).values():
+                  walk(child)
+          walk(root)
+          changed = {key for key in old['nodes'] | new['nodes'] if old['nodes'].get(key) != new['nodes'].get(key)}
+          assert changed <= allowed, f'unrelated lock nodes changed: {changed - allowed}'
+          assert nodes[root]['locked']['rev'] == os.environ['EXPECTED_SHA'], 'nixarchy pin does not match promoted edge'
+          changed_files = subprocess.check_output(['git', 'diff', '--name-only']).decode().splitlines()
+          assert changed_files in ([], ['flake.lock']), f'unexpected files changed: {changed_files}'
+          PY
+      - name: Check if lock changed
+        id: changed
+        run: |
+          if git diff --quiet -- flake.lock; then echo 'value=false' >> "$GITHUB_OUTPUT"; else echo 'value=true' >> "$GITHUB_OUTPUT"; fi
+      - name: Evaluate all hosts
+        if: steps.changed.outputs.value == 'true'
+        run: |
+          for host in p620 razer p510; do
+            nix eval --no-update-lock-file ".#nixosConfigurations.$host.config.system.build.toplevel.drvPath" >/dev/null
+          done
+      - uses: peter-evans/create-pull-request@v8
+        id: pr
+        if: steps.changed.outputs.value == 'true'
+        with:
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          branch: chore/follow-nixarchy-edge
+          delete-branch: true
+          commit-message: 'chore(deps): follow promoted nixarchy edge (#1946)'
+          title: 'chore(deps): follow promoted nixarchy edge'
+          body: |
+            Follows the promoted nixarchy edge commit ${{ steps.promotion.outputs.sha }}.
+            Closes #1946
+          add-paths: flake.lock
+      - name: Enable protected auto-merge
+        if: steps.pr.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+          PR: ${{ steps.pr.outputs.pull-request-number }}
+        run: gh pr merge "$PR" --auto --squash

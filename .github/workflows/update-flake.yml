@@ -40,7 +40,12 @@ jobs:
         run: |
           echo "Updating flake inputs..."
 
-          nix flake update
+          # nixarchy is advanced only by follow-edge.yml after promotion.
+          mapfile -t inputs < <(jq -r '.nodes.root.inputs | keys[] | select(. != "nixarchy")' flake.lock)
+          nix flake update "${inputs[@]}"
+          old_rev=$(git show HEAD:flake.lock | jq -r '.nodes.nixarchy.locked.rev')
+          new_rev=$(jq -r '.nodes.nixarchy.locked.rev' flake.lock)
+          [ "$old_rev" = "$new_rev" ] || { echo 'nixarchy moved outside the promotion workflow'; exit 1; }
 
           # git is the copy of the old lock — the previous `cp flake.lock
           # flake.lock.old` left its scratch file in the tree and
