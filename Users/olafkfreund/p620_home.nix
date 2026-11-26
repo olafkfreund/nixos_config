@@ -1,10 +1,14 @@
 { lib
 , pkgs
+, inputs
 , ...
 }: {
   imports = [
     ./profile.nix
   ];
+
+  # The nixi-plugin skill (nixoarchy-snowflake#127): one directory link, so template/ holds real files.
+  home.file.".claude/skills/nixi-plugin".source = "${inputs.nixi-companion}/skills/nixi-plugin";
 
   desktop.gnome.profile = "workstation";
 
