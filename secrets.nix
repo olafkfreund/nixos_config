@@ -343,4 +343,7 @@ in
   "secrets/rfactory-runner-tls-key.age".publicKeys = allUsers ++ [ p620 ];
   "secrets/rfactory-web-client-crt.age".publicKeys = allUsers ++ [ p620 ];
   "secrets/rfactory-web-client-key.age".publicKeys = allUsers ++ [ p620 ];
+
+  # razer's root reaches p620's staged closure with this, through a forced command (nixarchy#1946).
+  "secrets/guarded-stage-key.age".publicKeys = allUsers ++ [ razer ];
 }
