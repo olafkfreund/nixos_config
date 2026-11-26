@@ -1,15 +1,19 @@
 ---
-status: draft
+status: approved
 issue: 3237
 author: olafkfreund
 ---
 
-# Intent: hyprimate window animations, smoke by default, on p620 and razer
+# Intent: hyprimate window animations, Liquid by default, on p620 and razer
+
+Approved by the owner (2026-11-26): "set duration to 200 on open and close and lets use Liquid animation for all
+hosts. commit and merge and deploy"; then, asked, "p620 + razer" and "Fast-track, cite me". The style is Liquid,
+not Smoke; the slug keeps its first name.
 
 ## Problem
 
 Opening, closing and moving a window on the Omarchy session uses Hyprland's stock animations. The owner wants the
-[hyprimate](https://github.com/JustinBacher/hyprimate) plugin's Smoke style instead, on both desktops. Today it exists
+[hyprimate](https://github.com/JustinBacher/hyprimate) plugin's Liquid style instead, on both desktops. Today it exists
 only as a hand-loaded test on p620 that is gone at the next login.
 
 Observed in the 2026-11-26 live test on p620 (AMD), as background, not design:
@@ -24,7 +28,8 @@ Observed in the 2026-11-26 live test on p620 (AMD), as background, not design:
 ## Proposed outcome
 
 After a deploy and a fresh login on p620 and razer, hyprimate loads with no manual command, and windows open, close and
-move with the Smoke style. Turning the host's flag off and logging in again gives the stock animations back.
+move with the Liquid style, opening and closing in 200 ms.
+Turning the host's flag off and logging in again gives the stock animations back.
 
 ## Affected users and systems
 
@@ -45,11 +50,14 @@ move with the Smoke style. Turning the host's flag off and logging in again give
 - Upstream is young (0.1.0, one author, daily commits): pin a rev, bump deliberately.
 - p510 is not built or deployed.
 
+## Decisions (owner, 2026-11-26)
+
+1. **Style and timing:** Liquid, `duration = 200` for opening and closing; other Liquid settings at upstream defaults.
+2. **Rollout:** p620 and razer together. p510 stays out.
+3. **Breakage on a Hyprland bump:** not answered; the recommended default stands. A plugin that no longer builds fails
+   the host build and blocks that upgrade (razer's guarded upgrade simply does not switch); the fix is a hyprimate bump
+   or turning the flag off. No automatic drop.
+
 ## Open questions
 
-1. **Breakage on a Hyprland bump.** A future nixarchy Hyprland can fail the plugin's build or symbol check, which fails
-   the host's build. razer follows promoted edges unattended (#1946), so it would simply stop upgrading until fixed.
-   Accept that (the build failure is the alarm; fix by bumping hyprimate or turning the flag off), or must a bump drop
-   the plugin automatically and keep upgrading without Smoke?
-2. **Rollout.** Enable p620 and razer together, or p620 first and razer after a fresh-login check on its hybrid GPU?
-3. **Smoke settings.** Upstream defaults, or tune direction, density or colour now?
+None.
