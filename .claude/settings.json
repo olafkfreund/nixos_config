@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "command -v graphify >/dev/null 2>&1 || exit 0; exec graphify hook-guard search",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/graphify-search-nudge.sh",
             "timeout": 10
           }
         ]

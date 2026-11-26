@@ -263,6 +263,14 @@ let
     "impeccable@impeccable"
     "jobs-to-be-done@pm-skills"
     "daily.dev@daily.dev"
+    # Near-copies of agents we already have, and LSPs for languages we do not write (#3244).
+    "cloud-infrastructure@claude-code-workflows"
+    "cicd-automation@claude-code-workflows"
+    "code-refactoring@claude-code-workflows"
+    "codebase-cleanup@claude-code-workflows"
+    "api-testing-observability@claude-code-workflows"
+    "jdtls-lsp@claude-plugins-official"
+    "clangd-lsp@claude-plugins-official"
   ]
     (_: false);
 
@@ -647,37 +655,32 @@ let
     }];
   };
 
-  busAnnounceHooks = lib.optionalAttrs cfg.busAnnounceGuard.enable {
-    PreToolUse = [{
-      matcher = "Bash";
-      hooks = [{
-        type = "command";
-        command = toString busAnnounceScript;
-        timeout = 5;
-      }];
+  # A guard that crashes or times out blocks the call instead of letting it
+  # through (onFailure, 2.1.329); PreSkillShellCommand sends the same
+  # tool_input.command as Bash, so skills' inline shell is guarded too (#3244).
+  guardOn = script: [{
+    matcher = "Bash";
+    hooks = [{
+      type = "command";
+      command = toString script;
+      timeout = 5;
+      onFailure = "block";
     }];
+  }];
+
+  busAnnounceHooks = lib.optionalAttrs cfg.busAnnounceGuard.enable {
+    PreToolUse = guardOn busAnnounceScript;
+    PreSkillShellCommand = guardOn busAnnounceScript;
   };
 
   sharedCheckoutGuardHooks = lib.optionalAttrs cfg.sharedCheckoutGuard.enable {
-    PreToolUse = [{
-      matcher = "Bash";
-      hooks = [{
-        type = "command";
-        command = toString sharedCheckoutGuardScript;
-        timeout = 5;
-      }];
-    }];
+    PreToolUse = guardOn sharedCheckoutGuardScript;
+    PreSkillShellCommand = guardOn sharedCheckoutGuardScript;
   };
 
   deployGuardHooks = lib.optionalAttrs cfg.deployGuard.enable {
-    PreToolUse = [{
-      matcher = "Bash";
-      hooks = [{
-        type = "command";
-        command = toString deployGuardScript;
-        timeout = 5;
-      }];
-    }];
+    PreToolUse = guardOn deployGuardScript;
+    PreSkillShellCommand = guardOn deployGuardScript;
   };
 
   # Claude Code's Task subagents run in-process with no PTY, so herdr cannot
@@ -806,12 +809,13 @@ let
   # replaces the previously seed-once ~/.claude/settings.json entries that
   # pinned a /nix/store path which broke after the package was rebuilt + GC'd.
   ccmHooksDir = "${cfg.tmuxCcm.package}/share/tmux-plugins/tmux-ccm/hooks";
+  # Hook timeouts are seconds; 5000 let a hung script stall a session ~83 min (#3244).
   mkCcmHook = script: [{
-    hooks = [{ type = "command"; command = "${ccmHooksDir}/${script}"; timeout = 5000; }];
+    hooks = [{ type = "command"; command = "${ccmHooksDir}/${script}"; timeout = 5; }];
   }];
   mkCcmNotify = matcher: {
     inherit matcher;
-    hooks = [{ type = "command"; command = "${ccmHooksDir}/on-notification.sh"; timeout = 5000; }];
+    hooks = [{ type = "command"; command = "${ccmHooksDir}/on-notification.sh"; timeout = 5; }];
   };
   tmuxCcmHooks = lib.optionalAttrs cfg.tmuxCcm.enable {
     UserPromptSubmit = mkCcmHook "on-prompt-submit.sh";

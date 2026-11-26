@@ -54,9 +54,15 @@ The session model (Opus) writes intent, spec and plan, and reviews. The
   `herdr-team`). Steps and reviews it does not name follow the rules above.
 - When the prompt hook says `agent-team: on`, Codex and agy are on the
   team for every task under the artifact workflow (not exempt ones):
-  - Before stopping on an intent, spec or plan draft, review it with
-    both through `second-opinion`, in parallel and read-only, and show
-    their findings (confirmed, refuted, unverified) with the draft.
+  - Review the plan draft with both through `second-opinion`, in
+    parallel and read-only, before stopping on it, and show their
+    findings (confirmed, refuted, unverified) with the draft. Start
+    both in the background as soon as the draft is written and do
+    your own checks while they run. Intent and spec drafts get no
+    Codex/agy review unless the user asks: the plan carries every
+    spec decision, so one review there catches the same problems.
+  - After the last step, review the diff with both, in parallel with
+    the fresh Opus review.
   - Every draft plan fills `coders:` for each step that edits files and
     `reviewers: [codex, agy]`, one reason per entry. Default routing:
     large mechanical edits → agy; small tricky logic → codex; the rest
