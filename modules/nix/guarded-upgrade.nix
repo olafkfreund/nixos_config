@@ -11,7 +11,8 @@ let
     case "''${SSH_ORIGINAL_COMMAND:-}" in
       "readlink -f /var/lib/guarded-upgrade/stage-razer") exec ${pkgs.coreutils}/bin/readlink -f /var/lib/guarded-upgrade/stage-razer ;;
       "cat /var/lib/guarded-upgrade/verified") exec ${pkgs.coreutils}/bin/cat /var/lib/guarded-upgrade/verified ;;
-      "nix-store --serve") exec ${config.nix.package}/bin/nix-store --serve ;;
+      # nix copy --from asks for --serve --write even to download; serve it read-only.
+      "nix-store --serve" | "nix-store --serve --write") exec ${config.nix.package}/bin/nix-store --serve ;;
       *) echo "guarded-stage: refused" >&2; exit 1 ;;
     esac
   '';
