@@ -53,6 +53,12 @@
     ../../../modules/desktop/hyprimate.nix
   ];
 
+  # WhatsApp in Nixi (nixoarchy-snowflake#126): the bridge unit, started by Nixi's setting. razer pairs as its own linked device.
+  home-manager.users.olafkfreund.services.nixi.companion.whatsapp = {
+    enable = true;
+    package = inputs.nixi-companion.packages.${pkgs.stdenv.hostPlatform.system}.nixi-whatsapp-bridge;
+  };
+
   features.hyprimate.enable = true;
 
   local.llmIndex.sourcePath = "/extdisk/Source"; # real path; ~/Source is a symlink; /extdisk is the second NVMe from fstab
