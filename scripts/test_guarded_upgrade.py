@@ -85,18 +85,58 @@ class GuardedUpgradeFixtures(unittest.TestCase):
 
     def test_manual_deploy_blocks_activation(self):
         own = {100, 101}
-        rebuild = "sudo nixos-" + "rebuild switch --flake .#razer"
-        stc = "/nix/store/x-nixos-system/bin/switch-to-" + "configuration switch"
-        self.assertTrue(deploy_conflict([(200, rebuild)], own))
-        self.assertTrue(deploy_conflict([(201, stc)], own))
-        self.assertTrue(deploy_conflict([(202, "nh os " + "switch .")], own))
-        self.assertFalse(deploy_conflict([(100, stc)], own))
-        self.assertFalse(deploy_conflict([(203, "vim notes.md")], own))
+        rebuild = "nixos-" + "rebuild"
+        stc = "/nix/store/x-nixos-system/bin/switch-to-" + "configuration"
+        ng = [
+            "/nix/store/p-python3/bin/python3",
+            "/nix/store/r/bin/" + rebuild,
+            "switch",
+        ]
+        self.assertTrue(
+            deploy_conflict([(200, [rebuild, "switch", "--flake", ".#razer"])], own)
+        )
+        self.assertTrue(deploy_conflict([(201, [stc, "switch"])], own))
+        self.assertTrue(
+            deploy_conflict([(202, ["nh", "--verbose", "os", "switch"])], own)
+        )
+        self.assertTrue(deploy_conflict([(203, ng)], own))
+        # Its own ancestry, and processes that only mention a switch, never block.
+        self.assertFalse(deploy_conflict([(100, [stc, "switch"])], own))
+        self.assertFalse(deploy_conflict([(204, ["man", rebuild])], own))
+        self.assertFalse(
+            deploy_conflict([(205, ["vim", "notes-on-" + rebuild + ".md"])], own)
+        )
+        self.assertFalse(deploy_conflict([(206, [])], own))
 
     def test_session_must_survive_the_switch(self):
-        self.assertTrue(session_regressed(True, False))
-        self.assertFalse(session_regressed(True, True))
-        self.assertFalse(session_regressed(False, False))
+        self.assertTrue(session_regressed({"3"}, set()))
+        # A session that crashed and was replaced by a new login is still lost.
+        self.assertTrue(session_regressed({"3"}, {"4"}))
+        self.assertFalse(session_regressed({"3"}, {"3"}))
+        self.assertFalse(session_regressed({"3"}, {"3", "4"}))
+        self.assertFalse(session_regressed(set(), {"4"}))
+
+    def test_deploy_lock_refuses_when_a_manual_hold_has_it(self):
+        import fcntl
+        import tempfile
+        from pathlib import Path
+
+        import guarded_upgrade
+
+        with tempfile.TemporaryDirectory() as tmp:
+            lock = Path(tmp) / "nixos-deploy.lock"
+            original = guarded_upgrade.DEPLOY_LOCK
+            guarded_upgrade.DEPLOY_LOCK = lock
+            try:
+                with guarded_upgrade.deploy_lock():
+                    pass  # free: taken and released
+                with lock.open("a") as held:
+                    fcntl.flock(held, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    with self.assertRaises(RuntimeError):
+                        with guarded_upgrade.deploy_lock():
+                            pass
+            finally:
+                guarded_upgrade.DEPLOY_LOCK = original
 
     def test_rollback_target_selection(self):
         old = "/nix/store/" + "a" * 32 + "-old"

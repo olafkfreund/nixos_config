@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Conservative decision helpers for the guarded NixOS upgrade timer."""
 
+import contextlib
 import fcntl
 import json
 import os
@@ -65,20 +66,36 @@ def failed_units_regressed(before, after):
     return bool(after - before)
 
 
-DEPLOY_COMMANDS = ("nixos-rebuild", "switch-to-configuration", "nh os ")
+DEPLOY_PROGRAMS = {"nixos-rebuild", "nixos-rebuild-ng", "switch-to-configuration", "nh"}
 
 
 def deploy_conflict(cmdlines, own_pids):
-    """A manual deploy is running if any other process runs a switch command."""
-    return any(
-        pid not in own_pids and any(c in cmd for c in DEPLOY_COMMANDS)
-        for pid, cmd in cmdlines
-    )
+    """Another process is running a switch program.
+
+    Matched on the program's own name (argv[0], or the script an interpreter runs),
+    never on arguments, so `man nixos-rebuild` or an editor on a note does not block.
+    A backstop only: the deploy lock is what excludes a deploy started elsewhere.
+    """
+    for pid, argv in cmdlines:
+        if pid in own_pids or not argv:
+            continue
+        names = {os.path.basename(argv[0])}
+        if len(argv) > 1 and os.path.basename(argv[0]).startswith(
+            ("python", "bash", "sh", "perl")
+        ):
+            names.add(os.path.basename(argv[1]))
+        if names & DEPLOY_PROGRAMS:
+            return True
+    return False
 
 
 def session_regressed(before, after):
-    """A Hyprland session that was up before the switch must still be up after it."""
-    return bool(before) and not after
+    """Every graphical session open before the switch must still be open after it.
+
+    Sessions are logind ids, so a session that crashed and was replaced by a new
+    login counts as lost, which a "Hyprland is running" test could not tell.
+    """
+    return bool(set(before) - set(after))
 
 
 def rollback_target(closure, generation):
@@ -185,15 +202,11 @@ def process_cmdlines():
     lines = []
     for proc in Path("/proc").glob("[0-9]*"):
         try:
-            cmd = (
-                (proc / "cmdline")
-                .read_bytes()
-                .replace(b"\0", b" ")
-                .decode(errors="replace")
-            )
+            raw = (proc / "cmdline").read_bytes()
         except OSError:
             continue
-        lines.append((int(proc.name), cmd))
+        argv = [a.decode(errors="replace") for a in raw.split(b"\0") if a]
+        lines.append((int(proc.name), argv))
     return lines
 
 
@@ -202,14 +215,26 @@ def own_pids():
     while pid > 1:
         pids.add(pid)
         try:
-            pid = int((Path("/proc") / str(pid) / "stat").read_text().split()[3])
+            # comm can hold spaces and parentheses; the fields after the last ")" cannot.
+            stat = (Path("/proc") / str(pid) / "stat").read_text()
+            pid = int(stat.rpartition(")")[2].split()[1])
         except (OSError, ValueError, IndexError):
             break
     return pids
 
 
-def hyprland_running():
-    return bool(run("pgrep", "-x", "Hyprland", check=False))
+def graphical_sessions():
+    """logind ids of open Wayland sessions (the compositor's own process name is
+    .Hyprland-wrapped on NixOS, so a process-name test does not see it)."""
+    ids = set()
+    for line in run("loginctl", "list-sessions", "--no-legend").splitlines():
+        sid = line.split()[0] if line.split() else ""
+        if not sid:
+            continue
+        props = run("loginctl", "show-session", sid, "-p", "Type", "-p", "State")
+        if "Type=wayland" in props and "State=closing" not in props:
+            ids.add(sid)
+    return ids
 
 
 def ac_power():
@@ -230,20 +255,22 @@ def gate(host):
         raise RuntimeError("external power unavailable")
     if host == "p620":
         runner_gate()
-        now = datetime.now()
-        if now.hour != 4:
-            raise RuntimeError("outside 04:00–05:00 activation window")
+    # Both hosts: a window, and either nobody logged in or a fresh idle report.
+    # Nothing writes the idle report yet, so a host with an open session waits.
+    if datetime.now().hour != 4:
+        raise RuntimeError("outside 04:00–05:00 activation window")
+    if graphical_sessions():
         signal = read("idle")
-        sessions = run("loginctl", "list-sessions", "--no-legend")
-        if sessions:
-            if not signal or not idle_safe(
-                signal.get("session"),
-                signal.get("reported_session"),
-                signal.get("status"),
-                signal.get("at", 0),
-                time.time(),
-            ):
-                raise RuntimeError("desktop idle status unavailable")
+        if not signal or not idle_safe(
+            signal.get("session"),
+            signal.get("reported_session"),
+            signal.get("status"),
+            signal.get("at", 0),
+            time.time(),
+        ):
+            raise RuntimeError(
+                "a session is open and no fresh idle report says it is idle"
+            )
     return True
 
 
@@ -297,7 +324,12 @@ def verify_local(host, old_failed):
         "Result",
         "-p",
         "ExecMainStatus",
+        "-p",
+        "ActiveState",
     )
+    # A oneshot still running reports the last run's Result; it must have finished.
+    if "ActiveState=activating" in hm or "ActiveState=deactivating" in hm:
+        raise RuntimeError("Home Manager activation has not finished")
     if "Result=success" not in hm or "ExecMainStatus=0" not in hm:
         raise RuntimeError("Home Manager activation failed")
     if host == "p620":
@@ -318,7 +350,17 @@ def verify_local(host, old_failed):
 def rollback(record, why):
     old, generation = rollback_target(record["old"], record["generation"])
     run("nix-env", "-p", str(PROFILE), "--switch-generation", str(generation))
-    run(str(Path(old) / "bin/switch-to-configuration"), "switch", check=False)
+    switched = subprocess.run(
+        [str(Path(old) / "bin/switch-to-configuration"), "switch"],
+        text=True,
+        capture_output=True,
+    )
+    # Raising keeps the transaction file, so the next run retries the rollback
+    # under the lock, and __main__ exits non-zero so the unit shows as failed.
+    if switched.returncode:
+        raise RuntimeError(
+            f"rollback switch exited {switched.returncode}: {switched.stderr.strip()[:300]}"
+        )
     if current_closure() != old or str(PROFILE.resolve()) != old:
         raise RuntimeError("rollback failed to restore running and boot default")
     (STATE / "pause").write_text(record["sha"] + "\n")
@@ -350,7 +392,7 @@ def activate(host, sha, candidate):
         "old": old,
         "generation": active_generation(),
         "failed": sorted(failed_units()),
-        "session": hyprland_running(),
+        "sessions": sorted(graphical_sessions()),
     }
     save("transaction", record)
     try:
@@ -360,8 +402,8 @@ def activate(host, sha, candidate):
         if current_closure() != candidate or str(PROFILE.resolve()) != candidate:
             raise RuntimeError("activation did not select candidate")
         verify_local(host, set(record["failed"]))
-        if session_regressed(record["session"], hyprland_running()):
-            raise RuntimeError("the Hyprland session did not survive the switch")
+        if session_regressed(record["sessions"], graphical_sessions()):
+            raise RuntimeError("a graphical session open before the switch is gone")
     except Exception as error:
         rollback(record, str(error))
         raise
@@ -374,6 +416,24 @@ def may_activate(auto_activate):
     return auto_activate is True
 
 
+DEPLOY_LOCK = Path("/run/lock/nixos-deploy.lock")
+
+
+@contextlib.contextmanager
+def deploy_lock():
+    """The lock scripts/deploy-hold.sh takes for a manual deploy, on this host.
+
+    Held from the last gate through verify or rollback, and around reconciling an
+    interrupted transaction, so a manual deploy and this can never switch at once.
+    """
+    with DEPLOY_LOCK.open("a") as handle:
+        try:
+            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            raise RuntimeError("the deploy lock is held: a manual deploy is running")
+        yield
+
+
 def main(host, auto_activate):
     STATE.mkdir(mode=0o700, parents=True, exist_ok=True)
     with (STATE / "lock").open("w") as lock:
@@ -384,7 +444,8 @@ def main(host, auto_activate):
             return 0
         transaction = read("transaction")
         if transaction:
-            rollback(transaction, "interrupted activation")
+            with deploy_lock():
+                rollback(transaction, "interrupted activation")
             return 1
         if not should_start(False, (STATE / "pause").exists()):
             log("deferred: pause flag")
@@ -435,8 +496,9 @@ def main(host, auto_activate):
             raise RuntimeError("p620 canary has not verified this SHA")
         gate(host)
         post = bus_announce(host, sha)
-        gate(host)
-        activate(host, sha, candidate)
+        with deploy_lock():
+            gate(host)
+            activate(host, sha, candidate)
         post("#agents:freundcloud.org.uk", f"Guarded upgrade: {host} {sha} verified")
         return 0
 
@@ -445,5 +507,10 @@ if __name__ == "__main__":
     try:
         sys.exit(main(sys.argv[1], sys.argv[2] == "true"))
     except Exception as error:
+        # A transaction left open means a switch or rollback did not finish: the
+        # host may be between generations, so the unit must show as failed.
+        if (STATE / "transaction").exists():
+            log(f"failed with a transaction open: {error}")
+            sys.exit(1)
         log(f"deferred: {error}")
         sys.exit(0)

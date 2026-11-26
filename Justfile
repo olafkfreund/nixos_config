@@ -28,14 +28,14 @@ _require-main:
 # Deploy to local system using nh
 [group('deploy')]
 deploy: _require-main
-    nh os switch
+    ./scripts/deploy-hold.sh "$(hostname)" -- nh os switch
 
 # Guarded by name (#2951): bus hook (announce), coder guard (blocked). Rename it in the guards too.
 
 # Update local system using nh
 [group('update')]
 update: _require-main
-    nh os switch --update
+    ./scripts/deploy-hold.sh "$(hostname)" -- nh os switch --update
 
 # Idiot-proof update + commit + deploy (local OR remote). Does:
 #   1. nix flake update (scope = 'all' by default; pass 'nixpkgs' or any input name to scope down)
@@ -57,7 +57,7 @@ update: _require-main
 #   just update-commit-deploy razer home-manager  # remote, single input
 [group('update')]
 update-commit-deploy HOST="$(hostname)" SCOPE="all":
-    ./scripts/update-commit-deploy.sh {{HOST}} {{SCOPE}}
+    ./scripts/deploy-hold.sh {{HOST}} -- ./scripts/update-commit-deploy.sh {{HOST}} {{SCOPE}}
 
 # Guarded by name (#2951): coder guard (blocked: it commits and pushes). Rename it in the guards too.
 
@@ -284,30 +284,16 @@ check-syntax:
         echo "✅ All Nix files have valid syntax"
     fi
 
-# Refuse while the host's guarded upgrade is mid-switch (nixarchy#1946). The
-# guarded side refuses while a manual deploy runs, so neither can switch over the
-# other.
-_no-guarded-upgrade HOST:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    probe='systemctl is-active --quiet nixos-upgrade.service && exit 3; test -e /var/lib/guarded-upgrade/transaction && exit 4; exit 0'
-    if [ "$(hostname)" = "{{HOST}}" ]; then rc=0; bash -c "$probe" || rc=$?; else rc=0; ssh -o BatchMode=yes {{HOST}} "$probe" || rc=$?; fi
-    case $rc in
-      0) ;;
-      3) echo "{{HOST}}: the guarded upgrade is running; wait for nixos-upgrade.service to finish" >&2; exit 1 ;;
-      4) echo "{{HOST}}: a guarded upgrade transaction is open; it reconciles on its next run" >&2; exit 1 ;;
-      *) echo "{{HOST}}: could not ask whether a guarded upgrade is running (rc=$rc)" >&2; exit 1 ;;
-    esac
-
 # Deploy to razer laptop (Intel/NVIDIA) - OPTIMIZED
+# deploy-hold.sh holds razer's deploy lock, the one its guarded upgrade takes (nixarchy#1946).
 [group('deploy')]
-razer: _require-main (_no-guarded-upgrade "razer") (_sign-drv "razer")
-    ./scripts/sync-remote-checkout.sh around razer -- nixos-rebuild switch --flake .#razer --target-host razer --build-host razer --sudo --no-reexec --keep-going
+razer: _require-main (_sign-drv "razer")
+    ./scripts/deploy-hold.sh razer -- ./scripts/sync-remote-checkout.sh around razer -- nixos-rebuild switch --flake .#razer --target-host razer --build-host razer --sudo --no-reexec --keep-going
 
 # Deploy to p620 workstation (AMD) - OPTIMIZED
 [group('deploy')]
-p620: _require-main (_no-guarded-upgrade "p620")
-    sudo nixos-rebuild switch --flake .#p620
+p620: _require-main
+    ./scripts/deploy-hold.sh p620 -- sudo nixos-rebuild switch --flake .#p620
 
 # Deploy to p510 workstation (Intel Xeon/NVIDIA) - OPTIMIZED
 [group('deploy')]
@@ -455,7 +441,7 @@ fix-agenix-remote HOST:
 [group('deploy')]
 deploy-local-build HOST: _require-main
     @echo "🏗️ Building {{HOST}} locally, deploying remotely..."
-    ./scripts/sync-remote-checkout.sh around {{HOST}} -- nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --sudo --no-reexec --keep-going
+    ./scripts/deploy-hold.sh {{HOST}} -- ./scripts/sync-remote-checkout.sh around {{HOST}} -- nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --sudo --no-reexec --keep-going
 
 # Guarded by name (#2951): coder guard (blocked: signs with the host key). Rename it in the guards too.
 
@@ -472,7 +458,7 @@ _sign-drv HOST:
 
 # Build on P620, deploy to target host
 [group('deploy')]
-deploy-via-p620 HOST: _require-main (_no-guarded-upgrade HOST) (_sign-drv HOST)
+deploy-via-p620 HOST: _require-main (_sign-drv HOST)
     @echo "🏗️ Building {{HOST}} on P620 cache server, deploying to {{HOST}}..."
     @echo "📡 Step 1: Building on P620..."
     @# Already on p620? Build locally — SSHing to ourselves just to build is a
@@ -487,9 +473,9 @@ deploy-via-p620 HOST: _require-main (_no-guarded-upgrade HOST) (_sign-drv HOST)
     @# name, so a host entry in ~/.ssh/config that no longer resolves fails the
     @# copy step after a build that already succeeded. Same reasoning as Step 1.
     if [ "$(hostname)" = "{{HOST}}" ]; then \
-        sudo nixos-rebuild switch --flake .#{{HOST}} --no-reexec; \
+        ./scripts/deploy-hold.sh {{HOST}} -- sudo nixos-rebuild switch --flake .#{{HOST}} --no-reexec; \
     else \
-        ./scripts/sync-remote-checkout.sh around {{HOST}} -- nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --sudo --no-reexec --keep-going; \
+        ./scripts/deploy-hold.sh {{HOST}} -- ./scripts/sync-remote-checkout.sh around {{HOST}} -- nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --sudo --no-reexec --keep-going; \
     fi
     @echo "✅ Deployment complete! {{HOST}} is using P620's cache."
 
