@@ -109,3 +109,26 @@ the load turns any exception into a visible notification.
   `plugin:hyprimate:window:options:liquid:duration` reads `float: 200.000000`.
 - After re-login on each host: `hyprimate` listed once; `window:style` is `liquid`; duration `200`;
   `decoration:wobble:enabled` false; no hyprimate notification; the owner opens, closes and moves a window.
+
+## Implementation deviation (2026-11-26, PR review)
+
+Codex's diff review found, and the pinned Hyprland source confirms, that `hl.plugin.load` only declares a plugin:
+it appends the path to `m_registeredPlugins` (`src/config/lua/bindings/LuaBindingsConfigRules.cpp:562`). After the
+parse, `updateConfigPlugins` loads declared paths that are not loaded, **unloads config-loaded plugins that are no
+longer declared**, and reloads (`src/plugins/PluginSystem.cpp:197`, `src/config/lua/ConfigManager.cpp:1098`). The
+"load only if not registered" guard above would therefore load at login, then drop the declaration on the reload and
+unload it again, in a loop. The hand-loaded test never showed this, because a plugin loaded by `hyprctl` is not
+config-owned.
+
+What replaces it:
+
+- The drop-in declares `hl.plugin.load("/run/current-system/sw/lib/hyprimate.so")` on **every** parse, and applies
+  the plugin settings only when `plugin.hyprimate.window.style` is registered (the parse after Hyprland loaded it).
+  This is Omarchy's own titlebars pattern (`workspace-modes.lua`).
+- The module adds the package to `environment.systemPackages`; `/lib` is in `environment.pathsToLink` on p620 and
+  razer (both evaluated), so the path exists. The path string never changes, so a switch plus a reload does not
+  unload or replace the running plugin; the new build loads at the next login.
+- No notifications of our own: on the first parse the plugin is never loaded yet, and Hyprland itself shows an
+  overlay when a declared plugin fails to load.
+- p620 only, before deploy: unload the hand-loaded test copy, which has another path and is not config-owned, so the
+  config's copy does not land beside it.
