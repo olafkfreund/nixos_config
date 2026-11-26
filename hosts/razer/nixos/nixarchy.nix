@@ -50,7 +50,10 @@
     ../../common/nixos/omarchy-sole-hyprland.nix
     ../../common/nixos/omarchy-stylix-theme.nix
     ../../common/nixos/omarchy-desktop.nix
+    ../../../modules/desktop/hyprimate.nix
   ];
+
+  features.hyprimate.enable = true;
 
   local.llmIndex.sourcePath = "/extdisk/Source"; # real path; ~/Source is a symlink; /extdisk is the second NVMe from fstab
   local.llmIndex.excludePaths = [ "/extdisk/Source/password" ];

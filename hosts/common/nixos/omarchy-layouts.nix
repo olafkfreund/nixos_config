@@ -6,9 +6,10 @@
 # loads layouts.lua itself: after looknfeel, where Atmos writes its own
 # layout = "scrolling", and before the saved choices, which still win.
 #
-# autostart.lua loads Hyprflip and the declared keys (omarchy-keys.nix). force: the nixarchy seed copies
-# Omarchy's autostart.lua here with `cp -rn`, so without it home-manager
-# refuses to link over it.
+# autostart.lua loads Hyprflip, the declared keys (omarchy-keys.nix) and hyprimate
+# (modules/desktop/hyprimate.nix). force: the nixarchy seed copies Omarchy's
+# autostart.lua here with `cp -rn`, so without it home-manager refuses to link
+# over it.
 { ... }:
 {
   home-manager.users.olafkfreund.home.file = {
@@ -27,6 +28,14 @@
           local ok, err = pcall(require, "hypr.repo-keys")
           if not ok then
             hl.exec_cmd("omarchy-notification-send " .. o.shell_quote("hypr/repo-keys.lua failed: " .. tostring(err)))
+          end
+        end
+
+        -- hyprimate window animations (modules/desktop/hyprimate.nix, #3237).
+        if package.searchpath("hypr.hyprimate", package.path) then
+          local ok, err = pcall(require, "hypr.hyprimate")
+          if not ok then
+            hl.exec_cmd("omarchy-notification-send " .. o.shell_quote("hypr/hyprimate.lua failed: " .. tostring(err)))
           end
         end
       '';

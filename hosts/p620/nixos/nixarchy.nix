@@ -55,7 +55,10 @@
     ../../common/nixos/omarchy-sole-hyprland.nix
     ../../common/nixos/omarchy-stylix-theme.nix
     ../../common/nixos/omarchy-desktop.nix
+    ../../../modules/desktop/hyprimate.nix
   ];
+
+  features.hyprimate.enable = true;
 
   # Phone calls on this host through Nixi's handset (nixoarchy-snowflake#115).
   # p620 first; razer after the live call test passes.
