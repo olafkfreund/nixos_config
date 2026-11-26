@@ -2,12 +2,14 @@ import unittest
 
 from guarded_upgrade import (
     ac_safe,
+    deploy_conflict,
     failed_units_regressed,
     idle_safe,
     may_activate,
     promotion_safe,
     rollback_target,
     runners_safe,
+    session_regressed,
     should_start,
 )
 from check_edge_promotion import promoted
@@ -80,6 +82,21 @@ class GuardedUpgradeFixtures(unittest.TestCase):
         self.assertFalse(may_activate(None))
         self.assertFalse(may_activate("true"))
         self.assertTrue(may_activate(True))
+
+    def test_manual_deploy_blocks_activation(self):
+        own = {100, 101}
+        rebuild = "sudo nixos-" + "rebuild switch --flake .#razer"
+        stc = "/nix/store/x-nixos-system/bin/switch-to-" + "configuration switch"
+        self.assertTrue(deploy_conflict([(200, rebuild)], own))
+        self.assertTrue(deploy_conflict([(201, stc)], own))
+        self.assertTrue(deploy_conflict([(202, "nh os " + "switch .")], own))
+        self.assertFalse(deploy_conflict([(100, stc)], own))
+        self.assertFalse(deploy_conflict([(203, "vim notes.md")], own))
+
+    def test_session_must_survive_the_switch(self):
+        self.assertTrue(session_regressed(True, False))
+        self.assertFalse(session_regressed(True, True))
+        self.assertFalse(session_regressed(False, False))
 
     def test_rollback_target_selection(self):
         old = "/nix/store/" + "a" * 32 + "-old"

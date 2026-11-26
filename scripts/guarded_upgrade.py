@@ -65,6 +65,22 @@ def failed_units_regressed(before, after):
     return bool(after - before)
 
 
+DEPLOY_COMMANDS = ("nixos-rebuild", "switch-to-configuration", "nh os ")
+
+
+def deploy_conflict(cmdlines, own_pids):
+    """A manual deploy is running if any other process runs a switch command."""
+    return any(
+        pid not in own_pids and any(c in cmd for c in DEPLOY_COMMANDS)
+        for pid, cmd in cmdlines
+    )
+
+
+def session_regressed(before, after):
+    """A Hyprland session that was up before the switch must still be up after it."""
+    return bool(before) and not after
+
+
 def rollback_target(closure, generation):
     if not re.fullmatch(
         r"/nix/store/[a-z0-9]{32}-[^/]+", str(closure)
@@ -165,6 +181,37 @@ def current_closure():
     return str(Path("/run/current-system").resolve())
 
 
+def process_cmdlines():
+    lines = []
+    for proc in Path("/proc").glob("[0-9]*"):
+        try:
+            cmd = (
+                (proc / "cmdline")
+                .read_bytes()
+                .replace(b"\0", b" ")
+                .decode(errors="replace")
+            )
+        except OSError:
+            continue
+        lines.append((int(proc.name), cmd))
+    return lines
+
+
+def own_pids():
+    pids, pid = set(), os.getpid()
+    while pid > 1:
+        pids.add(pid)
+        try:
+            pid = int((Path("/proc") / str(pid) / "stat").read_text().split()[3])
+        except (OSError, ValueError, IndexError):
+            break
+    return pids
+
+
+def hyprland_running():
+    return bool(run("pgrep", "-x", "Hyprland", check=False))
+
+
 def ac_power():
     values = [
         p.read_text().strip()
@@ -177,6 +224,8 @@ def ac_power():
 def gate(host):
     if (STATE / "pause").exists():
         raise RuntimeError("automatic activation paused")
+    if deploy_conflict(process_cmdlines(), own_pids()):
+        raise RuntimeError("a manual deploy is running")
     if host == "razer" and not ac_safe(ac_power()):
         raise RuntimeError("external power unavailable")
     if host == "p620":
@@ -301,6 +350,7 @@ def activate(host, sha, candidate):
         "old": old,
         "generation": active_generation(),
         "failed": sorted(failed_units()),
+        "session": hyprland_running(),
     }
     save("transaction", record)
     try:
@@ -310,6 +360,8 @@ def activate(host, sha, candidate):
         if current_closure() != candidate or str(PROFILE.resolve()) != candidate:
             raise RuntimeError("activation did not select candidate")
         verify_local(host, set(record["failed"]))
+        if session_regressed(record["session"], hyprland_running()):
+            raise RuntimeError("the Hyprland session did not survive the switch")
     except Exception as error:
         rollback(record, str(error))
         raise
