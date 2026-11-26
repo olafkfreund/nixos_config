@@ -44,10 +44,13 @@ in
     ../../modules/services/meeting-transcribe.nix # meet CLI: record → whisperX → Ollama summary
     ../../modules/services/audible-sync.nix # audible-sync: download + decrypt Audible library to .m4b
     ../../modules/services/nixarchy-runner.nix # Self-hosted CI for nixarchy's VM checks
+    ../../modules/nix/guarded-upgrade.nix
     ../../modules/programs/agent-voice.nix
     ../../modules/programs/claude-swarm-reaper.nix
   ];
   host.class = "workstation";
+  # Off: see hosts/razer; p620 also waits for the runner drain test (nixarchy#1946).
+  features.guarded-upgrade.enable = false;
 
   # nixarchy's install and ISO checks need KVM, an hour, and 16 GB of build
   # directory. See modules/services/nixarchy-runner.nix.
