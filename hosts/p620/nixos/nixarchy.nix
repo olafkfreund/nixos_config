@@ -60,7 +60,7 @@
   # Phone calls on this host through Nixi's handset (nixoarchy-snowflake#115).
   # p620 first; razer after the live call test passes.
   features.nixiCalls.enable = true;
-  # WhatsApp in Nixi (nixoarchy-snowflake#126): the bridge unit, started by Nixi's setting. p620 first; razer after the live test.
+  # WhatsApp in Nixi (nixoarchy-snowflake#126): the bridge unit, started by Nixi's setting. On p620 and razer.
   home-manager.users.olafkfreund.services.nixi.companion.whatsapp = {
     enable = true;
     package = inputs.nixi-companion.packages.${pkgs.stdenv.hostPlatform.system}.nixi-whatsapp-bridge;
