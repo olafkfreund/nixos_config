@@ -39,9 +39,12 @@ in
   ];
 
   host.class = "laptop";
-  # Off until the guarded upgrade has its session/rollback checks and the
-  # lock shared with manual deploys (nixarchy#1946).
-  features.guarded-upgrade.enable = false;
+  # Follows a promoted green edge on its own: 04:00-05:00, on AC, nobody logged
+  # in, and only a closure p620 staged and verified first (nixarchy#1946).
+  features.guarded-upgrade = {
+    enable = true;
+    autoActivate = true;
+  };
 
   # NOPASSWD sudo for wheel members on razer.
   # Remote deploys (`nhs razer` / `just update-commit-deploy razer`, see
