@@ -7,24 +7,23 @@
 #
 # Both closures are registered in the VM's Nix store database at boot so guarded_upgrade.py can
 # switch to candidate and roll back to baseline with real switch-to-configuration calls.
-{
-  nixpkgs ?
-    let
-      lock = builtins.fromJSON (builtins.readFile ../../flake.lock);
-      node = lock.nodes.${lock.nodes.root.inputs.nixpkgs}.locked;
-    in
-    builtins.fetchTree {
-      inherit (node)
-        type
-        owner
-        repo
-        rev
-        narHash
-        ;
-    },
-  system ? "x86_64-linux",
-  repo ? "olafkfreund/nixarchy-drain-test",
-  label ? "runner-drain-test",
+{ nixpkgs ? let
+    lock = builtins.fromJSON (builtins.readFile ../../flake.lock);
+    node = lock.nodes.${lock.nodes.root.inputs.nixpkgs}.locked;
+  in
+  builtins.fetchTree {
+    inherit (node)
+      type
+      owner
+      repo
+      rev
+      narHash
+      ;
+  }
+, system ? "x86_64-linux"
+, repo ? "olafkfreund/nixarchy-drain-test"
+, label ? "runner-drain-test"
+,
 }:
 let
   lib = import "${nixpkgs}/lib";
@@ -37,7 +36,7 @@ let
         "${nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix"
         ../../modules/services/nixarchy-runner.nix
         (
-          { config, pkgs, ... }:
+          { pkgs, ... }:
           {
             system.stateVersion = "25.05";
             networking.hostName = "p620";
@@ -95,17 +94,19 @@ let
 
             systemd.services = lib.mkMerge [
               (lib.listToAttrs (
-                map (
-                  i:
-                  let
-                    suffix = lib.optionalString (i > 1) "-${toString i}";
-                  in
-                  lib.nameValuePair "github-runner-nixarchy${suffix}" {
-                    serviceConfig.ReadWritePaths = [
-                      "/var/lib/runner-drain-test/counters"
-                    ];
-                  }
-                ) (lib.range 1 4)
+                map
+                  (
+                    i:
+                    let
+                      suffix = lib.optionalString (i > 1) "-${toString i}";
+                    in
+                    lib.nameValuePair "github-runner-nixarchy${suffix}" {
+                      serviceConfig.ReadWritePaths = [
+                        "/var/lib/runner-drain-test/counters"
+                      ];
+                    }
+                  )
+                  (lib.range 1 4)
               ))
               {
                 home-manager-olafkfreund = {

@@ -1082,7 +1082,7 @@ class Recovery(DrainCase):
             self.assertEqual(gu.main(name, True), 1)
             self.assertEqual(self.host.started, starts, name)
 
-    def test_an_unparseable_journal_is_reopened_like_an_orphan(self):
+    def test_an_unparsable_journal_is_reopened_like_an_orphan(self):
         for junk in ("", '{"phase": "drai', "[1]", "{}"):
             with self.subTest(junk=junk):
                 self.host.started.clear()
