@@ -19,7 +19,18 @@ let
   herdr-team = pkgs.writeShellApplication {
     name = "herdr-team";
     runtimeInputs = with pkgs; [ jq coreutils util-linux procps git gnugrep gnused gawk findutils systemd ];
-    text = "agy_member=${lib.boolToString agyMember}\nsink_path=${sandbox.herdr-team-sink}/bin/herdr-team-sink\nreview_model=${team.roles.reviewer.codex.model}\nreview_effort=${team.roles.reviewer.codex.effort}\n" + builtins.readFile ./herdr-team.sh;
+    text = ''
+      agy_member=${lib.boolToString agyMember}
+      sink_path=${sandbox.herdr-team-sink}/bin/herdr-team-sink
+      review_model=${team.roles.reviewer.codex.model}
+      review_effort=${team.roles.reviewer.codex.effort}
+      claude_sink=${herdr-team-claude-sink}/bin/herdr-team-claude-sink
+      claude_guard=/etc/claude-code/hooks/coder-guard
+      claude_review_model=${team.roles.reviewer.claude.model}
+      claude_review_effort=${team.roles.reviewer.claude.effort}
+      claude_worker_model=${team.roles.worker.claude.model}
+      claude_worker_effort=${team.roles.worker.claude.effort}
+    '' + builtins.readFile ./herdr-team.sh;
     checkPhase = ''
       runHook preCheck
       ${pkgs.stdenv.shellDryRun} "$target"
@@ -53,6 +64,7 @@ in
   home.packages = [
     herdr-run
     herdr-team
+    herdr-team-claude-sink
     agy-acp-member
     (pkgs.writeShellApplication {
       name = "agent-run";
