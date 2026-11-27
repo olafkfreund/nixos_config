@@ -7,22 +7,52 @@ import json
 import os
 from pathlib import Path
 import re
+import stat
 import subprocess
 import sys
 import time
+import uuid
 from datetime import datetime
 import urllib.request
 
 
 STATE = Path("/var/lib/guarded-upgrade")
 PROFILE = Path("/nix/var/nix/profiles/system")
-REPO = "github:olafkfreund/nixos_config"
-EXPECTED_RUNNERS = {
-    "p620-nixarchy",
-    "p620-nixarchy-2",
-    "p620-nixarchy-3",
-    "p620-nixarchy-4",
-}
+
+# The GUARDED_* variables exist for the disposable-VM drain test (nixarchy#1967);
+# the unit sets none of them.
+env = os.environ.get
+# A flake ref that accepts "/<commit>", and the git URL of the same repository.
+REPO = env("GUARDED_REPO", "github:olafkfreund/nixos_config")
+GIT_URL = env("GUARDED_GIT_URL", "https://github.com/olafkfreund/nixos_config.git")
+RUNNER_REPO = env("GUARDED_RUNNER_REPO", "olafkfreund/nixarchy")
+ISSUE_REPO = env("GUARDED_ISSUE_REPO", "olafkfreund/nixos_config")
+# The unit and state directory are github-runner[-/]<RUNNER_UNIT><suffix>;
+# RUNNER_NAME<suffix> is the name GitHub knows.
+RUNNER_UNIT = env("GUARDED_RUNNER_UNIT", "nixarchy")
+RUNNER_NAME = env("GUARDED_RUNNER_NAME", "p620-nixarchy")
+SUFFIXES = ("", "-2", "-3", "-4")
+EXPECTED_RUNNERS = {RUNNER_NAME + suffix for suffix in SUFFIXES}
+# "workflow:job" pairs, comma separated.
+CI_WORKFLOWS = tuple(
+    tuple(item.split(":", 1))
+    for item in env(
+        "GUARDED_CI_WORKFLOWS", "install-check.yml:install,omarchy-edge.yml:verify"
+    ).split(",")
+    if item
+)
+# Local hours, "start-end", end excluded.
+WINDOW = env("GUARDED_WINDOW", "4-5")
+BUS_ROOM = env("GUARDED_BUS_ROOM", "#agents:freundcloud.org.uk")
+
+RUNNER_STATE = Path("/var/lib/github-runner")
+CGROUP_ROOT = Path("/sys/fs/cgroup")
+DRAIN_TIMEOUT = 30 * 60
+READY_TIMEOUT = 10 * 60
+START_TIMEOUT = 5 * 60
+SETTLE_TIMEOUT = 60
+POLL = 15
+EXITED = ("exited-idle", "exited-after-job")
 
 
 def promotion_safe(
@@ -154,8 +184,11 @@ def rollback_target(closure, generation):
     return str(closure), generation
 
 
-def run(*args, check=True):
-    result = subprocess.run(args, text=True, capture_output=True)
+def run(*args, check=True, timeout=None):
+    try:
+        result = subprocess.run(args, text=True, capture_output=True, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        raise RuntimeError(f"{args[0]} timed out after {timeout}s")
     if check and result.returncode:
         raise RuntimeError(f"{args[0]} failed: {result.stderr.strip()[:300]}")
     return result.stdout.strip()
@@ -179,9 +212,9 @@ def read(name):
 
 def github(path, method="GET", body=None):
     token = Path(os.environ["GITHUB_TOKEN_FILE"]).read_text().strip()
-    repo = "nixos_config" if path.startswith("/issues") else "nixarchy"
+    repo = ISSUE_REPO if path.startswith("/issues") else RUNNER_REPO
     request = urllib.request.Request(
-        f"https://api.github.com/repos/olafkfreund/{repo}" + path,
+        f"https://api.github.com/repos/{repo}" + path,
         data=json.dumps(body).encode() if body is not None else None,
         method=method,
         headers={
@@ -194,17 +227,15 @@ def github(path, method="GET", body=None):
         return json.load(response)
 
 
-def runner_gate():
+def our_runners():
     runners = github("/actions/runners?per_page=100")
-    ours = [
-        r for r in runners["runners"] if r.get("name", "").startswith("p620-nixarchy")
-    ]
-    if not runners_safe(ours, EXPECTED_RUNNERS):
+    return [r for r in runners["runners"] if r.get("name", "").startswith(RUNNER_NAME)]
+
+
+def runner_gate():
+    if not runners_safe(our_runners(), EXPECTED_RUNNERS):
         raise RuntimeError("runners busy, missing or offline")
-    for workflow, job in (
-        ("install-check.yml", "install"),
-        ("omarchy-edge.yml", "verify"),
-    ):
+    for workflow, job in CI_WORKFLOWS:
         runs = github(
             f"/actions/workflows/{workflow}/runs?status=in_progress&per_page=100"
         )
@@ -316,19 +347,21 @@ def ac_power():
     return "1" if "1" in values else "0" if values else None
 
 
-def gate(host):
+def gate(host, runners=True):
+    """runners=False is the recheck after a drain, when ours are offline on purpose."""
     if (STATE / "pause").exists():
         raise RuntimeError("automatic activation paused")
     if deploy_conflict(process_cmdlines(), own_pids()):
         raise RuntimeError("a manual deploy is running")
     if host == "razer" and not ac_safe(ac_power()):
         raise RuntimeError("external power unavailable")
-    if host == "p620":
+    if host == "p620" and runners:
         runner_gate()
     # Both hosts: a window, and either nobody logged in or a fresh idle report,
     # which guarded-idle-report (modules/nix/guarded-upgrade.nix) writes per session.
-    if datetime.now().hour != 4:
-        raise RuntimeError("outside 04:00–05:00 activation window")
+    start, end = map(int, WINDOW.split("-"))
+    if not start <= datetime.now().hour < end:
+        raise RuntimeError(f"outside {start:02}:00–{end:02}:00 activation window")
     live = graphical_sessions()
     if live:
         signal = {}
@@ -355,7 +388,7 @@ def gate(host):
 def bus_announce(host, sha):
     from agent_bus_mcp import post, read_new
 
-    messages = read_new("#agents:freundcloud.org.uk")
+    messages = read_new(BUS_ROOM)
     if messages.startswith("["):
         for item in json.loads(messages):
             if time.time() * 1000 - item.get("at", 0) < 30 * 60 * 1000 and re.search(
@@ -364,20 +397,17 @@ def bus_announce(host, sha):
                 re.I,
             ):
                 raise RuntimeError("agent bus reports work in flight")
-    post(
-        "#agents:freundcloud.org.uk",
-        f"Guarded upgrade: {host} candidate {sha}, activation and checks may take 20 minutes",
+    took = (
+        "drain, activation and checks may take an hour"
+        if host == "p620"
+        else "activation and checks may take 20 minutes"
     )
+    post(BUS_ROOM, f"Guarded upgrade: {host} candidate {sha}, {took}")
     return post
 
 
 def resolve_main():
-    line = run(
-        "git",
-        "ls-remote",
-        "https://github.com/olafkfreund/nixos_config.git",
-        "refs/heads/main",
-    )
+    line = run("git", "ls-remote", GIT_URL, "refs/heads/main")
     sha = line.split()[0] if line else ""
     if not re.fullmatch("[0-9a-f]{40}", sha):
         raise RuntimeError("cannot resolve main")
@@ -391,7 +421,12 @@ def build_candidate(sha, host):
     return str(link.resolve())
 
 
-def verify_local(host, old_failed):
+def runner_unit(suffix):
+    return f"github-runner-{RUNNER_UNIT}{suffix}.service"
+
+
+def verify_local(host, old_failed, runners=True):
+    """runners=False verifies the host while its runners are still closed."""
     if failed_units_regressed(old_failed, failed_units()):
         raise RuntimeError("new failed systemd units")
     hm = run(
@@ -410,16 +445,11 @@ def verify_local(host, old_failed):
         raise RuntimeError("Home Manager activation has not finished")
     if "Result=success" not in hm or "ExecMainStatus=0" not in hm:
         raise RuntimeError("Home Manager activation failed")
-    if host == "p620":
+    if host == "p620" and runners:
         runner_gate()
-        for suffix in ("", "-2", "-3", "-4"):
+        for suffix in SUFFIXES:
             if (
-                run(
-                    "systemctl",
-                    "is-active",
-                    f"github-runner-nixarchy{suffix}.service",
-                    check=False,
-                )
+                run("systemctl", "is-active", runner_unit(suffix), check=False)
                 != "active"
             ):
                 raise RuntimeError("runner service unavailable")
@@ -491,7 +521,8 @@ def activate(host, sha, candidate):
         time.sleep(30)
         if current_closure() != candidate or str(PROFILE.resolve()) != candidate:
             raise RuntimeError("activation did not select candidate")
-        verify_local(host, set(record["failed"]))
+        # p620 only switches drained; the reopen checks its runners.
+        verify_local(host, set(record["failed"]), runners=False)
         if session_regressed(record["sessions"], graphical_sessions()):
             raise RuntimeError("a session open before the switch is gone")
     except Exception as error:
@@ -499,11 +530,258 @@ def activate(host, sha, candidate):
         raise RolledBack(str(error)) from error
     (STATE / "transaction").unlink(missing_ok=True)
     (STATE / "rollback-root").unlink(missing_ok=True)
-    save("verified", {"sha": sha, "candidate": candidate})
+    # p620's canary is published only after its runners are back (reopen_and_clear).
+    if host != "p620":
+        save("verified", {"sha": sha, "candidate": candidate})
 
 
 class RolledBack(RuntimeError):
     """Activation failed and the old system was restored: a failure, not a deferral."""
+
+
+class ReopenFailed(RuntimeError):
+    """The runners did not all come back: the journal stays for the next run."""
+
+
+# The runner drain (nixarchy#1967, spec/2026-11-27-1967-runner-drain.md). STATE/drain
+# is the journal, STATE/runners-closed the marker each runner unit's condition reads.
+
+
+@contextlib.contextmanager
+def drain_dir(suffix, create=False):
+    """A descriptor on a runner's drain directory.
+
+    The runner's user, which runs CI jobs, owns this tree and root writes into it,
+    so nothing here follows a symlink at or below drain/.
+    """
+    state = RUNNER_STATE / (RUNNER_UNIT + suffix)
+    if create:
+        (state / "drain").mkdir(mode=0o755, exist_ok=True)
+    fd = os.open(state / "drain", os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    try:
+        if create:
+            # The listener writes its acknowledgement here.
+            owner = state.stat()
+            os.fchown(fd, owner.st_uid, owner.st_gid)
+            os.fchmod(fd, 0o755)
+        yield fd
+    finally:
+        os.close(fd)
+
+
+def write_request(suffix, request):
+    with drain_dir(suffix, create=True) as fd:
+        tmp = f".request.{uuid.uuid4().hex}"
+        handle = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644, dir_fd=fd)
+        with os.fdopen(handle, "w") as out:
+            os.fchmod(handle, 0o644)
+            out.write(json.dumps({"id": request}) + "\n")
+        os.replace(tmp, "request", src_dir_fd=fd, dst_dir_fd=fd)
+
+
+def remove_request(suffix):
+    with contextlib.suppress(FileNotFoundError), drain_dir(suffix) as fd:
+        os.unlink("request", dir_fd=fd)
+
+
+def read_ack(suffix):
+    """The listener's acknowledgement, or {} for anything missing or malformed."""
+    try:
+        with drain_dir(suffix) as fd:
+            # O_NONBLOCK: a FIFO planted here must not hang root.
+            flags = os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK
+            handle = os.open("ack", flags, dir_fd=fd)
+            try:
+                if not stat.S_ISREG(os.fstat(handle).st_mode):
+                    return {}
+                ack = json.loads(os.read(handle, 4096))
+            finally:
+                os.close(handle)
+    except (OSError, ValueError):
+        return {}
+    return ack if isinstance(ack, dict) else {}
+
+
+def unit_props(suffix):
+    shown = run(
+        "systemctl",
+        "show",
+        runner_unit(suffix),
+        "-p",
+        "InvocationID",
+        "-p",
+        "ActiveState",
+        "-p",
+        "ControlGroup",
+    )
+    return dict(line.split("=", 1) for line in shown.splitlines() if "=" in line)
+
+
+def cgroup_empty(group):
+    if not group:
+        return True
+    try:
+        events = (CGROUP_ROOT / group.lstrip("/") / "cgroup.events").read_text()
+    except FileNotFoundError:
+        return True
+    return "populated 0" in events.splitlines()
+
+
+def runner_drained(suffix, request, invocation):
+    # The unit is read before the ack: the listener writes the ack, then exits.
+    props = unit_props(suffix)
+    ack = read_ack(suffix)
+    return bool(
+        invocation
+        and ack.get("id") == request
+        and ack.get("invocation") == invocation
+        and ack.get("state") in EXITED
+        and props.get("ActiveState") == "inactive"
+        and cgroup_empty(props.get("ControlGroup"))
+    )
+
+
+def set_phase(journal, phase):
+    journal = {**journal, "phase": phase}
+    save("drain", journal)
+    return journal
+
+
+def start_drain(sha, candidate):
+    """Write the journal, before anything is closed."""
+    journal = {
+        "phase": "draining",
+        "sha": sha,
+        "candidate": candidate,
+        "request": str(uuid.uuid4()),
+        "deadline": time.time() + DRAIN_TIMEOUT,
+        # What an acknowledgement must name, and the reopen must see replaced.
+        "invocations": {s: unit_props(s).get("InvocationID", "") for s in SUFFIXES},
+    }
+    save("drain", journal)
+    return journal
+
+
+def close_and_wait(journal):
+    # The canary must not outlive the drain.
+    (STATE / "verified").unlink(missing_ok=True)
+    (STATE / "runners-closed").touch(mode=0o644)
+    for suffix in SUFFIXES:
+        write_request(suffix, journal["request"])
+    while True:
+        waiting = [
+            runner_unit(s)
+            for s in SUFFIXES
+            if not runner_drained(s, journal["request"], journal["invocations"][s])
+        ]
+        if not waiting:
+            return
+        if time.time() >= journal["deadline"]:
+            raise RuntimeError(f"deadline passed waiting for {', '.join(waiting)}")
+        time.sleep(POLL)
+
+
+def exiting(suffix, request):
+    state = unit_props(suffix).get("ActiveState")
+    ack = read_ack(suffix)
+    return state == "deactivating" or (
+        state == "active" and ack.get("id") == request and ack.get("state") in EXITED
+    )
+
+
+def start_units(suffixes):
+    run("systemctl", "start", *map(runner_unit, suffixes), timeout=START_TIMEOUT)
+
+
+def defer(journal, why):
+    """Give up on a drain. No unit is stopped or restarted: a job may be running."""
+    for suffix in SUFFIXES:
+        remove_request(suffix)
+    (STATE / "runners-closed").unlink(missing_ok=True)
+    # A listener that had already decided to exit reads as active for a moment more,
+    # and would stay offline if it were passed over now.
+    until = time.time() + SETTLE_TIMEOUT
+    while any(exiting(s, journal.get("request")) for s in SUFFIXES):
+        if time.time() >= until:
+            log("drain: a runner is still exiting and may be left stopped")
+            break
+        time.sleep(POLL)
+    stopped = [
+        s
+        for s in SUFFIXES
+        if unit_props(s).get("ActiveState") in ("inactive", "failed")
+    ]
+    if stopped:
+        start_units(stopped)
+    (STATE / "drain").unlink(missing_ok=True)
+    log(f"deferred: drain incomplete: {why}")
+
+
+def wait_ready(previous):
+    """Wait for four new invocations that GitHub reports online. Busy is fine."""
+    until = time.time() + READY_TIMEOUT
+    while True:
+        try:
+            props = {s: unit_props(s) for s in SUFFIXES}
+            online = {
+                r.get("name") for r in our_runners() if r.get("status") == "online"
+            }
+            if online == EXPECTED_RUNNERS and all(
+                p.get("ActiveState") == "active"
+                and p.get("InvocationID")
+                and p.get("InvocationID") != previous.get(s)
+                for s, p in props.items()
+            ):
+                return
+            why = "not all new and online"
+        # systemctl and GitHub failures (URLError is an OSError) are retried.
+        except (RuntimeError, OSError, ValueError, KeyError) as error:
+            why = str(error)
+        if time.time() >= until:
+            raise RuntimeError(why)
+        time.sleep(POLL)
+
+
+def reopen_and_clear(journal):
+    """Open admission, see the runners back, publish a committed SHA, end the journal."""
+    try:
+        # A request left in place would make each new listener exit at once.
+        for suffix in SUFFIXES:
+            remove_request(suffix)
+        (STATE / "runners-closed").unlink(missing_ok=True)
+        start_units(SUFFIXES)
+        wait_ready(journal.get("invocations", {}))
+    except Exception as error:
+        set_phase(journal, "reopen-failed")
+        raise ReopenFailed(f"reopen failed: {error}") from error
+    candidate = journal.get("candidate")
+    if journal["phase"] == "settled-commit" and is_current(candidate):
+        save("verified", {"sha": journal["sha"], "candidate": candidate})
+    (STATE / "drain").unlink(missing_ok=True)
+
+
+def drained_activate(sha, candidate):
+    """p620's switch, under the deploy lock. False means deferred."""
+    journal = start_drain(sha, candidate)
+    try:
+        close_and_wait(journal)
+        # The drain takes minutes and an idle report is stale after two.
+        gate("p620", runners=False)
+        if resolve_main() != sha:
+            raise RuntimeError("main advanced during the drain")
+        journal = set_phase(journal, "switching")
+        activate("p620", sha, candidate)
+    except RolledBack:
+        reopen_and_clear(set_phase(journal, "settled-rollback"))
+        raise
+    except Exception as error:
+        # An open transaction is an unfinished switch or rollback: stay closed.
+        if (STATE / "transaction").exists():
+            raise
+        defer(journal, str(error))
+        return False
+    reopen_and_clear(set_phase(journal, "settled-commit"))
+    return True
 
 
 STAGE_HOST = "guarded-stage@p620"
@@ -525,6 +803,12 @@ def stage_ssh(command):
         STAGE_HOST,
         command,
     )
+
+
+def require_canary(sha):
+    canary = stage_ssh("cat /var/lib/guarded-upgrade/verified")
+    if json.loads(canary).get("sha") != sha:
+        raise RuntimeError("p620 canary has not verified this SHA")
 
 
 def may_activate(auto_activate):
@@ -550,6 +834,35 @@ def deploy_lock():
         yield
 
 
+def is_current(candidate):
+    return current_closure() == candidate and str(PROFILE.resolve()) == candidate
+
+
+def recover(host):
+    """Finish what an interrupted run left behind.
+
+    Returns this run's exit status, or None when there was nothing to recover.
+    """
+    journal = read("drain")
+    transaction = read("transaction")
+    orphan = not journal and (STATE / "runners-closed").exists()
+    if not (journal or transaction or orphan):
+        return None
+    with deploy_lock():
+        if journal and journal["phase"] == "draining":
+            defer(journal, "recovering an interrupted drain")
+            return 0
+        if transaction:
+            rollback(transaction, "interrupted activation")
+            if journal:
+                journal = set_phase(journal, "settled-rollback")
+        if host == "p620":
+            if orphan:
+                log("ERROR: orphan runners-closed marker, no drain journal; reopening")
+            reopen_and_clear(journal or {"phase": "orphan"})
+    return 1 if transaction else 0
+
+
 def main(host, auto_activate):
     STATE.mkdir(mode=0o700, parents=True, exist_ok=True)
     with (STATE / "lock").open("w") as lock:
@@ -558,11 +871,10 @@ def main(host, auto_activate):
         except BlockingIOError:
             log("deferred: another deployment is running")
             return 0
-        transaction = read("transaction")
-        if transaction:
-            with deploy_lock():
-                rollback(transaction, "interrupted activation")
-            return 1
+        # Before the pause and runner gates: either would strand closed runners.
+        recovered = recover(host)
+        if recovered is not None:
+            return recovered
         if not should_start(False, (STATE / "pause").exists()):
             log("deferred: pause flag")
             return 0
@@ -578,16 +890,25 @@ def main(host, auto_activate):
             build_candidate(sha, "razer")
             if resolve_main() != sha:
                 raise RuntimeError("main advanced during staging")
-            if current_closure() == candidate and str(PROFILE.resolve()) == candidate:
-                verify_local(host, set(baseline["failed"]))
-                save("verified", {"sha": sha, "candidate": candidate})
+            if is_current(candidate):
+                with deploy_lock():
+                    if not is_current(candidate):
+                        raise RuntimeError("generation changed before verification")
+                    verify_local(host, set(baseline["failed"]))
+                    save("verified", {"sha": sha, "candidate": candidate})
                 log("verified manually activated p620 canary")
                 return 0
             if not auto_activate:
                 log("staged: p620 unattended activation is disabled")
                 return 0
             gate(host)
-            raise RuntimeError("runner listener drain acknowledgement is not available")
+            with deploy_lock():
+                gate(host)
+                post = bus_announce(host, sha)
+                if not drained_activate(sha, candidate):
+                    return 0
+            post(BUS_ROOM, f"Guarded upgrade: {host} {sha} verified")
+            return 0
         if not may_activate(auto_activate):
             log(f"staged nothing: {host} unattended activation is disabled")
             return 0
@@ -608,30 +929,38 @@ def main(host, auto_activate):
         link.symlink_to(candidate)
         if resolve_main() != sha:
             raise RuntimeError("main advanced during staging")
-        canary = stage_ssh("cat /var/lib/guarded-upgrade/verified")
-        if json.loads(canary).get("sha") != sha:
-            raise RuntimeError("p620 canary has not verified this SHA")
+        require_canary(sha)
         gate(host)
         with deploy_lock():
             gate(host)
-            # Announced only once nothing else can stop the switch.
+            # Announced only once nothing on this host can stop the switch.
             post = bus_announce(host, sha)
+            # p620 may have started a drain, and withdrawn its canary, meanwhile.
+            require_canary(sha)
             activate(host, sha, candidate)
-        post("#agents:freundcloud.org.uk", f"Guarded upgrade: {host} {sha} verified")
+        post(BUS_ROOM, f"Guarded upgrade: {host} {sha} verified")
         return 0
+
+
+def failure_status(error):
+    """The unit's exit status for an error that escaped main()."""
+    # A transaction, journal or marker left behind means a switch, rollback or
+    # reopen did not finish, so the unit must show as failed.
+    left = [
+        n for n in ("transaction", "drain", "runners-closed") if (STATE / n).exists()
+    ]
+    if left:
+        log(f"failed with {', '.join(left)} left open: {error}")
+        return 1
+    if isinstance(error, RolledBack):
+        log(f"failed and rolled back: {error}")
+        return 1
+    log(f"deferred: {error}")
+    return 0
 
 
 if __name__ == "__main__":
     try:
         sys.exit(main(sys.argv[1], sys.argv[2] == "true"))
     except Exception as error:
-        # A transaction left open means a switch or rollback did not finish: the
-        # host may be between generations, so the unit must show as failed.
-        if (STATE / "transaction").exists():
-            log(f"failed with a transaction open: {error}")
-            sys.exit(1)
-        if isinstance(error, RolledBack):
-            log(f"failed and rolled back: {error}")
-            sys.exit(1)
-        log(f"deferred: {error}")
-        sys.exit(0)
+        sys.exit(failure_status(error))

@@ -14,6 +14,7 @@
 # - While COMMAND runs, the hold is watched: if it ends (its RuntimeMaxSec, or
 #   someone stopped it), COMMAND is stopped rather than left switching unguarded.
 # - The hold is released on exit and on INT, TERM and HUP.
+# - Refused while HOST's runner drain journal exists (nixarchy#1967).
 set -euo pipefail
 
 host=${1:?usage: deploy-hold.sh HOST -- COMMAND...}
@@ -70,6 +71,15 @@ release() {
 }
 trap release EXIT
 trap 'release; exit 130' INT TERM HUP
+
+# Checked while holding the lock, so no drain can start afterwards. A check that
+# fails refuses too.
+journal=/var/lib/guarded-upgrade/drain
+if ! on_host "sudo test ! -e $journal"; then
+  echo "deploy-hold: $host has an unfinished runner drain, $journal (or it could not be checked)." >&2
+  echo "  its guarded upgrade recovers it: ssh $host sudo systemctl start nixos-upgrade.service" >&2
+  exit 1
+fi
 
 "$@" &
 child=$!
