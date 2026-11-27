@@ -277,9 +277,15 @@ class FakeHost:
     def listen(self):
         for unit, props in self.units.items():
             request = self.drain(unit) / "request"
-            if props["ActiveState"] != "active" or not request.exists():
+            if props["ActiveState"] != "active":
                 continue
             if self.behaviour[unit] == "silent":
+                continue
+            if not request.exists():
+                ack = self.drain(unit) / "ack"
+                if ack.exists() and '"draining"' in ack.read_text():
+                    cancelled = {**json.loads(ack.read_text()), "state": "cancelled"}
+                    ack.write_text(json.dumps(cancelled))
                 continue
             busy = self.behaviour[unit] == "busy"
             self.ack(
@@ -507,6 +513,113 @@ class DrainAndSwitch(DrainCase):
         self.assert_deferred([(UNITS[0], UNITS[2], UNITS[3])])
         self.assertEqual(self.host.units[UNITS[1]]["InvocationID"], UNITS[1])
 
+    def test_only_a_runner_that_never_saw_the_request_resolves_at_the_timeout(self):
+        # No ack, or one for another request: resolved, but only after the timeout.
+        for ack in (None, {"id": "old", "state": "draining"}):
+            with self.subTest(ack=ack):
+                self.setUp()
+                journal = self.draining(UNITS[0])
+                self.cancelled(UNITS[1:])
+                path = self.host.drain(UNITS[0]) / "ack"
+                path.unlink() if ack is None else path.write_text(json.dumps(ack))
+                gu.defer(journal, "why")
+                self.assertGreaterEqual(self.host.now - 1000, gu.SETTLE_TIMEOUT)
+                self.assert_deferred([])
+        self.setUp()
+        journal = self.draining(UNITS[0])
+        self.cancelled(UNITS[1:])
+        with self.assertRaises(gu.ReopenFailed):
+            gu.defer(journal, "why")
+        self.assertEqual(gu.read("drain")["unresolved"], [UNITS[0]])
+
+    def draining(self, unit):
+        """A listener that saw request "r" and has not yet said how it ends."""
+        self.host.ack(unit, id="r", invocation=unit, state="draining")
+        self.host.behaviour[unit] = "silent"
+        return {"request": "r", "invocations": dict(zip(gu.SUFFIXES, UNITS))}
+
+    def cancelled(self, units):
+        for unit in units:
+            self.host.ack(unit, id="r", invocation=unit, state="cancelled")
+
+    def test_defer_starts_a_listener_that_exits_after_a_late_decision(self):
+        # Past its last check, not yet exited: active, still acking "draining".
+        journal = self.draining(UNITS[0])
+        self.cancelled(UNITS[1:])
+        exit_at = self.host.now + gu.SETTLE_TIMEOUT / 2
+
+        def leave():
+            if self.host.now >= exit_at and not self.host.started:
+                self.host.units[UNITS[0]]["ActiveState"] = "inactive"
+
+        self.host.on_sleep = leave
+        gu.defer(journal, "why")
+        self.assert_deferred([(UNITS[0],)])
+
+    def test_a_runner_exiting_past_the_settle_timeout_is_recovered_later(self):
+        journal = self.draining(UNITS[0])
+        self.cancelled(UNITS[1:])
+        with self.assertRaises(gu.ReopenFailed):
+            gu.defer(journal, "why")
+        self.assertEqual(gu.read("drain")["phase"], "cancelling")
+        self.assertEqual(self.host.started, [])
+        self.host.units[UNITS[0]]["ActiveState"] = "inactive"
+        self.assertEqual(gu.recover("p620"), 0)
+        self.assert_deferred([(UNITS[0],)])
+
+    def test_only_this_requests_cancel_from_an_active_unit_counts(self):
+        journal = {"request": "r", "invocations": {"": "one"}}
+        up = {"ActiveState": "active", "InvocationID": "one"}
+        for ack_id, state, want in (
+            ("r", "cancelled", True),
+            ("old", "cancelled", False),
+            ("r", "draining", False),
+            ("r", "exited-idle", False),
+        ):
+            self.host.ack(UNITS[0], id=ack_id, state=state)
+            self.assertEqual(gu.resumed("", journal, up), want, (ack_id, state))
+        self.host.ack(UNITS[0], id="r", state="cancelled")
+        down = {**up, "ActiveState": "inactive"}
+        self.assertFalse(gu.resumed("", journal, down))
+        self.assertTrue(gu.resumed("", journal, {**up, "InvocationID": "two"}))
+
+    def break_drain_path(self, unit, kind):
+        if kind == "file":
+            self.host.drain(unit).write_text("")
+        else:
+            elsewhere = self.host.state / "elsewhere"
+            elsewhere.mkdir(exist_ok=True)
+            self.host.drain(unit).symlink_to(elsewhere)
+
+    def test_one_unusable_drain_path_does_not_keep_the_others_closed(self):
+        for kind in ("file", "symlink"):
+            with self.subTest(kind):
+                self.setUp()
+                seen = self.fake_activate()
+                self.break_drain_path(UNITS[0], kind)
+                with self.assertRaises(gu.ReopenFailed):
+                    gu.drained_activate(SHA, NEW)
+                self.assertEqual(seen, {})
+                self.assertFalse(self.exists("runners-closed"))
+                self.assertEqual(gu.read("drain")["unresolved"], [UNITS[0]])
+                self.assertTrue(
+                    any(f"{UNITS[0]}: cannot write" in m for m in self.logs)
+                )
+
+    def test_reopen_with_one_unremovable_request_still_opens_the_others(self):
+        for unit in UNITS:
+            self.host.units[unit]["ActiveState"] = "inactive"
+        (self.host.state / "runners-closed").touch()
+        for suffix in gu.SUFFIXES[1:]:
+            gu.write_request(suffix, "r")
+        self.break_drain_path(UNITS[0], "file")
+        with self.assertRaises(gu.ReopenFailed):
+            gu.reopen_and_clear({"phase": "orphan"})
+        self.assertFalse(self.exists("runners-closed"))
+        self.assertEqual(self.requests(), [])
+        self.assertEqual(self.host.started, [tuple(UNITS)])
+        self.assertEqual(gu.read("drain")["unresolved"], [UNITS[0]])
+
     def test_a_job_past_the_deadline_defers(self):
         seen = self.fake_activate()
         self.host.behaviour[UNITS[3]] = "busy"
@@ -529,15 +642,20 @@ class DrainAndSwitch(DrainCase):
 
     def test_defer_waits_for_a_listener_that_is_already_exiting(self):
         unit = UNITS[0]
+        self.cancelled(UNITS)
         self.host.units[unit]["ActiveState"] = "deactivating"
-        self.host.on_sleep = lambda: self.host.units[unit].update(
-            ActiveState="inactive"
-        )
-        gu.defer({"request": "r"}, "why")
+
+        def finish():
+            if not self.host.started:
+                self.host.units[unit]["ActiveState"] = "inactive"
+
+        self.host.on_sleep = finish
+        gu.defer({"request": "r", "invocations": dict(zip(gu.SUFFIXES, UNITS))}, "why")
         self.assertEqual(self.host.started, [(unit,)])
 
-    def test_defer_with_every_unit_running_starts_nothing(self):
-        gu.defer({"request": "r"}, "why")
+    def test_defer_with_every_unit_cancelled_starts_nothing(self):
+        self.cancelled(UNITS)
+        gu.defer({"request": "r", "invocations": dict(zip(gu.SUFFIXES, UNITS))}, "why")
         self.assert_deferred([])
 
     def test_gate_failing_after_the_drain_defers(self):
@@ -595,6 +713,16 @@ class DrainAndSwitch(DrainCase):
             gu.wait_ready(previous)
         gu.wait_ready(dict.fromkeys(gu.SUFFIXES, "before"))
 
+    def test_a_runner_exiting_during_the_github_call_is_not_ready(self):
+        def github(path):
+            reply = self.host.github(path)
+            self.host.units[UNITS[0]]["ActiveState"] = "inactive"
+            return reply
+
+        self.patch(github=github)
+        with self.assertRaises(RuntimeError):
+            gu.wait_ready(dict.fromkeys(gu.SUFFIXES, "before"))
+
     def test_failure_status_without_anything_left_open(self):
         self.assertEqual(gu.failure_status(RuntimeError("busy")), 0)
         self.assertEqual(gu.failure_status(gu.RolledBack("x")), 1)
@@ -634,6 +762,7 @@ class Recovery(DrainCase):
                 "drain",
                 {
                     "phase": phase,
+                    **({"settled": phase} if phase.startswith("settled-") else {}),
                     "sha": SHA,
                     "candidate": NEW,
                     "request": "r",
@@ -652,10 +781,12 @@ class Recovery(DrainCase):
         self.assertEqual(gu.main("p620", True), 0)
         self.assertEqual(self.host.calls, [])
 
-    def test_draining_defers(self):
-        self.interrupted("draining")
-        self.assertEqual(gu.main("p620", True), 0)
-        self.assert_deferred([tuple(UNITS)])
+    def test_draining_and_cancelling_defer(self):
+        for phase in ("draining", "cancelling"):
+            self.host.started.clear()
+            self.interrupted(phase)
+            self.assertEqual(gu.main("p620", True), 0, phase)
+            self.assert_deferred([tuple(UNITS)])
 
     def test_switching_with_a_transaction_rolls_back_then_reopens(self):
         self.interrupted("switching")
@@ -694,12 +825,20 @@ class Recovery(DrainCase):
             self.assert_reopened()
             self.assertFalse(self.exists("verified"), phase)
 
-    def test_a_failed_recovery_keeps_the_journal(self):
+    def test_a_retried_reopen_still_publishes_a_committed_switch(self):
         self.interrupted("settled-commit")
+        self.host.current = NEW
         self.host.offline = {UNITS[0]}
         with self.assertRaises(gu.ReopenFailed):
             gu.main("p620", True)
         self.assertEqual(gu.read("drain")["phase"], "reopen-failed")
+        self.assertFalse(self.exists("verified"))
+        self.host.offline = set()
+        for unit in UNITS:
+            self.host.units[unit]["ActiveState"] = "inactive"
+        self.assertEqual(gu.main("p620", True), 0)
+        self.assertEqual(gu.read("verified"), {"sha": SHA, "candidate": NEW})
+        self.assertFalse(self.exists("drain"))
 
     def test_orphan_marker_is_logged_and_reopened(self):
         self.interrupted(None)
@@ -895,13 +1034,13 @@ class Overrides(unittest.TestCase):
 
 
 class DeployHold(unittest.TestCase):
-    def deploy(self, journal_check):
+    def deploy(self, present):
         with tempfile.TemporaryDirectory() as tmp:
             fakes = {
                 "hostname": "echo testhost",
                 "systemctl": "exit 0",
-                # `test ! -e <journal>` answers as told; systemd-run and stop succeed.
-                "sudo": f'[ "$1" = test ] && exit {journal_check}; exit 0',
+                # `test ! -e <path>` fails for the one present; the rest succeed.
+                "sudo": f'[ "$1 $4" = "test {present}" ] && exit 1; exit 0',
             }
             for name, body in fakes.items():
                 path = Path(tmp) / name
@@ -925,11 +1064,13 @@ class DeployHold(unittest.TestCase):
             )
             return result, ran.exists()
 
-    def test_refuses_during_a_drain_and_names_the_journal(self):
-        result, ran = self.deploy(1)
-        self.assertEqual((result.returncode, ran), (1, False), result.stderr)
-        self.assertIn("/var/lib/guarded-upgrade/drain", result.stderr)
-        result, ran = self.deploy(0)
+    def test_refuses_during_a_drain_and_names_what_is_left(self):
+        for name in ("drain", "runners-closed"):
+            path = f"/var/lib/guarded-upgrade/{name}"
+            result, ran = self.deploy(path)
+            self.assertEqual((result.returncode, ran), (1, False), result.stderr)
+            self.assertIn(path, result.stderr)
+        result, ran = self.deploy("none")
         self.assertEqual((result.returncode, ran), (0, True), result.stderr)
 
 

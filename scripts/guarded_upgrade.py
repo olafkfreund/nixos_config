@@ -541,7 +541,7 @@ class RolledBack(RuntimeError):
 
 
 class ReopenFailed(RuntimeError):
-    """The runners did not all come back: the journal stays for the next run."""
+    """The runners are not all seen back: the journal stays for the next run."""
 
 
 # The runner drain (nixarchy#1967, spec/2026-11-27-1967-runner-drain.md). STATE/drain
@@ -644,6 +644,9 @@ def runner_drained(suffix, request, invocation):
 
 def set_phase(journal, phase):
     journal = {**journal, "phase": phase}
+    # The outcome outlives "reopen-failed", so a retried reopen can still publish.
+    if phase.startswith("settled-"):
+        journal["settled"] = phase
     save("drain", journal)
     return journal
 
@@ -668,7 +671,12 @@ def close_and_wait(journal):
     (STATE / "verified").unlink(missing_ok=True)
     (STATE / "runners-closed").touch(mode=0o644)
     for suffix in SUFFIXES:
-        write_request(suffix, journal["request"])
+        try:
+            write_request(suffix, journal["request"])
+        except OSError as error:
+            raise RuntimeError(
+                f"{runner_unit(suffix)}: cannot write the drain request: {error}"
+            ) from error
     while True:
         waiting = [
             runner_unit(s)
@@ -682,40 +690,80 @@ def close_and_wait(journal):
         time.sleep(POLL)
 
 
-def exiting(suffix, request):
-    state = unit_props(suffix).get("ActiveState")
-    ack = read_ack(suffix)
-    return state == "deactivating" or (
-        state == "active" and ack.get("id") == request and ack.get("state") in EXITED
-    )
-
-
 def start_units(suffixes):
     run("systemctl", "start", *map(runner_unit, suffixes), timeout=START_TIMEOUT)
 
 
-def defer(journal, why):
-    """Give up on a drain. No unit is stopped or restarted: a job may be running."""
+def open_admission():
+    """Remove every request, then the marker; returns the runners whose request stayed.
+
+    One runner's unusable drain path must not keep the others closed.
+    """
+    stuck = []
     for suffix in SUFFIXES:
-        remove_request(suffix)
+        try:
+            remove_request(suffix)
+        except OSError as error:
+            stuck.append(suffix)
+            log(f"drain: {runner_unit(suffix)}: cannot remove the request: {error}")
     (STATE / "runners-closed").unlink(missing_ok=True)
-    # A listener that had already decided to exit reads as active for a moment more,
-    # and would stay offline if it were passed over now.
+    return stuck
+
+
+def resumed(suffix, journal, props, settled=False):
+    """Known to stay up: it cancelled this drain, or it is a later invocation.
+
+    settled, once the request is gone for the whole settle timeout: a listener
+    acknowledges "draining" before any exit path, so one with no acknowledgement
+    of this request never saw it.
+    """
+    if props.get("ActiveState") != "active" or not props.get("InvocationID"):
+        return False
+    if props["InvocationID"] != journal.get("invocations", {}).get(suffix):
+        return True
+    ack = read_ack(suffix)
+    if ack.get("id") != journal.get("request"):
+        return settled
+    return ack.get("state") == "cancelled"
+
+
+def defer(journal, why):
+    """Give up on a drain. No unit is stopped or restarted: a job may be running.
+
+    A listener that already decided to exit still reads as active, so the journal
+    ends only once every runner is known to stay up.
+    """
+    journal = set_phase(journal, "cancelling")
+    log(f"deferred: drain incomplete: {why}")
+    stuck = open_admission()
     until = time.time() + SETTLE_TIMEOUT
-    while any(exiting(s, journal.get("request")) for s in SUFFIXES):
-        if time.time() >= until:
-            log("drain: a runner is still exiting and may be left stopped")
+    while True:
+        props = {s: unit_props(s) for s in SUFFIXES}
+        expired = time.time() >= until
+        waiting = [
+            s
+            for s in SUFFIXES
+            if s in stuck or not resumed(s, journal, props[s], expired)
+        ]
+        if not waiting:
+            (STATE / "drain").unlink(missing_ok=True)
+            return
+        stopped = [
+            s for s in SUFFIXES if props[s].get("ActiveState") in ("inactive", "failed")
+        ]
+        if stopped:
+            try:
+                start_units(stopped)
+            except RuntimeError as error:
+                log(f"drain: {error}")
+        if expired:
             break
         time.sleep(POLL)
-    stopped = [
-        s
-        for s in SUFFIXES
-        if unit_props(s).get("ActiveState") in ("inactive", "failed")
-    ]
-    if stopped:
-        start_units(stopped)
-    (STATE / "drain").unlink(missing_ok=True)
-    log(f"deferred: drain incomplete: {why}")
+    units = [runner_unit(s) for s in waiting]
+    save("drain", {**journal, "unresolved": units})
+    raise ReopenFailed(
+        f"drain not cancelled for {', '.join(units)}; the next run retries"
+    )
 
 
 def wait_ready(previous):
@@ -727,10 +775,14 @@ def wait_ready(previous):
             online = {
                 r.get("name") for r in our_runners() if r.get("status") == "online"
             }
+            # A runner can exit while GitHub is being asked.
+            after = {s: unit_props(s) for s in SUFFIXES}
             if online == EXPECTED_RUNNERS and all(
                 p.get("ActiveState") == "active"
                 and p.get("InvocationID")
                 and p.get("InvocationID") != previous.get(s)
+                and after[s].get("ActiveState") == "active"
+                and after[s].get("InvocationID") == p.get("InvocationID")
                 for s, p in props.items()
             ):
                 return
@@ -747,16 +799,17 @@ def reopen_and_clear(journal):
     """Open admission, see the runners back, publish a committed SHA, end the journal."""
     try:
         # A request left in place would make each new listener exit at once.
-        for suffix in SUFFIXES:
-            remove_request(suffix)
-        (STATE / "runners-closed").unlink(missing_ok=True)
+        stuck = [runner_unit(s) for s in open_admission()]
+        journal = {**journal, "unresolved": stuck}
         start_units(SUFFIXES)
+        if stuck:
+            raise RuntimeError(f"drain request left for {', '.join(stuck)}")
         wait_ready(journal.get("invocations", {}))
     except Exception as error:
         set_phase(journal, "reopen-failed")
         raise ReopenFailed(f"reopen failed: {error}") from error
     candidate = journal.get("candidate")
-    if journal["phase"] == "settled-commit" and is_current(candidate):
+    if journal.get("settled") == "settled-commit" and is_current(candidate):
         save("verified", {"sha": journal["sha"], "candidate": candidate})
     (STATE / "drain").unlink(missing_ok=True)
 
@@ -850,7 +903,7 @@ def recover(host):
     if not (journal or transaction or orphan):
         return None
     with deploy_lock():
-        if journal and journal["phase"] == "draining":
+        if journal and journal["phase"] in ("draining", "cancelling"):
             defer(journal, "recovering an interrupted drain")
             return 0
         if transaction:

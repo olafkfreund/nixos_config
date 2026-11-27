@@ -46,15 +46,9 @@ let
 
             nixpkgs.config.allowUnfree = true;
             nixpkgs.overlays = [
-              (
-                final: _prev:
-                {
-                  customPkgs = import ../../pkgs { pkgs = final; };
-                }
-                // lib.optionalAttrs (builtins.pathExists ../../pkgs/github-runner-drain) {
-                  github-runner-drain = final.callPackage ../../pkgs/github-runner-drain { };
-                }
-              )
+              (final: _prev: {
+                customPkgs = import ../../pkgs { pkgs = final; };
+              })
             ];
 
             virtualisation = {

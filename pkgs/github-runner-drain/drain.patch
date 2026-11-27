@@ -8,19 +8,30 @@
  using System.Threading;
  using System.Threading.Tasks;
  using GitHub.DistributedTask.WebApi;
-@@ -57,6 +58,36 @@
+@@ -57,6 +58,47 @@
          // The error throttler helps us back off when encountering successive, non-retriable errors from /acquirejob.
          // </summary>
          private IErrorThrottler _acquireJobThrottler;
 +        internal string DrainDirectory { get; set; }
++        internal Func<string, string> DrainRequestReader = File.ReadAllText;
++        internal Action BeforeAdmissionCheck;
 +
-+        private static string ReadDrainRequest(string path)
++        private string ReadDrainRequest(string path)
 +        {
-+            if (!File.Exists(path)) return null;
-+            using var request = JsonDocument.Parse(File.ReadAllText(path));
-+            string id = request.RootElement.GetProperty("id").GetString();
-+            if (!Guid.TryParse(id, out _)) throw new InvalidDataException("Invalid runner drain request ID.");
-+            return id;
++            try
++            {
++                using var request = JsonDocument.Parse(DrainRequestReader(path));
++                if (request.RootElement.ValueKind != JsonValueKind.Object ||
++                    !request.RootElement.TryGetProperty("id", out var id) ||
++                    id.ValueKind != JsonValueKind.String ||
++                    !Guid.TryParse(id.GetString(), out _)) return null;
++                return id.GetString();
++            }
++            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException ||
++                ex is System.Security.SecurityException || ex is JsonException)
++            {
++                return null;
++            }
 +        }
 +
 +        private static void WriteDrainAck(string path, string id, string state)
@@ -45,7 +56,7 @@
  
          public override void Initialize(IHostContext hostContext)
          {
-@@ -499,6 +530,12 @@
+@@ -499,6 +541,12 @@
                  bool restartSession = false; // Flag to indicate session restart
                  bool restartSessionPending = false;
                  bool cleanupLocalConfigAfter404 = false;
@@ -58,7 +69,7 @@
                  try
                  {
                      var notification = HostContext.GetService<IJobNotification>();
-@@ -512,8 +549,37 @@
+@@ -512,8 +560,37 @@
  
                      jobDispatcher.JobStatus += _listener.OnJobStatus;
  
@@ -87,7 +98,7 @@
 +                            {
 +                                messageQueueLoopTokenSource.Cancel();
 +                                try { await pendingMessage; }
-+                                catch (OperationCanceledException) { }
++                                catch (Exception ex) { Trace.Info($"Ignore exception after cancelling message poll for drain. {ex}"); }
 +                            }
 +                            drainExitState = jobReceivedBeforeDrain ? "exited-after-job" : "exited-idle";
 +                            break;
@@ -96,7 +107,7 @@
                          // Check if we need to restart the session and can do so (job dispatcher not busy)
                          if (restartSessionPending && !jobDispatcher.Busy)
                          {
-@@ -527,7 +593,7 @@
+@@ -527,7 +604,7 @@
                          bool skipMessageDeletion = false;
                          try
                          {
@@ -105,19 +116,20 @@
                              if (autoUpdateInProgress)
                              {
                                  Trace.Verbose("Auto update task running at backend, waiting for getNextMessage or selfUpdateTask to finish.");
-@@ -603,7 +669,11 @@
+@@ -603,7 +680,12 @@
                                  }
                              }
  
-+                            if (await Task.WhenAny(getNextMessage, Task.Delay(1000, messageQueueLoopTokenSource.Token)) != getNextMessage
-+                                && !messageQueueLoopTokenSource.IsCancellationRequested)
-+                                continue;
++                            while (await Task.WhenAny(getNextMessage, Task.Delay(1000, messageQueueLoopTokenSource.Token)) != getNextMessage
++                                && !messageQueueLoopTokenSource.IsCancellationRequested
++                                && drainId == null && ReadDrainRequest(drainRequest) == null) { }
++                            if (!getNextMessage.IsCompleted && (drainId != null || ReadDrainRequest(drainRequest) != null)) continue;
                              message = await getNextMessage; //get next message
 +                            pendingMessage = null;
                              HostContext.WritePerfCounter($"MessageReceived_{message.MessageType}");
                              if (string.Equals(message.MessageType, AgentRefreshMessage.MessageType, StringComparison.OrdinalIgnoreCase))
                              {
-@@ -660,7 +730,7 @@
+@@ -660,7 +742,7 @@
                              }
                              else if (string.Equals(message.MessageType, JobRequestMessageTypes.PipelineAgentJobRequest, StringComparison.OrdinalIgnoreCase))
                              {
@@ -126,7 +138,7 @@
                                  {
                                      skipMessageDeletion = true;
                                      Trace.Info($"Skip message deletion for job request message '{message.MessageId}'.");
-@@ -670,6 +740,7 @@
+@@ -670,6 +752,7 @@
                                      Trace.Info($"Received job message of length {message.Body.Length} from service, with hash '{IOUtil.GetSha256Hash(message.Body)}'");
                                      var jobMessage = StringUtil.ConvertFromJson<Pipelines.AgentJobRequestMessage>(message.Body);
                                      jobDispatcher.Run(jobMessage, runOnce);
@@ -134,7 +146,7 @@
                                      if (runOnce)
                                      {
                                          Trace.Info("One time used runner received job message.");
-@@ -680,7 +751,7 @@
+@@ -680,7 +763,7 @@
                              // Broker flow
                              else if (MessageUtil.IsRunServiceJob(message.MessageType))
                              {
@@ -143,7 +155,44 @@
                                  {
                                      skipMessageDeletion = true;
                                      Trace.Info($"Skip message deletion for job request message '{message.MessageId}'.");
-@@ -760,6 +831,7 @@
+@@ -692,6 +775,12 @@
+                                     // Acknowledge (best-effort)
+                                     if (messageRef.ShouldAcknowledge) // Temporary feature flag
+                                     {
++                                        BeforeAdmissionCheck?.Invoke();
++                                        if (ReadDrainRequest(drainRequest) != null)
++                                        {
++                                            skipMessageDeletion = true;
++                                            continue;
++                                        }
+                                         try
+                                         {
+                                             await _listener.AcknowledgeMessageAsync(messageRef.RunnerRequestId, messageQueueLoopTokenSource.Token);
+@@ -719,6 +808,11 @@
+                                         await actionsRunServer.ConnectAsync(new Uri(settings.ServerUrl), creds);
+ 
+                                         // Get job message
++                                        if (!messageRef.ShouldAcknowledge && ReadDrainRequest(drainRequest) != null)
++                                        {
++                                            skipMessageDeletion = true;
++                                            continue;
++                                        }
+                                         jobRequestMessage = await actionsRunServer.GetJobMessageAsync(messageRef.RunnerRequestId, messageQueueLoopTokenSource.Token);
+                                     }
+                                     else
+@@ -730,6 +824,11 @@
+                                         await runServer.ConnectAsync(new Uri(messageRef.RunServiceUrl), credsV2);
+ 
+                                         // Get job message
++                                        if (!messageRef.ShouldAcknowledge && ReadDrainRequest(drainRequest) != null)
++                                        {
++                                            skipMessageDeletion = true;
++                                            continue;
++                                        }
+                                         try
+                                         {
+                                             jobRequestMessage = await runServer.GetJobMessageAsync(messageRef.RunnerRequestId, messageRef.BillingOwnerId, messageQueueLoopTokenSource.Token);
+@@ -760,6 +859,7 @@
  
                                      // Dispatch
                                      jobDispatcher.Run(jobRequestMessage, runOnce);
@@ -151,24 +200,24 @@
  
                                      // Run once?
                                      if (runOnce)
-@@ -869,6 +941,17 @@
-                             // ignore exception during delete session for ephemeral runner since the runner might already be deleted from the server side
-                             // and the delete session call will ends up with 401.
-                             Trace.Info($"Ignore any exception during DeleteSession for an ephemeral runner. {ex}");
-+                        }
-+                    }
-+
+@@ -872,6 +972,17 @@
+                         }
+                     }
+ 
 +                    if (drainExitState != null)
 +                    {
 +                        if (ReadDrainRequest(drainRequest) == drainId)
 +                            WriteDrainAck(drainAck, drainId, drainExitState);
-+                        else
++                        if (ReadDrainRequest(drainRequest) != drainId)
 +                        {
 +                            WriteDrainAck(drainAck, drainId, "cancelled");
 +                            restartSession = true;
-                         }
-                     }
++                        }
++                    }
++
+                     messageQueueLoopTokenSource.Dispose();
  
+                     if ((settings.Ephemeral && runOnceJobCompleted) || cleanupLocalConfigAfter404)
 --- a/src/Runner.Listener/JobDispatcher.cs
 +++ b/src/Runner.Listener/JobDispatcher.cs
 @@ -84,7 +84,8 @@
@@ -201,15 +250,10 @@
                  {
 --- a/src/Test/L0/Listener/RunnerL0.cs
 +++ b/src/Test/L0/Listener/RunnerL0.cs
-@@ -70,6 +70,107 @@
-         {
-             var message = new JobCancelMessage(Guid.NewGuid(), TimeSpan.FromSeconds(0));
-             return message;
-+        }
-+
-+        [Fact]
-+        [Trait("Level", "L0")]
-+        [Trait("Category", "Runner")]
+@@ -75,6 +75,164 @@
+         [Fact]
+         [Trait("Level", "L0")]
+         [Trait("Category", "Runner")]
 +        public async Task DrainRejectsOfferAtAdmissionAndCancellationResumes()
 +        {
 +            string directory = Path.Combine(Path.GetTempPath(), "runner-drain-" + Guid.NewGuid());
@@ -228,6 +272,7 @@
 +                hc.EnqueueInstance<IErrorThrottler>(_acquireJobThrottler.Object);
 +                hc.EnqueueInstance<IRunServer>(_runServer.Object);
 +                hc.EnqueueInstance<IRunServer>(_runServer.Object);
++                hc.EnqueueInstance<IRunServer>(_runServer.Object);
 +                hc.EnqueueInstance<IJobDispatcher>(_jobDispatcher.Object);
 +                runner.Initialize(hc);
 +
@@ -239,59 +284,115 @@
 +                    .ReturnsAsync(CreateSessionResult.Success);
 +                _messageListener.Setup(x => x.DeleteSessionAsync()).Returns(Task.CompletedTask);
 +                _messageListener.Setup(x => x.DeleteMessageAsync(It.IsAny<TaskAgentMessage>())).Returns(Task.CompletedTask);
-+                _messageListener.Setup(x => x.AcknowledgeMessageAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
++                string id = Guid.NewGuid().ToString();
++                string request = Path.Combine(directory, "request");
++                string requestJson = "{\"id\":\"" + id + "\"}";
++                _messageListener.Setup(x => x.AcknowledgeMessageAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
++                    .Returns((string offerId, CancellationToken _) =>
++                    {
++                        if (offerId == "3") File.WriteAllText(request, requestJson);
++                        return Task.CompletedTask;
++                    });
 +                _credentialManager.Setup(x => x.LoadCredentials(true)).Returns(new VssCredentials());
-+                _runServer.Setup(x => x.ConnectAsync(It.IsAny<Uri>(), It.IsAny<VssCredentials>())).Returns(Task.CompletedTask);
++                int connections = 0;
++                _runServer.Setup(x => x.ConnectAsync(It.IsAny<Uri>(), It.IsAny<VssCredentials>()))
++                    .Returns((Uri _, VssCredentials __) =>
++                    {
++                        if (Interlocked.Increment(ref connections) == 3) File.WriteAllText(request, requestJson);
++                        return Task.CompletedTask;
++                    });
 +                _runServer.Setup(x => x.GetJobMessageAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
 +                    .ReturnsAsync(() => CreateJobRequestMessage("acquired"));
 +                _jobDispatcher.Setup(x => x.WaitAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 +                _jobDispatcher.Setup(x => x.ShutdownAsync()).Returns(Task.CompletedTask);
 +                bool busy = false;
 +                int dispatched = 0;
-+                _jobDispatcher.SetupGet(x => x.Busy).Returns(() => busy);
++                _jobDispatcher.SetupGet(x => x.Busy).Returns(() => Volatile.Read(ref busy));
 +                _jobDispatcher.Setup(x => x.Run(It.IsAny<Pipelines.AgentJobRequestMessage>(), false))
 +                    .Callback(() => { busy = true; Interlocked.Increment(ref dispatched); });
 +
-+                TaskAgentMessage Offer(long id) => new()
++                TaskAgentMessage Offer(long id, bool acknowledge = true) => new()
 +                {
 +                    Body = JsonUtility.ToString(new RunnerJobRequestRef
 +                    {
 +                        BillingOwnerId = "github", RunnerRequestId = id.ToString(),
-+                        RunServiceUrl = "https://run-service.com", ShouldAcknowledge = true
++                        RunServiceUrl = "https://run-service.com", ShouldAcknowledge = acknowledge
 +                    }),
 +                    MessageId = id,
 +                    MessageType = JobRequestMessageTypes.RunnerJobRequest
 +                };
 +                var secondOffer = new TaskCompletionSource<TaskAgentMessage>(TaskCreationOptions.RunContinuationsAsynchronously);
 +                var thirdOffer = new TaskCompletionSource<TaskAgentMessage>(TaskCreationOptions.RunContinuationsAsynchronously);
++                var fourthOffer = new TaskCompletionSource<TaskAgentMessage>(TaskCreationOptions.RunContinuationsAsynchronously);
 +                int poll = 0;
 +                _messageListener.Setup(x => x.GetNextMessageAsync(It.IsAny<CancellationToken>()))
-+                    .Returns((CancellationToken token) => ++poll switch
++                    .Returns((CancellationToken token) => Interlocked.Increment(ref poll) switch
 +                    {
 +                        1 => Task.FromResult(Offer(1)),
 +                        2 => secondOffer.Task,
 +                        3 => thirdOffer.Task,
++                        4 => fourthOffer.Task,
++                        5 => Task.Delay(Timeout.Infinite, token).ContinueWith<TaskAgentMessage>(_ => throw new IOException("transient poll failure")),
 +                        _ => Task.Delay(Timeout.Infinite, token).ContinueWith(_ => Offer(99), token)
 +                    });
 +
 +                Task<int> running = runner.ExecuteCommand(new CommandSettings(hc, new[] { "run" }));
 +                await WaitFor(() => Volatile.Read(ref dispatched) == 1);
-+                string id = Guid.NewGuid().ToString();
-+                string request = Path.Combine(directory, "request");
-+                File.WriteAllText(request, "{\"id\":\"" + id + "\"}");
++                int disappeared = 0;
++                int corruptReads = 0;
++                runner.DrainRequestReader = path =>
++                {
++                    if (File.Exists(path) && Volatile.Read(ref disappeared) == 0)
++                    {
++                        File.Delete(path);
++                        try { return File.ReadAllText(path); }
++                        finally { Interlocked.Exchange(ref disappeared, 1); }
++                    }
++                    string text = File.ReadAllText(path);
++                    if (text == "garbage") Interlocked.Increment(ref corruptReads);
++                    return text;
++                };
++                File.WriteAllText(request, requestJson);
++                await WaitFor(() => Volatile.Read(ref disappeared) == 1);
++                Assert.False(running.IsCompleted); // A vanished request must not shut down the active worker.
++                _jobDispatcher.Verify(x => x.ShutdownAsync(), Times.Never());
++                File.WriteAllText(request, "garbage");
++                await WaitFor(() => Volatile.Read(ref corruptReads) > 0);
++                Assert.False(running.IsCompleted);
++                File.Delete(request);
++                runner.BeforeAdmissionCheck = () => File.WriteAllText(request, requestJson);
 +                secondOffer.SetResult(Offer(2));
 +                await WaitFor(() => File.Exists(Path.Combine(directory, "ack")));
 +                Assert.Contains("\"state\":\"draining\"", File.ReadAllText(Path.Combine(directory, "ack")));
 +                Assert.Equal(1, Volatile.Read(ref dispatched));
 +                _messageListener.Verify(x => x.AcknowledgeMessageAsync("2", It.IsAny<CancellationToken>()), Times.Never());
 +                _runServer.Verify(x => x.GetJobMessageAsync("2", It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never());
++                runner.BeforeAdmissionCheck = null;
 +
++                await WaitFor(() => Volatile.Read(ref poll) >= 3);
++                Assert.False(thirdOffer.Task.IsCompleted);
 +                File.Delete(request);
 +                await WaitFor(() => File.ReadAllText(Path.Combine(directory, "ack")).Contains("cancelled"));
 +                thirdOffer.SetResult(Offer(3));
 +                await WaitFor(() => Volatile.Read(ref dispatched) == 2);
++                _messageListener.Verify(x => x.AcknowledgeMessageAsync("3", It.IsAny<CancellationToken>()), Times.Once());
++                _runServer.Verify(x => x.GetJobMessageAsync("3", It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once());
++                File.Delete(request);
++                await WaitFor(() => File.ReadAllText(Path.Combine(directory, "ack")).Contains("cancelled"));
++
++                fourthOffer.SetResult(Offer(4, acknowledge: false));
++                await WaitFor(() => File.Exists(request));
++                await WaitFor(() => File.ReadAllText(Path.Combine(directory, "ack")).Contains("draining"));
 +                Assert.Equal(2, Volatile.Read(ref dispatched));
-+                hc.ShutdownRunner(ShutdownReason.UserCancelled);
++                _messageListener.Verify(x => x.AcknowledgeMessageAsync("4", It.IsAny<CancellationToken>()), Times.Never());
++                _runServer.Verify(x => x.GetJobMessageAsync("4", It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never());
++                File.Delete(request);
++                await WaitFor(() => File.ReadAllText(Path.Combine(directory, "ack")).Contains("cancelled"));
++                await WaitFor(() => Volatile.Read(ref poll) >= 5);
++                File.WriteAllText(request, requestJson);
++                await WaitFor(() => File.ReadAllText(Path.Combine(directory, "ack")).Contains("draining"));
++                Volatile.Write(ref busy, false);
++                await WaitFor(() => File.ReadAllText(Path.Combine(directory, "ack")).Contains("exited-after-job"));
 +                await Task.WhenAny(running, Task.Delay(5000));
 +                Assert.True(running.IsCompleted);
 +                Assert.False(running.IsFaulted, running.Exception?.ToString());
@@ -306,6 +407,11 @@
 +                for (int i = 0; i < 100 && !condition(); i++) await Task.Delay(50);
 +                Assert.True(condition());
 +            }
-         }
- 
-         [Fact]
++        }
++
++        [Fact]
++        [Trait("Level", "L0")]
++        [Trait("Category", "Runner")]
+         //process 2 new job messages, and one cancel message
+         public async Task TestRunAsync()
+         {

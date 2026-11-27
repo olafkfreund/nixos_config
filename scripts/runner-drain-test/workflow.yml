@@ -42,64 +42,48 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$COUNTER_DIR"
+          chmod 1777 "$COUNTER_DIR" 2>/dev/null || true
           key="${SCENARIO}-${NONCE}"
-          lockdir="$COUNTER_DIR/${key}.lock"
-          start_count_file="$COUNTER_DIR/${key}.started.count"
-          done_count_file="$COUNTER_DIR/${key}.completed.count"
-          events_file="$COUNTER_DIR/${key}.events.jsonl"
-
-          acquire_lock() {
-            while ! mkdir "$lockdir" 2>/dev/null; do
-              sleep 0.05
-            done
-          }
-          release_lock() {
-            rmdir "$lockdir" 2>/dev/null || true
-          }
+          safe_run="${GITHUB_RUN_ID:-norun}"
+          safe_attempt="${GITHUB_RUN_ATTEMPT:-1}"
+          safe_runner="${RUNNER_NAME:-norunner}"
+          attempt_id="${safe_run}-${safe_attempt}-${safe_runner}-$$"
+          start_file="$COUNTER_DIR/${key}.attempt.${attempt_id}.started.json"
+          done_file="$COUNTER_DIR/${key}.attempt.${attempt_id}.completed.json"
+          ip_file="$COUNTER_DIR/${key}.attempt.${attempt_id}.in_progress"
 
           started_at="$(date +%s)"
-          acquire_lock
-          cur=0
-          if [ -f "$start_count_file" ]; then
-            cur="$(cat "$start_count_file")"
-          fi
-          next=$((cur + 1))
-          printf '%s\n' "$next" > "$start_count_file"
           jq -cn \
             --arg event "started" \
             --arg scenario "$SCENARIO" \
             --arg nonce "$NONCE" \
-            --arg run_id "${GITHUB_RUN_ID:-}" \
-            --arg attempt "${GITHUB_RUN_ATTEMPT:-1}" \
-            --arg runner "${RUNNER_NAME:-}" \
+            --arg run_id "$safe_run" \
+            --arg attempt "$safe_attempt" \
+            --arg runner "$safe_runner" \
+            --arg attempt_id "$attempt_id" \
             --argjson ts "$started_at" \
-            --argjson count "$next" \
-            '{event: $event, scenario: $scenario, nonce: $nonce, run_id: $run_id, attempt: $attempt, runner: $runner, ts: $ts, count: $count}' \
-            >> "$events_file"
-          touch "$COUNTER_DIR/${key}.in_progress"
-          release_lock
+            '{event: $event, scenario: $scenario, nonce: $nonce, run_id: $run_id, attempt: $attempt, runner: $runner, attempt_id: $attempt_id, ts: $ts}' \
+            > "${start_file}.tmp"
+          chmod 0644 "${start_file}.tmp"
+          mv -f "${start_file}.tmp" "$start_file"
+          touch "$ip_file"
+          chmod 0644 "$ip_file"
 
           sleep "$SLEEP_SECONDS"
           completed_at="$(date +%s)"
 
-          acquire_lock
-          cur=0
-          if [ -f "$done_count_file" ]; then
-            cur="$(cat "$done_count_file")"
-          fi
-          next=$((cur + 1))
-          printf '%s\n' "$next" > "$done_count_file"
-          rm -f "$COUNTER_DIR/${key}.in_progress"
           jq -cn \
             --arg event "completed" \
             --arg scenario "$SCENARIO" \
             --arg nonce "$NONCE" \
-            --arg run_id "${GITHUB_RUN_ID:-}" \
-            --arg attempt "${GITHUB_RUN_ATTEMPT:-1}" \
-            --arg runner "${RUNNER_NAME:-}" \
+            --arg run_id "$safe_run" \
+            --arg attempt "$safe_attempt" \
+            --arg runner "$safe_runner" \
+            --arg attempt_id "$attempt_id" \
             --argjson started_at "$started_at" \
             --argjson ts "$completed_at" \
-            --argjson count "$next" \
-            '{event: $event, scenario: $scenario, nonce: $nonce, run_id: $run_id, attempt: $attempt, runner: $runner, started_at: $started_at, ts: $ts, count: $count}' \
-            >> "$events_file"
-          release_lock
+            '{event: $event, scenario: $scenario, nonce: $nonce, run_id: $run_id, attempt: $attempt, runner: $runner, attempt_id: $attempt_id, started_at: $started_at, ts: $ts}' \
+            > "${done_file}.tmp"
+          chmod 0644 "${done_file}.tmp"
+          mv -f "${done_file}.tmp" "$done_file"
+          rm -f "$ip_file"

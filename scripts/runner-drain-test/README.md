@@ -11,16 +11,17 @@ End-to-end QEMU VM test harness for `pkgs/github-runner-drain`,
   and `runner-drain-candidate-check.service` in `candidate` (which fails
   verification when `/etc/runner-drain-test/force-verify-fail` is present).
 - `workflow.yml` — GitHub Actions workflow (`.github/workflows/drain-test.yml`)
-  installed into the disposable repository; each job run atomically updates
-  started/completed execution counters and event logs under
-  `/var/lib/runner-drain-test/counters/`.
+  installed into the disposable repository; each job attempt writes its own
+  independent started/completed record (`0644`, named by run ID, attempt, runner,
+  and PID) under `/var/lib/runner-drain-test/counters/` (`1777`).
 - `run-test.py` — driver that ensures `workflow.yml` is installed on `main` of
   the disposable repository, builds and boots the VM, runs scenarios `(a)`
-  through `(f)` against the real `scripts/guarded_upgrade.py` with environment
-  overrides, and writes `recording.json`.
-- `test_harness.py` — unit tests for repository/token resolution, AST-based
-  environment variable discovery against `scripts/guarded_upgrade.py`, and
-  condition-skip collection.
+  through `(f)` against the real, unmodified `scripts/guarded_upgrade.py` with
+  `GUARDED_*` environment overrides, and writes `recording.json`.
+- `test_harness.py` — unit tests for repository/token resolution, `GUARDED_*`
+  environment variable discovery against `scripts/guarded_upgrade.py`,
+  per-attempt execution record aggregation, GitHub job transition tracking,
+  boundary classification, and condition-skip collection.
 
 ## Running
 
@@ -35,18 +36,24 @@ python3 scripts/runner-drain-test/run-test.py \
 
 ## Scenarios covered
 
-- **(a)** A job acquired at the admission boundary completes exactly once, before
-  the system switch.
-- **(b)** A job dispatched after admission closes queues while the runners are
-  closed, and runs exactly once after the reopen.
+- **(a)** Synchronised on the broker side at the admission boundary: the offer
+  acquired just before `drain/request` completes once before the switch, while
+  the offer pending at the boundary stays queued across the switch and runs once
+  after reopen.
+- **(b)** A job dispatched after admission closes is verified `queued` on GitHub
+  while the runners are closed, and runs once after the reopen.
 - **(c)** The same as (b), with a forced verification failure in `candidate` and
   a real rollback to `baseline`.
 - **(d)** One runner (`github-runner-nixarchy-4.service`) withholds its
-  `drain/ack`, and the switch defers without stopping or restarting that runner.
-- **(e)** The upgrade is interrupted right after `/var/lib/guarded-upgrade/runners-closed`
-  is written (while `scripts/deploy-hold.sh` refuses a manual deploy), then again
-  right after a rollback (`settled-rollback`), and recovery reopens the runners
-  both times.
+  `drain/ack` in two ways (case 1: request hidden by a private mount; case 2:
+  request visible, `drain/ack` path unwritable), and the switch defers both
+  times.
+- **(e)** The upgrade is interrupted by killing the Python PID itself at the
+  actual state transitions (right after the `draining` journal phase is written
+  before the marker, right after `/var/lib/guarded-upgrade/runners-closed` is
+  written before requests while `scripts/deploy-hold.sh` refuses a manual deploy,
+  and right after `settled-rollback` before reopen), and recovery reopens the
+  runners every time.
 - **(f)** One runner stays busy past the drain deadline, the drain defers without
   stopping the busy runner (`drain/ack` transitions to `cancelled`), and the
   in-flight job completes once.
