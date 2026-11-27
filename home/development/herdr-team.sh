@@ -81,7 +81,7 @@ claude_argv() { # role work model effort: writes the member's hook settings and 
   jq -n --arg p "$prompt" --arg s "$stop" --arg g "$guard" '
     def hook($c): [{hooks: [{type: "command", command: $c}]}];
     {hooks: ({UserPromptSubmit: hook($p), Stop: hook($s)}
-      + (if $g == "" then {} else {PreToolUse: [{matcher: "Bash"} + hook($g)[0]]} end))}' >"$2/claude-settings.json"
+      + (if $g == "" then {} else {PreToolUse: [{matcher: "Bash", hooks: [{type: "command", command: $g, timeout: 5, onFailure: "block"}]}]} end))}' >"$2/claude-settings.json"
   argv=(agent-env env -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE claude
     --model "${3:-$m}" --effort "${4:-$e}" --permission-mode "$mode" --settings "$2/claude-settings.json")
 }
@@ -445,6 +445,7 @@ teardown() { # state file, member: stop it, close its pane, remove its dirs and 
 up_tui() {
   local branch kind wrapper notify common trust lead lead_start max created reply attempt i matched mpid mstart now first rec firstpane gd root agy_session screen ready_attempts err name model_opt='' effort_opt=''
   local -a over=()
+  local prev=''
   task=${1:-}
   role=${2:-}
   shift 2 || usage
@@ -483,7 +484,7 @@ up_tui() {
       wrapper=claude kind=claude
       [[ $(gq rev-parse --path-format=absolute --git-dir) != "$(gq rev-parse --path-format=absolute --git-common-dir)" ]] \
         || refuse 'claude members need a linked worktree'
-      [[ $role != claude-implement || -x $claude_guard ]] || refuse "coder guard not found: $claude_guard"
+      [[ $role != claude-implement || (-f $claude_guard && -x $claude_guard) ]] || refuse "coder guard not found: $claude_guard"
       ;;
   esac
   for tool in agent-env "$wrapper"; do
@@ -679,25 +680,28 @@ LAUNCH
         matched=1
         break
       fi
-      # herdr can report claude before its first question is drawn
-      [[ $kind != claude ]] || sleep_for 3
-      if screen=$(h pane read "$pane" --source visible 2>/dev/null); then
-        if [[ $kind == claude ]]; then
+      if [[ $kind == claude ]]; then
+        # Ready once the visible screen is drawn, unchanged across two reads and shows none of
+        # Claude's own questions: herdr reports claude before its first screen is drawn (#3268).
+        if screen=$(h pane read "$pane" --source visible 2>/dev/null) && [[ -n ${screen//[[:space:]]/} ]]; then
           claude_screen "$screen"
+          if [[ $screen == "$prev" ]]; then
+            matched=1
+            break
+          fi
+          prev=$screen
+        fi
+      else
+        screen=$(h pane read "$pane" --source visible 2>/dev/null) || screen=''
+        # the client writes the id to a file: a wrapped pane line could cut it short
+        if [[ $screen == *'agy session '* && -f $work/turns/session ]] && agy_session=$(<"$work/turns/session") \
+          && [[ $agy_session =~ ^[A-Za-z0-9._-]+$ ]]; then
           matched=1
           break
         fi
-      else
-        screen=''
+        # first use of a new agy runs the guard probe before the client (up to 300 s + 600 s)
+        [[ $screen != *'running the guard probe'* ]] || ready_attempts=1200
       fi
-      # the client writes the id to a file: a wrapped pane line could cut it short
-      if [[ $screen == *'agy session '* && -f $work/turns/session ]] && agy_session=$(<"$work/turns/session") \
-        && [[ $agy_session =~ ^[A-Za-z0-9._-]+$ ]]; then
-        matched=1
-        break
-      fi
-      # first use of a new agy runs the guard probe before the client (up to 300 s + 600 s)
-      [[ $screen != *'running the guard probe'* ]] || ready_attempts=1200
     fi
     [[ ! -f $ctl/exit ]] || fail "launcher exited $(<"$ctl/exit"): $(tr '\n' ' ' <"$ctl/status")"
     sleep_for 1
@@ -730,6 +734,7 @@ LAUNCH
 up_hc() {
   local branch kind wrapper notify common trust lead lead_start max created reply attempt i matched mpid mstart now first rec firstpane gd root agy_session screen ready_attempts err name placeholder='' model_opt='' effort_opt=''
   local -a over=()
+  local prev=''
   task=${1:-}
   role=${2:-}
   shift 2 || usage
@@ -768,7 +773,7 @@ up_hc() {
       wrapper=claude kind=claude
       [[ $(gq rev-parse --path-format=absolute --git-dir) != "$(gq rev-parse --path-format=absolute --git-common-dir)" ]] \
         || refuse 'claude members need a linked worktree'
-      [[ $role != claude-implement || -x $claude_guard ]] || refuse "coder guard not found: $claude_guard"
+      [[ $role != claude-implement || (-f $claude_guard && -x $claude_guard) ]] || refuse "coder guard not found: $claude_guard"
       ;;
   esac
   for tool in agent-env "$wrapper"; do
@@ -986,25 +991,27 @@ LAUNCH
         break
       fi
       if [[ $kind == claude ]]; then
-        sleep_for 3
-        # without --lines hc reads only the visible screen
-        if screen=$(hc_owned "$pane" && hc read "$pane" 2>/dev/null); then
+        # without --lines hc reads only the visible screen; same settle rule as the TUI backend
+        if screen=$(hc_owned "$pane" && hc read "$pane" 2>/dev/null) && [[ -n ${screen//[[:space:]]/} ]]; then
           claude_screen "$screen"
-          if hc get "$pane" --json 2>/dev/null | jq -e '.status != "blocked"' >/dev/null; then
+          if [[ $screen == "$prev" ]] && hc get "$pane" --json 2>/dev/null \
+            | jq -e '.status != null and .status != "blocked"' >/dev/null; then
             matched=1
             break
           fi
+          prev=$screen
         fi
+      else
+        screen=$(screen_read "$pane" 2>/dev/null) || screen=''
+        # the client writes the id to a file: a wrapped pane line could cut it short
+        if [[ $screen == *'agy session '* && -f $work/turns/session ]] && agy_session=$(<"$work/turns/session") \
+          && [[ $agy_session =~ ^[A-Za-z0-9._-]+$ ]]; then
+          matched=1
+          break
+        fi
+        # first use of a new agy runs the guard probe before the client (up to 300 s + 600 s)
+        [[ $screen != *'running the guard probe'* ]] || ready_attempts=1200
       fi
-      screen=$(screen_read "$pane" 2>/dev/null) || screen=''
-      # the client writes the id to a file: a wrapped pane line could cut it short
-      if [[ $screen == *'agy session '* && -f $work/turns/session ]] && agy_session=$(<"$work/turns/session") \
-        && [[ $agy_session =~ ^[A-Za-z0-9._-]+$ ]]; then
-        matched=1
-        break
-      fi
-      # first use of a new agy runs the guard probe before the client (up to 300 s + 600 s)
-      [[ $screen != *'running the guard probe'* ]] || ready_attempts=1200
     fi
     [[ ! -f $ctl/exit ]] || fail "launcher exited $(<"$ctl/exit"): $(tr '\n' ' ' <"$ctl/status")"
     sleep_for 1

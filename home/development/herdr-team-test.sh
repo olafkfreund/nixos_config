@@ -108,7 +108,8 @@ case "$1 ${2:-}" in
   'pane read')
     if [[ -e $TEST_STATE/claude-$3.settings ]]; then
       [[ $5 == visible ]] || cat "$TEST_STATE/claude-$3.scrollback" 2>/dev/null || :
-      cat "$TEST_STATE/claude-$3.screen" 2>/dev/null || :
+      # a real Claude screen is never blank: default to an idle composer
+      cat "$TEST_STATE/claude-$3.screen" 2>/dev/null || printf '> \n? for shortcuts\n'
     elif [[ -e $TEST_STATE/pane-$3.in ]]; then cat "$TEST_STATE/pane-$3.out" 2>/dev/null || :; else cat "$TEST_STATE/screen" 2>/dev/null || :; fi
     ;;
   'agent rename'|'agent prompt'|'agent send-keys')
@@ -1708,7 +1709,7 @@ up t1 claude-implement --step 3
 w=$(field t1 claude-implement work)
 [[ $(tail -n1 "$TEST_STATE/launched") == "claude --model sonnet --effort medium --permission-mode bypassPermissions --settings $w/claude-settings.json" ]] \
   || die "claude implement launch: $(tail -n1 "$TEST_STATE/launched")"
-jq -e --arg g "$(printf '%q' "$guard")" '.hooks.PreToolUse == [{matcher:"Bash",hooks:[{type:"command",command:$g}]}]
+jq -e --arg g "$(printf '%q' "$guard")" '.hooks.PreToolUse == [{matcher:"Bash",hooks:[{type:"command",command:$g,timeout:5,onFailure:"block"}]}]
   and (.hooks | has("Stop") and has("UserPromptSubmit"))' "$w/claude-settings.json" >/dev/null || die 'implement settings'
 team up t2 implement
 assert_code 2
@@ -1820,7 +1821,7 @@ case $1 in
     jq -nc --arg a "$addr" --arg n "$name" --arg hn "$hn" --argjson st "$status" '{address:$a,name:$hn,state:"running",status:$st,foreground:{argv:[$n],name:$n,pid:1},pid:1}'
     ;;
   read)
-    cat "$TEST_STATE/screen" 2>/dev/null || :
+    cat "$TEST_STATE/screen" 2>/dev/null || { [[ ! -e $TEST_STATE/claude-$2.settings ]] || printf '> \n? for shortcuts\n'; }
     ;;
   send)
     text=$3

@@ -115,8 +115,8 @@ def main():
     event, path = sys.argv[1:]
     if not path:
         return
-    payload = sys.stdin.buffer.read(HOOK_LIMIT)
-    if len(payload) == HOOK_LIMIT:
+    payload = sys.stdin.buffer.read(HOOK_LIMIT + 1)
+    if len(payload) > HOOK_LIMIT:
         return
     hook = json.loads(payload)
     if not isinstance(hook, dict):
