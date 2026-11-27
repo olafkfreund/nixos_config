@@ -1568,11 +1568,14 @@ finish() {
   fi
   last=$(jq -r --arg m "$role" '.members[$m].last.outcome // ""' "$f")
   # A graceful quit only: one ctrl+c, a second if the agent is still there after 3 s.
+  # Claude Code exits only on a second ctrl+c within about a second (#3268).
+  local second=6
+  [[ $kind != claude ]] || second=1
   if alive "$pid" "$start" && same_pane "$pane" "$terminal" "$kind" "$agy_session"; then
     interrupt_member "$pane" "$kind" >/dev/null 2>&1 || :
     for ((i = 0; i < 30; i++)); do
       [[ -f $ctl/exit || -f $ctl/gone ]] && break
-      if ((i == 6)); then
+      if ((i == second)); then
         interrupt_member "$pane" "$kind" >/dev/null 2>&1 || :
       fi
       sleep_for 0.5
