@@ -5,7 +5,10 @@ description: >-
   plan's frontmatter says status: approved, give it the plan path and step 1,
   and send each later step to the same agent with SendMessage so its cache
   stays warm.
-model: sonnet
+model: @model@
+effort: @effort@
+experimental:
+  cacheTtl: 1h
 tools: Read, Edit, Write, Grep, Glob, Bash
 hooks:
   PreToolUse:
