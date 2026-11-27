@@ -14,10 +14,32 @@ from guarded_upgrade import (
     should_start,
     user_sessions,
 )
-from check_edge_promotion import promoted
+from check_edge_promotion import DropAuthOffGitHub, promoted
 
 
 class GuardedUpgradeFixtures(unittest.TestCase):
+    def test_artifact_redirect_off_github_drops_the_token(self):
+        import urllib.request
+
+        handler = DropAuthOffGitHub()
+        req = urllib.request.Request(
+            "https://api.github.com/repos/o/r/actions/artifacts/1/zip",
+            headers={"Authorization": "Bearer secret"},
+        )
+        blob = handler.redirect_request(
+            req,
+            None,
+            302,
+            "Found",
+            {},
+            "https://productionresultssa1.blob.core.windows.net/x?sig=y",
+        )
+        self.assertFalse(blob.has_header("Authorization"))
+        same = handler.redirect_request(
+            req, None, 302, "Found", {}, "https://api.github.com/repos/o/r/other"
+        )
+        self.assertEqual(same.get_header("Authorization"), "Bearer secret")
+
     def test_promotion_evidence_stale_or_mismatched(self):
         self.assertFalse(promotion_safe("abc", "def", "abc", "success", "main", 1, 1))
         self.assertFalse(promotion_safe("abc", "abc", "def", "success", "main", 1, 1))
