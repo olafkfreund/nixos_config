@@ -1,0 +1,89 @@
+name: Runner Drain Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: "Scenario identifier (a, b, c, d, e, f)"
+        required: true
+        type: string
+      nonce:
+        description: "Unique run nonce for this scenario dispatch"
+        required: true
+        type: string
+      runner_label:
+        description: "Unique runner label for the isolated VM"
+        required: true
+        type: string
+      sleep_seconds:
+        description: "Seconds the job stays busy before completing"
+        required: false
+        default: "5"
+        type: string
+      counter_dir:
+        description: "Directory inside the VM for atomic execution counters"
+        required: false
+        default: "/var/lib/runner-drain-test/counters"
+        type: string
+
+jobs:
+  drain-test:
+    name: drain-test
+    runs-on:
+      - self-hosted
+      - ${{ inputs.runner_label }}
+    steps:
+      - name: Record execution counter and run workload
+        env:
+          SCENARIO: ${{ inputs.scenario }}
+          NONCE: ${{ inputs.nonce }}
+          SLEEP_SECONDS: ${{ inputs.sleep_seconds }}
+          COUNTER_DIR: ${{ inputs.counter_dir }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$COUNTER_DIR"
+          chmod 1777 "$COUNTER_DIR" 2>/dev/null || true
+          key="${SCENARIO}-${NONCE}"
+          safe_run="${GITHUB_RUN_ID:-norun}"
+          safe_attempt="${GITHUB_RUN_ATTEMPT:-1}"
+          safe_runner="${RUNNER_NAME:-norunner}"
+          attempt_id="${safe_run}-${safe_attempt}-${safe_runner}-$$"
+          start_file="$COUNTER_DIR/${key}.attempt.${attempt_id}.started.json"
+          done_file="$COUNTER_DIR/${key}.attempt.${attempt_id}.completed.json"
+          ip_file="$COUNTER_DIR/${key}.attempt.${attempt_id}.in_progress"
+
+          started_at="$(date +%s)"
+          jq -cn \
+            --arg event "started" \
+            --arg scenario "$SCENARIO" \
+            --arg nonce "$NONCE" \
+            --arg run_id "$safe_run" \
+            --arg attempt "$safe_attempt" \
+            --arg runner "$safe_runner" \
+            --arg attempt_id "$attempt_id" \
+            --argjson ts "$started_at" \
+            '{event: $event, scenario: $scenario, nonce: $nonce, run_id: $run_id, attempt: $attempt, runner: $runner, attempt_id: $attempt_id, ts: $ts}' \
+            > "${start_file}.tmp"
+          chmod 0644 "${start_file}.tmp"
+          mv -f "${start_file}.tmp" "$start_file"
+          touch "$ip_file"
+          chmod 0644 "$ip_file"
+
+          sleep "$SLEEP_SECONDS"
+          completed_at="$(date +%s)"
+
+          jq -cn \
+            --arg event "completed" \
+            --arg scenario "$SCENARIO" \
+            --arg nonce "$NONCE" \
+            --arg run_id "$safe_run" \
+            --arg attempt "$safe_attempt" \
+            --arg runner "$safe_runner" \
+            --arg attempt_id "$attempt_id" \
+            --argjson started_at "$started_at" \
+            --argjson ts "$completed_at" \
+            '{event: $event, scenario: $scenario, nonce: $nonce, run_id: $run_id, attempt: $attempt, runner: $runner, attempt_id: $attempt_id, started_at: $started_at, ts: $ts}' \
+            > "${done_file}.tmp"
+          chmod 0644 "${done_file}.tmp"
+          mv -f "${done_file}.tmp" "$done_file"
+          rm -f "$ip_file"

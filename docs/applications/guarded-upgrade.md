@@ -22,3 +22,9 @@ fresh idle report in `/run/guarded-upgrade-idle/<uid>` (nixarchy#1946).
 different uid, which the gate rejects by design. `ProtectSystem = "strict"` and `ProtectHome` require mount
 namespacing that user units lack. `NoNewPrivileges = true` is kept on both, because neither runs a setuid
 program.
+
+`guarded-upgrade-recover` (p620, at boot) runs as root without `DynamicUser`: it starts and inspects
+the four runner units and owns their `drain/` directories, which a dynamic user cannot. It never
+switches, so it runs with `ProtectSystem = "strict"`, `ProtectHome`, `PrivateTmp` and
+`NoNewPrivileges`. Its only writable paths are its own state and cache directories and
+`/var/lib/github-runner`, plus `/run/lock` for the deploy lock.

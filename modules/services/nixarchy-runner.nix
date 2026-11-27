@@ -201,8 +201,13 @@ in
         }
         (lib.listToAttrs (map
           (i: lib.nameValuePair "github-runner-nixarchy${suffix i}" {
-            # A missing build disk must stop CI instead of sending builds to /.
-            unitConfig.RequiresMountsFor = [ cfg.buildDir ];
+            unitConfig = {
+              # A missing build disk must stop CI instead of sending builds to /.
+              RequiresMountsFor = [ cfg.buildDir ];
+              # The guarded upgrade closes admission with this marker: a start is
+              # skipped, a running job is left alone (nixarchy#1967).
+              ConditionPathExists = "!/var/lib/guarded-upgrade/runners-closed";
+            };
           })
           (lib.range 1 cfg.instances)))
       ];
@@ -274,6 +279,9 @@ in
           lib.nameValuePair "nixarchy${suffix i}" {
             inherit (cfg) url tokenFile extraLabels;
             enable = true;
+            # Drains on request (nixarchy#1967). Not callPackage: that replaces the
+            # `.override` the upstream module calls to set nodeRuntimes.
+            package = import ../../pkgs/github-runner-drain { inherit pkgs; };
             name = "${config.networking.hostName}-nixarchy${suffix i}";
 
             # No workDir. It is tempting to move this too and it is the wrong
@@ -339,9 +347,10 @@ in
               DeviceAllow = [ "/dev/kvm rw" ];
               SupplementaryGroups = [ "kvm" ];
 
-              # An hour-long job that is killed at the fifty-ninth minute has
-              # cost the whole hour and told nobody anything.
-              TimeoutStartSec = "0";
+              # Covers ExecStartPre (registration), never the job: the unit is
+              # Type=simple, so it has started once the listener is forked. Bounded
+              # so a hung start cannot stall the upgrade that reopens the runners.
+              TimeoutStartSec = "5min";
             };
           }
         )

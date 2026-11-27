@@ -295,6 +295,10 @@ in
         image = cfg.image;
         ports = [ "127.0.0.1:${toString cfg.port}:7007" ];
         environmentFiles = [ "${envDir}/env-backstage" ];
+        # Re-read the catalog every 30 min, not every ~2 min: the default used
+        # ~4-5k of the token's 5k GitHub calls an hour (#3275). Webhooks and the
+        # hourly provider keep it fresh.
+        environment.APP_CONFIG_catalog_processingInterval = builtins.toJSON { minutes = 30; };
         dependsOn = [ "backstage-postgres" ];
         autoStart = true;
         # /var/lib/backstage-techdocs persists the rendered MkDocs output

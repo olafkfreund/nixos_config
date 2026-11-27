@@ -129,6 +129,8 @@ let
   # agy session (AGY_CODER unset) must never touch the guard at all. So the
   # gate itself decides "allow" before the guard file is ever referenced,
   # and only execs it once AGY_CODER=1.
+  # host-guard (#3265) applies to every session, so its gate only checks that
+  # the /etc adapter exists.
   coderGuardHookEntry = (pkgs.formats.json { }).generate "antigravity-coder-guard-hook.json" {
     "coder-guard" = {
       PreToolUse = [
@@ -138,6 +140,20 @@ let
             {
               type = "command";
               command = "/bin/sh -c '[ \"\${AGY_CODER:-}\" = 1 ] || { echo \"{\\\"decision\\\":\\\"allow\\\"}\"; exit 0; }; exec /etc/antigravity/hooks/coder-guard'";
+              timeout = 10;
+            }
+          ];
+        }
+      ];
+    };
+    "host-guard" = {
+      PreToolUse = [
+        {
+          matcher = "run_command";
+          hooks = [
+            {
+              type = "command";
+              command = "/bin/sh -c '[ -x /etc/antigravity/hooks/host-guard ] || { echo \"{\\\"decision\\\":\\\"allow\\\"}\"; exit 0; }; exec /etc/antigravity/hooks/host-guard'";
               timeout = 10;
             }
           ];
@@ -417,15 +433,18 @@ in
         tmp=$(mktemp)
         ${pkgs.coreutils}/bin/cat "$entry" > "$tmp"
         $DRY_RUN_CMD mv "$tmp" "$hooksfile"
-        $DRY_RUN_CMD echo "Antigravity: seeded hooks.json with the coder guard (#2087)"
+        $DRY_RUN_CMD echo "Antigravity: seeded hooks.json with the guards (#2087, #3265)"
       elif ${pkgs.jq}/bin/jq -e 'type == "object"' "$hooksfile" >/dev/null 2>&1; then
-        if ${pkgs.jq}/bin/jq -e '."coder-guard"' "$hooksfile" >/dev/null 2>&1; then
-          $DRY_RUN_CMD echo "Antigravity: coder guard already registered in hooks.json"
+        # By value, so a stale entry is replaced and formatting alone never writes.
+        if ${pkgs.jq}/bin/jq -e --slurpfile want "$entry" \
+            '(."coder-guard" == $want[0]."coder-guard") and (."host-guard" == $want[0]."host-guard")' \
+            "$hooksfile" >/dev/null 2>&1; then
+          $DRY_RUN_CMD echo "Antigravity: guards already current in hooks.json"
         else
           tmp=$(mktemp)
           ${pkgs.jq}/bin/jq -s '.[0] + .[1]' "$hooksfile" "$entry" > "$tmp"
           $DRY_RUN_CMD mv "$tmp" "$hooksfile"
-          $DRY_RUN_CMD echo "Antigravity: added the coder guard to hooks.json (#2087)"
+          $DRY_RUN_CMD echo "Antigravity: updated the guards in hooks.json (#2087, #3265)"
         fi
       else
         $DRY_RUN_CMD echo "Antigravity: hooks.json is not a JSON object -- left untouched (#2087)"

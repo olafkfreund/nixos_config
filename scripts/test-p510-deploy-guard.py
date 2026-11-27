@@ -596,15 +596,27 @@ for g, b64, want, label in (
     + [(guard_broken, *("bHMgLWxh", 2, "#3047 prepare failure denies (ls -la)"))]
 ):
     cmd = base64.b64decode(b64).decode()
-    p = subprocess.run(
-        [g],
-        input=json.dumps({"tool_input": {"command": cmd}}),
-        capture_output=True,
-        text=True,
-    )
-    ok = p.returncode == want
-    fail += not ok
-    print(f"{'ok  ' if ok else 'FAIL'} exit={p.returncode} want={want}  {label}")
+    codex = {
+        "tool_input": {"command": cmd},
+        "cwd": "/tmp",
+        "hook_event_name": "PreToolUse",
+        "tool_name": "Bash",
+    }
+    for shape, payload in (
+        ("claude", {"tool_input": {"command": cmd}}),
+        ("codex", codex),
+    ):
+        p = subprocess.run(
+            [g],
+            input=json.dumps(payload),
+            capture_output=True,
+            text=True,
+        )
+        ok = p.returncode == want
+        fail += not ok
+        print(
+            f"{'ok  ' if ok else 'FAIL'} exit={p.returncode} want={want}  [{shape}] {label}"
+        )
 
 os.unlink(guard)
 for f in (guard_p510, guard_broken, broken_prepare):

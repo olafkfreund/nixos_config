@@ -145,6 +145,43 @@ in
       };
     })
     (lib.mkIf (host == "p620") {
+      # A reboot during a drain leaves the runners closed: finish it now rather than
+      # at the next timer run (nixarchy#1967).
+      systemd.services.guarded-upgrade-recover = {
+        description = "Finish an interrupted guarded upgrade or runner drain";
+        wantedBy = [ "multi-user.target" ];
+        wants = [ "network-online.target" ];
+        after = [ "network-online.target" ];
+        # It never switches: an uncommitted leftover transaction waits for the timer
+        # run (and fails this unit, so CI being closed is visible); a recorded commit
+        # only needs cleanup and reopens here. A later switch must not rerun it.
+        restartIfChanged = false;
+        serviceConfig = {
+          Type = "oneshot";
+          # Stays active, so a later switch does not run it again.
+          RemainAfterExit = true;
+          StateDirectory = "guarded-upgrade";
+          StateDirectoryMode = "0755";
+          CacheDirectory = "guarded-upgrade";
+          # Recovery never switches, so the system can be read-only to it: it writes
+          # only its own state and cache and the runners' drain/ files. Not
+          # DynamicUser: it starts the runner units. See docs/applications/guarded-upgrade.md.
+          ProtectSystem = "strict";
+          ReadWritePaths = [ "/var/lib/github-runner" "/run/lock" ];
+          PrivateTmp = true;
+          NoNewPrivileges = true;
+          ProtectHome = true;
+        };
+        environment = {
+          XDG_CACHE_HOME = "/var/cache/guarded-upgrade";
+          XDG_STATE_HOME = "/var/lib/guarded-upgrade";
+          GITHUB_TOKEN_FILE = config.age.secrets."api-github-token".path;
+        };
+        path = with pkgs; [ nix coreutils systemd ];
+        script = ''
+          exec ${python}/bin/python ${../../scripts/guarded_upgrade.py} ${host} recover
+        '';
+      };
       users.groups.guarded-stage = { };
       users.users.guarded-stage = {
         isSystemUser = true;

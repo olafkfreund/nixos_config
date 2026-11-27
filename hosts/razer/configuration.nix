@@ -61,6 +61,7 @@ in
 
   # Choose networking profile: "desktop", "server", or "minimal"
   features.networking.profile = "desktop";
+  features.logging.enableFiltering = true; # journald 1G cap, 7-day retention, as p620 (#3276)
 
   # Consolidated networking configuration
   networking = {
