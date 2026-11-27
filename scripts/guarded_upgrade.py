@@ -502,7 +502,12 @@ def rollback(record, why):
 
 def end_transaction():
     (STATE / "transaction").unlink(missing_ok=True)
-    (STATE / "rollback-root").unlink(missing_ok=True)
+    # Only a GC root, replaced by the next switch: failing to drop it must not
+    # turn a recorded verdict into an error.
+    try:
+        (STATE / "rollback-root").unlink(missing_ok=True)
+    except OSError as error:
+        log(f"rollback root left behind: {error}")
 
 
 def activate(host, sha, candidate):
@@ -928,28 +933,60 @@ def is_current(candidate):
     return current_closure() == candidate and str(PROFILE.resolve()) == candidate
 
 
+def valid_journal(journal):
+    """Every field recovery reads has the type it expects; absent is allowed,
+    because a failed orphan reopen records only a phase."""
+    if not isinstance(journal, dict):
+        return False
+    settled = ("settled-commit", "settled-rollback")
+    phase = journal.get("phase")
+    if phase not in ("draining", "cancelling", "switching", "reopen-failed", *settled):
+        return False
+    if "settled" in journal and not (
+        journal["settled"] in settled and phase in ("reopen-failed", *settled)
+    ):
+        return False
+    if journal.get("settled") == "settled-commit" and not (
+        "sha" in journal and "candidate" in journal
+    ):
+        return False
+    if not all(
+        isinstance(journal.get(key, ""), str) for key in ("sha", "candidate", "request")
+    ):
+        return False
+    invocations = journal.get("invocations", {})
+    requested = journal.get("requested", [])
+    return (
+        isinstance(invocations, dict)
+        and all(isinstance(value, str) for value in invocations.values())
+        and isinstance(requested, list)
+        and all(isinstance(value, str) for value in requested)
+    )
+
+
 def recover(host, boot=False):
     """Finish what an interrupted run left behind.
 
     Returns this run's exit status, or None when there was nothing to recover.
     """
-    # Never switch during boot. Closed runners are the safe state until the timer run.
-    if boot and (STATE / "transaction").exists():
-        log(
-            "ERROR: unfinished transaction: the rollback is left for the next "
-            "nixos-upgrade timer run; runners left as they are"
-        )
-        return 0
     unreadable = False
     try:
         journal = read("drain")
-        if journal is not None and not (
-            isinstance(journal, dict) and "phase" in journal
-        ):
+        # A file holding "null" is a bad journal, not a missing one.
+        if (STATE / "drain").exists() and not valid_journal(journal):
             raise ValueError("not a drain journal")
     except ValueError as error:
         log(f"ERROR: unreadable drain journal, treated as an orphan: {error}")
         journal, unreadable = None, True
+    # Never switch during boot. Closed runners are the safe state until the timer
+    # run; a recorded commit needs only cleanup, so boot may finish that.
+    committed = bool(journal) and journal.get("settled") == "settled-commit"
+    if boot and (STATE / "transaction").exists() and not committed:
+        log(
+            "ERROR: unfinished transaction: the rollback is left for the next "
+            "nixos-upgrade timer run; runners left as they are"
+        )
+        return 1
     transaction = read("transaction")
     orphan = unreadable or (not journal and (STATE / "runners-closed").exists())
     if not (journal or transaction or orphan):

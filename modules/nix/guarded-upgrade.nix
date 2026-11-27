@@ -152,8 +152,9 @@ in
         wantedBy = [ "multi-user.target" ];
         wants = [ "network-online.target" ];
         after = [ "network-online.target" ];
-        # It never switches: a leftover transaction waits for the timer run. A later
-        # switch must not rerun it either.
+        # It never switches: an uncommitted leftover transaction waits for the timer
+        # run (and fails this unit, so CI being closed is visible); a recorded commit
+        # only needs cleanup and reopens here. A later switch must not rerun it.
         restartIfChanged = false;
         serviceConfig = {
           Type = "oneshot";

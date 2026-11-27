@@ -70,7 +70,7 @@
  
          public override void Initialize(IHostContext hostContext)
          {
-@@ -499,6 +555,13 @@
+@@ -499,6 +555,15 @@
                  bool restartSession = false; // Flag to indicate session restart
                  bool restartSessionPending = false;
                  bool cleanupLocalConfigAfter404 = false;
@@ -78,13 +78,15 @@
 +                string drainRequest = Path.Combine(drainDirectory, "request");
 +                string drainAck = Path.Combine(drainDirectory, "ack");
 +                string drainId = null;
++                string cancelledDrainId = null;
 +                string drainExitState = null;
 +                bool drainAcknowledged = false;
 +                bool jobReceivedBeforeDrain = false;
++                CancellationTokenSource pendingPollTokenSource = null;
                  try
                  {
                      var notification = HostContext.GetService<IJobNotification>();
-@@ -512,10 +575,39 @@
+@@ -512,10 +577,57 @@
  
                      jobDispatcher.JobStatus += _listener.OnJobStatus;
  
@@ -96,13 +98,20 @@
 +                        if (requestId != drainId)
 +                        {
 +                            if (requestId == null && drainId != null)
-+                                TryWriteDrainAck(drainAck, drainId, "cancelled");
++                                cancelledDrainId = drainId;
 +                            drainId = requestId;
 +                            drainAcknowledged = false;
 +                            if (drainId != null)
 +                                jobReceivedBeforeDrain = jobDispatcher.Busy;
 +                        }
-+                        if (drainId != null && !drainAcknowledged)
++                        if (cancelledDrainId != null)
++                        {
++                            if (TryWriteDrainAck(drainAck, cancelledDrainId, "cancelled"))
++                                cancelledDrainId = null;
++                            else
++                                await Task.Delay(1000);
++                        }
++                        if (drainId != null && cancelledDrainId == null && !drainAcknowledged)
 +                            drainAcknowledged = TryWriteDrainAck(drainAck, drainId, "draining");
 +                        if (drainAcknowledged && !jobDispatcher.Busy)
 +                        {
@@ -121,29 +130,47 @@
 +
                          // Check if we need to restart the session and can do so (job dispatcher not busy)
 -                        if (restartSessionPending && !jobDispatcher.Busy)
-+                        if (restartSessionPending && !jobDispatcher.Busy && pendingMessage == null)
++                        if (restartSessionPending && !jobDispatcher.Busy && pendingMessage != null && !pendingMessage.IsCompleted)
++                        {
++                            pendingPollTokenSource.Cancel();
++                            try { await pendingMessage; }
++                            catch (OperationCanceledException)
++                            {
++                                pendingMessage = null;
++                                pendingPollTokenSource.Dispose();
++                                pendingPollTokenSource = null;
++                            }
++                        }
++                        if (restartSessionPending && !jobDispatcher.Busy && pendingMessage == null && cancelledDrainId == null)
                          {
                              Trace.Info("Pending session restart detected and job dispatcher is not busy. Restarting session now.");
                              messageQueueLoopTokenSource.Cancel();
-@@ -527,7 +619,7 @@
+@@ -527,7 +639,12 @@
                          bool skipMessageDeletion = false;
                          try
                          {
 -                            Task<TaskAgentMessage> getNextMessage = _listener.GetNextMessageAsync(messageQueueLoopTokenSource.Token);
-+                            Task<TaskAgentMessage> getNextMessage = pendingMessage ??= _listener.GetNextMessageAsync(messageQueueLoopTokenSource.Token);
++                            if (pendingMessage == null)
++                            {
++                                pendingPollTokenSource = CancellationTokenSource.CreateLinkedTokenSource(messageQueueLoopTokenSource.Token);
++                                pendingMessage = _listener.GetNextMessageAsync(pendingPollTokenSource.Token);
++                            }
++                            Task<TaskAgentMessage> getNextMessage = pendingMessage;
                              if (autoUpdateInProgress)
                              {
                                  Trace.Verbose("Auto update task running at backend, waiting for getNextMessage or selfUpdateTask to finish.");
-@@ -603,7 +695,17 @@
+@@ -603,7 +720,19 @@
                                  }
                              }
  
 -                            message = await getNextMessage; //get next message
 +                            while (await Task.WhenAny(getNextMessage, Task.Delay(1000, messageQueueLoopTokenSource.Token)) != getNextMessage
 +                                && !messageQueueLoopTokenSource.IsCancellationRequested
-+                                && drainId == null && ReadDrainRequest(drainRequest) == null) { }
-+                            if (!getNextMessage.IsCompleted && (drainId != null || ReadDrainRequest(drainRequest) != null)) continue;
++                                && drainId == null && ReadDrainRequest(drainRequest) == null && cancelledDrainId == null) { }
++                            if (!getNextMessage.IsCompleted && (drainId != null || ReadDrainRequest(drainRequest) != null || cancelledDrainId != null)) continue;
 +                            pendingMessage = null;
++                            pendingPollTokenSource.Dispose();
++                            pendingPollTokenSource = null;
 +                            try { message = await getNextMessage; } //get next message
 +                            catch (Exception ex) when (ex is IOException || ex is System.Net.Http.HttpRequestException)
 +                            {
@@ -153,7 +180,7 @@
                              HostContext.WritePerfCounter($"MessageReceived_{message.MessageType}");
                              if (string.Equals(message.MessageType, AgentRefreshMessage.MessageType, StringComparison.OrdinalIgnoreCase))
                              {
-@@ -660,7 +762,7 @@
+@@ -660,7 +789,7 @@
                              }
                              else if (string.Equals(message.MessageType, JobRequestMessageTypes.PipelineAgentJobRequest, StringComparison.OrdinalIgnoreCase))
                              {
@@ -162,7 +189,7 @@
                                  {
                                      skipMessageDeletion = true;
                                      Trace.Info($"Skip message deletion for job request message '{message.MessageId}'.");
-@@ -670,6 +772,7 @@
+@@ -670,6 +799,7 @@
                                      Trace.Info($"Received job message of length {message.Body.Length} from service, with hash '{IOUtil.GetSha256Hash(message.Body)}'");
                                      var jobMessage = StringUtil.ConvertFromJson<Pipelines.AgentJobRequestMessage>(message.Body);
                                      jobDispatcher.Run(jobMessage, runOnce);
@@ -170,7 +197,7 @@
                                      if (runOnce)
                                      {
                                          Trace.Info("One time used runner received job message.");
-@@ -680,7 +783,7 @@
+@@ -680,7 +810,7 @@
                              // Broker flow
                              else if (MessageUtil.IsRunServiceJob(message.MessageType))
                              {
@@ -179,7 +206,7 @@
                                  {
                                      skipMessageDeletion = true;
                                      Trace.Info($"Skip message deletion for job request message '{message.MessageId}'.");
-@@ -688,13 +791,21 @@
+@@ -688,13 +818,21 @@
                                  else
                                  {
                                      var messageRef = StringUtil.ConvertFromJson<RunnerJobRequestRef>(message.Body);
@@ -201,7 +228,7 @@
                                          }
                                          catch (RunnerRequestJobNotFoundException) when (settings.Ephemeral)
                                          {
-@@ -719,6 +830,11 @@
+@@ -719,6 +857,11 @@
                                          await actionsRunServer.ConnectAsync(new Uri(settings.ServerUrl), creds);
  
                                          // Get job message
@@ -213,7 +240,7 @@
                                          jobRequestMessage = await actionsRunServer.GetJobMessageAsync(messageRef.RunnerRequestId, messageQueueLoopTokenSource.Token);
                                      }
                                      else
-@@ -730,6 +846,11 @@
+@@ -730,6 +873,11 @@
                                          await runServer.ConnectAsync(new Uri(messageRef.RunServiceUrl), credsV2);
  
                                          // Get job message
@@ -225,7 +252,7 @@
                                          try
                                          {
                                              jobRequestMessage = await runServer.GetJobMessageAsync(messageRef.RunnerRequestId, messageRef.BillingOwnerId, messageQueueLoopTokenSource.Token);
-@@ -760,6 +881,7 @@
+@@ -760,6 +908,7 @@
  
                                      // Dispatch
                                      jobDispatcher.Run(jobRequestMessage, runOnce);
@@ -233,13 +260,14 @@
  
                                      // Run once?
                                      if (runOnce)
-@@ -869,6 +991,19 @@
+@@ -869,6 +1018,22 @@
                              // ignore exception during delete session for ephemeral runner since the runner might already be deleted from the server side
                              // and the delete session call will ends up with 401.
                              Trace.Info($"Ignore any exception during DeleteSession for an ephemeral runner. {ex}");
 +                        }
 +                    }
 +
++                    pendingPollTokenSource?.Dispose();
 +                    if (drainExitState != null)
 +                    {
 +                        if (ReadDrainRequest(drainRequest) == drainId)
@@ -248,7 +276,9 @@
 +                                await Task.Delay(1000, HostContext.RunnerShutdownToken);
 +                        if (ReadDrainRequest(drainRequest) != drainId)
 +                        {
-+                            TryWriteDrainAck(drainAck, drainId, "cancelled");
++                            while (!TryWriteDrainAck(drainAck, drainId, "cancelled") &&
++                                !HostContext.RunnerShutdownToken.IsCancellationRequested)
++                                await Task.Delay(1000, HostContext.RunnerShutdownToken);
 +                            restartSession = true;
                          }
                      }
@@ -285,7 +315,7 @@
                  {
 --- a/src/Test/L0/Listener/RunnerL0.cs
 +++ b/src/Test/L0/Listener/RunnerL0.cs
-@@ -70,6 +70,288 @@
+@@ -70,6 +70,292 @@
          {
              var message = new JobCancelMessage(Guid.NewGuid(), TimeSpan.FromSeconds(0));
              return message;
@@ -318,7 +348,9 @@
 +                _configurationManager.Setup(x => x.LoadSettings()).Returns(new RunnerSettings { PoolId = 43242, AgentId = 5678 });
 +                _configurationManager.Setup(x => x.IsConfigured()).Returns(true);
 +                _configStore.Setup(x => x.IsServiceConfigured()).Returns(false);
-+                _messageListener.Setup(x => x.CreateSessionAsync(It.IsAny<CancellationToken>())).ReturnsAsync(CreateSessionResult.Success);
++                int sessions = 0;
++                _messageListener.Setup(x => x.CreateSessionAsync(It.IsAny<CancellationToken>()))
++                    .Returns((CancellationToken _) => { Interlocked.Increment(ref sessions); return Task.FromResult(CreateSessionResult.Success); });
 +                _messageListener.Setup(x => x.DeleteSessionAsync()).Returns(Task.CompletedTask);
 +                _messageListener.Setup(x => x.DeleteMessageAsync(It.IsAny<TaskAgentMessage>())).Returns(Task.CompletedTask);
 +                _jobDispatcher.Setup(x => x.ShutdownAsync()).Returns(Task.CompletedTask);
@@ -361,6 +393,7 @@
 +                Assert.False(running.IsCompleted);
 +                cancelPoll.SetResult(cancellation);
 +                await WaitFor(() => Volatile.Read(ref cancels) == 1);
++                await WaitFor(() => Volatile.Read(ref sessions) == 2);
 +                hc.ShutdownRunner(ShutdownReason.UserCancelled);
 +                await WaitFor(() => running.IsCompleted);
 +                _jobDispatcher.Verify(x => x.Cancel(It.IsAny<JobCancelMessage>()), Times.Once());
@@ -547,8 +580,9 @@
 +                File.Delete(request);
 +                await Task.Delay(1200); // The failed cancelled ack must not stop the active worker.
 +                Assert.False(running.IsCompleted);
-+                File.WriteAllText(request, requestJson);
 +                Directory.Delete(ack);
++                await WaitFor(() => File.Exists(ack) && File.ReadAllText(ack).Contains("cancelled"));
++                File.WriteAllText(request, requestJson);
 +                await WaitFor(() => File.Exists(ack) && File.ReadAllText(ack).Contains("draining"));
 +                File.Delete(ack);
 +                Directory.CreateDirectory(ack);

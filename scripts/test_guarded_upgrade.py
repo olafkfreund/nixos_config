@@ -960,6 +960,43 @@ class Recovery(DrainCase):
         self.assert_reopened()
         self.assertFalse(self.exists("verified"))
 
+    def test_a_failed_rollback_root_cleanup_keeps_the_commit(self):
+        profile = self.host.state / "profile"
+        profile.symlink_to(OLD)
+        real_run, real_unlink = self.host.run, gu.Path.unlink
+
+        def run(*args, **kwargs):
+            if args[0] == "nix-env":
+                real_unlink(profile)
+                profile.symlink_to(args[-1])
+            if args[0] in ("nix-env", "nix-store"):
+                return ""
+            return real_run(*args, **kwargs)
+
+        def switch(*args, **kwargs):
+            self.host.current = NEW
+            return subprocess.CompletedProcess(args, 0, "", "")
+
+        def unlink(path, *args, **kwargs):
+            if path.name == "rollback-root":
+                raise OSError("read-only")
+            return real_unlink(path, *args, **kwargs)
+
+        self.patch(
+            run=run,
+            PROFILE=profile,
+            current_closure=lambda: self.host.current,
+            active_generation=lambda: 1,
+            failed_units=set,
+            graphical_sessions=set,
+            verify_local=lambda *a, **k: None,
+            gate=lambda *a, **k: None,
+        )
+        self.patch_object(gu.subprocess, "run", switch)
+        self.patch_object(gu.Path, "unlink", unlink)
+        self.assertTrue(gu.drained_activate(SHA, NEW))
+        self.assert_committed()
+
     def assert_committed(self):
         self.assertEqual(self.rolled_back, [])
         self.assert_reopened()
@@ -1100,13 +1137,13 @@ class Recovery(DrainCase):
             raise AssertionError(f"recover mode switched: {args}")
 
         self.patch_object(gu.subprocess, "run", switch)
-        for phase in ("switching", "draining", "settled-commit", None):
+        for phase in ("switching", "draining", "settled-rollback", None):
             with self.subTest(phase=phase):
                 self.logs.clear()
                 self.interrupted(phase)
                 gu.save("transaction", {"sha": SHA})
                 journal = gu.read("drain")
-                self.assertEqual(gu.cli("p620", "recover"), 0)
+                self.assertEqual(gu.cli("p620", "recover"), 1)
                 self.assertEqual(self.rolled_back, [])
                 self.assertEqual(self.host.calls, [])
                 self.assertEqual(self.requests(), UNITS)
@@ -1120,6 +1157,57 @@ class Recovery(DrainCase):
         self.assertEqual(gu.main("p620", True), 1)
         self.assertEqual(self.rolled_back, [SHA])
         self.assert_reopened()
+
+    def test_recover_mode_finishes_a_committed_cleanup_without_switching(self):
+        def switch(*args, **kwargs):
+            raise AssertionError(f"recover mode switched: {args}")
+
+        self.patch_object(gu.subprocess, "run", switch)
+        for phase in ("settled-commit", "reopen-failed"):
+            with self.subTest(phase=phase):
+                self.host.started.clear()
+                self.host.current = NEW
+                self.interrupted("settled-commit")
+                gu.save("drain", {**gu.read("drain"), "phase": phase})
+                gu.save("transaction", {"sha": SHA})
+                self.assertEqual(gu.cli("p620", "recover"), 0)
+                self.assert_committed()
+                (self.host.state / "verified").unlink()
+
+    def test_an_invalid_journal_is_reopened_like_an_orphan(self):
+        good = {
+            "phase": "switching",
+            "sha": SHA,
+            "candidate": NEW,
+            "request": "r",
+            "invocations": {"": "x"},
+            "requested": [""],
+        }
+        commit = {**good, "phase": "settled-commit", "settled": "settled-commit"}
+        self.assertTrue(gu.valid_journal(good))
+        self.assertTrue(gu.valid_journal(commit))
+        self.assertTrue(gu.valid_journal({"phase": "reopen-failed", "unresolved": []}))
+        bad = [None, {**good, "phase": "bogus"}, {**good, "phase": []}]
+        for key in ("sha", "candidate", "request", "invocations", "requested"):
+            bad.append({**good, key: None})
+        bad += [
+            {**good, "invocations": {"": 1}},
+            {**good, "requested": [1]},
+            {**good, "settled": "settled-commit"},
+            {**commit, "settled": "yes"},
+            {k: v for k, v in commit.items() if k != "sha"},
+            {k: v for k, v in commit.items() if k != "candidate"},
+        ]
+        for journal in bad:
+            with self.subTest(journal=journal):
+                self.host.started.clear()
+                self.logs.clear()
+                self.interrupted(None, closed=False)
+                gu.save("drain", journal)
+                self.assertEqual(gu.main("p620", True), 0)
+                self.assertTrue(any("unreadable" in m for m in self.logs))
+                self.assert_reopened()
+                self.assertFalse(self.exists("verified"))
 
     def test_recovery_waits_for_the_deploy_lock(self):
         self.interrupted("switching")
