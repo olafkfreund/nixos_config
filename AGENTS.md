@@ -34,7 +34,8 @@ Per-host user files in `Users/<user>/` compose the Home Manager config. Home Man
    Flux's `fluxd` user unit and its `flux-guard` units, see `docs/applications/flux.md`;
    omaPOD's `omapod-refresh` and `omapod-settings` user units, see `docs/applications/omapod.md`; the
    `hc-core-ensure` user unit, which must act on the user's own hc core, see `docs/applications/herdr.md`; the guarded upgrade's
-   `guarded-idle-report` and `guarded-idle-beat` user units, see `docs/applications/guarded-upgrade.md`).
+   `guarded-idle-report` and `guarded-idle-beat` user units and the `guarded-upgrade-recover` unit, see
+   `docs/applications/guarded-upgrade.md`).
 3. **Secrets load at runtime only** — `passwordFile` / agenix paths. Never
    `builtins.readFile` a secret; that puts it in the Nix store.
 4. **No `mkIf cond true`** — assign the boolean directly.

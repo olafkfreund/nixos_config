@@ -163,6 +163,12 @@ in
           StateDirectory = "guarded-upgrade";
           StateDirectoryMode = "0755";
           CacheDirectory = "guarded-upgrade";
+          # Recovery never switches, so the system can be read-only to it: it writes
+          # only its own state and cache and the runners' drain/ files. Not
+          # DynamicUser: it starts the runner units. See docs/applications/guarded-upgrade.md.
+          ProtectSystem = "strict";
+          ReadWritePaths = [ "/var/lib/github-runner" "/run/lock" ];
+          PrivateTmp = true;
           NoNewPrivileges = true;
           ProtectHome = true;
         };
