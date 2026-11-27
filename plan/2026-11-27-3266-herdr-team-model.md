@@ -16,49 +16,59 @@ Decisions (approved spec): `up` in both backends takes `--model M` and
 `--effort E`, validated against `^[A-Za-z0-9._-]+$`; review uses them in
 place of `$review_model`/`$review_effort`; implement passes `-c model="M"` /
 `-c model_reasoning_effort="E"` to `codex-implement`; agy-implement passes
-`--model M` / `--effort E` to `agy-implement --acp`; the member record gains
-`model` and `effort` (null when unset); the header usage line names them.
+them to `agy-implement --acp`; the member record gains `model` and `effort`
+(null when unset); the header usage line names them.
+
+Revised after the Codex plan review: no jq `select` (it empties the record);
+agy values go as `--model=M` / `--effort=E` so a leading `-` stays a value;
+the fakes record what the agy member receives; an hc override case.
 
 ## Steps
 
 1. `home/development/herdr-team.sh`.
    - Header line 3: `herdr-team up <task> review|implement|agy-implement [--step k] [--model m] [--effort e]`.
-   - `up_tui` (~424-434) and `up_hc` (~678-688): add `model_opt` and
-     `effort_opt` to the `local` lists (empty by default) and two `case`
-     arms beside `--step`:
-     `--model) [[ ${2:-} =~ ^[A-Za-z0-9._-]+$ ]] || usage; model_opt=$2; shift 2 ;;`
-     and the same for `--effort`.
-   - Argv (~502-507 and ~756-761): build `over=()`; when `model_opt` is set
-     add `-c "model=\"$model_opt\""`, when `effort_opt` is set add
-     `-c "model_reasoning_effort=\"$effort_opt\""`.
-     - review: replace the two fixed `-c` values with
-       `-c "model=\"${model_opt:-${review_model:?}}\"" -c "model_reasoning_effort=\"${effort_opt:-${review_effort:?}}\""`
-       (same position, so the existing launch-line tests still match).
-     - implement: `argv=(agent-env codex-implement [--no-daemon] "${over[@]}" -c "$notify" -c "$trust")`.
-     - agy-implement: append `--model "$model_opt"` / `--effort "$effort_opt"`
-       when set, after `--turns "$work/turns"`.
+   - `up_tui` (local list at line 421) and `up_hc` (line 673): add
+     `model_opt='' effort_opt=''` to the local list and a separate
+     `local -a over=()`; beside `--step`, one arm
+     `--model | --effort)` that checks `${2:-}` against the regex (else
+     `usage`), sets `model_opt` or `effort_opt`, and shifts 2.
+   - Before each argv `case`: `over+=(-c "model=\"$model_opt\"")` when
+     `model_opt` is set, `over+=(-c "model_reasoning_effort=\"$effort_opt\"")`
+     when `effort_opt` is set.
+     - review: the fixed values become
+       `${model_opt:-${review_model:?}}` / `${effort_opt:-${review_effort:?}}`
+       in the same position.
+     - implement: `codex-implement [--no-daemon] "${over[@]}" -c "$notify" -c "$trust"`.
+     - agy-implement: after `--turns "$work/turns"`, append
+       `--model=$model_opt` / `--effort=$effort_opt` when set.
    - `rec=$(jq -n …)` (~509 and ~763): `--arg model "$model_opt" --arg effort "$effort_opt"`
-     and in the object `model: ($model | select(. != "")), effort: ($effort | select(. != ""))`
-     written so an empty value becomes `null` (e.g. `(if $model == "" then null else $model end)`).
-   → verify: `shellcheck --exclude=SC2016` on the file; `bash -n`.
+     and `model: (if $model == "" then null else $model end)`, the same for
+     `effort`, inside the object.
+   → verify: `bash -n`; the build's shellcheck.
 
-2. `home/development/herdr-team-test.sh`, using the file's existing
-   `team up` helpers and its fake `codex` / `agy-implement` that log `$*` to
-   `$TEST_STATE/launched`:
-   - review with `--model x.y --effort low` → launch line contains
-     `-c model="x.y" -c model_reasoning_effort="low"` in place of the defaults;
-   - implement with `--model x` → line contains `-c model="x"` and no
-     effort override;
-   - agy-implement with `--effort high` → argv ends with `--effort high`;
-   - `--model 'a b'` and `--model 'a;b'` → `up` exits with the usage error
-     and starts nothing;
-   - the member record in the team state shows the model (`jq`).
+2. `home/development/herdr-team-test.sh`.
+   - The fake `agy-implement` writes its arguments, one per line, to
+     `$TEST_STATE/agy-args` before `shift`; the fake `agy` appends each
+     `session/set_config_option` params object to `$TEST_STATE/agy-config`.
+   - New block before "basic flow" (`ok model-overrides`): review with
+     `--model x.y --effort low` (launch line has both overrides, no
+     default, record holds them); implement with `--model x` (line has
+     `codex-implement -c model="x" -c notify=`, no effort, record effort is
+     an existing key with null); a default review member (both keys exist
+     and are null); `--model 'a b'`, `'a;b'`, `''` and a bare `--effort`
+     rejected through `team up` with nothing launched; agy-implement with
+     `--model -preview --effort high` (args file has `--model=-preview` and
+     `--effort=high`; the fake agy received `model=-preview` and
+     `thought_level=high`).
+   - At the end (`ok hc-model-overrides`): hc implement with
+     `--model x --effort high` (line has `--no-daemon -c model="x" -c model_reasoning_effort="high" -c notify=`,
+     record holds both).
    → verify: `nix build --no-link .#nixosConfigurations.p620.config.system.build.toplevel`
    (herdr-team's checkPhase runs shellcheck and the test file).
 
 3. Lead: `just test-host razer`; agy diff review; PR; merge; bus
-   announcement; switch p620, then razer via p620; on p620 run
-   `herdr-team up` help text check (`herdr-team up 2>&1 | head -1`).
+   announcement; switch p620, then razer via p620; check line 3 of the
+   installed script names the flags (`grep -m1 'up <task>' "$(command -v herdr-team)"`).
 
 ## Tests
 
