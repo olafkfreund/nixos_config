@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3263
 intent: intent/2026-11-27-3263-agent-team-role-map.md
 ---
