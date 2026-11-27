@@ -228,9 +228,10 @@ The model is the reviewer row of the Team policy table.
   review "model not reported".
 
 When two providers were asked for, run the Codex and agy calls
-**in parallel**: check `git status --porcelain` before starting, launch two background Bash commands (each with its own output
-file and `timeout`), wait for both, then check `git status --porcelain` again
-and report any change. Inside herdr,
+**in parallel**: check `git status --porcelain` before starting, launch two
+background Bash commands (each with its own output file and `timeout`), wait
+for both, then check `git status --porcelain` again and report any change.
+Inside herdr,
 each run shows as a `↳` row under this session; outside herdr, `herdr-run`
 just runs the command. (Was
 sequential with no recorded reason; if parallel runs fail where sequential
