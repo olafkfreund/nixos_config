@@ -1159,6 +1159,8 @@ in
 
     # Managed subagent: the Sonnet coder for approved plans (#2079).
     environment.etc."claude-code/.claude/agents/coder.md".source = coderAgent;
+    # Stable path for the herdr-team claude-implement member's PreToolUse hook (#3268).
+    environment.etc."claude-code/hooks/coder-guard".source = coderGuardScript;
 
     # Codex reads /etc/codex/requirements.toml; managed hook commands must sit
     # under managed_dir. No matcher: the guard exits 0 without a command.
