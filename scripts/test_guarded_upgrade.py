@@ -152,6 +152,45 @@ class GuardedUpgradeFixtures(unittest.TestCase):
         self.assertEqual(user_sessions(props), {"2", "3"})
         self.assertEqual(user_sessions({"1": props["1"]}), set())
 
+    def test_ssh_without_a_tty_is_not_a_person(self):
+        props = {
+            "4": {
+                "Class": "user",
+                "State": "active",
+                "Type": "wayland",
+                "Service": "sddm",
+                "TTY": "tty2",
+            },
+            "306": {
+                "Class": "user",
+                "State": "active",
+                "Type": "tty",
+                "Service": "sshd",
+                "TTY": "",
+            },
+            "610": {
+                "Class": "user",
+                "State": "active",
+                "Type": "tty",
+                "Service": "sshd",
+            },
+            "7": {
+                "Class": "user",
+                "State": "active",
+                "Type": "tty",
+                "Service": "sshd",
+                "TTY": "pts/0",
+            },
+            "8": {
+                "Class": "user",
+                "State": "active",
+                "Type": "tty",
+                "Service": "login",
+                "TTY": "",
+            },
+        }
+        self.assertEqual(user_sessions(props), {"4", "7", "8"})
+
     def test_session_must_survive_the_switch(self):
         self.assertTrue(session_regressed({"3"}, set()))
         # A session that crashed and was replaced by a new login is still lost.

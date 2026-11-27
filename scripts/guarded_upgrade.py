@@ -123,13 +123,17 @@ def user_sessions(props_by_id):
     """logind ids of active or online sessions that belong to a person.
 
     Class=user leaves out the display manager's greeter, which is its own Wayland
-    session whenever nobody is logged in; any Type counts, so an SSH or console
-    login blocks a switch just as a desktop does.
+    session whenever nobody is logged in. A console login or an interactive SSH
+    login blocks a switch just as a desktop does. An SSH session with no TTY does
+    not: it is a program (another host's herdr or editor server) holding a
+    connection, not a person at a prompt (owner, 2026-11-27).
     """
     return {
         sid
         for sid, props in props_by_id.items()
-        if props.get("Class") == "user" and props.get("State") in ("active", "online")
+        if props.get("Class") == "user"
+        and props.get("State") in ("active", "online")
+        and not (props.get("Service") == "sshd" and not props.get("TTY"))
     }
 
 
@@ -287,6 +291,10 @@ def graphical_sessions():
                 "State",
                 "-p",
                 "Type",
+                "-p",
+                "Service",
+                "-p",
+                "TTY",
             ],
             text=True,
             capture_output=True,
