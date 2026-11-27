@@ -150,7 +150,7 @@ Three selectors, pick one:
    `git status --porcelain` check before and after).
 2. **`review` takes far fewer flags than `exec`.** No `-s`, no `--ephemeral`,
    no `--skip-git-repo-check`, no `-C`, no `-o`. Put the root options
-   (`--dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt`)
+   (`--dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt -p review`)
    **before** the `review` subcommand, and check `git status --porcelain`
    before and after every run; report any change.
 

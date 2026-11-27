@@ -56,7 +56,7 @@ read. Models per role:
   reviews, deploys and commits stay with the manager.
 - When agent-team mode is on (Claude Code's prompt hook says
   `agent-team: on`; in Codex or agy, run `agent-team status`, which
-  prints `on` or `off`), each task under the artifact workflow (not
+  prints `agent-team: on` or `agent-team: off`), each task under the artifact workflow (not
   exempt ones) gets two reviews:
   - The plan draft: one read-only review by Codex (by agy when Codex is
     the manager), started as soon as the draft is written; show its
@@ -74,7 +74,9 @@ read. Models per role:
     entry; the user opts out by deleting entries before approving.
   - A provider that fails or is out of quota is reported verbatim;
     carry on without it. Review output never approves anything.
-  - `agent-team: off`: none of this applies.
+  - `agent-team: off`: none of this applies; review the diff with one
+    fresh agent on the manager's reviewer model, given only the plan path
+    and `git diff`.
 - Prefer one worker plus `herdr-team` for other providers over native
   multi-agent teams, which cost several times the tokens.
 - Finish a step a worker hands back yourself, then commit and update
