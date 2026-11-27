@@ -104,7 +104,8 @@ reviewers:
       (`kubectl get jobs -A --field-selector status.successful=0`).
    2. Record: `docker ps -a` (IDs, names), `docker volume ls`,
       `kubectl get nodes,pods -A`, PVC list; write a sentinel ConfigMap.
-   3. Stop: `k3d-image-gc.timer`, `k3d-cluster-bootstrap`, every container
+   3. Stop: `k3d-image-gc.timer`, `k3d-cluster-bootstrap.timer`,
+      `k3d-backup-freshness.timer`, `k3d-cluster-bootstrap`, every container
       (`docker stop $(docker ps -q)`), then `docker.socket`, `docker`,
       `containerd`. `pgrep -a containerd-shim` must be empty; stop if not.
    4. `umount /mnt/build/docker/volumes`; `findmnt` must not show it, and
@@ -113,8 +114,8 @@ reviewers:
       compare `du -s --apparent-size` and file counts.
    6. `nixos-rebuild switch` p620 from `main` with Docker held down (mask
       `docker.socket` for the switch and unmask after), then start
-      `containerd`, `docker.socket`, `docker`, `k3d-cluster-bootstrap`,
-      `k3d-image-gc.timer`.
+      `containerd`, `docker.socket`, `docker`, `k3d-cluster-bootstrap`, and
+      the three timers.
    7. Check: same container IDs and volume names as recorded; nodes and pods
       Ready; sentinel reads back; `docker inspect` mounts resolve under
       `/mnt/build/docker/volumes` on nvme0n1 (`findmnt -T`);
