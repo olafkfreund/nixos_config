@@ -82,6 +82,8 @@ in
           ExecStart = "${pkgs.hypridle}/bin/hypridle -c ${idleConf}";
           ExecStopPost = "${pkgs.systemd}/bin/systemctl --user stop guarded-idle-beat.service";
           Restart = "on-failure";
+          # The rest of the hardening rule does not fit a user unit: docs/applications/guarded-upgrade.md.
+          NoNewPrivileges = true;
         };
       };
       # Rewritten every 60 s while idle: the gate refuses a report older than 120 s,
@@ -89,7 +91,10 @@ in
       systemd.user.services.guarded-idle-beat = {
         description = "Idle report heartbeat for the guarded upgrade";
         path = [ pkgs.systemd pkgs.coreutils pkgs.gnused pkgs.gnugrep ];
-        serviceConfig.ExecStopPost = "${pkgs.coreutils}/bin/rm -f /run/guarded-upgrade-idle/%U";
+        serviceConfig = {
+          ExecStopPost = "${pkgs.coreutils}/bin/rm -f /run/guarded-upgrade-idle/%U";
+          NoNewPrivileges = true;
+        };
         script = ''
           uid=$(id -u)
           f=/run/guarded-upgrade-idle/$uid
@@ -98,7 +103,15 @@ in
             # Inhibitors (a video, a call) reach whoever owns org.freedesktop.ScreenSaver.
             # If that is not our hypridle, its silence proves nothing: report nothing.
             pid=$(busctl --user status org.freedesktop.ScreenSaver 2>/dev/null | sed -n 's/^PID=//p')
-            if [ -n "$pid" ] && grep -qsF ${idleConf} "/proc/$pid/cmdline"; then
+            # An inhibitor taken after the timeout only bumps hypridle's count (0.1.8 runs no
+            # on-resume for it), and the count is visible only in its log. No startup line
+            # from this run means the log is unreadable: report nothing then too.
+            inv=$(systemctl --user show -p InvocationID --value guarded-idle-report.service)
+            lines=$(journalctl --user _SYSTEMD_INVOCATION_ID="$inv" -o cat --no-pager 2>/dev/null || true)
+            locks=$(printf '%s\n' "$lines" | sed -n 's/.*Inhibit locks: \([0-9]*\).*/\1/p' | tail -n 1)
+            if [ -n "$pid" ] && grep -qsF ${idleConf} "/proc/$pid/cmdline" \
+              && [ -n "$inv" ] && printf '%s\n' "$lines" | grep -q 'found [0-9]* rules' \
+              && [ "''${locks:-0}" = 0 ]; then
               printf '{"session": "%s", "reported_session": "%s", "status": "idle", "at": %s}\n' "$sid" "$sid" "$(date +%s)" > "$f.tmp"
               mv -f "$f.tmp" "$f"
             else
