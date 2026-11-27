@@ -545,6 +545,16 @@ for arg in "$@"; do
     args+=("$arg")
   fi
 done
+# The disposable repository is private: authenticate with its token, read from
+# the guest file at each call and passed through git's environment config, so
+# it never appears in an argument list.
+token_file=/run/runner-drain-test/github-token
+if [[ -r "$token_file" ]]; then
+  auth=$(printf 'x-access-token:%s' "$(tr -d '\\n' < "$token_file")" | base64 -w0)
+  export GIT_CONFIG_COUNT=1
+  export GIT_CONFIG_KEY_0=http.https://github.com/.extraheader
+  export GIT_CONFIG_VALUE_0="Authorization: Basic $auth"
+fi
 exec "$REAL_GIT" "${args[@]}"
 """
 
@@ -2428,6 +2438,22 @@ def main(argv=None):
             results.append(res)
             status = "PASS" if res["passed"] else "FAIL"
             log(f"Scenario ({s}): {status}")
+    except Exception:
+        # Guest logs live on the VM's tmpfs: copy them out before it stops, or a
+        # failure leaves no evidence of what the script under test did.
+        with contextlib.suppress(Exception):
+            res = harness.ssh(
+                "for f in /run/runner-drain-test/*.log /run/runner-drain-test/transitions.json; do "
+                '[ -f "$f" ] && { echo "=== $f"; tail -n 80 "$f"; }; done; '
+                "echo '=== guarded-upgrade state'; ls -la /var/lib/guarded-upgrade 2>&1; "
+                "cat /var/lib/guarded-upgrade/drain 2>&1; "
+                "echo '=== journal'; journalctl -n 60 --no-pager 2>&1 | tail -n 60",
+                timeout=60,
+                check=False,
+            )
+            (workdir / "guest-on-failure.log").write_text(res.stdout + res.stderr)
+            log(f"Guest logs saved to {workdir / 'guest-on-failure.log'}")
+        raise
     finally:
         harness.stop_vm()
         if created_temp and not args.keep_workdir:
