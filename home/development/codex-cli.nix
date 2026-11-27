@@ -98,6 +98,12 @@ in
     review_model = "${team.roles.reviewer.codex.model}"
   '' + agentsTable;
 
+  home.file.".codex/review.config.toml".text = ''
+    # codex -p review profile: the reviewer role (#3264).
+    model = "${team.roles.reviewer.codex.model}"
+    model_reasoning_effort = "${team.roles.reviewer.codex.effort}"
+  '' + agentsTable;
+
   # Never `exit` in an activation entry: they are concatenated into one script.
   home.activation = {
     codexNixdMcp = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

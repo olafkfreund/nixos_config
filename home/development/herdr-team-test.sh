@@ -175,7 +175,7 @@ client=${AGY_ACP_MEMBER_PY:-$(dirname "$(realpath "$0")")/agy-acp-member.py}
   echo "agy-acp-member.py not found ($client); set AGY_ACP_MEMBER_PY" >&2
   exit 1
 }
-printf '#!%s\nshift\nexec %s %s "$@"\n' "$(command -v bash)" "$py" "$client" >"$tmp/bin/agy-implement"
+printf '#!%s\nprintf "%%s\\n" "$@" >"$TEST_STATE/agy-args"\nshift\nexec %s %s "$@"\n' "$(command -v bash)" "$py" "$client" >"$tmp/bin/agy-implement"
 cat >"$tmp/bin/agy" <<FAKE
 #!$py
 import json, os, signal, sys
@@ -191,6 +191,8 @@ for line in sys.stdin:
     elif method == 'session/new':
         send({'id': msg['id'], 'result': {'sessionId': 'fake-session', 'configOptions': [{'id': 'model'}, {'id': 'thought_level'}]}})
     elif method == 'session/set_config_option':
+        with open(os.path.join(os.environ['TEST_STATE'], 'agy-config'), 'a') as log:
+            log.write(json.dumps(msg.get('params', {})) + '\n')
         send({'id': msg['id'], 'result': {}})
     elif method == 'session/prompt':
         count += 1
@@ -351,6 +353,41 @@ if ! command -v agent-env >/dev/null; then # a dev machine has the real one on P
 fi
 mv "$tmp/agent-env.off" "$tmp/bin/agent-env"
 ok refusals
+
+# --- per-member model and effort (#3266) ---
+reset
+up t1 review --model x.y --effort low
+grep -qF -- '-c model="x.y" -c model_reasoning_effort="low"' "$TEST_STATE/launched" || die 'review override'
+if grep -qF 'gpt-6.2-astra' "$TEST_STATE/launched"; then die 'review default kept'; fi
+"$tool" status t1 | jq -e '.members.review | .model == "x.y" and .effort == "low"' >/dev/null || die 'review record'
+team down t1
+reset
+up t1 implement --model x
+grep -qF -- 'codex-implement -c model="x" -c notify=' "$TEST_STATE/launched" || die 'implement override'
+if grep -qF 'model_reasoning_effort' "$TEST_STATE/launched"; then die 'implement effort without --effort'; fi
+"$tool" status t1 | jq -e '.members.implement | has("effort") and .effort == null and .model == "x"' >/dev/null || die 'implement record'
+team down t1
+reset
+up t1 review
+"$tool" status t1 | jq -e '.members.review | has("model") and has("effort") and .model == null and .effort == null' >/dev/null || die 'default record'
+team down t1
+for bad in 'a b' 'a;b' ''; do
+  reset
+  team up t1 review --model "$bad"
+  [[ $code == 2 && ! -e $TEST_STATE/launched ]] || die "bad model accepted: [$bad]"
+done
+reset
+team up t1 review --effort
+[[ $code == 2 && ! -e $TEST_STATE/launched ]] || die 'missing effort value accepted'
+reset
+touch "$TEST_STATE/agy-next"
+up t1 agy-implement --model -preview --effort high
+grep -qxF -- '--model=-preview' "$TEST_STATE/agy-args" || die 'agy model arg'
+grep -qxF -- '--effort=high' "$TEST_STATE/agy-args" || die 'agy effort arg'
+jq -se 'any(.configId == "model" and .value == "-preview") and any(.configId == "thought_level" and .value == "high")' \
+  "$TEST_STATE/agy-config" >/dev/null || die 'agy config options'
+team down t1
+ok model-overrides
 
 # --- basic flow: review, ask, resume, down ---
 reset
@@ -1742,3 +1779,12 @@ team finish h1 implement
 assert_code 1
 is '.head_moved == true'
 ok hc-head-moved
+
+reset
+: >"$TEST_STATE/hc-implement"
+up h1 implement --model x --effort high
+grep -q -- '--no-daemon' "$TEST_STATE/launched" || die 'hc implement daemon'
+grep -qF -- '--no-daemon -c model="x" -c model_reasoning_effort="high" -c notify=' "$TEST_STATE/launched" || die 'hc implement override'
+"$tool" status h1 | jq -e '.members.implement | .model == "x" and .effort == "high"' >/dev/null || die 'hc implement record'
+team down h1
+ok hc-model-overrides

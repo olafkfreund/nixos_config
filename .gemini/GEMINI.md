@@ -71,7 +71,7 @@ through slash commands, agents, and skills.
 
 ### Agents (Automatic Activation)
 
-**System Agents** (`.gemini/agents/`):
+**System Agents** (rendered from `.claude/agents/` into `~/.gemini/agents/`, #3267):
 
 - **config-drift-detective** - Configuration drift detection and state enforcement (NEW)
 - **deployment-coordinator** - Intelligent multi-host deployment orchestration (NEW)
@@ -79,6 +79,7 @@ through slash commands, agents, and skills.
 - **issue-checker** - GitHub issue analysis and task tracking
 - **local-logs** - System log parsing and analysis
 - **module-refactor** - Intelligent code refactoring and anti-pattern detection (NEW)
+- **nix-anti-pattern-auditor** - NixOS anti-pattern audit against the documented catalogue
 - **nix-check** - Configuration validation and testing
 - **package-resolver** - Automatic package conflict resolution (NEW)
 - **performance-analyzer** - Build time and evaluation profiling (NEW)

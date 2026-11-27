@@ -105,21 +105,6 @@
     ];
   };
 
-  # Docker's volumes (the whole k3d cluster) on nvme0 (#3109), bound into the
-  # new store on the build disk (#3208). The old copy on the Micron stays
-  # untouched until it is deleted on purpose.
-  # Docker requires this mount (configuration.nix), so it never starts without it.
-  fileSystems."/mnt/build/docker/volumes" = {
-    device = "/home/docker-volumes";
-    fsType = "none";
-    options = [
-      "bind"
-      "nofail"
-      "x-systemd.requires-mounts-for=/home"
-      "x-systemd.requires-mounts-for=/mnt/build"
-    ];
-  };
-
   # The agents' VM workspace (#3194) lives on /mnt/build but keeps the path
   # nixarchy's AGENTS.md hardcodes. If the build disk is missing this bind
   # fails and the old copy underneath shows. When the disk is back, stop

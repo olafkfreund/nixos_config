@@ -1,5 +1,5 @@
 # One role map for Claude Code, Codex and agy (#3263).
-{
+let
   roles = {
     manager = {
       claude = { model = "opus"; effort = "high"; };
@@ -22,5 +22,19 @@
       agy = { model = "gemini-4-hydrogen"; effort = "low"; };
     };
   };
+  # One row of the policy table (#3264).
+  row = name:
+    let r = roles.${name};
+    in "| ${name} | `${r.claude.model}` (${r.claude.effort}) | `${r.codex.model}` (${r.codex.effort}) | `${r.agy.model}-${r.agy.effort}` |";
+in
+{
+  inherit roles;
   limits = { subagents = 4; depth = 1; };
+  table = ''
+    | Role | Claude Code | Codex | agy |
+    | ---- | ----------- | ----- | --- |
+    ${row "manager"}
+    ${row "reviewer"}
+    ${row "worker"}
+    ${row "explorer"}'';
 }

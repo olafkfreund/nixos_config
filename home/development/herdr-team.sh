@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2016,SC2154  # jq filters are single-quoted on purpose; agy_member and sink_path come from the Nix prefix
-# Usage: herdr-team up <task> review|implement|agy-implement [--step k]
+# Usage: herdr-team up <task> review|implement|agy-implement [--step k] [--model m] [--effort e]
 #        herdr-team ask <task> <member> <prompt-file> [--resume n] [--timeout s]
 #        herdr-team converse <task> <member> <prompt-file> [--max-hops N] [--deadline s]
 #        herdr-team status <task> | down <task> [member] [--force]
@@ -418,7 +418,8 @@ teardown() { # state file, member: stop it, close its pane, remove its dirs and 
 }
 
 up_tui() {
-  local branch kind wrapper notify common trust lead lead_start max created reply attempt i matched mpid mstart now first rec firstpane gd root agy_session screen ready_attempts err name
+  local branch kind wrapper notify common trust lead lead_start max created reply attempt i matched mpid mstart now first rec firstpane gd root agy_session screen ready_attempts err name model_opt='' effort_opt=''
+  local -a over=()
   task=${1:-}
   role=${2:-}
   shift 2 || usage
@@ -428,6 +429,11 @@ up_tui() {
       --step)
         [[ ${2:-} =~ ^[0-9]+$ ]] || usage
         step=$2
+        shift 2
+        ;;
+      --model | --effort) # per-member override of the role map's model (#3266)
+        [[ ${2:-} =~ ^[A-Za-z0-9._-]+$ ]] || usage
+        if [[ $1 == --model ]]; then model_opt=$2; else effort_opt=$2; fi
         shift 2
         ;;
       *) usage ;;
@@ -498,18 +504,26 @@ up_tui() {
   trust="projects={\"$root\"={trust_level=\"trusted\"}"
   if [[ $(dirname -- "$common") != "$root" ]]; then trust+=",\"$(dirname -- "$common")\"={trust_level=\"trusted\"}"; fi
   trust+='}'
+  [[ -z $model_opt ]] || over+=(-c "model=\"$model_opt\"")
+  [[ -z $effort_opt ]] || over+=(-c "model_reasoning_effort=\"$effort_opt\"")
   case $role in
     review)
       argv=(agent-env env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY
-        -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE codex --dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt -c "model=\"${review_model:?}\"" -c "model_reasoning_effort=\"${review_effort:?}\"" -c "$notify" -c "$trust")
+        -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE codex --dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt -c "model=\"${model_opt:-${review_model:?}}\"" -c "model_reasoning_effort=\"${effort_opt:-${review_effort:?}}\"" -c "$notify" -c "$trust")
       ;;
-    implement) argv=(agent-env codex-implement -c "$notify" -c "$trust") ;;
-    agy-implement) argv=(agent-env agy-implement --acp --turns "$work/turns") ;;
+    implement) argv=(agent-env codex-implement "${over[@]}" -c "$notify" -c "$trust") ;;
+    agy-implement)
+      argv=(agent-env agy-implement --acp --turns "$work/turns")
+      [[ -z $model_opt ]] || argv+=("--model=$model_opt")
+      [[ -z $effort_opt ]] || argv+=("--effort=$effort_opt")
+      ;;
   esac
   rec=$(jq -n --arg role "$role" --arg kind "$kind" --arg step "$step" \
     --arg work "$work" --arg ctl "$ctl" --argjson since "$now" --arg containment "$containment" --arg scope "$scope" \
+    --arg model "$model_opt" --arg effort "$effort_opt" \
     '{role: $role, kind: $kind, pane: "", terminal: "", agy_session: null, pid: null, start: null, step: $step, fingerprint: null,
-      head: null, pending: null, last: null, next: 1, work: $work, ctl: $ctl, since: $since, containment: $containment}
+      head: null, pending: null, last: null, next: 1, work: $work, ctl: $ctl, since: $since, containment: $containment,
+      model: (if $model == "" then null else $model end), effort: (if $effort == "" then null else $effort end)}
       + (if $scope == "" then {} else {scope: $scope} end)')
   if [[ -f $f ]]; then
     update "$f" '.members[$m] = $rec' --arg m "$role" --argjson rec "$rec"
@@ -670,7 +684,8 @@ LAUNCH
 }
 
 up_hc() {
-  local branch kind wrapper notify common trust lead lead_start max created reply attempt i matched mpid mstart now first rec firstpane gd root agy_session screen ready_attempts err name placeholder=
+  local branch kind wrapper notify common trust lead lead_start max created reply attempt i matched mpid mstart now first rec firstpane gd root agy_session screen ready_attempts err name placeholder='' model_opt='' effort_opt=''
+  local -a over=()
   task=${1:-}
   role=${2:-}
   shift 2 || usage
@@ -680,6 +695,11 @@ up_hc() {
       --step)
         [[ ${2:-} =~ ^[0-9]+$ ]] || usage
         step=$2
+        shift 2
+        ;;
+      --model | --effort) # per-member override of the role map's model (#3266)
+        [[ ${2:-} =~ ^[A-Za-z0-9._-]+$ ]] || usage
+        if [[ $1 == --model ]]; then model_opt=$2; else effort_opt=$2; fi
         shift 2
         ;;
       *) usage ;;
@@ -752,18 +772,26 @@ up_hc() {
   trust="projects={\"$root\"={trust_level=\"trusted\"}"
   if [[ $(dirname -- "$common") != "$root" ]]; then trust+=",\"$(dirname -- "$common")\"={trust_level=\"trusted\"}"; fi
   trust+='}'
+  [[ -z $model_opt ]] || over+=(-c "model=\"$model_opt\"")
+  [[ -z $effort_opt ]] || over+=(-c "model_reasoning_effort=\"$effort_opt\"")
   case $role in
     review)
       argv=(agent-env env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY
-        -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE codex --no-daemon --dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt -c "model=\"${review_model:?}\"" -c "model_reasoning_effort=\"${review_effort:?}\"" -c "$notify" -c "$trust")
+        -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE codex --no-daemon --dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt -c "model=\"${model_opt:-${review_model:?}}\"" -c "model_reasoning_effort=\"${effort_opt:-${review_effort:?}}\"" -c "$notify" -c "$trust")
       ;;
-    implement) argv=(agent-env codex-implement --no-daemon -c "$notify" -c "$trust") ;;
-    agy-implement) argv=(agent-env agy-implement --acp --turns "$work/turns") ;;
+    implement) argv=(agent-env codex-implement --no-daemon "${over[@]}" -c "$notify" -c "$trust") ;;
+    agy-implement)
+      argv=(agent-env agy-implement --acp --turns "$work/turns")
+      [[ -z $model_opt ]] || argv+=("--model=$model_opt")
+      [[ -z $effort_opt ]] || argv+=("--effort=$effort_opt")
+      ;;
   esac
   rec=$(jq -n --arg role "$role" --arg kind "$kind" --arg step "$step" \
     --arg work "$work" --arg ctl "$ctl" --argjson since "$now" --arg containment "$containment" --arg scope "$scope" \
+    --arg model "$model_opt" --arg effort "$effort_opt" \
     '{role: $role, kind: $kind, pane: "", terminal: "", agy_session: null, pid: null, start: null, step: $step, fingerprint: null,
-      head: null, pending: null, last: null, next: 1, work: $work, ctl: $ctl, since: $since, containment: $containment}
+      head: null, pending: null, last: null, next: 1, work: $work, ctl: $ctl, since: $since, containment: $containment,
+      model: (if $model == "" then null else $model end), effort: (if $effort == "" then null else $effort end)}
       + (if $scope == "" then {} else {scope: $scope} end)')
   if [[ -f $f ]]; then
     update "$f" '.members[$m] = $rec' --arg m "$role" --argjson rec "$rec"

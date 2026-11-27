@@ -9,6 +9,12 @@ let
     # Read at every tick, so a rotated token is picked up without a rebuild.
     GH_TOKEN=$(cat /run/agenix/api-github-token) || exit 1
     export GH_TOKEN
+    # GitHub's rate_limit endpoint is free; a drained token skips this tick (#3259).
+    left=$(gh api rate_limit --jq .resources.core.remaining 2>/dev/null) || left=
+    if [[ $left =~ ^[0-9]+$ ]] && [ "$left" -lt 500 ]; then
+      echo "skipping: $left GitHub API calls left"
+      exit 0
+    fi
     exec ${pkgs.bash}/bin/bash ${script}
   '';
 in
@@ -31,11 +37,11 @@ in
     };
   };
   systemd.user.timers.nixarchy-schedule-watchdog = {
-    description = "Check nixarchy's scheduled workflows every 5 minutes";
+    description = "Check nixarchy's scheduled workflows every 15 minutes";
     wantedBy = [ "timers.target" ];
     unitConfig.ConditionUser = "olafkfreund";
     timerConfig = {
-      OnCalendar = "*:0/5";
+      OnCalendar = "*:0/15";
       Persistent = false;
     };
   };
