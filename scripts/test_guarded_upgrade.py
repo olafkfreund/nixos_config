@@ -58,7 +58,8 @@ class GuardedUpgradeFixtures(unittest.TestCase):
         self.assertFalse(promotion_safe(None, "abc", "abc", "success", "main", 1, 1))
 
     def test_idle_report_written_by_another_user_is_ignored(self):
-        import os, tempfile
+        import os
+        import tempfile
         from pathlib import Path
 
         with tempfile.TemporaryDirectory() as d:
