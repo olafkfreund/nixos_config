@@ -656,8 +656,8 @@ let
   };
 
   # A guard that crashes or times out blocks the call instead of letting it
-  # through (onFailure, 2.1.329); PreSkillShellCommand sends the same
-  # tool_input.command as Bash, so skills' inline shell is guarded too (#3244).
+  # through (onFailure, 2.1.329). No PreSkillShellCommand: Claude Code before
+  # 2.1.332 stops on it with a settings prompt in sessions still running.
   guardOn = script: [{
     matcher = "Bash";
     hooks = [{
@@ -670,17 +670,14 @@ let
 
   busAnnounceHooks = lib.optionalAttrs cfg.busAnnounceGuard.enable {
     PreToolUse = guardOn busAnnounceScript;
-    PreSkillShellCommand = guardOn busAnnounceScript;
   };
 
   sharedCheckoutGuardHooks = lib.optionalAttrs cfg.sharedCheckoutGuard.enable {
     PreToolUse = guardOn sharedCheckoutGuardScript;
-    PreSkillShellCommand = guardOn sharedCheckoutGuardScript;
   };
 
   deployGuardHooks = lib.optionalAttrs cfg.deployGuard.enable {
     PreToolUse = guardOn deployGuardScript;
-    PreSkillShellCommand = guardOn deployGuardScript;
   };
 
   # Claude Code's Task subagents run in-process with no PTY, so herdr cannot
