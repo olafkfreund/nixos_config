@@ -374,11 +374,11 @@ team down t1
 for bad in 'a b' 'a;b' ''; do
   reset
   team up t1 review --model "$bad"
-  [[ $code != 0 && ! -e $TEST_STATE/launched ]] || die "bad model accepted: [$bad]"
+  [[ $code == 2 && ! -e $TEST_STATE/launched ]] || die "bad model accepted: [$bad]"
 done
 reset
 team up t1 review --effort
-[[ $code != 0 && ! -e $TEST_STATE/launched ]] || die 'missing effort value accepted'
+[[ $code == 2 && ! -e $TEST_STATE/launched ]] || die 'missing effort value accepted'
 reset
 touch "$TEST_STATE/agy-next"
 up t1 agy-implement --model -preview --effort high
