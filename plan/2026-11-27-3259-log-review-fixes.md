@@ -50,6 +50,8 @@ reviewers:
    shows the i915 line plus the two new lines.
    Traps: do not add a second `boot.extraModprobeConfig` elsewhere (it is a
    lines option and would merge, but one place is the repo's pattern).
+   Deviation (implementation): the pre-push typos hook reads `hda` as a
+   misspelling of "had", so `.typos.toml` allows `hda` / `HDA`.
 
 2. `hosts/razer/nixos/hardware-configuration.nix:27`: `options = [ "fmask=0022" "dmask=0022" ];`
    → `[ "fmask=0077" "dmask=0077" ];`.

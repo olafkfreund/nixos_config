@@ -27,6 +27,10 @@ extend-ignore-re = [
   # the flag cluster, not a misspelling of HEX.
   HAX = "HAX"
 
+  # Intel HD Audio: the kernel's snd_hda_intel module.
+  hda = "hda"
+  HDA = "HDA"
+
   # NixOS-specific terms
   nixos = "nixos"
   nixpkgs = "nixpkgs"
