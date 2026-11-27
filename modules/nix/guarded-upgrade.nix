@@ -54,10 +54,15 @@ in
           ExecCondition = lib.mkForce "${pkgs.coreutils}/bin/true";
           StateDirectory = "guarded-upgrade";
           StateDirectoryMode = "0755";
+          CacheDirectory = "guarded-upgrade";
           NoNewPrivileges = true;
           ProtectHome = true;
         };
         environment = {
+          # ProtectHome makes /root read-only: nix's fetcher cache and the bus's
+          # cursor database would otherwise fail there on the first real run.
+          XDG_CACHE_HOME = "/var/cache/guarded-upgrade";
+          XDG_STATE_HOME = "/var/lib/guarded-upgrade";
           PYTHONPATH = "${pkgs.customPkgs.agent-bus-mcp}/share/agent-bus-mcp";
           MATRIX_HOMESERVER = "https://matrix.freundcloud.org.uk";
           MATRIX_SERVER_NAME = "freundcloud.org.uk";
