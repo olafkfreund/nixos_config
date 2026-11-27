@@ -19,9 +19,11 @@ name: package autoupdate
 
 on:
   schedule:
-    # 03:43 UTC — after the nixos issue audit (02:00) and before the flake
-    # update (06:00), so a package bump and a flake bump never race for main.
-    - cron: "43 3 * * *"
+    # 05:43 UTC — after the guarded upgrade's 04:00–05:00 window (a merge inside
+    # it moves main past the SHA p620's canary verified, and razer refuses,
+    # nixarchy#1946) and before the flake update (06:00), so a package bump and a
+    # flake bump never race for main.
+    - cron: "43 5 * * *"
   workflow_dispatch:
 
 permissions:
