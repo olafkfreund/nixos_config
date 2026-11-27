@@ -77,3 +77,10 @@ Both host builds (they run herdr-team-test.sh); the cases in step 2.
 ## Rollback
 
 Revert the PR and switch again.
+
+## Deviations
+
+- The test cases use the harness task names `t1` / `h1` (its fake herdr
+  answers only those) and `touch "$TEST_STATE/agy-next"` before the agy
+  member, as the existing agy case does. `up_hc`'s `placeholder=` became
+  `placeholder=''` (shellcheck SC1007 once another local follows it).
