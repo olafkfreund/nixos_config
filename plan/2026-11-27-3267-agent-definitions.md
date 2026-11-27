@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3267
 spec: spec/2026-11-27-3267-agent-definitions.md
 coders:
