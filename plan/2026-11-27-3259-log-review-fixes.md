@@ -127,10 +127,20 @@ reviewers:
       While containerd runs, `ctr -n moby tasks ls` must be empty. Then
       `docker.socket`, `docker`, `containerd`; `pgrep -a containerd-shim`
       must be empty. Abort if anything is left.
-   4. **Hold down and unbind:** `systemctl mask --runtime docker.socket
-      docker.service containerd.service k3d-cluster-bootstrap.service
-      mnt-build-docker-volumes.mount` (runtime masks vanish on reboot, so a
-      crash cannot leave Docker masked). Then `umount /mnt/build/docker/volumes`.
+   4. **Hold down and unbind:** a runtime `systemctl mask` does not work
+      here: NixOS units are symlinks in `/etc/systemd/system`, which outrank
+      `/run`. Instead, for each of `docker.socket`, `docker.service`,
+      `containerd.service`, `k3d-cluster-bootstrap.service` and
+      `mnt-build-docker-volumes.mount`, write
+      `/run/systemd/system/<unit>.d/hold-3259.conf` with
+      `[Unit]` / `ConditionPathExists=/run/hold-3259-release` (a path that
+      does not exist), then `systemctl daemon-reload`. Drop-ins in `/run`
+      apply on top of `/etc` units and vanish on reboot. Tested on
+      2026-11-27 against `k3d-backup-freshness.service`: `systemctl start`
+      reported `skipped, unmet condition check`. Hard check: `systemctl cat`
+      of each of the five shows `hold-3259.conf`. A skipped condition does
+      not fail dependents, so all five need the hold. Then
+      `umount /mnt/build/docker/volumes`.
       Hard checks: `findmnt --mountpoint /mnt/build/docker/volumes` prints
       nothing; the directory is empty; `findmnt -T /mnt/build/docker/volumes -o SOURCE`
       is `/dev/nvme0n1p1`.
@@ -139,15 +149,19 @@ reviewers:
       must match. Repeat the `findmnt -T` check.
    6. **Merge and switch:** merge the PR, update `~/.config/nixos` to
       `main` (check no `nhs` is running there first), and switch p620 from
-      it with the masks still in place. A switch that reports only the
-      masked units as failed is expected; any other failed unit means go to
-      9a.
-   7. **Release:** `systemctl unmask --runtime` the five units;
+      it with the holds in place. After the switch, `systemctl cat` of
+      `docker.socket`, `docker.service`, `containerd.service` and
+      `k3d-cluster-bootstrap.service` still shows `hold-3259.conf`, and none
+      of them is active; a failed unit other than these means go to 9a.
+   7. **Release:** `rm -r /run/systemd/system/*.d/hold-3259.conf` (only
+      those files) and `systemctl daemon-reload`;
       `systemctl cat mnt-build-docker-volumes.mount` must say not found and
       `findmnt --mountpoint /mnt/build/docker/volumes` print nothing. Start
       `containerd`, `docker.socket`, `docker`. Before any container starts:
-      `docker volume ls` and every recorded mount source match step 2 and
-      exist under `/mnt/build/docker/volumes`.
+      `docker volume ls` matches step 2; every recorded mount of type
+      `volume` resolves under `/mnt/build/docker/volumes`; every recorded
+      `bind` mount (such as `/mnt/code/k3d/storage`, which never moved)
+      still exists at its recorded path.
    8. **Start and check:** start `k3d-cluster-bootstrap` and the four
       timers. Same container IDs as recorded; nodes and pods Ready; sentinel
       reads back; `lsof +D /home/docker-volumes` empty; `findmnt -T` of a
@@ -156,11 +170,11 @@ reviewers:
       Docker's store, containerd and the PVs (`/mnt/code/k3d/storage`) are
       not moved, so they always match whichever volumes copy last ran.
       - 9a. Failure before step 8 started a container: keep or reapply the
-        masks, switch back to the previous generation, unmask,
+        holds, switch back to the previous generation, remove the holds,
         `systemctl start mnt-build-docker-volumes.mount`, check
         `findmnt --mountpoint` shows `/home/docker-volumes` exactly once,
         then start everything as in 7–8.
-      - 9b. Failure after the cluster ran on the copy: quiesce and mask as
+      - 9b. Failure after the cluster ran on the copy: quiesce and hold as
         in 3–4, `sudo rsync -aHAX --numeric-ids --delete /mnt/build/docker/volumes/ /home/docker-volumes/`
         (exit 0, counts match), then 9a.
       - After either, the 102 GB copy sits hidden under the bind on
