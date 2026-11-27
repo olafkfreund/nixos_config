@@ -67,11 +67,16 @@ check_cwd() {
 }
 
 workspaces="$(jq -cn --arg path "$workspace" '[$path, "/tmp"]')"
-for args in '{"Cwd":""}' '{"Cwd":3}' '{}' '{"Cwd":"/dev/null"}' '{"Cwd":"/tmp","cwd":"/tmp"}'; do
+for args in '{"Cwd":""}' '{"Cwd":3}' '{}' '{"Cwd":"/dev/null"}' '{"Cwd":"."}' '{"Cwd":"tmp"}'; do
   check_cwd "$args" "$workspaces" "$workspace"
 done
 check_cwd '{"cWd":"/tmp"}' "$workspaces" /tmp
 check_cwd '{}' "$(jq -cn --arg path "$workspace" '[null, "/dev/null", $path]')" "$workspace"
 check_cwd '{}' '[false, "/dev/null"]' omitted
+
+# Two Cwd spellings are ambiguous and denied (#3265 review).
+t "$(jq -cn '{toolCall:{name:"run_command",args:{CommandLine:"echo hi",Cwd:"/tmp",cwd:"/"}}}')" deny "host guard refuses ambiguous Cwd"
+# Array args are not a key map: no command to check, so allow (and no jq error).
+t '{"toolCall":{"name":"run_command","args":[1]}}' allow
 
 echo 'ALL PASSED'

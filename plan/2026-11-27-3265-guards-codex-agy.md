@@ -189,3 +189,10 @@ by value; tests cover both payload shapes.
 Revert the PR and switch again. The old activation leaves hooks.json alone
 when `coder-guard` exists, so the `host-guard` key stays; its command allows
 once `/etc/antigravity/hooks/host-guard` is gone, so it is harmless.
+
+## Deviations
+
+- From the agy diff review: two `Cwd` spellings are denied as ambiguous
+  (agy keeps the last), only absolute `Cwd` and workspace paths are used
+  (hooks run in `~/.gemini/config`), and array args no longer print a jq
+  error. Tests added for each.

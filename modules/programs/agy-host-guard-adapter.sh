@@ -29,13 +29,17 @@ key_counts="$(printf '%s' "$payload" | @jq@ --stream -cn '
     | if $path[:2] == ["toolCall", "args"] and
         (($event | length) == 2 and ($path | length) == 3 or
          ($event | length) == 1 and ($path | length) == 4)
-      then ($path[2] | ascii_downcase) as $key | .[$key] += 1 else . end)
+      then ([$path[2] | strings | ascii_downcase][0]) as $key | if $key then .[$key] += 1 else . end else . end)
 ')"
 if @jq@ -e 'any(keys[]; test("[^\\x00-\\x7f]"))' <<<"$key_counts" >/dev/null; then
   deny "host guard refuses non-ASCII key names"
 fi
 if @jq@ -e '.commandline > 1' <<<"$key_counts" >/dev/null; then
   deny "host guard refuses ambiguous CommandLine"
+fi
+# agy keeps the last of duplicate keys, so two Cwd spellings could point the guard at the wrong directory.
+if @jq@ -e '.cwd > 1' <<<"$key_counts" >/dev/null; then
+  deny "host guard refuses ambiguous Cwd"
 fi
 
 translated="$(@jq@ -ce '
@@ -52,7 +56,7 @@ while IFS= read -r -d '' directory; do
 done < <(@jq@ -j --argjson counts "$key_counts" '
   (.args[] | select($counts.cwd == 1 and (.key | ascii_downcase == "cwd")) | .value),
   .workspaces[]
-  | strings | select(length > 0 and (contains("\u0000") | not)) | ., "\u0000"
+  | strings | select(startswith("/") and (contains("\u0000") | not)) | ., "\u0000"
 ' <<<"$input")
 
 guards=(@guards@)
