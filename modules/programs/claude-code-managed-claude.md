@@ -36,45 +36,60 @@ needs the owner's OK before any build or deploy; announce on the agent bus befor
 output is advice only, never approval. A session the owner starts and directs follows the owner's instructions and the
 repository's own rules instead.
 
-## Model split (Claude Code only)
+## Team policy
 
-The session model (Opus) writes intent, spec and plan, and reviews. The
-`coder` agent (Sonnet) writes the code for an approved `plan/`.
+One manager per task: the session the owner drives, whichever tool it
+is. It writes intent, spec and plan, reviews, commits and deploys.
+Workers implement the steps of an approved `plan/`; explorers only
+read. Models per role:
 
-- Hand off when an approved `plan/` has three or more steps that edit files,
-  or touches three or more files. Below that, implement it yourself: a
-  handoff costs a fresh cache and a re-read that a small task does not repay.
-- Start one `coder` per task with the plan path and step 1, and send each
-  later step to the same agent with `SendMessage` so its cache stays warm.
-- Review with a fresh agent on `model: "opus"`, given only the plan path and
-  `git diff`, so it does not share the coder's blind spots.
-- An approved `plan/` may name other implementers per step (`coders:`)
-  and extra read-only reviewers (`reviewers:`). Follow it with the
-  `handoff` and `second-opinion` skills (inside herdr, they route through
-  `herdr-team`). Steps and reviews it does not name follow the rules above.
-- When the prompt hook says `agent-team: on`, Codex and agy are on the
-  team for every task under the artifact workflow (not exempt ones):
-  - Review the plan draft with both through `second-opinion`, in
-    parallel and read-only, before stopping on it, and show their
-    findings (confirmed, refuted, unverified) with the draft. Start
-    both in the background as soon as the draft is written and do
-    your own checks while they run. Intent and spec drafts get no
-    Codex/agy review unless the user asks: the plan carries every
-    spec decision, so one review there catches the same problems.
-  - After the last step, review the diff with both, in parallel with
-    the fresh Opus review.
-  - Every draft plan fills `coders:` for each step that edits files and
-    `reviewers: [codex, agy]`, one reason per entry. Default routing:
-    large mechanical edits → agy; small tricky logic → codex; the rest
-    → coder; builds, reviews, deploys and commits stay yours.
-  - The user opts out by deleting entries before approving the plan.
-  - A provider that fails or is out of quota is reported verbatim; carry
-    on without it. Their output never approves anything.
+@team_table@
+
+- Hand off when an approved `plan/` has three or more steps that edit
+  files, or touches three or more files. Below that, implement it
+  yourself: a handoff costs a fresh cache and a re-read that a small
+  task does not repay.
+- An approved `plan/` names implementers per step (`coders:`) and extra
+  read-only reviewers (`reviewers:`). Default routing: large mechanical
+  edits → agy (`agy-implement`); small tricky logic → Codex
+  (`codex-implement`); the rest → the manager's own worker; builds,
+  reviews, deploys and commits stay with the manager.
+- When agent-team mode is on (Claude Code's prompt hook says
+  `agent-team: on`; in Codex or agy, run `agent-team status`, which
+  prints `on` or `off`), each task under the artifact workflow (not
+  exempt ones) gets two reviews:
+  - The plan draft: one read-only review by Codex (by agy when Codex is
+    the manager), started as soon as the draft is written; show its
+    findings (confirmed, refuted, unverified) with the draft. Intent
+    and spec drafts get no external review unless the user asks: the
+    plan carries every spec decision.
+  - The diff, after the last step: one read-only review by a provider
+    other than the one that implemented the steps, started fresh and
+    given only the plan path and `git diff`, so it does not share the
+    implementer's blind spots.
+  - More only when the plan's `reviewers:` lists them or the user asks;
+    the two default reviewers count toward what `reviewers:` lists.
+    Every draft plan fills `coders:` for each step that edits files and
+    `reviewers:` (plan reviewer and diff reviewer), one reason per
+    entry; the user opts out by deleting entries before approving.
+  - A provider that fails or is out of quota is reported verbatim;
+    carry on without it. Review output never approves anything.
   - `agent-team: off`: none of this applies.
-- Finish a step the coder hands back yourself, then commit and update `plan/`
-  for any deviation it reported. The PR says which steps the coder did.
-- This applies to committed, approved `plan/` files only. A plan that exists
-  only in the conversation stays with you.
+- Prefer one worker plus `herdr-team` for other providers over native
+  multi-agent teams, which cost several times the tokens.
+- Finish a step a worker hands back yourself, then commit and update
+  `plan/` for any deviation it reported. The PR says who did which step.
+- This applies to committed, approved `plan/` files only. A plan that
+  exists only in the conversation stays with the manager.
+
+## Claude Code mechanics (Claude Code only)
+
+- The worker is the `coder` agent. Start one per task with the plan
+  path and step 1, and send each later step to the same agent with
+  `SendMessage` so its cache stays warm.
+- Other implementers and reviewers go through the `handoff` and
+  `second-opinion` skills (inside herdr, they route through
+  `herdr-team`).
 
 ## Working style
 
