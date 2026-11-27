@@ -6,6 +6,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 HERE = Path(__file__).resolve().parent
 SPEC = importlib.util.spec_from_file_location("run_test", HERE / "run-test.py")
@@ -86,6 +87,18 @@ class RunnerDrainHarnessTests(unittest.TestCase):
     def test_vm_nix_has_no_dead_github_runner_drain_overlay(self):
         vm_nix = run_test.VM_NIX_FILE.read_text()
         self.assertNotIn("github-runner-drain =", vm_nix)
+
+    def test_never_falls_back_to_the_owners_token(self):
+        env = {
+            "GH_TOKEN": "real",
+            "GITHUB_TOKEN": "real",
+            "GITHUB_TOKEN_FILE": __file__,
+        }
+        with (
+            mock.patch.dict(os.environ, env, clear=True),
+            self.assertRaises(RuntimeError),
+        ):
+            run_test.resolve_token_from_env()
 
     def test_collect_condition_skips_requires_condition_result_no_while_closed(self):
         harness = run_test.VMHarness(

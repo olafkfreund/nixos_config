@@ -118,32 +118,17 @@ def resolve_token_from_env(token_file=None, allow_agenix=False):
             raise RuntimeError(f"token file is empty: {path_str}")
         return token
 
+    # Only names that exist for this test: GH_TOKEN, GITHUB_TOKEN and
+    # GITHUB_TOKEN_FILE usually hold the owner's real token, which must never
+    # reach the disposable VM.
     for var in (
         "RUNNER_DRAIN_TEST_TOKEN",
         "DISPOSABLE_GITHUB_TOKEN",
         "DRAIN_TEST_TOKEN",
-        "GH_TOKEN",
-        "GITHUB_TOKEN",
     ):
         val = os.environ.get(var, "").strip()
         if val:
             return val
-
-    fallback_file = os.environ.get("GITHUB_TOKEN_FILE", "").strip()
-    if fallback_file:
-        path = Path(fallback_file)
-        resolved = str(path.resolve()) if path.exists() else str(path)
-        if not allow_agenix and (
-            fallback_file.startswith("/run/agenix")
-            or resolved.startswith("/run/agenix")
-        ):
-            raise RuntimeError(
-                "GITHUB_TOKEN_FILE points to /run/agenix; provide a disposable token via "
-                "RUNNER_DRAIN_TEST_TOKEN or RUNNER_DRAIN_TEST_TOKEN_FILE"
-            )
-        token = path.read_text().strip()
-        if token:
-            return token
 
     raise RuntimeError(
         "disposable GitHub token not found; set RUNNER_DRAIN_TEST_TOKEN or RUNNER_DRAIN_TEST_TOKEN_FILE"
