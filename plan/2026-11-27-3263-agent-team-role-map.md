@@ -146,8 +146,13 @@ verify, so the flake sees new files.
      `-c model=\"gpt-6.2-astra\" -c model_reasoning_effort=\"medium\"` (the
      string is double-quoted, so the inner quotes are escaped).
    - `home/development/herdr-team-test.sh:1662` (hc backend): add, beside the
-     `--no-daemon` check,
-     `grep -qF -- '-c model="gpt-6.2-astra" -c model_reasoning_effort="medium"' "$TEST_STATE/launched" || die 'hc review model'`.
+     `--no-daemon` check:
+
+     ```bash
+     grep -qF -- '-c model="gpt-6.2-astra" -c model_reasoning_effort="medium"' \
+       "$TEST_STATE/launched" || die 'hc review model'
+     ```
+
    → verify: `nix build --no-link .#nixosConfigurations.p620.config.system.build.toplevel`
    (herdr-team's checkPhase runs shellcheck and herdr-team-test.sh); the built
    `agy-implement` still contains `gemini-4-hydrogen-medium` and
