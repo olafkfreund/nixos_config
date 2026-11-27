@@ -2,7 +2,9 @@ name: Follow promoted nixarchy edge
 
 on:
   schedule:
-    - cron: '20 1 * * *'
+    # After the guarded upgrade's 04:00–05:00 window: its PR auto-merges when CI
+    # passes, and a merge inside the window moves main past p620's canary (nixarchy#1946).
+    - cron: '5 5 * * *'
   workflow_dispatch:
 
 permissions:
