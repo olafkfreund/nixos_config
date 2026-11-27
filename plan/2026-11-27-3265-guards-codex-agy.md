@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3265
 spec: spec/2026-11-27-3265-guards-codex-agy.md
 coders:
