@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3259
 spec: spec/2026-11-27-3259-log-review-fixes.md
 coders:
