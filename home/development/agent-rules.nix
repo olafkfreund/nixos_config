@@ -9,9 +9,16 @@ let
   llmIndex = lib.optional (lib.attrByPath [ "services" "llm-index" "enable" ] false config)
     config.services.llm-index.agentInstructions;
 
-  # The model-split section names Claude's own agents (#2079); keep it to Claude.
-  managedPolicy = lib.head (lib.splitString "\n## Model split (Claude Code only)"
-    (builtins.readFile ../../modules/programs/claude-code-managed-claude.md));
+  team = import ../../modules/programs/agent-team.nix;
+
+  # Everything from the Claude Code mechanics heading on is Claude's alone; the
+  # Team policy above it is shared, with the role table filled in (#3264).
+  policyParts = lib.splitString "\n## Claude Code mechanics (Claude Code only)"
+    (builtins.readFile ../../modules/programs/claude-code-managed-claude.md);
+  managedPolicy =
+    assert lib.assertMsg (lib.length policyParts == 2)
+      "agent-rules: expected exactly one Claude Code mechanics heading in claude-code-managed-claude.md; update the marker in agent-rules.nix";
+    builtins.replaceStrings [ "@team_table@" ] [ team.table ] (lib.head policyParts);
 
   # Drop the YAML frontmatter; everything after the closing `---` is the body.
   skill = builtins.readFile ./claude-code-skills/artifact-workflow/SKILL.md;
@@ -35,8 +42,14 @@ let
       "agent-rules: the managed policy's skill sentence changed; update the replaceStrings in agent-rules.nix";
     assert lib.assertMsg (!lib.hasInfix "name: artifact-workflow" text)
       "agent-rules: SKILL.md frontmatter was not stripped";
-    assert lib.assertMsg (!lib.hasInfix "Model split" text)
-      "agent-rules: the Claude-only model-split section leaked into the Codex/Antigravity rules";
+    assert lib.assertMsg (!lib.hasInfix "Claude Code mechanics" text)
+      "agent-rules: the Claude-only mechanics section leaked into the Codex/Antigravity rules";
+    assert lib.assertMsg (!lib.hasInfix "@team_table@" text)
+      "agent-rules: the @team_table@ placeholder was not replaced";
+    assert lib.assertMsg (lib.hasInfix "## Team policy" text)
+      "agent-rules: the Team policy section is missing";
+    assert lib.assertMsg (lib.stringLength text < 32768)
+      "agent-rules: AGENTS.md is over Codex's 32 KiB cap";
     pkgs.writeText "global-agents.md" text;
 in
 {
