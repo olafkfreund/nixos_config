@@ -2235,9 +2235,9 @@ cat /run/runner-drain-test/{run_tag}.pid
         rc, out_log = self.wait_guarded_upgrade(
             "scen-f", timeout=180, poll_callback=_poll
         )
-        defer_at = int(time.time())
         after_defer = self.get_vm_snapshot()
         samples.append(after_defer)
+        defer_at = extract_guest_transition_times(after_defer)["cancelling_at"]
 
         deadline = time.time() + 120
         while time.time() < deadline:
@@ -2291,6 +2291,7 @@ cat /run/runner-drain-test/{run_tag}.pid
             and len(gh_completed) == 1
             and gh_completed[0].get("conclusion") == "success"
             and completed_at is not None
+            and defer_at is not None
             and completed_at >= defer_at
             and busy_unit in RUNNER_UNITS
             and before_invs[busy_unit] == after_invs[busy_unit]
