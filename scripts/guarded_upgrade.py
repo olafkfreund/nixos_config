@@ -202,8 +202,17 @@ def log(message):
 def save(name, value):
     STATE.mkdir(mode=0o700, parents=True, exist_ok=True)
     tmp = STATE / (name + ".tmp")
-    tmp.write_text(json.dumps(value) + "\n")
+    with tmp.open("w") as out:
+        out.write(json.dumps(value) + "\n")
+        out.flush()
+        os.fsync(out.fileno())
     os.replace(tmp, STATE / name)
+    # The rename itself must survive a power cut.
+    directory = os.open(STATE, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        os.fsync(directory)
+    finally:
+        os.close(directory)
 
 
 def read(name):
@@ -491,6 +500,11 @@ def rollback(record, why):
     (STATE / "transaction").unlink(missing_ok=True)
 
 
+def end_transaction():
+    (STATE / "transaction").unlink(missing_ok=True)
+    (STATE / "rollback-root").unlink(missing_ok=True)
+
+
 def activate(host, sha, candidate):
     old = current_closure()
     if str(PROFILE.resolve()) != old:
@@ -529,8 +543,12 @@ def activate(host, sha, candidate):
     except Exception as error:
         rollback(record, str(error))
         raise RolledBack(str(error)) from error
-    (STATE / "transaction").unlink(missing_ok=True)
-    (STATE / "rollback-root").unlink(missing_ok=True)
+    # The verdict reaches the journal before the transaction goes, so a kill in
+    # between cannot lose it. Only p620 has a drain journal.
+    journal = read("drain")
+    if journal:
+        set_phase(journal, "settled-commit")
+    end_transaction()
     # p620's canary is published only after its runners are back (reopen_and_clear).
     if host != "p620":
         save("verified", {"sha": sha, "candidate": candidate})
@@ -677,7 +695,18 @@ def close_and_wait(journal):
             raise RuntimeError(
                 f"{runner_unit(suffix)}: cannot write the drain request: {error}"
             ) from error
+        journal.setdefault("requested", []).append(suffix)
+        save("drain", journal)
     while True:
+        # A new invocation can never match the recorded one: defer now.
+        restarted = [
+            runner_unit(s)
+            for s in SUFFIXES
+            if unit_props(s).get("InvocationID", "")
+            not in ("", journal["invocations"][s])
+        ]
+        if restarted:
+            raise RuntimeError(f"restarted during the drain: {', '.join(restarted)}")
         waiting = [
             runner_unit(s)
             for s in SUFFIXES
@@ -710,44 +739,44 @@ def open_admission():
     return stuck
 
 
-def resumed(suffix, journal, props, settled=False):
-    """Known to stay up: it cancelled this drain, or it is a later invocation.
-
-    settled, once the request is gone for the whole settle timeout: a listener
-    acknowledges "draining" before any exit path, so one with no acknowledgement
-    of this request never saw it.
-    """
-    if props.get("ActiveState") != "active" or not props.get("InvocationID"):
-        return False
-    if props["InvocationID"] != journal.get("invocations", {}).get(suffix):
+def may_hold_request(journal, suffix):
+    """False for a drain path that is not a directory and never took our request."""
+    if suffix in journal.get("requested", []):
         return True
+    try:
+        mode = os.lstat(RUNNER_STATE / (RUNNER_UNIT + suffix) / "drain").st_mode
+    except OSError:
+        return True
+    return stat.S_ISDIR(mode)
+
+
+def resumed(suffix, journal, props):
+    """Up at the end of the settle window: active, and not itself draining this request."""
+    invocation = props.get("InvocationID")
+    if props.get("ActiveState") != "active" or not invocation:
+        return False
     ack = read_ack(suffix)
-    if ack.get("id") != journal.get("request"):
-        return settled
-    return ack.get("state") == "cancelled"
+    return not (
+        ack.get("id") == journal.get("request")
+        and ack.get("invocation") == invocation
+        and ack.get("state") != "cancelled"
+    )
 
 
 def defer(journal, why):
     """Give up on a drain. No unit is stopped or restarted: a job may be running.
 
-    A listener that already decided to exit still reads as active, so the journal
-    ends only once every runner is known to stay up.
+    A listener that already decided to exit still reads as active, and one that
+    cancelled can still die restarting its session, so the runners are judged only
+    at the end of the settle window.
     """
     journal = set_phase(journal, "cancelling")
     log(f"deferred: drain incomplete: {why}")
-    stuck = open_admission()
+    stuck = [s for s in open_admission() if may_hold_request(journal, s)]
     until = time.time() + SETTLE_TIMEOUT
     while True:
-        props = {s: unit_props(s) for s in SUFFIXES}
         expired = time.time() >= until
-        waiting = [
-            s
-            for s in SUFFIXES
-            if s in stuck or not resumed(s, journal, props[s], expired)
-        ]
-        if not waiting:
-            (STATE / "drain").unlink(missing_ok=True)
-            return
+        props = {s: unit_props(s) for s in SUFFIXES}
         stopped = [
             s for s in SUFFIXES if props[s].get("ActiveState") in ("inactive", "failed")
         ]
@@ -756,9 +785,14 @@ def defer(journal, why):
                 start_units(stopped)
             except RuntimeError as error:
                 log(f"drain: {error}")
+            props = {s: unit_props(s) for s in SUFFIXES}
         if expired:
             break
         time.sleep(POLL)
+    waiting = [s for s in SUFFIXES if s in stuck or not resumed(s, journal, props[s])]
+    if not waiting:
+        (STATE / "drain").unlink(missing_ok=True)
+        return
     units = [runner_unit(s) for s in waiting]
     save("drain", {**journal, "unresolved": units})
     raise ReopenFailed(
@@ -799,7 +833,9 @@ def reopen_and_clear(journal):
     """Open admission, see the runners back, publish a committed SHA, end the journal."""
     try:
         # A request left in place would make each new listener exit at once.
-        stuck = [runner_unit(s) for s in open_admission()]
+        stuck = [
+            runner_unit(s) for s in open_admission() if may_hold_request(journal, s)
+        ]
         journal = {**journal, "unresolved": stuck}
         start_units(SUFFIXES)
         if stuck:
@@ -892,32 +928,52 @@ def is_current(candidate):
     return current_closure() == candidate and str(PROFILE.resolve()) == candidate
 
 
-def recover(host):
+def recover(host, boot=False):
     """Finish what an interrupted run left behind.
 
     Returns this run's exit status, or None when there was nothing to recover.
     """
-    journal = read("drain")
+    # Never switch during boot. Closed runners are the safe state until the timer run.
+    if boot and (STATE / "transaction").exists():
+        log(
+            "ERROR: unfinished transaction: the rollback is left for the next "
+            "nixos-upgrade timer run; runners left as they are"
+        )
+        return 0
+    unreadable = False
+    try:
+        journal = read("drain")
+        if journal is not None and not (
+            isinstance(journal, dict) and "phase" in journal
+        ):
+            raise ValueError("not a drain journal")
+    except ValueError as error:
+        log(f"ERROR: unreadable drain journal, treated as an orphan: {error}")
+        journal, unreadable = None, True
     transaction = read("transaction")
-    orphan = not journal and (STATE / "runners-closed").exists()
+    orphan = unreadable or (not journal and (STATE / "runners-closed").exists())
     if not (journal or transaction or orphan):
         return None
     with deploy_lock():
         if journal and journal["phase"] in ("draining", "cancelling"):
             defer(journal, "recovering an interrupted drain")
             return 0
+        if transaction and journal and journal.get("settled") == "settled-commit":
+            # Verified before the interruption: only the cleanup was left.
+            end_transaction()
+            transaction = None
         if transaction:
             rollback(transaction, "interrupted activation")
             if journal:
                 journal = set_phase(journal, "settled-rollback")
         if host == "p620":
             if orphan:
-                log("ERROR: orphan runners-closed marker, no drain journal; reopening")
+                log("ERROR: orphan drain: no usable journal; reopening")
             reopen_and_clear(journal or {"phase": "orphan"})
     return 1 if transaction else 0
 
 
-def main(host, auto_activate):
+def main(host, auto_activate, recover_only=False):
     STATE.mkdir(mode=0o700, parents=True, exist_ok=True)
     with (STATE / "lock").open("w") as lock:
         try:
@@ -926,9 +982,11 @@ def main(host, auto_activate):
             log("deferred: another deployment is running")
             return 0
         # Before the pause and runner gates: either would strand closed runners.
-        recovered = recover(host)
+        recovered = recover(host, boot=recover_only)
         if recovered is not None:
             return recovered
+        if recover_only:
+            return 0
         if not should_start(False, (STATE / "pause").exists()):
             log("deferred: pause flag")
             return 0
@@ -1013,8 +1071,13 @@ def failure_status(error):
     return 0
 
 
+def cli(host, mode):
+    """mode is the unit's autoActivate ("true"/"false"), or "recover" at boot."""
+    return main(host, mode == "true", recover_only=mode == "recover")
+
+
 if __name__ == "__main__":
     try:
-        sys.exit(main(sys.argv[1], sys.argv[2] == "true"))
+        sys.exit(cli(sys.argv[1], sys.argv[2]))
     except Exception as error:
         sys.exit(failure_status(error))

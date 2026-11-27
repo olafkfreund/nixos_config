@@ -145,6 +145,36 @@ in
       };
     })
     (lib.mkIf (host == "p620") {
+      # A reboot during a drain leaves the runners closed: finish it now rather than
+      # at the next timer run (nixarchy#1967).
+      systemd.services.guarded-upgrade-recover = {
+        description = "Finish an interrupted guarded upgrade or runner drain";
+        wantedBy = [ "multi-user.target" ];
+        wants = [ "network-online.target" ];
+        after = [ "network-online.target" ];
+        # It never switches: a leftover transaction waits for the timer run. A later
+        # switch must not rerun it either.
+        restartIfChanged = false;
+        serviceConfig = {
+          Type = "oneshot";
+          # Stays active, so a later switch does not run it again.
+          RemainAfterExit = true;
+          StateDirectory = "guarded-upgrade";
+          StateDirectoryMode = "0755";
+          CacheDirectory = "guarded-upgrade";
+          NoNewPrivileges = true;
+          ProtectHome = true;
+        };
+        environment = {
+          XDG_CACHE_HOME = "/var/cache/guarded-upgrade";
+          XDG_STATE_HOME = "/var/lib/guarded-upgrade";
+          GITHUB_TOKEN_FILE = config.age.secrets."api-github-token".path;
+        };
+        path = with pkgs; [ nix coreutils systemd ];
+        script = ''
+          exec ${python}/bin/python ${../../scripts/guarded_upgrade.py} ${host} recover
+        '';
+      };
       users.groups.guarded-stage = { };
       users.users.guarded-stage = {
         isSystemUser = true;

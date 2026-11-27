@@ -12,6 +12,7 @@ running and boot generations, and canary contents.
 import argparse
 import base64
 import contextlib
+import inspect
 import json
 import os
 import shutil
@@ -310,6 +311,41 @@ def parse_iso_ts(value):
         return None
 
 
+def read_drain_artifact(path, unreadable_value="ack unreadable"):
+    """Read a drain request or ack JSON file, returning unreadable_value when the
+    path exists but cannot be read as text (e.g. a directory at drain/ack)."""
+    p = Path(path)
+    if not p.exists():
+        return None
+    try:
+        raw = p.read_text()
+    except (OSError, UnicodeError):
+        return unreadable_value
+    try:
+        return json.loads(raw)
+    except ValueError:
+        return {"raw": raw}
+
+
+def extract_guest_transition_times(snapshot):
+    """Extract guest-recorded transition timestamps (journal phase writes and
+    runners-closed marker creation/removal) from a VM snapshot."""
+    trans = (snapshot or {}).get("transitions")
+    if not isinstance(trans, dict):
+        trans = {}
+    return {
+        "draining_at": trans.get("phase:draining"),
+        "boundary_released_at": trans.get("boundary_released"),
+        "admission_closed_at": trans.get("runners_closed"),
+        "switch_at": trans.get("phase:switching"),
+        "settled_commit_at": trans.get("phase:settled-commit"),
+        "settled_rollback_at": trans.get("phase:settled-rollback"),
+        "cancelling_at": trans.get("phase:cancelling"),
+        "reopened_at": trans.get("runners_reopened"),
+        "drain_cleared_at": trans.get("drain_cleared"),
+    }
+
+
 def summarize_attempt_dir(cdir, scenario, nonce):
     """Aggregate independent per-attempt execution records for (scenario, nonce)."""
     cdir = Path(cdir)
@@ -555,9 +591,28 @@ state_dir = Path("/var/lib/guarded-upgrade")
 rt_dir = Path("/run/runner-drain-test")
 rt_dir.mkdir(mode=0o755, parents=True, exist_ok=True)
 (rt_dir / "python.pid").write_text(f"{os.getpid()}\\n")
+transitions_file = rt_dir / "transitions.json"
 
 _orig_replace = os.replace
 _orig_touch = Path.touch
+_orig_unlink = Path.unlink
+
+
+def _record_transition(name, ts=None):
+    now = time.time() if ts is None else ts
+    data = {}
+    if transitions_file.exists():
+        try:
+            data = json.loads(transitions_file.read_text())
+        except Exception:
+            data = {}
+    data[name] = now
+    history = data.get("history", [])
+    history.append({"transition": name, "at": now})
+    data["history"] = history
+    tmp = rt_dir / f"transitions.{os.getpid()}.tmp"
+    tmp.write_text(json.dumps(data) + "\\n")
+    _orig_replace(tmp, transitions_file)
 
 
 def _read_drain_phase():
@@ -582,10 +637,13 @@ def _hooked_replace(src, dst, *args, **kwargs):
         dst_str = dst_str.decode(errors="replace")
     if dst_str == str(state_dir / "drain"):
         phase = _read_drain_phase()
+        if phase:
+            _record_transition(f"phase:{phase}")
         if phase == "draining" and (rt_dir / "hold-boundary").exists():
             (rt_dir / "boundary-reached").touch()
             while (rt_dir / "hold-boundary").exists():
                 time.sleep(0.05)
+            _record_transition("boundary_released")
         if interrupt_at == "before-marker" and phase == "draining":
             _kill_self("before-marker")
         elif interrupt_at == f"phase:{phase}":
@@ -595,14 +653,29 @@ def _hooked_replace(src, dst, *args, **kwargs):
 
 def _hooked_touch(self, *args, **kwargs):
     res = _orig_touch(self, *args, **kwargs)
-    if str(self) == str(state_dir / "runners-closed") and interrupt_at == "after-marker":
-        _kill_self("after-marker")
+    if str(self) == str(state_dir / "runners-closed"):
+        _record_transition("runners_closed")
+        if interrupt_at == "after-marker":
+            _kill_self("after-marker")
+    return res
+
+
+def _hooked_unlink(self, *args, **kwargs):
+    target = str(self)
+    is_marker = target == str(state_dir / "runners-closed")
+    is_drain = target == str(state_dir / "drain")
+    ts = time.time() if (is_marker or is_drain) else None
+    res = _orig_unlink(self, *args, **kwargs)
+    if is_marker:
+        _record_transition("runners_reopened", ts=ts)
+    elif is_drain:
+        _record_transition("drain_cleared", ts=ts)
     return res
 
 
 os.replace = _hooked_replace
-if interrupt_at:
-    Path.touch = _hooked_touch
+Path.touch = _hooked_touch
+Path.unlink = _hooked_unlink
 
 sys.path.insert(0, str(script_path.parent))
 sys.argv = [str(script_path), host, auto_activate]
@@ -838,7 +911,7 @@ chmod 0755 /run/runner-drain-test/bin/nix /run/runner-drain-test/bin/git /run/ru
 set -euo pipefail
 rm -f /etc/runner-drain-test/force-verify-fail
 rm -f /run/runner-drain-test/hold-boundary /run/runner-drain-test/boundary-reached
-rm -f /run/runner-drain-test/interrupted-* /run/runner-drain-test/python.pid
+rm -f /run/runner-drain-test/interrupted-* /run/runner-drain-test/python.pid /run/runner-drain-test/transitions.json
 rm -f /var/lib/guarded-upgrade/pause /var/lib/guarded-upgrade/drain /var/lib/guarded-upgrade/runners-closed
 rm -f /var/lib/guarded-upgrade/transaction /var/lib/guarded-upgrade/rollback-root
 rm -f /var/lib/guarded-upgrade/last-failure /var/lib/guarded-upgrade/verified /var/lib/guarded-upgrade/baseline
@@ -874,13 +947,16 @@ done
         self.wait_for_runners_online(require_idle=True, timeout=180)
 
     def get_vm_snapshot(self):
-        probe = """\
+        artifact_helper_src = inspect.getsource(read_drain_artifact)
+        probe = f"""\
 python3 - <<'PY'
 import json
 import os
 from pathlib import Path
 import re
 import subprocess
+
+{artifact_helper_src}
 
 units = [
     "github-runner-nixarchy.service",
@@ -890,7 +966,7 @@ units = [
 ]
 dirs = ["nixarchy", "nixarchy-2", "nixarchy-3", "nixarchy-4"]
 
-unit_info = {}
+unit_info = {{}}
 for u in units:
     out = subprocess.run(
         [
@@ -922,25 +998,13 @@ for u in units:
     props = dict(line.split("=", 1) for line in out.splitlines() if "=" in line)
     unit_info[u] = props
 
-acks = {}
-requests = {}
+acks = {{}}
+requests = {{}}
 for d in dirs:
-    ack_p = Path(f"/var/lib/github-runner/{d}/drain/ack")
-    req_p = Path(f"/var/lib/github-runner/{d}/drain/request")
-    if ack_p.exists():
-        try:
-            acks[d] = json.loads(ack_p.read_text())
-        except Exception:
-            acks[d] = {"raw": ack_p.read_text()}
-    else:
-        acks[d] = None
-    if req_p.exists():
-        try:
-            requests[d] = json.loads(req_p.read_text())
-        except Exception:
-            requests[d] = {"raw": req_p.read_text()}
-    else:
-        requests[d] = None
+    ack_p = Path(f"/var/lib/github-runner/{{d}}/drain/ack")
+    req_p = Path(f"/var/lib/github-runner/{{d}}/drain/request")
+    acks[d] = read_drain_artifact(ack_p, "ack unreadable")
+    requests[d] = read_drain_artifact(req_p, "request unreadable")
 
 profile = Path("/nix/var/nix/profiles/system")
 gen_num = None
@@ -953,7 +1017,10 @@ def read_json_or_text(path):
     p = Path(path)
     if not p.exists():
         return None
-    txt = p.read_text().strip()
+    try:
+        txt = p.read_text().strip()
+    except (OSError, UnicodeError):
+        return None
     try:
         return json.loads(txt)
     except Exception:
@@ -986,82 +1053,46 @@ skip_lines = [
     if "condition" in line.lower() or "runners-closed" in line.lower() or "skipped" in line.lower()
 ]
 
-snapshot = {
+snapshot = {{
     "units": unit_info,
     "acks": acks,
     "requests": requests,
-    "generations": {
+    "generations": {{
         "running": str(Path("/run/current-system").resolve()),
         "boot": str(profile.resolve()) if profile.exists() else None,
         "generation": gen_num,
         "baseline": Path("/var/lib/runner-drain-test/baseline-path").read_text().strip(),
         "candidate": Path("/var/lib/runner-drain-test/candidate-path").read_text().strip(),
-    },
-    "state": {
+    }},
+    "state": {{
         "runners_closed": (state_dir / "runners-closed").exists(),
         "verified": read_json_or_text(state_dir / "verified"),
         "drain": read_json_or_text(state_dir / "drain"),
         "pause": read_json_or_text(state_dir / "pause"),
         "last_failure": read_json_or_text(state_dir / "last-failure"),
         "transaction": read_json_or_text(state_dir / "transaction"),
-    },
+    }},
+    "transitions": read_json_or_text("/run/runner-drain-test/transitions.json") or {{}},
     "condition_skip_journal": skip_lines,
-}
+}}
 print(json.dumps(snapshot))
 PY
 """
         res = self.ssh(probe, timeout=30)
         return json.loads(res.stdout)
 
-    def get_counter_state(self, scenario, nonce):
+    def get_counter_state(
+        self, scenario, nonce, counter_dir="/var/lib/runner-drain-test/counters"
+    ):
+        helper_src = inspect.getsource(summarize_attempt_dir)
         probe = f"""\
 python3 - <<'PY'
 import json
 from pathlib import Path
 
-cdir = Path("/var/lib/runner-drain-test/counters")
-scenario = {scenario!r}
-nonce = {nonce!r}
-key = f"{{scenario}}-{{nonce}}"
-started_records = []
-completed_records = []
-in_progress_files = []
+{helper_src}
 
-for p in sorted(cdir.glob(f"{{key}}.attempt.*.started.json")):
-    try:
-        started_records.append(json.loads(p.read_text()))
-    except Exception:
-        continue
-for p in sorted(cdir.glob(f"{{key}}.attempt.*.completed.json")):
-    try:
-        completed_records.append(json.loads(p.read_text()))
-    except Exception:
-        continue
-for p in sorted(cdir.glob(f"{{key}}.attempt.*.in_progress")):
-    in_progress_files.append(p.name)
-
-events = sorted(
-    [*started_records, *completed_records],
-    key=lambda e: (e.get("ts", 0), 0 if e.get("event") == "started" else 1),
-)
-run_ids = sorted(
-    {{
-        str(r.get("run_id"))
-        for r in [*started_records, *completed_records]
-        if r.get("run_id") and r.get("run_id") != "norun"
-    }}
-)
-
-print(json.dumps({{
-    "started": len(started_records),
-    "completed": len(completed_records),
-    "in_progress": bool(in_progress_files),
-    "in_progress_files": in_progress_files,
-    "started_attempts": started_records,
-    "completed_attempts": completed_records,
-    "run_ids": run_ids,
-    "events": events,
-}}))
+print(json.dumps(summarize_attempt_dir({counter_dir!r}, {scenario!r}, {nonce!r})))
 PY
 """
         res = self.ssh(probe, timeout=20)
@@ -1116,7 +1147,7 @@ PY
         script = f"""\
 set -euo pipefail
 {exports}
-rm -f /run/runner-drain-test/{run_tag}.rc /run/runner-drain-test/{run_tag}.log /run/runner-drain-test/python.pid
+rm -f /run/runner-drain-test/{run_tag}.rc /run/runner-drain-test/{run_tag}.log /run/runner-drain-test/python.pid /run/runner-drain-test/transitions.json
 (
   set +e
   python3 /run/runner-drain-test/run_guarded_upgrade.py /run/runner-drain-test/guarded_upgrade.py p620 {act_str} > /run/runner-drain-test/{run_tag}.log 2>&1
@@ -1293,7 +1324,7 @@ cat /run/runner-drain-test/{run_tag}.pid
 
         # Release the drain boundary while pre_run is acquired and post_run's offer is
         # pending at the broker, then resume runners 2..4 once drain/request is on disk.
-        boundary_closed_at = time.time()
+        boundary_closed_at = None
         self.ssh("rm -f /run/runner-drain-test/hold-boundary")
 
         deadline = time.time() + 60
@@ -1302,7 +1333,9 @@ cat /run/runner-drain-test/{run_tag}.pid
             if snap["state"]["runners_closed"] and all(
                 snap["requests"].get(d) is not None for d in RUNNER_DIRS
             ):
-                boundary_closed_at = time.time()
+                boundary_closed_at = extract_guest_transition_times(snap)[
+                    "admission_closed_at"
+                ]
                 break
             time.sleep(0.3)
         for u in (
@@ -1317,10 +1350,8 @@ cat /run/runner-drain-test/{run_tag}.pid
             )
 
         samples = []
-        switch_observed_at = None
 
         def _poll():
-            nonlocal switch_observed_at
             snap = self.get_vm_snapshot()
             samples.append(snap)
             self.poll_github_jobs(
@@ -1329,23 +1360,17 @@ cat /run/runner-drain-test/{run_tag}.pid
             self.poll_github_jobs(
                 post_transitions, created_after=post_dispatched_at, run_id=post_run_id
             )
-            drain_state = snap["state"]["drain"]
-            if (
-                switch_observed_at is None
-                and isinstance(drain_state, dict)
-                and drain_state.get("phase") in ("switching", "settled-commit")
-            ) or (
-                switch_observed_at is None
-                and snap["generations"]["running"] == snap["generations"]["candidate"]
-            ):
-                switch_observed_at = int(time.time())
 
         rc, out_log = self.wait_guarded_upgrade(
             "scen-a", timeout=360, poll_callback=_poll
         )
-        reopened_at = time.time()
         after = self.get_vm_snapshot()
         samples.append(after)
+        t_times = extract_guest_transition_times(after)
+        if t_times["admission_closed_at"] is not None:
+            boundary_closed_at = t_times["admission_closed_at"]
+        switch_at = t_times["switch_at"]
+        reopened_at = t_times["reopened_at"]
 
         # Wait for the post-boundary offer to run and complete after reopen.
         deadline = time.time() + 180
@@ -1380,7 +1405,7 @@ cat /run/runner-drain-test/{run_tag}.pid
             post_run_events=post_counter["events"],
             post_transitions=post_transitions,
             boundary_closed_at=boundary_closed_at,
-            switch_at=switch_observed_at,
+            switch_at=switch_at,
             reopened_at=reopened_at,
         )
         pre_gh_completed = [
@@ -1402,7 +1427,8 @@ cat /run/runner-drain-test/{run_tag}.pid
 
         passed = (
             rc == 0
-            and switch_observed_at is not None
+            and switch_at is not None
+            and reopened_at is not None
             and boundary_verdict["ok"]
             and pre_counter["started"] == 1
             and pre_counter["completed"] == 1
@@ -1442,8 +1468,10 @@ cat /run/runner-drain-test/{run_tag}.pid
                 "pre_boundary": pre_transitions,
                 "post_boundary": post_transitions,
             },
-            "switch_observed_at": switch_observed_at,
-            "reopened_at": int(reopened_at),
+            "guest_transitions": after.get("transitions", {}),
+            "switch_at": switch_at,
+            "switch_observed_at": switch_at,
+            "reopened_at": reopened_at,
             "exited_after_job_seen": exited_after_job_seen,
             "invocations": {
                 "before": before_invs,
@@ -1485,7 +1513,9 @@ cat /run/runner-drain-test/{run_tag}.pid
             snap = self.get_vm_snapshot()
             samples.append(snap)
             if snap["state"]["runners_closed"]:
-                admission_closed_at = time.time()
+                admission_closed_at = extract_guest_transition_times(snap)[
+                    "admission_closed_at"
+                ]
                 canary_invalidated_during_drain = snap["state"]["verified"] is None
                 break
             time.sleep(0.5)
@@ -1504,18 +1534,24 @@ cat /run/runner-drain-test/{run_tag}.pid
             nonlocal started_while_closed
             snap = self.get_vm_snapshot()
             samples.append(snap)
-            self.poll_github_jobs(transitions, created_after=dispatched_at)
             if snap["state"]["runners_closed"]:
                 cstate = self.get_counter_state("b", nonce)
-                if cstate["started"] > 0:
+                if (
+                    cstate["started"] > 0
+                    and self.get_vm_snapshot()["state"]["runners_closed"]
+                ):
                     started_while_closed = True
+            self.poll_github_jobs(transitions, created_after=dispatched_at)
 
         rc, out_log = self.wait_guarded_upgrade(
             "scen-b", timeout=360, poll_callback=_poll
         )
-        reopened_at = time.time()
         after_upgrade = self.get_vm_snapshot()
         samples.append(after_upgrade)
+        t_times = extract_guest_transition_times(after_upgrade)
+        if t_times["admission_closed_at"] is not None:
+            admission_closed_at = t_times["admission_closed_at"]
+        reopened_at = t_times["reopened_at"]
 
         deadline = time.time() + 180
         while time.time() < deadline:
@@ -1534,6 +1570,11 @@ cat /run/runner-drain-test/{run_tag}.pid
         self.poll_github_jobs(transitions, created_after=dispatched_at)
         self.wait_for_runners_online(require_idle=True, timeout=120)
         after = self.get_vm_snapshot()
+        if reopened_at is not None and any(
+            isinstance(a.get("ts"), (int, float)) and a["ts"] < reopened_at - 2
+            for a in counter["started_attempts"]
+        ):
+            started_while_closed = True
         before_invs = {u: before["units"][u].get("InvocationID") for u in RUNNER_UNITS}
         after_invs = {
             u: after_upgrade["units"][u].get("InvocationID") for u in RUNNER_UNITS
@@ -1546,6 +1587,7 @@ cat /run/runner-drain-test/{run_tag}.pid
         passed = (
             rc == 0
             and admission_closed_at is not None
+            and reopened_at is not None
             and canary_invalidated_during_drain
             and not started_while_closed
             and gh_queued_ok
@@ -1571,9 +1613,10 @@ cat /run/runner-drain-test/{run_tag}.pid
             "passed": passed,
             "exit_code": rc,
             "log": out_log,
-            "admission_closed_at": int(admission_closed_at),
+            "guest_transitions": after_upgrade.get("transitions", {}),
+            "admission_closed_at": admission_closed_at,
             "dispatched_at": int(dispatched_at),
-            "reopened_at": int(reopened_at),
+            "reopened_at": reopened_at,
             "canary_invalidated_during_drain": canary_invalidated_during_drain,
             "started_while_closed": started_while_closed,
             "github_queued_during_closed_verified": gh_queued_ok,
@@ -1613,7 +1656,9 @@ cat /run/runner-drain-test/{run_tag}.pid
             snap = self.get_vm_snapshot()
             samples.append(snap)
             if snap["state"]["runners_closed"]:
-                admission_closed_at = time.time()
+                admission_closed_at = extract_guest_transition_times(snap)[
+                    "admission_closed_at"
+                ]
                 break
             time.sleep(0.5)
         else:
@@ -1631,18 +1676,24 @@ cat /run/runner-drain-test/{run_tag}.pid
             nonlocal started_while_closed
             snap = self.get_vm_snapshot()
             samples.append(snap)
-            self.poll_github_jobs(transitions, created_after=dispatched_at)
             if snap["state"]["runners_closed"]:
                 cstate = self.get_counter_state("c", nonce)
-                if cstate["started"] > 0:
+                if (
+                    cstate["started"] > 0
+                    and self.get_vm_snapshot()["state"]["runners_closed"]
+                ):
                     started_while_closed = True
+            self.poll_github_jobs(transitions, created_after=dispatched_at)
 
         rc, out_log = self.wait_guarded_upgrade(
             "scen-c", timeout=360, poll_callback=_poll
         )
-        reopened_at = time.time()
         after_rollback = self.get_vm_snapshot()
         samples.append(after_rollback)
+        t_times = extract_guest_transition_times(after_rollback)
+        if t_times["admission_closed_at"] is not None:
+            admission_closed_at = t_times["admission_closed_at"]
+        reopened_at = t_times["reopened_at"]
 
         deadline = time.time() + 180
         while time.time() < deadline:
@@ -1663,6 +1714,11 @@ cat /run/runner-drain-test/{run_tag}.pid
             "rm -f /etc/runner-drain-test/force-verify-fail /var/lib/guarded-upgrade/pause"
         )
         self.wait_for_runners_online(require_idle=True, timeout=120)
+        if reopened_at is not None and any(
+            isinstance(a.get("ts"), (int, float)) and a["ts"] < reopened_at - 2
+            for a in counter["started_attempts"]
+        ):
+            started_while_closed = True
 
         before_invs = {u: before["units"][u].get("InvocationID") for u in RUNNER_UNITS}
         after_invs = {
@@ -1676,6 +1732,7 @@ cat /run/runner-drain-test/{run_tag}.pid
         passed = (
             rc != 0
             and admission_closed_at is not None
+            and reopened_at is not None
             and not started_while_closed
             and gh_queued_ok
             and counter["started"] == 1
@@ -1702,9 +1759,10 @@ cat /run/runner-drain-test/{run_tag}.pid
             "passed": passed,
             "exit_code": rc,
             "log": out_log,
-            "admission_closed_at": int(admission_closed_at),
+            "guest_transitions": after_rollback.get("transitions", {}),
+            "admission_closed_at": admission_closed_at,
             "dispatched_at": int(dispatched_at),
-            "reopened_at": int(reopened_at),
+            "reopened_at": reopened_at,
             "started_while_closed": started_while_closed,
             "github_queued_during_closed_verified": gh_queued_ok,
             "github_transitions": transitions,
@@ -1794,6 +1852,7 @@ cat /run/runner-drain-test/{run_tag}.pid
         # the listener's File.Move(tmp, drain/ack, true) cannot replace drain/ack).
         self.reset_to_baseline()
         before2 = self.get_vm_snapshot()
+        pid4_2 = before2["units"][withholding_unit]["MainPID"]
         inv4_before2 = before2["units"][withholding_unit]["InvocationID"]
         self.ssh(
             "rm -rf /var/lib/github-runner/nixarchy-4/drain/ack && "
@@ -1815,7 +1874,7 @@ cat /run/runner-drain-test/{run_tag}.pid
                 if (
                     isinstance(snap["requests"].get("nixarchy-4"), dict)
                     and snap["requests"]["nixarchy-4"].get("id")
-                    and snap["acks"].get("nixarchy-4") is None
+                    and snap["acks"].get("nixarchy-4") in (None, "ack unreadable")
                 ):
                     request_visible_during_drain = True
 
@@ -1837,11 +1896,16 @@ cat /run/runner-drain-test/{run_tag}.pid
             u: before2["units"][u].get("InvocationID") for u in RUNNER_UNITS
         }
         after_invs2 = {u: after2["units"][u].get("InvocationID") for u in RUNNER_UNITS}
+        pid4_after2 = after2["units"][withholding_unit].get("MainPID")
+        inv4_after2 = after2["units"][withholding_unit].get("InvocationID")
 
         case2_ok = (
             rc2 == 0
             and "drain incomplete" in out_log2
             and request_visible_during_drain
+            and inv4_before2 == inv4_after2
+            and pid4_2 == pid4_after2
+            and after2["units"][withholding_unit].get("ActiveState") == "active"
             and all(
                 before_invs2[u] != after_invs2[u]
                 and after2["units"][u].get("ActiveState") == "active"
@@ -1887,7 +1951,10 @@ cat /run/runner-drain-test/{run_tag}.pid
                 "withholding_unit": {
                     "unit": withholding_unit,
                     "before_invocation": inv4_before2,
-                    "after_invocation": after_invs2[withholding_unit],
+                    "after_invocation": inv4_after2,
+                    "before_pid": pid4_2,
+                    "after_pid": pid4_after2,
+                    "unstopped": inv4_before2 == inv4_after2 and pid4_2 == pid4_after2,
                 },
                 "invocations": {
                     "before": before_invs2,

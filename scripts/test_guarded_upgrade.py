@@ -567,21 +567,83 @@ class DrainAndSwitch(DrainCase):
         self.assertEqual(gu.recover("p620"), 0)
         self.assert_deferred([(UNITS[0],)])
 
-    def test_only_this_requests_cancel_from_an_active_unit_counts(self):
+    def test_resumed_is_judged_on_the_current_invocations_own_ack(self):
         journal = {"request": "r", "invocations": {"": "one"}}
-        up = {"ActiveState": "active", "InvocationID": "one"}
-        for ack_id, state, want in (
-            ("r", "cancelled", True),
-            ("old", "cancelled", False),
-            ("r", "draining", False),
-            ("r", "exited-idle", False),
-        ):
-            self.host.ack(UNITS[0], id=ack_id, state=state)
-            self.assertEqual(gu.resumed("", journal, up), want, (ack_id, state))
-        self.host.ack(UNITS[0], id="r", state="cancelled")
-        down = {**up, "ActiveState": "inactive"}
-        self.assertFalse(gu.resumed("", journal, down))
-        self.assertTrue(gu.resumed("", journal, {**up, "InvocationID": "two"}))
+        for invocation in ("one", "two"):  # the original one, and a later one
+            up = {"ActiveState": "active", "InvocationID": invocation}
+            for ack_id, state, want in (
+                ("r", "cancelled", True),
+                ("old", "draining", True),
+                ("r", "draining", False),
+                ("r", "exited-idle", False),
+                ("r", "exited-after-job", False),
+            ):
+                self.host.ack(UNITS[0], id=ack_id, invocation=invocation, state=state)
+                self.assertEqual(
+                    gu.resumed("", journal, up), want, (invocation, ack_id, state)
+                )
+            down = {**up, "ActiveState": "inactive"}
+            self.assertFalse(gu.resumed("", journal, down))
+        # What an earlier invocation said is not the new one's word.
+        self.host.ack(UNITS[0], id="r", invocation="one", state="exited-idle")
+        up = {"ActiveState": "active", "InvocationID": "two"}
+        self.assertTrue(gu.resumed("", journal, up))
+
+    def test_a_restarted_listener_that_exits_on_the_old_request_is_started(self):
+        # It restarted after start_drain and is about to leave when defer begins.
+        journal = self.draining(UNITS[0])
+        self.cancelled(UNITS[1:])
+        self.host.units[UNITS[0]]["InvocationID"] = "restarted"
+        self.host.ack(UNITS[0], id="r", invocation="restarted", state="draining")
+
+        def leave():
+            if not self.host.started:
+                self.host.ack(
+                    UNITS[0], id="r", invocation="restarted", state="exited-idle"
+                )
+                self.host.units[UNITS[0]]["ActiveState"] = "inactive"
+
+        self.host.on_sleep = leave
+        gu.defer(journal, "why")
+        self.assert_deferred([(UNITS[0],)])
+
+    def test_a_cancelled_listener_that_dies_in_the_settle_window_is_started(self):
+        self.cancelled(UNITS)
+
+        def die():
+            if not self.host.started:
+                self.host.units[UNITS[0]]["ActiveState"] = "failed"
+
+        self.host.on_sleep = die
+        gu.defer({"request": "r", "invocations": dict(zip(gu.SUFFIXES, UNITS))}, "why")
+        self.assert_deferred([(UNITS[0],)])
+
+    def test_a_unit_started_in_the_last_settle_round_is_read_again(self):
+        self.cancelled(UNITS)
+        end = self.host.now + gu.SETTLE_TIMEOUT
+
+        def die_last():
+            if self.host.now >= end:
+                self.host.units[UNITS[0]]["ActiveState"] = "inactive"
+
+        self.host.on_sleep = die_last
+        gu.defer({"request": "r", "invocations": dict(zip(gu.SUFFIXES, UNITS))}, "why")
+        self.assert_deferred([(UNITS[0],)])
+
+    def test_a_runner_restarting_during_the_drain_defers_early(self):
+        seen = self.fake_activate()
+        self.host.behaviour[UNITS[0]] = "silent"
+
+        def restart():
+            self.host.units[UNITS[0]]["InvocationID"] = "restarted"
+
+        self.host.on_sleep = restart
+        self.assertFalse(gu.drained_activate(SHA, NEW))
+        self.assertEqual(seen, {})
+        self.assertLess(self.host.now - 1000, gu.DRAIN_TIMEOUT / 2)
+        self.assertTrue(
+            any(f"restarted during the drain: {UNITS[0]}" in m for m in self.logs)
+        )
 
     def break_drain_path(self, unit, kind):
         if kind == "file":
@@ -591,34 +653,64 @@ class DrainAndSwitch(DrainCase):
             elsewhere.mkdir(exist_ok=True)
             self.host.drain(unit).symlink_to(elsewhere)
 
-    def test_one_unusable_drain_path_does_not_keep_the_others_closed(self):
+    def test_one_unusable_drain_path_defers_and_leaves_nothing_behind(self):
+        # It never took a request, so an active runner there needs no recovery.
         for kind in ("file", "symlink"):
             with self.subTest(kind):
                 self.setUp()
                 seen = self.fake_activate()
                 self.break_drain_path(UNITS[0], kind)
-                with self.assertRaises(gu.ReopenFailed):
-                    gu.drained_activate(SHA, NEW)
+                self.assertFalse(gu.drained_activate(SHA, NEW))
                 self.assertEqual(seen, {})
+                self.assertFalse(self.exists("drain"))
                 self.assertFalse(self.exists("runners-closed"))
-                self.assertEqual(gu.read("drain")["unresolved"], [UNITS[0]])
                 self.assertTrue(
                     any(f"{UNITS[0]}: cannot write" in m for m in self.logs)
                 )
 
-    def test_reopen_with_one_unremovable_request_still_opens_the_others(self):
-        for unit in UNITS:
-            self.host.units[unit]["ActiveState"] = "inactive"
-        (self.host.state / "runners-closed").touch()
-        for suffix in gu.SUFFIXES[1:]:
-            gu.write_request(suffix, "r")
+    def test_each_written_request_is_recorded_in_the_journal(self):
+        self.break_drain_path(UNITS[2], "file")
+        journal = gu.start_drain(SHA, NEW)
+        with self.assertRaises(RuntimeError):
+            gu.close_and_wait(journal)
+        self.assertEqual(gu.read("drain")["requested"], ["", "-2"])
+
+    def test_a_path_broken_after_its_request_was_written_stays_unresolved(self):
+        self.cancelled(UNITS[1:])
         self.break_drain_path(UNITS[0], "file")
+        journal = {"request": "r", "requested": [""], "invocations": {}}
         with self.assertRaises(gu.ReopenFailed):
-            gu.reopen_and_clear({"phase": "orphan"})
-        self.assertFalse(self.exists("runners-closed"))
-        self.assertEqual(self.requests(), [])
-        self.assertEqual(self.host.started, [tuple(UNITS)])
+            gu.defer(journal, "why")
         self.assertEqual(gu.read("drain")["unresolved"], [UNITS[0]])
+
+    def test_an_unusable_path_with_a_runner_down_stays_unresolved(self):
+        self.break_drain_path(UNITS[0], "file")
+        self.cancelled(UNITS[1:])
+        self.host.units[UNITS[0]]["ActiveState"] = "activating"
+        with self.assertRaises(gu.ReopenFailed):
+            gu.defer({"request": "r", "invocations": {}}, "why")
+
+    def test_reopen_with_one_unremovable_request_still_opens_the_others(self):
+        for requested in ([""], []):
+            with self.subTest(requested=requested):
+                self.setUp()
+                for unit in UNITS:
+                    self.host.units[unit]["ActiveState"] = "inactive"
+                (self.host.state / "runners-closed").touch()
+                for suffix in gu.SUFFIXES[1:]:
+                    gu.write_request(suffix, "r")
+                self.break_drain_path(UNITS[0], "file")
+                journal = {"phase": "orphan", "requested": requested}
+                if requested:
+                    with self.assertRaises(gu.ReopenFailed):
+                        gu.reopen_and_clear(journal)
+                    self.assertEqual(gu.read("drain")["unresolved"], [UNITS[0]])
+                else:
+                    gu.reopen_and_clear(journal)
+                    self.assertFalse(self.exists("drain"))
+                self.assertFalse(self.exists("runners-closed"))
+                self.assertEqual(self.requests(), [])
+                self.assertEqual(self.host.started, [tuple(UNITS)])
 
     def test_a_job_past_the_deadline_defers(self):
         seen = self.fake_activate()
@@ -626,7 +718,9 @@ class DrainAndSwitch(DrainCase):
         self.assertFalse(gu.drained_activate(SHA, NEW))
         self.assertEqual(seen, {})
         self.assertGreaterEqual(self.host.now - 1000, gu.DRAIN_TIMEOUT)
-        self.assertLess(self.host.now - 1000, gu.DRAIN_TIMEOUT + 2 * gu.POLL)
+        self.assertLess(
+            self.host.now - 1000, gu.DRAIN_TIMEOUT + gu.SETTLE_TIMEOUT + 2 * gu.POLL
+        )
         self.assert_deferred([tuple(UNITS[:3])])
 
     def test_a_job_finishing_before_the_deadline_is_waited_for(self):
@@ -796,7 +890,105 @@ class Recovery(DrainCase):
         self.assert_reopened()
         self.assertFalse(self.exists("verified"))
 
+    def killed_activation(self, when):
+        """The real activate() on a journal in "switching", killed at `when`."""
+
+        class Killed(BaseException):
+            pass
+
+        profile = self.host.state / "profile"
+        profile.symlink_to(OLD)
+        real_run, real_unlink = self.host.run, gu.Path.unlink
+
+        def run(*args, **kwargs):
+            if args[0] == "nix-env":
+                real_unlink(profile)
+                profile.symlink_to(args[-1])
+            if args[0] in ("nix-env", "nix-store"):
+                return ""
+            return real_run(*args, **kwargs)
+
+        def switch(*args, **kwargs):
+            self.host.current = NEW
+            return subprocess.CompletedProcess(args, 0, "", "")
+
+        def unlink(path, *args, **kwargs):
+            if path.name != "transaction":
+                return real_unlink(path, *args, **kwargs)
+            if when == "after-unlink":
+                real_unlink(path, *args, **kwargs)
+            raise Killed
+
+        def verify(host, failed, runners=True):
+            if when == "verifying":
+                raise Killed
+
+        self.interrupted("switching")
+        with (
+            mock.patch.multiple(
+                gu,
+                run=run,
+                PROFILE=profile,
+                current_closure=lambda: self.host.current,
+                active_generation=lambda: 1,
+                failed_units=set,
+                graphical_sessions=set,
+                verify_local=verify,
+            ),
+            mock.patch.object(gu.subprocess, "run", switch),
+            mock.patch.object(gu.Path, "unlink", unlink),
+            self.assertRaises(Killed),
+        ):
+            gu.activate("p620", SHA, NEW)
+
+    def test_a_kill_before_the_transaction_is_deleted_keeps_the_commit(self):
+        self.killed_activation("before-unlink")
+        self.assertTrue(self.exists("transaction"))
+        self.assertEqual(gu.main("p620", True), 0)
+        self.assert_committed()
+
+    def test_a_kill_after_the_transaction_is_deleted_keeps_the_commit(self):
+        self.killed_activation("after-unlink")
+        self.assertFalse(self.exists("transaction"))
+        self.assertEqual(gu.main("p620", True), 0)
+        self.assert_committed()
+
+    def test_a_kill_during_verification_rolls_back_and_publishes_nothing(self):
+        self.killed_activation("verifying")
+        self.assertEqual(gu.main("p620", True), 1)
+        self.assertEqual(self.rolled_back, [SHA])
+        self.assert_reopened()
+        self.assertFalse(self.exists("verified"))
+
+    def assert_committed(self):
+        self.assertEqual(self.rolled_back, [])
+        self.assert_reopened()
+        self.assertFalse(self.exists("transaction"))
+        self.assertEqual(gu.read("verified"), {"sha": SHA, "candidate": NEW})
+
+    def test_settled_commit_with_a_transaction_commits_without_rolling_back(self):
+        # "reopen-failed" keeps the verdict in "settled".
+        for phase in ("settled-commit", "reopen-failed"):
+            self.host.started.clear()
+            self.host.current = NEW
+            self.interrupted("settled-commit")
+            gu.save("drain", {**gu.read("drain"), "phase": phase})
+            gu.save("transaction", {"sha": SHA})
+            (self.host.state / "rollback-root").touch()
+            self.assertEqual(gu.main("p620", True), 0, phase)
+            self.assert_committed()
+            self.assertFalse(self.exists("rollback-root"))
+            (self.host.state / "verified").unlink()
+
+    def test_settled_commit_with_a_transaction_not_current_is_not_published(self):
+        self.interrupted("settled-commit")
+        gu.save("transaction", {"sha": SHA})
+        self.assertEqual(gu.main("p620", True), 0)
+        self.assertEqual(self.rolled_back, [])
+        self.assertFalse(self.exists("verified"))
+
     def test_switching_without_a_transaction_reopens_without_publishing(self):
+        # No verdict: killed before the transaction was saved, or after a rollback.
         self.interrupted("switching")
         self.host.current = NEW
         self.assertEqual(gu.main("p620", True), 0)
@@ -852,6 +1044,82 @@ class Recovery(DrainCase):
             gu.save("transaction", {"sha": SHA})
             self.assertEqual(gu.main(name, True), 1)
             self.assertEqual(self.host.started, starts, name)
+
+    def test_an_unparseable_journal_is_reopened_like_an_orphan(self):
+        for junk in ("", '{"phase": "drai', "[1]", "{}"):
+            with self.subTest(junk=junk):
+                self.host.started.clear()
+                self.logs.clear()
+                self.interrupted(None, closed=False)
+                (self.host.state / "drain").write_text(junk)
+                self.assertEqual(gu.main("p620", True), 0)
+                self.assertTrue(any("unreadable" in m for m in self.logs))
+                self.assert_reopened()
+                self.assertFalse(self.exists("verified"))
+
+    def test_the_journal_is_durable_before_and_after_the_rename(self):
+        order = []
+        fsync, replace = os.fsync, os.replace
+
+        def traced_fsync(fd):
+            order.append(os.readlink(f"/proc/self/fd/{fd}"))
+            fsync(fd)
+
+        def traced_replace(*args):
+            order.append("rename")
+            replace(*args)
+
+        self.patch_object(gu.os, "fsync", traced_fsync)
+        self.patch_object(gu.os, "replace", traced_replace)
+        gu.save("drain", {"phase": "draining"})
+        state = os.path.realpath(self.host.state)
+        self.assertEqual(order, [f"{state}/drain.tmp", "rename", state])
+
+    def test_recover_mode_recovers_and_then_stops(self):
+        def resolve_main():
+            raise AssertionError("recover mode went on to an upgrade")
+
+        self.patch(resolve_main=resolve_main)
+        (self.host.state / "pause").unlink()
+        self.assertEqual(gu.cli("p620", "recover"), 0)
+        self.assertEqual(self.host.calls, [])
+        self.interrupted("draining")
+        self.assertEqual(gu.cli("p620", "recover"), 0)
+        self.assert_deferred([tuple(UNITS)])
+
+    def test_recover_mode_leaves_a_running_upgrade_alone(self):
+        self.interrupted("draining")
+        with (self.host.state / "lock").open("w") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            self.assertEqual(gu.cli("p620", "recover"), 0)
+        self.assertEqual(self.host.started, [])
+        self.assertTrue(self.exists("runners-closed"))
+
+    def test_recover_mode_never_switches_with_a_leftover_transaction(self):
+        def switch(*args, **kwargs):
+            raise AssertionError(f"recover mode switched: {args}")
+
+        self.patch_object(gu.subprocess, "run", switch)
+        for phase in ("switching", "draining", "settled-commit", None):
+            with self.subTest(phase=phase):
+                self.logs.clear()
+                self.interrupted(phase)
+                gu.save("transaction", {"sha": SHA})
+                journal = gu.read("drain")
+                self.assertEqual(gu.cli("p620", "recover"), 0)
+                self.assertEqual(self.rolled_back, [])
+                self.assertEqual(self.host.calls, [])
+                self.assertEqual(self.requests(), UNITS)
+                self.assertTrue(self.exists("runners-closed"))
+                self.assertTrue(self.exists("transaction"))
+                self.assertEqual(gu.read("drain"), journal)
+                self.assertTrue(any("timer run" in m for m in self.logs))
+                (self.host.state / "drain").unlink(missing_ok=True)
+        # The timer run still rolls back.
+        self.interrupted("switching")
+        self.assertEqual(gu.main("p620", True), 1)
+        self.assertEqual(self.rolled_back, [SHA])
+        self.assert_reopened()
 
     def test_recovery_waits_for_the_deploy_lock(self):
         self.interrupted("switching")
@@ -1070,6 +1338,13 @@ class DeployHold(unittest.TestCase):
             result, ran = self.deploy(path)
             self.assertEqual((result.returncode, ran), (1, False), result.stderr)
             self.assertIn(path, result.stderr)
+            for hint in (
+                "transaction",
+                "file or symlink",
+                "rm -f /var/lib/guarded-upgrade/drain",
+                "systemctl start github-runner-nixarchy",
+            ):
+                self.assertIn(hint, result.stderr)
         result, ran = self.deploy("none")
         self.assertEqual((result.returncode, ran), (0, True), result.stderr)
 

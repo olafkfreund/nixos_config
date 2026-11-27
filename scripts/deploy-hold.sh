@@ -78,6 +78,12 @@ for left in /var/lib/guarded-upgrade/{drain,runners-closed}; do
   if ! on_host "sudo test ! -e $left"; then
     echo "deploy-hold: $host has an unfinished runner drain, $left (or it could not be checked)." >&2
     echo "  its guarded upgrade recovers it: ssh $host sudo systemctl start nixos-upgrade.service" >&2
+    echo "  if that keeps failing, journalctl -u nixos-upgrade.service names the runner. On $host, and only" >&2
+    echo "  if /var/lib/guarded-upgrade/transaction does not exist (otherwise a switch is unfinished):" >&2
+    echo "    1. remove a /var/lib/github-runner/<name>/drain that is a file or symlink," >&2
+    echo "       or only the request file inside it when it is a directory;" >&2
+    echo "    2. sudo rm -f /var/lib/guarded-upgrade/drain /var/lib/guarded-upgrade/runners-closed" >&2
+    echo "    3. sudo systemctl start github-runner-nixarchy{,-2,-3,-4}.service" >&2
     exit 1
   fi
 done
