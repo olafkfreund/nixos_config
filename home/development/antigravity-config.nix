@@ -193,7 +193,7 @@ let
     for a in "$@"; do if [ "$a" = --acp ]; then acp=1; else args+=("$a"); fi; done
     set -- "''${args[@]}"
 
-    model="--model gemini-4-argon-medium"
+    model="--model gemini-4-hydrogen-medium"
     for a in "$@"; do
       case "$a" in
         --model|--model=*|--effort|--effort=*) model="" ;;
@@ -209,7 +209,7 @@ let
       # shellcheck disable=SC2086
       exec env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE \
         -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE AGY_CODER=1 AGY_WORKTREE="$(git rev-parse --show-toplevel)" \
-        agy-acp-member ''${model:+--model gemini-4-argon --effort medium} "$@" # ACP takes the effort as its own option
+        agy-acp-member ''${model:+--model gemini-4-hydrogen --effort medium} "$@" # ACP takes the effort as its own option
     fi
     # shellcheck disable=SC2086
     exec env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE \
