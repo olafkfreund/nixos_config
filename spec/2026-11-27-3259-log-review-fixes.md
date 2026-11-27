@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3259
 intent: intent/2026-11-27-3259-log-review-fixes.md
 ---
