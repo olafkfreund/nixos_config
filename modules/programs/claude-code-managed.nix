@@ -432,6 +432,14 @@ let
       [ "${pkgs.jq}/bin/jq" "${coderGuardScript}" "${pkgs.coreutils}/bin/realpath" "${pkgs.coreutils}/bin/stat" ]
       (builtins.readFile ./agy-guard-adapter.sh));
 
+  hostGuards = lib.optional cfg.busAnnounceGuard.enable "${busAnnounceScript}"
+    ++ lib.optional cfg.sharedCheckoutGuard.enable "${sharedCheckoutGuardScript}"
+    ++ lib.optional cfg.deployGuard.enable "${deployGuardScript}";
+  agyHostGuardScript = pkgs.writeShellScript "agy-host-guard"
+    (builtins.replaceStrings [ "@jq@" "@guards@" ]
+      [ "${pkgs.jq}/bin/jq" (lib.concatStringsSep " " hostGuards) ]
+      (builtins.readFile ./agy-host-guard-adapter.sh));
+
   coderAgent = pkgs.writeText "coder.md" (builtins.replaceStrings
     [ "@guard@" "@model@" "@effort@" ]
     [ "${coderGuardScript}" team.roles.worker.claude.model team.roles.worker.claude.effort ]
@@ -1258,6 +1266,7 @@ in
     # agy reads ~/.gemini/config/hooks.json, which Syncthing carries between
     # hosts, so the command path must be absolute /etc, not a store path.
     environment.etc."antigravity/hooks/coder-guard".source = agyGuardScript;
+    environment.etc."antigravity/hooks/host-guard".source = agyHostGuardScript;
 
     # agy's sandbox remounts /bin read-only without repeating envfs's FUSE
     # nosuid,nodev, which a user namespace locks -> EPERM (#2298). Harmless on
