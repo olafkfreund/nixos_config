@@ -54,6 +54,20 @@ def idle_safe(session, reported_session, status, reported_at, now):
     )
 
 
+IDLE_DIR = Path("/run/guarded-upgrade-idle")
+
+
+def load_idle_report(path, session_uid):
+    """The session's idle report, trusted only when its own user wrote it: the
+    directory is sticky and writable by everyone (a session's hypridle writes it)."""
+    try:
+        if path.stat().st_uid != session_uid:
+            return {}
+        return json.loads(path.read_text())
+    except (OSError, ValueError):
+        return {}
+
+
 def ac_safe(value):
     return value == "1"
 
@@ -303,13 +317,18 @@ def gate(host):
         raise RuntimeError("external power unavailable")
     if host == "p620":
         runner_gate()
-    # Both hosts: a window, and either nobody logged in or a fresh idle report.
-    # Nothing writes the idle report yet, so a host with an open session waits.
+    # Both hosts: a window, and either nobody logged in or a fresh idle report,
+    # which guarded-idle-report (modules/nix/guarded-upgrade.nix) writes per session.
     if datetime.now().hour != 4:
         raise RuntimeError("outside 04:00–05:00 activation window")
     live = graphical_sessions()
     if live:
-        signal = read("idle") or {}
+        signal = {}
+        if len(live) == 1:
+            (sid,) = live
+            uid = run("loginctl", "show-session", sid, "-p", "User", "--value").strip()
+            if uid.isdigit():
+                signal = load_idle_report(IDLE_DIR / uid, int(uid))
         # The report must be about a session that is open now, and every open
         # session must be the one it vouches for.
         if live != {signal.get("session")} or not idle_safe(

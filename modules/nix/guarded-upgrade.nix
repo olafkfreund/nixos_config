@@ -16,6 +16,15 @@ let
       *) echo "guarded-stage: refused" >&2; exit 1 ;;
     esac
   '';
+  # A second hypridle, beside the desktop's own, so its listener cannot be edited away
+  # in ~/.config/hypr. It honours idle inhibitors (a video, a call) by default.
+  idleConf = pkgs.writeText "guarded-idle.conf" ''
+    listener {
+      timeout = 900
+      on-timeout = systemctl --user start guarded-idle-beat.service
+      on-resume = systemctl --user stop guarded-idle-beat.service
+    }
+  '';
 in
 {
   options.features.guarded-upgrade = {
@@ -56,6 +65,40 @@ in
         path = with pkgs; [ git nix coreutils systemd openssh curl ];
         script = lib.mkForce ''
           exec ${python}/bin/python ${../../scripts/guarded_upgrade.py} ${config.networking.hostName} ${lib.boolToString cfg.autoActivate}
+        '';
+      };
+    }
+    {
+      # The idle report the activation gate reads: one file per user, sticky so nobody
+      # replaces another's, and trusted only when the session's own user owns it.
+      systemd.tmpfiles.rules = [ "d /run/guarded-upgrade-idle 1733 root root -" ];
+      systemd.user.services.guarded-idle-report = {
+        description = "Tell the guarded upgrade when this session is idle (nixarchy#1946)";
+        wantedBy = [ "graphical-session.target" ];
+        partOf = [ "graphical-session.target" ];
+        after = [ "graphical-session.target" ];
+        path = [ pkgs.systemd ];
+        serviceConfig = {
+          ExecStart = "${pkgs.hypridle}/bin/hypridle -c ${idleConf}";
+          ExecStopPost = "${pkgs.systemd}/bin/systemctl --user stop guarded-idle-beat.service";
+          Restart = "on-failure";
+        };
+      };
+      # Rewritten every 60 s while idle: the gate refuses a report older than 120 s,
+      # so a beat that dies reads as not idle.
+      systemd.user.services.guarded-idle-beat = {
+        description = "Idle report heartbeat for the guarded upgrade";
+        path = [ pkgs.systemd pkgs.coreutils ];
+        serviceConfig.ExecStopPost = "${pkgs.coreutils}/bin/rm -f /run/guarded-upgrade-idle/%U";
+        script = ''
+          uid=$(id -u)
+          f=/run/guarded-upgrade-idle/$uid
+          sid=$(loginctl show-user "$uid" -p Display --value)
+          while :; do
+            printf '{"session": "%s", "reported_session": "%s", "status": "idle", "at": %s}\n' "$sid" "$sid" "$(date +%s)" > "$f.tmp"
+            mv -f "$f.tmp" "$f"
+            sleep 60
+          done
         '';
       };
     }

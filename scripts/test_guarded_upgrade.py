@@ -5,6 +5,7 @@ from guarded_upgrade import (
     deploy_conflict,
     failed_units_regressed,
     idle_safe,
+    load_idle_report,
     may_activate,
     promotion_safe,
     rollback_target,
@@ -55,6 +56,19 @@ class GuardedUpgradeFixtures(unittest.TestCase):
     def test_api_errors(self):
         self.assertFalse(runners_safe(None, {"p620-nixarchy"}))
         self.assertFalse(promotion_safe(None, "abc", "abc", "success", "main", 1, 1))
+
+    def test_idle_report_written_by_another_user_is_ignored(self):
+        import os, tempfile
+        from pathlib import Path
+
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "1000"
+            path.write_text('{"session": "4", "status": "idle"}')
+            self.assertEqual(load_idle_report(path, os.getuid())["status"], "idle")
+            self.assertEqual(load_idle_report(path, os.getuid() + 1), {})
+            self.assertEqual(load_idle_report(Path(d) / "missing", os.getuid()), {})
+            path.write_text("not json")
+            self.assertEqual(load_idle_report(path, os.getuid()), {})
 
     def test_idle_resume_and_stale_session(self):
         self.assertTrue(idle_safe("seat-1", "seat-1", "idle", 100, 110))
