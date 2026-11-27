@@ -1,6 +1,7 @@
 { pkgs, lib, ... }:
 let
   agyMember = true;
+  team = import ../../modules/programs/agent-team.nix;
   sandbox = import ./agent-sandbox-pkgs.nix { inherit pkgs lib; };
   testPath = lib.makeBinPath (with pkgs; [ bash coreutils util-linux procps jq socat gnugrep gnused gawk findutils diffutils git python3 ]);
   herdr-run = pkgs.writeShellApplication {
@@ -18,7 +19,7 @@ let
   herdr-team = pkgs.writeShellApplication {
     name = "herdr-team";
     runtimeInputs = with pkgs; [ jq coreutils util-linux procps git gnugrep gnused gawk findutils systemd ];
-    text = "agy_member=${lib.boolToString agyMember}\nsink_path=${sandbox.herdr-team-sink}/bin/herdr-team-sink\n" + builtins.readFile ./herdr-team.sh;
+    text = "agy_member=${lib.boolToString agyMember}\nsink_path=${sandbox.herdr-team-sink}/bin/herdr-team-sink\nreview_model=${team.roles.reviewer.codex.model}\nreview_effort=${team.roles.reviewer.codex.effort}\n" + builtins.readFile ./herdr-team.sh;
     checkPhase = ''
       runHook preCheck
       ${pkgs.stdenv.shellDryRun} "$target"

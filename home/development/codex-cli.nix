@@ -2,6 +2,15 @@
 let
   bin = "${config.home.profileDirectory}/bin";
   hookCmd = "${config.home.homeDirectory}/.local/bin/codex-nix-format";
+  team = import ../../modules/programs/agent-team.nix;
+
+  # Appended after a profile's root keys (#3263).
+  agentsTable = ''
+
+    [agents]
+    max_threads = ${toString team.limits.subagents}
+    max_depth = ${toString team.limits.depth}
+  '';
 
   # Codex PostToolUse hook: format every .nix file an edit touched with
   # nix-format (#1983). apply_patch hands over patch text, not paths, so the
@@ -55,6 +64,7 @@ in
       cx-project = "codex-project";
       cx-analyze = "codex-project analyze";
       cx-ask = "codex-project ask";
+      codex-manager = "codex -p manager";
     };
   };
 
@@ -72,15 +82,27 @@ in
   # Stable path, so the hooks.json entry and Codex's trust hash survive rebuilds.
   home.file.".local/bin/codex-nix-format".source = codexNixFormat;
 
-  # Implementation profile for `codex-implement` (#2081): Sol, medium reasoning.
+  # Implementation profile for `codex-implement` (#2081): the worker role (#3263).
   home.file.".codex/implement.config.toml".text = ''
     # codex-implement profile (#2081): the launcher overrides sandbox and approval.
-    model = "gpt-6-sol"
-    model_reasoning_effort = "medium"
+    model = "${team.roles.worker.codex.model}"
+    model_reasoning_effort = "${team.roles.worker.codex.effort}"
     sandbox_mode = "danger-full-access"
     approval_policy = "never"
+  '' + agentsTable;
 
-  '';
+  home.file.".codex/manager.config.toml".text = ''
+    # codex-manager profile (#3263).
+    model = "${team.roles.manager.codex.model}"
+    model_reasoning_effort = "${team.roles.manager.codex.effort}"
+    review_model = "${team.roles.reviewer.codex.model}"
+  '' + agentsTable;
+
+  home.file.".codex/review.config.toml".text = ''
+    # codex -p review profile: the reviewer role (#3264).
+    model = "${team.roles.reviewer.codex.model}"
+    model_reasoning_effort = "${team.roles.reviewer.codex.effort}"
+  '' + agentsTable;
 
   # Never `exit` in an activation entry: they are concatenated into one script.
   home.activation = {
@@ -108,12 +130,29 @@ in
       fi
     '';
 
+    # Force the root review_model to the reviewer role; write only what parses (#3263).
     codexReviewModel = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       config="$HOME/.codex/config.toml"
-      if [ -f "$config" ] && ! grep -q '^review_model' "$config"; then
+      if [ -f "$config" ]; then
         tmp="$(mktemp)"
-        { echo 'review_model = "gpt-6-astra"'; cat "$config"; } > "$tmp"
-        $DRY_RUN_CMD install -m 0600 "$tmp" "$config"
+        ${pkgs.gawk}/bin/awk '
+          /^[[:space:]]*\[/ { table = 1 }
+          !table && /^[[:space:]]*"?review_model"?[[:space:]]*=/ {
+            found = 1; $0 = "review_model = \"${team.roles.reviewer.codex.model}\""
+          }
+          { lines[NR] = $0 }
+          END {
+            if (!found) print "review_model = \"${team.roles.reviewer.codex.model}\""
+            for (i = 1; i <= NR; i++) print lines[i]
+          }
+        ' "$config" > "$tmp"
+        if ! ${pkgs.diffutils}/bin/cmp -s "$tmp" "$config"; then
+          if ${pkgs.python3}/bin/python3 -c 'import sys,tomllib; tomllib.load(open(sys.argv[1],"rb"))' "$tmp" 2>/dev/null; then
+            $DRY_RUN_CMD install -m 0600 "$tmp" "$config"
+          else
+            echo "codexReviewModel: $config would not parse with the new review_model, left unchanged" >&2
+          fi
+        fi
         rm -f "$tmp"
       fi
     '';

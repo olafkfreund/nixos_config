@@ -21,6 +21,7 @@
 }:
 let
   cfg = config.modules.programs.claude-code-managed;
+  team = import ./agent-team.nix;
 
   # PARR Protocol Reminder Hook. The text lives in parr-protocol.txt, which
   # home/development/agent-rules.nix also feeds to Codex and Antigravity (#1832).
@@ -432,7 +433,8 @@ let
       (builtins.readFile ./agy-guard-adapter.sh));
 
   coderAgent = pkgs.writeText "coder.md" (builtins.replaceStrings
-    [ "@guard@" ] [ "${coderGuardScript}" ]
+    [ "@guard@" "@model@" "@effort@" ]
+    [ "${coderGuardScript}" team.roles.worker.claude.model team.roles.worker.claude.effort ]
     (builtins.readFile ./claude-code-coder-agent.md));
 
   # Keep the shared checkout on main (#2052). /etc/nixos is ~/.config/nixos, so
@@ -841,10 +843,10 @@ let
       # lite on every host (/ponytail ultra per session); PARR's reporting rule
       # still owns output (#2062, #2831).
       env = {
-        CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS = "4";
-        CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH = "1";
+        CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS = toString team.limits.subagents;
+        CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH = toString team.limits.depth;
         PONYTAIL_DEFAULT_MODE = "lite";
-        CLAUDE_CODE_SUBAGENT_MODEL = "sonnet"; # subagents with no model: (#2831)
+        CLAUDE_CODE_SUBAGENT_MODEL = team.roles.worker.claude.model; # subagents with no model: (#2831)
         CLAUDE_CODE_EXPERIMENTAL_CODE_MODE = "1"; # (#3141)
       } // (cfg.settings.env or { });
       enabledPlugins = (cfg.settings.enabledPlugins or { }) // disabledPlugins;
@@ -1153,7 +1155,7 @@ in
 
     # Managed policy memory: loads in every session in every repo and cannot
     # be excluded (#1818).
-    environment.etc."claude-code/CLAUDE.md".source = ./claude-code-managed-claude.md;
+    environment.etc."claude-code/CLAUDE.md".source = pkgs.writeText "claude-code-managed-CLAUDE.md" (builtins.replaceStrings [ "@team_table@" ] [ team.table ] (builtins.readFile ./claude-code-managed-claude.md));
 
     # Managed subagent: the Sonnet coder for approved plans (#2079).
     environment.etc."claude-code/.claude/agents/coder.md".source = coderAgent;

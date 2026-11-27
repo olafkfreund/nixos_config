@@ -41,8 +41,9 @@ the step yourself or give it to the `coder`. Note the fallback in the PR;
 it does not change `coders:` in the plan. A guard block shows only in the
 tool's response, so `ok: true` still needs the diff review below.
 
-`agent-run` uses agy's default model; for another one, run
-`herdr-run agy agy-implement --model <name>` directly and do the six checks by hand.
+`agent-run` uses the worker model of the Team policy table; for another one,
+run `herdr-run agy agy-implement --model <name>` directly and do the six checks
+by hand.
 
 ### Inside herdr: `herdr-team` (the default)
 

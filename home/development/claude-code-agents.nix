@@ -18,6 +18,7 @@
 let
   cfg = config.programs.claudeCode.agentCuration;
   disabledStr = lib.concatStringsSep " " cfg.disabledAgents;
+  team = import ../../modules/programs/agent-team.nix;
 
   # Pins Explore to Haiku with read-only tools (no Bash), whatever the built-in default. Written
   # as a real file, never home.file: agents/** is syncthing-synced.
@@ -25,7 +26,9 @@ let
     ---
     name: Explore
     description: Fast read-only agent for searching and reading a codebase. Use it to find files, grep for symbols or answer questions about how code works.
-    model: haiku
+    model: ${team.roles.explorer.claude.model}
+    effort: ${team.roles.explorer.claude.effort}
+    omitClaudeMd: true
     tools: Read, Grep, Glob
     ---
 

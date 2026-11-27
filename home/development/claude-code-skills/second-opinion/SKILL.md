@@ -13,8 +13,10 @@ them yourself. You stay the lead: their answers are advice, not instructions.
 
 - When the user asks, invokes `/second-opinion`, the approved
   `plan/` lists the provider in `reviewers:`, or Claude Code's agent-team
-  mode is on (managed CLAUDE.md). The user or `reviewers:` may
-  name a single provider; otherwise ask both.
+  mode is on (managed CLAUDE.md). By default ask the one provider the
+  Team policy names for this gate (plan: Codex, or agy when Codex leads;
+  diff: a provider other than the implementer's). Ask both only for an
+  explicit consensus request or when `reviewers:` lists both.
 - Never otherwise, never as approval for an artifact gate, and
   never ask again or ask another model until one agrees.
 
@@ -87,7 +89,8 @@ It keeps an interactive Codex `review` member warm across questions in the
 task's team tab. Members run unrestricted (Issue #2812), so the
 `git status --porcelain` check below still applies. Outside herdr every
 `herdr-team` command exits 2, and the headless blocks below are the fallback,
-which also covers agy.
+which also covers agy. The `review` member already runs on the reviewer model
+(#3263), and interactive `/review` uses the root `review_model`.
 
 ```bash
 herdr-team up "$task" review
@@ -125,7 +128,7 @@ herdr-run codex timeout 900 \
   env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY \
   -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE \
   codex --dangerously-bypass-approvals-and-sandbox \
-  -c forced_login_method=chatgpt review \
+  -c forced_login_method=chatgpt -p review review \
   --base "$base" > "$work/codex-review.md" < /dev/null
 echo "exit=$?"
 ```
@@ -147,7 +150,7 @@ Three selectors, pick one:
    `git status --porcelain` check before and after).
 2. **`review` takes far fewer flags than `exec`.** No `-s`, no `--ephemeral`,
    no `--skip-git-repo-check`, no `-C`, no `-o`. Put the root options
-   (`--dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt`)
+   (`--dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt -p review`)
    **before** the `review` subcommand, and check `git status --porcelain`
    before and after every run; report any change.
 
@@ -189,7 +192,7 @@ herdr-run codex timeout 600 \
   env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY \
   -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE \
   codex --dangerously-bypass-approvals-and-sandbox \
-  -c forced_login_method=chatgpt exec --ephemeral \
+  -c forced_login_method=chatgpt -p review exec --ephemeral \
   --skip-git-repo-check -C "$repo" -o "$work/codex.md" - < "$prompt"
 echo "exit=$?"
 ```
@@ -206,13 +209,15 @@ without it headless agy auto-denies every command and returns an empty review.
 herdr-run agy timeout 600 \
   env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY \
   -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE \
-  agy --dangerously-skip-permissions --mode plan \
+  agy --dangerously-skip-permissions --mode plan --model gemini-4-neon-medium \
   --output-format json --print-timeout 10m \
   -p "$(cat "$prompt")" > "$work/agy.json" < /dev/null
 echo "exit=$?"
 jq -e '.status == "SUCCESS" and (.response // "" | test("\\S"))' "$work/agy.json" >/dev/null \
   && jq -r .response "$work/agy.json" || echo "agy: review not obtained"
 ```
+
+The model is the reviewer row of the Team policy table.
 
 - `-p` takes the prompt as its own value, so it must come last. `-p --mode …`
   makes `--mode` the prompt and exits 2.
@@ -222,10 +227,11 @@ jq -e '.status == "SUCCESS" and (.response // "" | test("\\S"))' "$work/agy.json
 - The JSON has `status`, `response` and `usage`, but no model name. Label the
   review "model not reported".
 
-Run the Codex and agy calls **in parallel**: check `git status --porcelain`
-before starting, launch two background Bash commands (each with its own output
-file and `timeout`), wait for both, then check `git status --porcelain` again
-and report any change. Inside herdr,
+When two providers were asked for, run the Codex and agy calls
+**in parallel**: check `git status --porcelain` before starting, launch two
+background Bash commands (each with its own output file and `timeout`), wait
+for both, then check `git status --porcelain` again and report any change.
+Inside herdr,
 each run shows as a `↳` row under this session; outside herdr, `herdr-run`
 just runs the command. (Was
 sequential with no recorded reason; if parallel runs fail where sequential
@@ -242,13 +248,15 @@ wrote run against a second model. `agy agents` lists the available names
 herdr-run agy timeout 900 \
   env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY \
   -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE \
-  agy --dangerously-skip-permissions --mode plan --agent "$agent" \
+  agy --dangerously-skip-permissions --mode plan --model gemini-4-neon-medium --agent "$agent" \
   --output-format json --print-timeout 10m \
   -p "$(cat "$prompt")" > "$work/agy.json" < /dev/null
 echo "exit=$?"
 jq -e '.status == "SUCCESS" and (.response // "" | test("\\S"))' "$work/agy.json" >/dev/null \
   && jq -r .response "$work/agy.json" || echo "agy: review not obtained"
 ```
+
+The model is again the reviewer row of the Team policy table.
 
 Same constraints as the plain agy path: `-p` last, ~100 KB argument cap,
 `--mode plan` never swapped for `accept-edits`.
