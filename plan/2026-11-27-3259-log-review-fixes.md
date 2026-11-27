@@ -96,8 +96,9 @@ reviewers:
    → verify: `just test-host p620`; `nix eval` shows no
      `fileSystems."/mnt/build/docker/volumes"`.
    Traps: the PR is merged only at step 6.6, inside the maintenance window,
-   after the copy is verified. Merged earlier, any deploy of `main` would
-   start Docker on the empty directory under the bind.
+   after the copy is verified. Merged earlier, any deploy of `main`,
+   including p620's 04:00 `system.autoUpgrade`, would start Docker on the
+   empty directory under the bind.
 
 5. `factory-gitops`, new branch `fix/observe-memory` from `origin/main`,
    `apps/observe/manifests/manifests.yaml:166-171`: `requests.memory: 1Gi`,
@@ -177,6 +178,11 @@ reviewers:
       - 9b. Failure after the cluster ran on the copy: quiesce and hold as
         in 3–4, `sudo rsync -aHAX --numeric-ids --delete /mnt/build/docker/volumes/ /home/docker-volumes/`
         (exit 0, counts match), then 9a.
+      - After 9a or 9b, `main` still has no bind and p620's
+        `system.autoUpgrade` switches to `main` at 04:00, which would undo
+        the rollback unattended. So: `systemctl stop nixos-upgrade.timer`
+        (runtime only) at once, then revert the PR on `main`, and start the
+        timer again once the revert is merged.
       - After either, the 102 GB copy sits hidden under the bind on
         `/mnt/build`; remove it only through a private bind of `/mnt/build`
         (never through the mounted path), with the owner's OK.
