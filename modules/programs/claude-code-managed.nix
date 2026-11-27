@@ -432,6 +432,14 @@ let
       [ "${pkgs.jq}/bin/jq" "${coderGuardScript}" "${pkgs.coreutils}/bin/realpath" "${pkgs.coreutils}/bin/stat" ]
       (builtins.readFile ./agy-guard-adapter.sh));
 
+  hostGuards = lib.optional cfg.busAnnounceGuard.enable "${busAnnounceScript}"
+    ++ lib.optional cfg.sharedCheckoutGuard.enable "${sharedCheckoutGuardScript}"
+    ++ lib.optional cfg.deployGuard.enable "${deployGuardScript}";
+  agyHostGuardScript = pkgs.writeShellScript "agy-host-guard"
+    (builtins.replaceStrings [ "@jq@" "@guards@" ]
+      [ "${pkgs.jq}/bin/jq" (lib.concatStringsSep " " hostGuards) ]
+      (builtins.readFile ./agy-host-guard-adapter.sh));
+
   coderAgent = pkgs.writeText "coder.md" (builtins.replaceStrings
     [ "@guard@" "@model@" "@effort@" ]
     [ "${coderGuardScript}" team.roles.worker.claude.model team.roles.worker.claude.effort ]
@@ -1163,6 +1171,15 @@ in
     # Codex reads /etc/codex/requirements.toml; managed hook commands must sit
     # under managed_dir. No matcher: the guard exits 0 without a command.
     environment.etc."codex/hooks/coder-guard".source = codexGuardScript;
+    environment.etc."codex/hooks/bus-announce" = lib.mkIf cfg.busAnnounceGuard.enable {
+      source = busAnnounceScript;
+    };
+    environment.etc."codex/hooks/shared-checkout" = lib.mkIf cfg.sharedCheckoutGuard.enable {
+      source = sharedCheckoutGuardScript;
+    };
+    environment.etc."codex/hooks/p510-deploy" = lib.mkIf cfg.deployGuard.enable {
+      source = deployGuardScript;
+    };
     environment.etc."codex/requirements.toml".text = ''
       [hooks]
       managed_dir = "/etc/codex/hooks"
@@ -1172,6 +1189,28 @@ in
       [[hooks.PreToolUse.hooks]]
       type = "command"
       command = "/etc/codex/hooks/coder-guard"
+      timeout = 10
+    '' + lib.optionalString (cfg.busAnnounceGuard.enable || cfg.sharedCheckoutGuard.enable || cfg.deployGuard.enable) ''
+
+      [[hooks.PreToolUse]]
+      matcher = "^Bash$"
+    '' + lib.optionalString cfg.busAnnounceGuard.enable ''
+
+      [[hooks.PreToolUse.hooks]]
+      type = "command"
+      command = "/etc/codex/hooks/bus-announce"
+      timeout = 10
+    '' + lib.optionalString cfg.sharedCheckoutGuard.enable ''
+
+      [[hooks.PreToolUse.hooks]]
+      type = "command"
+      command = "/etc/codex/hooks/shared-checkout"
+      timeout = 10
+    '' + lib.optionalString cfg.deployGuard.enable ''
+
+      [[hooks.PreToolUse.hooks]]
+      type = "command"
+      command = "/etc/codex/hooks/p510-deploy"
       timeout = 10
     '' + lib.optionalString cfg.subagentMetadata.codex ''
 
@@ -1227,6 +1266,7 @@ in
     # agy reads ~/.gemini/config/hooks.json, which Syncthing carries between
     # hosts, so the command path must be absolute /etc, not a store path.
     environment.etc."antigravity/hooks/coder-guard".source = agyGuardScript;
+    environment.etc."antigravity/hooks/host-guard".source = agyHostGuardScript;
 
     # agy's sandbox remounts /bin read-only without repeating envfs's FUSE
     # nosuid,nodev, which a user namespace locks -> EPERM (#2298). Harmless on
