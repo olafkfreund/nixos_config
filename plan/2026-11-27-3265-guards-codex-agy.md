@@ -133,7 +133,13 @@ by value; tests cover both payload shapes.
    - `antigravityCoderGuardHook` activation (lines 407-433): when hooks.json
      is a JSON object, replace the key-exists test with a value comparison,
      as `agent-voice.nix` does:
-     `jq -e --slurpfile want "$entry" '(."coder-guard" == $want[0]."coder-guard") and (."host-guard" == $want[0]."host-guard")' "$hooksfile"`.
+
+     ```bash
+     jq -e --slurpfile want "$entry" \
+       '(."coder-guard" == $want[0]."coder-guard") and (."host-guard" == $want[0]."host-guard")' \
+       "$hooksfile"
+     ```
+
      Equal → leave the file alone (formatting differences never cause a
      write). Different → `jq -s '.[0] + .[1]' "$hooksfile" "$entry"` into a
      temp file, then `$DRY_RUN_CMD mv` it into place. Print one line saying
