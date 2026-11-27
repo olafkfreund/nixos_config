@@ -19,6 +19,10 @@ let
   # A second hypridle, beside the desktop's own, so its listener cannot be edited away
   # in ~/.config/hypr. It honours idle inhibitors (a video, a call) by default.
   idleConf = pkgs.writeText "guarded-idle.conf" ''
+    # Only the desktop's own hypridle handles sleep; this one must not delay it.
+    general {
+      inhibit_sleep = 0
+    }
     listener {
       timeout = 900
       on-timeout = systemctl --user start guarded-idle-beat.service
