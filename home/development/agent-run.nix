@@ -28,6 +28,16 @@ let
       runHook postCheck
     '';
   };
+  herdr-team-claude-sink = pkgs.writeShellApplication {
+    name = "herdr-team-claude-sink";
+    runtimeInputs = [ pkgs.python3 ];
+    text = ''exec python3 ${./claude-sink.py} "$@"'';
+    checkPhase = ''
+      runHook preCheck
+      ${lib.getExe pkgs.python3} ${./claude-sink-test.py} "$target"
+      runHook postCheck
+    '';
+  };
   agy-acp-member = pkgs.writeShellApplication {
     name = "agy-acp-member";
     runtimeInputs = [ pkgs.python3 ];
