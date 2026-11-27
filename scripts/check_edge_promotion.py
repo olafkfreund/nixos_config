@@ -5,11 +5,30 @@ import io
 import json
 import os
 import sys
+import urllib.parse
 import urllib.request
 import zipfile
 
 
 API = "https://api.github.com/repos/olafkfreund/nixarchy"
+
+
+class DropAuthOffGitHub(urllib.request.HTTPRedirectHandler):
+    """An artifact download redirects to a pre-signed blob URL, which refuses a
+    request that also carries the GitHub token (HTTP 401). Keep the header only
+    while the redirect stays on api.github.com."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        new = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if (
+            new is not None
+            and urllib.parse.urlsplit(newurl).hostname != "api.github.com"
+        ):
+            new.remove_header("Authorization")
+        return new
+
+
+OPENER = urllib.request.build_opener(DropAuthOffGitHub)
 
 
 def get(path):
@@ -21,7 +40,7 @@ def get(path):
             "X-GitHub-Api-Version": "2022-11-28",
         },
     )
-    with urllib.request.urlopen(request, timeout=30) as response:
+    with OPENER.open(request, timeout=30) as response:
         return response.read()
 
 
