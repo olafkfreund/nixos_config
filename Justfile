@@ -174,6 +174,8 @@ test-guards:
     @bash ./scripts/test-nhs-checkout-sync.sh
     @bash ./modules/programs/claude-coder-guard.test.sh
     @bash ./modules/programs/claude-guard-prepare.test.sh
+    @bash ./modules/programs/agy-guard-adapter.test.sh
+    @bash ./modules/programs/agy-host-guard-adapter.test.sh
     @bash ./scripts/test-guard-safe-recipes.sh
 
 # Check for available updates
