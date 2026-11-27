@@ -88,15 +88,22 @@ in
       # so a beat that dies reads as not idle.
       systemd.user.services.guarded-idle-beat = {
         description = "Idle report heartbeat for the guarded upgrade";
-        path = [ pkgs.systemd pkgs.coreutils ];
+        path = [ pkgs.systemd pkgs.coreutils pkgs.gnused pkgs.gnugrep ];
         serviceConfig.ExecStopPost = "${pkgs.coreutils}/bin/rm -f /run/guarded-upgrade-idle/%U";
         script = ''
           uid=$(id -u)
           f=/run/guarded-upgrade-idle/$uid
           sid=$(loginctl show-user "$uid" -p Display --value)
           while :; do
-            printf '{"session": "%s", "reported_session": "%s", "status": "idle", "at": %s}\n' "$sid" "$sid" "$(date +%s)" > "$f.tmp"
-            mv -f "$f.tmp" "$f"
+            # Inhibitors (a video, a call) reach whoever owns org.freedesktop.ScreenSaver.
+            # If that is not our hypridle, its silence proves nothing: report nothing.
+            pid=$(busctl --user status org.freedesktop.ScreenSaver 2>/dev/null | sed -n 's/^PID=//p')
+            if [ -n "$pid" ] && grep -qsF ${idleConf} "/proc/$pid/cmdline"; then
+              printf '{"session": "%s", "reported_session": "%s", "status": "idle", "at": %s}\n' "$sid" "$sid" "$(date +%s)" > "$f.tmp"
+              mv -f "$f.tmp" "$f"
+            else
+              rm -f "$f"
+            fi
             sleep 60
           done
         '';
