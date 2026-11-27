@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3267
 intent: intent/2026-11-27-3267-agent-definitions.md
 ---
