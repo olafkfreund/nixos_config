@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 3266
 intent: intent/2026-11-27-3266-herdr-team-model.md
 ---
