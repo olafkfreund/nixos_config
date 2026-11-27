@@ -1,0 +1,105 @@
+name: Runner Drain Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: "Scenario identifier (a, b, c, d, e, f)"
+        required: true
+        type: string
+      nonce:
+        description: "Unique run nonce for this scenario dispatch"
+        required: true
+        type: string
+      runner_label:
+        description: "Unique runner label for the isolated VM"
+        required: true
+        type: string
+      sleep_seconds:
+        description: "Seconds the job stays busy before completing"
+        required: false
+        default: "5"
+        type: string
+      counter_dir:
+        description: "Directory inside the VM for atomic execution counters"
+        required: false
+        default: "/var/lib/runner-drain-test/counters"
+        type: string
+
+jobs:
+  drain-test:
+    name: drain-test
+    runs-on:
+      - self-hosted
+      - ${{ inputs.runner_label }}
+    steps:
+      - name: Record execution counter and run workload
+        env:
+          SCENARIO: ${{ inputs.scenario }}
+          NONCE: ${{ inputs.nonce }}
+          SLEEP_SECONDS: ${{ inputs.sleep_seconds }}
+          COUNTER_DIR: ${{ inputs.counter_dir }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$COUNTER_DIR"
+          key="${SCENARIO}-${NONCE}"
+          lockdir="$COUNTER_DIR/${key}.lock"
+          start_count_file="$COUNTER_DIR/${key}.started.count"
+          done_count_file="$COUNTER_DIR/${key}.completed.count"
+          events_file="$COUNTER_DIR/${key}.events.jsonl"
+
+          acquire_lock() {
+            while ! mkdir "$lockdir" 2>/dev/null; do
+              sleep 0.05
+            done
+          }
+          release_lock() {
+            rmdir "$lockdir" 2>/dev/null || true
+          }
+
+          started_at="$(date +%s)"
+          acquire_lock
+          cur=0
+          if [ -f "$start_count_file" ]; then
+            cur="$(cat "$start_count_file")"
+          fi
+          next=$((cur + 1))
+          printf '%s\n' "$next" > "$start_count_file"
+          jq -cn \
+            --arg event "started" \
+            --arg scenario "$SCENARIO" \
+            --arg nonce "$NONCE" \
+            --arg run_id "${GITHUB_RUN_ID:-}" \
+            --arg attempt "${GITHUB_RUN_ATTEMPT:-1}" \
+            --arg runner "${RUNNER_NAME:-}" \
+            --argjson ts "$started_at" \
+            --argjson count "$next" \
+            '{event: $event, scenario: $scenario, nonce: $nonce, run_id: $run_id, attempt: $attempt, runner: $runner, ts: $ts, count: $count}' \
+            >> "$events_file"
+          touch "$COUNTER_DIR/${key}.in_progress"
+          release_lock
+
+          sleep "$SLEEP_SECONDS"
+          completed_at="$(date +%s)"
+
+          acquire_lock
+          cur=0
+          if [ -f "$done_count_file" ]; then
+            cur="$(cat "$done_count_file")"
+          fi
+          next=$((cur + 1))
+          printf '%s\n' "$next" > "$done_count_file"
+          rm -f "$COUNTER_DIR/${key}.in_progress"
+          jq -cn \
+            --arg event "completed" \
+            --arg scenario "$SCENARIO" \
+            --arg nonce "$NONCE" \
+            --arg run_id "${GITHUB_RUN_ID:-}" \
+            --arg attempt "${GITHUB_RUN_ATTEMPT:-1}" \
+            --arg runner "${RUNNER_NAME:-}" \
+            --argjson started_at "$started_at" \
+            --argjson ts "$completed_at" \
+            --argjson count "$next" \
+            '{event: $event, scenario: $scenario, nonce: $nonce, run_id: $run_id, attempt: $attempt, runner: $runner, started_at: $started_at, ts: $ts, count: $count}' \
+            >> "$events_file"
+          release_lock
