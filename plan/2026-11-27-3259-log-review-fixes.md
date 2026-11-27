@@ -3,7 +3,7 @@ status: draft
 issue: 3259
 spec: spec/2026-11-27-3259-log-review-fixes.md
 coders:
-  1: coder # three module-option lines, mechanical
+  1: coder # two module-option lines, mechanical
   2: coder # two mount masks, mechanical
   3: codex # small shell logic with an exit-code edge case
   4: coder # delete one fileSystems block, trim one list, fix two comments
@@ -17,9 +17,13 @@ reviewers:
 
 ## Decisions (carried from the approved spec, plus one owner addition)
 
-- **razer Wi-Fi/audio:** add `options iwlwifi power_save=0`,
-  `options iwlmvm power_scheme=1`, `options snd_hda_intel power_save=0` to
-  razer's existing `boot.extraModprobeConfig`.
+- **razer Wi-Fi/audio:** add `options iwlmvm power_scheme=1` and
+  `options snd_hda_intel power_save=0` to razer's existing
+  `boot.extraModprobeConfig`. Deviation from the spec: the spec's third line,
+  `options iwlwifi power_save=0`, is dropped because razer already runs with
+  it off (`modinfo`: default disable; `/sys/module/iwlwifi/parameters/power_save`
+  = N on 2026-11-27). Live values today: `power_scheme` 2, HDA `power_save` 10
+  (the kernel default; power-profiles-daemon does not set it).
 - **razer `/boot`:** `fmask=0077`, `dmask=0077`.
 - **p620 watchdog:** skip a tick (exit 0) when the token's remaining core
   quota is below 500; timer every 15 minutes instead of 5.
@@ -40,7 +44,7 @@ reviewers:
 ## Steps
 
 1. `hosts/razer/nixos/laptop.nix:56-58`: inside the existing
-   `boot.extraModprobeConfig` string, after `options i915 …`, add the three
+   `boot.extraModprobeConfig` string, after `options i915 …`, add the two
    `options` lines above, with one comment line naming #3259.
    → verify: `nix eval .#nixosConfigurations.razer.config.boot.extraModprobeConfig`
    shows all four lines.
@@ -137,7 +141,7 @@ reviewers:
 
 - `just check-syntax`; `just test-host razer`; `just test-host p620`.
 - razer after deploy and reboot: `cat /sys/module/iwlmvm/parameters/power_scheme`
-  = 1, `cat /sys/module/iwlwifi/parameters/power_save` = N,
+  = 1,
   `cat /sys/module/snd_hda_intel/parameters/power_save` = 0;
   `findmnt /boot -o OPTIONS` has `fmask=0077`; `bootctl status 2>&1 | grep -c 'world accessible'` = 0.
   A day later `journalctl -k -g 'NMI_INTERRUPT|dma error' --since -1d` is
