@@ -9,6 +9,10 @@ let
   cfg = config.programs.claude-code-skills;
   dev = config.features.development;
 
+  # The skill's review commands must name the reviewer role's model (#3264).
+  inherit ((import ../../../modules/programs/agent-team.nix).roles) reviewer;
+  inBothCommands = s: lib.length (lib.splitString s (builtins.readFile ./second-opinion/SKILL.md)) >= 3;
+
   graphifySkill = variant: md: pkgs.runCommand "skill-graphify-${variant}" { } ''
     g=${pkgs.customPkgs.graphify}/${pkgs.python3.sitePackages}/graphify
     test -e $g/${md} && test -d $g/skills/${variant}/references
@@ -79,6 +83,9 @@ let
   # Not here on purpose: parr-run and run-aws-demo describe private
   # infrastructure (this repo is public), and the `skills` CLI owns its own.
 in
+assert lib.assertMsg
+  (inBothCommands "--mode plan --model ${reviewer.agy.model}-${reviewer.agy.effort}" && inBothCommands "-p review")
+  "second-opinion/SKILL.md: both agy commands need the reviewer model from modules/programs/agent-team.nix, and both Codex commands need -p review";
 {
   imports = [ inputs.nix-skills.homeManagerModules.default ];
 
