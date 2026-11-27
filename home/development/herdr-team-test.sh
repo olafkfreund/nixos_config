@@ -68,6 +68,10 @@ case "$1 ${2:-}" in
     fi
     terminal="t${3#p}"
     [[ ! -e $TEST_STATE/change-id ]] || terminal=changed
+    if [[ -e $TEST_STATE/claude-$3.settings ]]; then
+      jq -nc --arg terminal "$terminal" '{result:{pane:{terminal_id:$terminal,agent:"claude"}}}'
+      exit 0
+    fi
     kind=$(cat "$TEST_STATE/kind" 2>/dev/null || { [[ -e $TEST_STATE/agent-up ]] && echo codex || echo ''; })
     jq -nc --arg terminal "$terminal" --arg kind "$kind" '{result:{pane:{terminal_id:$terminal,agent:$kind}}}'
     ;;
@@ -88,7 +92,7 @@ case "$1 ${2:-}" in
       printf '%s\n' "$!" >"$TEST_STATE/pane-$3.pgid"
       exit 0
     fi
-    nohup bash -c "$4" >/dev/null 2>&1 </dev/null &
+    FAKE_PANE=$3 nohup bash -c "$4" >/dev/null 2>&1 </dev/null &
     ;;
   'pane send-text') printf '%s' "$4" >"$TEST_STATE/pane-$3.in" ;;
   'pane send-keys')
@@ -102,7 +106,11 @@ case "$1 ${2:-}" in
   'pane rename') : ;;
   'pane close') printf '%s\n' "$3" >> "$TEST_STATE/closed" ;;
   'pane read')
-    if [[ -e $TEST_STATE/pane-$3.in ]]; then cat "$TEST_STATE/pane-$3.out" 2>/dev/null || :; else cat "$TEST_STATE/screen" 2>/dev/null || :; fi
+    if [[ -e $TEST_STATE/claude-$3.settings ]]; then
+      [[ $5 == visible ]] || cat "$TEST_STATE/claude-$3.scrollback" 2>/dev/null || :
+      # a real Claude screen is never blank: default to an idle composer
+      cat "$TEST_STATE/claude-$3.screen" 2>/dev/null || printf '> \n? for shortcuts\n'
+    elif [[ -e $TEST_STATE/pane-$3.in ]]; then cat "$TEST_STATE/pane-$3.out" 2>/dev/null || :; else cat "$TEST_STATE/screen" 2>/dev/null || :; fi
     ;;
   'agent rename'|'agent prompt'|'agent send-keys')
     [[ ! -e $TEST_STATE/pane-$3.in ]] || exit 1
@@ -118,11 +126,22 @@ case "$1 ${2:-}" in
         exit 0 ;;
       send-keys)
         [[ ! -e $TEST_STATE/no-quit ]] || exit 0
-        ( sleep "$(cat "$TEST_STATE/quit-delay" 2>/dev/null || echo 0)"; cat "$TEST_STATE/quit-code" 2>/dev/null > "$TEST_STATE/quit.tmp" || echo 0 > "$TEST_STATE/quit.tmp"; mv "$TEST_STATE/quit.tmp" "$TEST_STATE/quit" ) >/dev/null 2>&1 &
+        q=$TEST_STATE/quit
+        [[ ! -e $TEST_STATE/claude-$3.settings ]] || q=$TEST_STATE/claude-$3.quit
+        ( sleep "$(cat "$TEST_STATE/quit-delay" 2>/dev/null || echo 0)"; cat "$TEST_STATE/quit-code" 2>/dev/null > "$q.tmp" || echo 0 > "$q.tmp"; mv "$q.tmp" "$q" ) >/dev/null 2>&1 &
         exit 0 ;;
     esac
     printf '%s\n' "$4" >> "$TEST_STATE/prompts"
     idx=$(wc -l < "$TEST_STATE/prompts")
+    settings=$TEST_STATE/claude-$3.settings
+    if [[ -e $settings ]]; then # play the pane's own hooks, so the real sink writes the turn
+      hook() { bash -c "$(jq -r --arg e "$1" '.hooks[$e][0].hooks[0].command' "$(cat "$settings")")"; }
+      input=$4
+      [[ ! -e $TEST_STATE/reply-input ]] || input=$(cat "$TEST_STATE/reply-input")
+      jq -nc --arg p "$input" '{prompt_id:"prompt-1",prompt:$p}' | hook UserPromptSubmit
+      [[ ! -e $TEST_STATE/reply ]] || jq -nc --rawfile r "$TEST_STATE/reply" '{prompt_id:"prompt-1",last_assistant_message:$r}' | hook Stop
+      exit 0
+    fi
     r=$TEST_STATE/script/$idx
     [[ -e $r ]] || r=$TEST_STATE/reply
     if [[ -e $r ]]; then
@@ -165,6 +184,20 @@ exit "$code"
 FAKE
 sed -i "1s|.*|#!$(command -v bash)|" "$HERDR_BIN_PATH" "$tmp/bin/agent-env" "$tmp/bin/codex"
 cp "$tmp/bin/codex" "$tmp/bin/codex-implement"
+cat >"$tmp/bin/claude" <<'FAKE'
+#!/usr/bin/env bash
+printf 'claude %s\n' "$*" >>"$TEST_STATE/launched"
+env | grep -E '^(NIX_CONFIG|GITHUB_API_TOKEN|ANTHROPIC_API_KEY|ANTHROPIC_API_KEY_FILE)=' >>"$TEST_STATE/env-dump" || :
+state=$TEST_STATE/claude-${FAKE_PANE:?}
+while (($#)); do
+  [[ $1 != --settings ]] || printf '%s\n' "$2" >"$state.settings"
+  shift
+done
+trap 'exit 143' TERM
+while [[ ! -e $state.quit && ! -e $TEST_STATE/quit ]]; do sleep 0.05; done
+exit "$(cat "$state.quit" 2>/dev/null || cat "$TEST_STATE/quit")"
+FAKE
+sed -i "1s|.*|#!$(command -v bash)|" "$tmp/bin/claude"
 # agy members: the real client against a fake `agy acp` that answers from $TEST_STATE/agyscript/<n> or echoes the prompt
 py=$(command -v python3) || {
   echo 'python3 is needed for the agy member cases' >&2
@@ -609,7 +642,7 @@ tid=22222222-2222-3333-4444-555555555555
 jq -nc --arg id "$tid" '{turn_id:$id,input:"Generate a concise, single-line task title for this chat",reply:"title",source:"codex"}' >"$work/turns/$tid.json"
 # malformed files never match: wrong source, wrong name, missing reply, a symlink
 p2=$(pointer t1 2)
-jq -nc --arg in "$p2" '{turn_id:"33333333-2222-3333-4444-555555555555",input:$in,reply:"x",source:"claude"}' >"$work/turns/33333333-2222-3333-4444-555555555555.json"
+jq -nc --arg in "$p2" '{turn_id:"33333333-2222-3333-4444-555555555555",input:$in,reply:"x",source:"other"}' >"$work/turns/33333333-2222-3333-4444-555555555555.json"
 jq -nc --arg in "$p2" '{turn_id:"44444444-2222-3333-4444-555555555555",input:$in,reply:"x",source:"codex"}' >"$work/turns/other.json"
 jq -nc --arg in "$p2" '{turn_id:"55555555-2222-3333-4444-555555555555",input:$in,source:"codex"}' >"$work/turns/55555555-2222-3333-4444-555555555555.json"
 ln -s "$work/turns/done/$id.json" "$work/turns/66666666-2222-3333-4444-555555555555.json"
@@ -1610,6 +1643,123 @@ team ask nothing review "$tmp/prompt"
 assert_code 2
 ok unknown-task
 
+# --- claude members: a linked worktree, a fixture guard, the real sink behind the fake hooks ---
+reset
+guard="$tmp/guard dir/guard"
+mkdir -p "$(dirname "$guard")"
+printf '#!%s\nexit 0\n' "$(command -v bash)" >"$guard"
+chmod +x "$guard"
+real_tool=$tool
+tool=$tmp/herdr-team-claude
+sed "s|^claude_guard=.*|claude_guard='$guard'|" "$real_tool" >"$tool"
+chmod +x "$tool"
+claude_sink=$(grep -m1 '^claude_sink=' "$tool" | cut -d= -f2-)
+for r in claude-review claude-implement; do
+  team up t1 "$r"
+  assert_code 2
+  is '.reason == "claude members need a linked worktree"'
+done
+cwt=$tmp/cwt
+g -C "$repo" worktree add -q -b claude-wt "$cwt"
+cwt=$(realpath "$cwt")
+cd "$cwt"
+creset() {
+  reset
+  g -C "$cwt" reset -q --hard "$base"
+  g -C "$cwt" clean -fdxq
+}
+chmod -x "$guard"
+team up t1 claude-implement
+assert_code 2
+is '.reason | test("coder guard not found")'
+[[ ! -e $TEST_STATE/launched ]] || die 'launched without a guard'
+up t1 claude-review
+team down t1
+chmod +x "$guard"
+ok claude-refusals
+
+creset
+ANTHROPIC_API_KEY=decoy ANTHROPIC_API_KEY_FILE=decoy up t1 claude-review
+w=$(field t1 claude-review work)
+[[ $(cat "$TEST_STATE/launched") == "claude --model opus --effort medium --permission-mode plan --settings $w/claude-settings.json" ]] \
+  || die "claude review launch: $(cat "$TEST_STATE/launched")"
+[[ ! -s $TEST_STATE/env-dump ]] || die "a key reached claude: $(cat "$TEST_STATE/env-dump")"
+[[ $(field t1 claude-review kind) == claude ]]
+jq -e --arg p "$(printf '%q ' "$claude_sink" prompt "$w/turns")" --arg s "$(printf '%q ' "$claude_sink" stop "$w/turns")" \
+  '(.hooks | keys == ["Stop","UserPromptSubmit"]) and .hooks.UserPromptSubmit == [{hooks:[{type:"command",command:$p}]}]
+   and .hooks.Stop == [{hooks:[{type:"command",command:$s}]}]' "$w/claude-settings.json" >/dev/null || die 'review settings'
+grep -qx 'agent rename p1 t1-claude-review' "$TEST_STATE/log" || die 'claude agent name'
+printf 'claude says\nTO: lead\nok\nEND' >"$TEST_STATE/reply"
+team ask t1 claude-review "$tmp/prompt" --timeout 10
+assert_code 0
+is '.outcome == "ok" and .n == 1'
+cmp "$TEST_STATE/reply" "$(jq -r .answer "$tmp/out")" || die 'claude reply'
+jq -se 'length == 1 and .[0].source == "claude"' "$w"/turns/done/*.json >/dev/null || die 'claude turn source'
+grep -q 'You are the reviewer: do not modify any file' "$w/req/1.md" || die 'claude reviewer reminder'
+pointer t1 9 claude-review >"$TEST_STATE/reply-input"
+team ask t1 claude-review "$tmp/prompt" --timeout 1
+is '.outcome == "timeout" and .n == 2'
+team down t1
+no_leftovers
+ok claude-review
+
+creset
+up t1 claude-review
+up t1 claude-implement --step 3
+w=$(field t1 claude-implement work)
+[[ $(tail -n1 "$TEST_STATE/launched") == "claude --model sonnet --effort medium --permission-mode bypassPermissions --settings $w/claude-settings.json" ]] \
+  || die "claude implement launch: $(tail -n1 "$TEST_STATE/launched")"
+jq -e --arg g "$(printf '%q' "$guard")" '.hooks.PreToolUse == [{matcher:"Bash",hooks:[{type:"command",command:$g,timeout:5,onFailure:"block"}]}]
+  and (.hooks | has("Stop") and has("UserPromptSubmit"))' "$w/claude-settings.json" >/dev/null || die 'implement settings'
+team up t2 implement
+assert_code 2
+is '.reason | test("implementer or a finish")'
+printf 'done' >"$TEST_STATE/reply"
+team ask t1 claude-implement "$tmp/prompt" --timeout 10
+is '.outcome == "ok"'
+printf 'edit\n' >>"$cwt/f"
+team finish t1 claude-implement
+assert_code 0
+is '.ok == true and .exit == 0 and .failures == [] and .changed == ["f"]'
+grep -q '^agent send-keys p2 ctrl+c' "$TEST_STATE/log" || die 'claude ctrl+c'
+"$tool" status t1 | jq -e '.members | keys == ["claude-review"]' >/dev/null || die 'reviewer kept'
+team down t1
+no_leftovers
+ok claude-implement-finish
+
+creset
+up t1 claude-implement
+printf 'dirty\n' >"$cwt/dirty"
+up t1 claude-review --model x --effort low
+grep -qF 'claude --model x --effort low --permission-mode plan' "$TEST_STATE/launched" || die 'claude override'
+"$tool" status t1 | jq -e '.members["claude-review"] | .model == "x" and .effort == "low"' >/dev/null || die 'claude record'
+team down t1
+team up t1 claude-implement
+assert_code 2
+is '.reason | test("dirty")'
+ok claude-reviewer-dirty
+
+refused_screen() { # role screen reason: an owner-only question gets no key
+  creset
+  printf '%s\n' "$2" >"$TEST_STATE/claude-p1.screen"
+  team up t1 "$1"
+  assert_code 1
+  is ".ok == false and .outcome == \"owner_action\" and (.reason | test(\"$3\"))"
+  ! grep -qE '^(pane send-keys|pane send-text|agent send-keys|agent prompt)' "$TEST_STATE/log" || die 'a key reached the question'
+  no_leftovers
+}
+refused_screen claude-review $'Quick safety check: Is this a project you created or one you trust?\n> No, exit' 'trust the worktree'
+refused_screen claude-implement $'  Yes, I trust this folder' 'trust the worktree'
+refused_screen claude-implement $'WARNING: Claude Code running in Bypass Permissions mode\n> No, exit\n  Yes, I accept' 'bypass-permissions'
+creset
+printf 'Quick safety check: trust this folder\n' >"$TEST_STATE/claude-p1.scrollback"
+printf '> \n  bypass permissions on\n' >"$TEST_STATE/claude-p1.screen"
+up t1 claude-implement
+team down t1
+ok claude-owner-questions
+cd "$repo"
+tool=$real_tool
+
 # --- hc backend: fake core and app; no live session is contacted ---
 cat >"$tmp/bin/herdr-app" <<'FAKE'
 #!/usr/bin/env bash
@@ -1651,7 +1801,7 @@ case $1 in
     [[ ! -e $TEST_STATE/hc-tamper-max ]] || sed -i 's/^maxsecs=.*/maxsecs=0/' "$launch"
     printf '%s\n' "${launch%/launch}" >"$TEST_STATE/hc-ctl"
     printf 'member-address\n' >"$TEST_STATE/hc-addr"
-    HC_TERMINAL_ID=member-address nohup bash "$launch" >/dev/null 2>&1 </dev/null &
+    HC_TERMINAL_ID=member-address FAKE_PANE=member-address nohup bash "$launch" >/dev/null 2>&1 </dev/null &
     printf '%s\n' "$!" >"$TEST_STATE/hc-pid"
     echo '{"address":"member-address","parent":"lead-address"}'
     ;;
@@ -1663,15 +1813,22 @@ case $1 in
     [[ ! -e $TEST_STATE/hc-implement ]] || name=codex-implement
     status=null
     [[ ! -e $TEST_STATE/agent-up ]] || status='"idle"'
+    if [[ -e $TEST_STATE/claude-member-address.settings ]]; then
+      name=claude status='"idle"'
+      [[ ! -e $TEST_STATE/hc-blocked ]] || status='"blocked"'
+    fi
     hn=$(cat "$TEST_STATE/hc-name" 2>/dev/null || :)
     jq -nc --arg a "$addr" --arg n "$name" --arg hn "$hn" --argjson st "$status" '{address:$a,name:$hn,state:"running",status:$st,foreground:{argv:[$n],name:$n,pid:1},pid:1}'
     ;;
   read)
-    cat "$TEST_STATE/screen" 2>/dev/null || :
+    cat "$TEST_STATE/screen" 2>/dev/null || { [[ ! -e $TEST_STATE/claude-$2.settings ]] || printf '> \n? for shortcuts\n'; }
     ;;
   send)
-    "$HERDR_BIN_PATH" agent prompt "$2" "$3"
+    text=$3
+    [[ ! -e $TEST_STATE/claude-$2.settings ]] || text=$'[from lead]\n'$3$'\n[end]'
+    "$HERDR_BIN_PATH" agent prompt "$2" "$text"
     ;;
+  keys) : ;;
   interrupt)
     printf '0\n' >"$TEST_STATE/quit"
     ;;
@@ -1788,3 +1945,36 @@ grep -qF -- '--no-daemon -c model="x" -c model_reasoning_effort="high" -c notify
 "$tool" status h1 | jq -e '.members.implement | .model == "x" and .effort == "high"' >/dev/null || die 'hc implement record'
 team down h1
 ok hc-model-overrides
+
+# --- hc: claude members ---
+tool=$tmp/herdr-team-claude
+cd "$cwt"
+creset
+up h1 claude-review
+grep -qx 'read member-address' "$TEST_STATE/hc-log" || die 'hc visible read'
+printf 'hc claude answer' >"$TEST_STATE/reply"
+team ask h1 claude-review "$tmp/prompt" --timeout 10
+assert_code 0
+is '.outcome == "ok"'
+cmp "$TEST_STATE/reply" "$(jq -r .answer "$tmp/out")" || die 'hc claude reply'
+grep -qx '\[from lead\]' "$TEST_STATE/prompts" || die 'the pointer was not enveloped'
+team down h1
+no_leftovers
+ok hc-claude
+
+creset
+: >"$TEST_STATE/hc-blocked"
+team up h1 claude-review
+assert_code 1
+is '.reason | test("did not report claude")'
+no_leftovers
+creset
+printf 'Quick safety check\n' >"$TEST_STATE/screen"
+: >"$TEST_STATE/hc-blocked"
+team up h1 claude-implement
+assert_code 1
+is '.outcome == "owner_action" and (.reason | test("trust the worktree"))'
+! grep -qE '^(send|keys|interrupt) ' "$TEST_STATE/hc-log" || die 'hc sent a key to the question'
+no_leftovers
+ok hc-claude-not-ready
+cd "$repo"
