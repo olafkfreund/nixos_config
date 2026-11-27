@@ -501,7 +501,7 @@ up_tui() {
   case $role in
     review)
       argv=(agent-env env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY
-        -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE codex --dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt -c "$notify" -c "$trust")
+        -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE codex --dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt -c "model=\"${review_model:?}\"" -c "model_reasoning_effort=\"${review_effort:?}\"" -c "$notify" -c "$trust")
       ;;
     implement) argv=(agent-env codex-implement -c "$notify" -c "$trust") ;;
     agy-implement) argv=(agent-env agy-implement --acp --turns "$work/turns") ;;
@@ -755,7 +755,7 @@ up_hc() {
   case $role in
     review)
       argv=(agent-env env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY
-        -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE codex --no-daemon --dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt -c "$notify" -c "$trust")
+        -u ANTHROPIC_API_KEY -u ANTHROPIC_API_KEY_FILE codex --no-daemon --dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt -c "model=\"${review_model:?}\"" -c "model_reasoning_effort=\"${review_effort:?}\"" -c "$notify" -c "$trust")
       ;;
     implement) argv=(agent-env codex-implement --no-daemon -c "$notify" -c "$trust") ;;
     agy-implement) argv=(agent-env agy-implement --acp --turns "$work/turns") ;;

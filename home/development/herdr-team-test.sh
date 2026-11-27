@@ -357,7 +357,7 @@ reset
 up t1 review
 is '.member == "review"'
 w=$(field t1 review work)
-[[ $(cat "$TEST_STATE/launched") == "codex --dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt -c notify=[\"$sink\",\"$w/turns\"] -c projects={\"$repo\"={trust_level=\"trusted\"}}" ]] || die "review launch line: $(cat "$TEST_STATE/launched")"
+[[ $(cat "$TEST_STATE/launched") == "codex --dangerously-bypass-approvals-and-sandbox -c forced_login_method=chatgpt -c model=\"gpt-6.2-astra\" -c model_reasoning_effort=\"medium\" -c notify=[\"$sink\",\"$w/turns\"] -c projects={\"$repo\"={trust_level=\"trusted\"}}" ]] || die "review launch line: $(cat "$TEST_STATE/launched")"
 [[ $(cat "$TEST_STATE/marker") == "$(field t1 review ctl)" ]] || die "member marker"
 [[ -e $TEST_STATE/agent-env-used && $(stat -c %a "$w/turns") == 700 && $(stat -c %a "$w") == 700 ]]
 "$tool" status t1 | jq -e '.live.review == true and .members.review.pid != null and .reservation == null' >/dev/null
@@ -1660,6 +1660,7 @@ up h1 review
 [[ $(grep -c '^new$' "$TEST_STATE/app-log") == 1 && $(grep -c '^select$' "$TEST_STATE/app-log") == 1 ]] || die 'hc tab and focus'
 grep -q -- '--label herdr.space=space --label herdr.tab=team-tab' "$TEST_STATE/hc-log" || die 'hc labels'
 grep -q -- '--no-daemon' "$TEST_STATE/launched" || die 'hc codex daemon'
+grep -qF -- '-c model="gpt-6.2-astra" -c model_reasoning_effort="medium"' "$TEST_STATE/launched" || die 'hc review model'
 arm h1 review
 printf 'TO: lead\nreview complete\nEND\n' >"$TEST_STATE/reply"
 team ask h1 review "$tmp/prompt" --timeout 5
