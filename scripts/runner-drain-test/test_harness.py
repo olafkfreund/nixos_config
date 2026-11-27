@@ -465,45 +465,133 @@ save_drain("settled-commit")
         )
 
     def test_classify_boundary_runs(self):
+        closed_ts = run_test.parse_iso_ts("2026-11-27T00:16:43Z")
+        reopened_ts = run_test.parse_iso_ts("2026-11-27T00:17:10Z")
         pre_events = [
-            {"event": "started", "ts": 1002},
-            {"event": "completed", "ts": 1015},
+            {"event": "started", "ts": closed_ts - 1.0},
+            {"event": "completed", "ts": closed_ts + 12.0},
         ]
         post_events = [
-            {"event": "started", "ts": 1032},
-            {"event": "completed", "ts": 1038},
+            {"event": "started", "ts": reopened_ts + 2.0},
+            {"event": "completed", "ts": reopened_ts + 8.0},
         ]
         post_transitions = [
             {
                 "job_id": 77,
                 "status": "queued",
                 "conclusion": None,
-                "observed_at": 1004.0,
+                "created_at": "2026-11-27T00:16:40Z",
+                "started_at": "2026-11-27T00:16:40Z",
+                "observed_at": closed_ts - 2.0,
             },
             {
                 "job_id": 77,
                 "status": "in_progress",
                 "conclusion": None,
-                "observed_at": 1032.0,
+                "created_at": "2026-11-27T00:16:40Z",
+                "started_at": "2026-11-27T00:17:12Z",
+                "observed_at": reopened_ts + 2.0,
             },
             {
                 "job_id": 77,
                 "status": "completed",
                 "conclusion": "success",
-                "observed_at": 1038.0,
+                "created_at": "2026-11-27T00:16:40Z",
+                "started_at": "2026-11-27T00:17:12Z",
+                "observed_at": reopened_ts + 8.0,
             },
         ]
         verdict = run_test.classify_boundary_runs(
             pre_run_events=pre_events,
             post_run_events=post_events,
             post_transitions=post_transitions,
-            boundary_closed_at=1003.0,
-            switch_at=1020.0,
-            reopened_at=1030.0,
+            boundary_closed_at=closed_ts,
+            switch_at=closed_ts + 17.0,
+            reopened_at=reopened_ts,
         )
         self.assertTrue(verdict["ok"])
         self.assertEqual(verdict["pre_boundary_side"], "before_switch")
         self.assertEqual(verdict["post_boundary_side"], "after_reopen")
+
+    def test_verify_queued_across_closed_window(self):
+        closed_at = run_test.parse_iso_ts("2026-11-27T17:17:00Z")
+        reopened_at = run_test.parse_iso_ts("2026-11-27T17:17:45Z")
+        base_transitions = [
+            {
+                "job_id": 140646975503,
+                "run_id": 46040575780,
+                "status": "queued",
+                "conclusion": None,
+                "created_at": "2026-11-27T17:16:56Z",
+                "started_at": "2026-11-27T17:16:56Z",
+                "observed_at": closed_at - 3.0,
+            },
+            {
+                "job_id": 140646975503,
+                "run_id": 46040575780,
+                "status": "in_progress",
+                "conclusion": None,
+                "created_at": "2026-11-27T17:16:56Z",
+                "started_at": "2026-11-27T17:17:50Z",
+                "observed_at": reopened_at + 6.0,
+            },
+            {
+                "job_id": 140646975503,
+                "run_id": 46040575780,
+                "status": "completed",
+                "conclusion": "success",
+                "created_at": "2026-11-27T17:16:56Z",
+                "started_at": "2026-11-27T17:17:50Z",
+                "observed_at": reopened_at + 12.0,
+            },
+        ]
+        # Correct: created before close, started at or after reopen, 1 attempt.
+        self.assertTrue(
+            run_test.verify_queued_across_closed_window(
+                base_transitions, closed_at, reopened_at, attempts=1
+            )
+        )
+        # Started before reopen fails.
+        started_early = [dict(t) for t in base_transitions]
+        started_early[1]["started_at"] = "2026-11-27T17:17:40Z"
+        started_early[2]["started_at"] = "2026-11-27T17:17:40Z"
+        self.assertFalse(
+            run_test.verify_queued_across_closed_window(
+                started_early, closed_at, reopened_at, attempts=1
+            )
+        )
+        # Created after close fails.
+        created_late = [dict(t) for t in base_transitions]
+        for t in created_late:
+            t["created_at"] = "2026-11-27T17:17:05Z"
+        self.assertFalse(
+            run_test.verify_queued_across_closed_window(
+                created_late, closed_at, reopened_at, attempts=1
+            )
+        )
+        # Two attempts fails (both via attempts=2 and via two completed jobs).
+        self.assertFalse(
+            run_test.verify_queued_across_closed_window(
+                base_transitions, closed_at, reopened_at, attempts=2
+            )
+        )
+        two_completed = [
+            *base_transitions,
+            {
+                "job_id": 140646975504,
+                "run_id": 46040575780,
+                "status": "completed",
+                "conclusion": "success",
+                "created_at": "2026-11-27T17:16:56Z",
+                "started_at": "2026-11-27T17:17:55Z",
+                "observed_at": reopened_at + 15.0,
+            },
+        ]
+        self.assertFalse(
+            run_test.verify_queued_across_closed_window(
+                two_completed, closed_at, reopened_at, attempts=1
+            )
+        )
 
 
 if __name__ == "__main__":

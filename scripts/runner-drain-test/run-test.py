@@ -443,6 +443,52 @@ def record_job_transition(transitions, jobs, observed_at=None):
     return transitions
 
 
+def verify_queued_across_closed_window(
+    transitions,
+    runners_closed_at,
+    runners_reopened_at,
+    attempts=None,
+):
+    """Verify deterministically from GitHub timestamps that the job was created
+    before admission closed, started at or after reopen, and ran exactly once."""
+    if not transitions or runners_closed_at is None or runners_reopened_at is None:
+        return False
+    if attempts is not None and attempts != 1:
+        return False
+    all_completed = [t for t in transitions if t.get("status") == "completed"]
+    completed_success = [
+        t for t in all_completed if t.get("conclusion") == "success"
+    ]
+    distinct_job_ids = {
+        t.get("job_id") for t in transitions if t.get("job_id") is not None
+    }
+    if (
+        len(all_completed) != 1
+        or len(completed_success) != 1
+        or len(distinct_job_ids) > 1
+    ):
+        return False
+    job = completed_success[0]
+    jid = job.get("job_id")
+    created_ts = parse_iso_ts(job.get("created_at"))
+    if created_ts is None:
+        for t in transitions:
+            if t.get("job_id") == jid:
+                created_ts = parse_iso_ts(t.get("created_at"))
+                if created_ts is not None:
+                    break
+    started_ts = parse_iso_ts(job.get("started_at"))
+    if started_ts is None:
+        for t in transitions:
+            if t.get("job_id") == jid and t.get("status") == "in_progress":
+                started_ts = parse_iso_ts(t.get("started_at"))
+                if started_ts is not None:
+                    break
+    if created_ts is None or started_ts is None:
+        return False
+    return created_ts < runners_closed_at and started_ts >= runners_reopened_at
+
+
 def verify_queued_during_closed_window(transitions, admission_closed_at, reopened_at):
     """Verify a job was observed queued while admission was closed, never started
     before reopen, and completed with success exactly once after reopen."""
@@ -502,12 +548,15 @@ def classify_boundary_runs(
             "ok": False,
             "reason": "post-boundary job started before reopen",
         }
-    if not verify_queued_during_closed_window(
-        post_transitions, boundary_closed_at, reopened_at
+    if not verify_queued_across_closed_window(
+        post_transitions,
+        boundary_closed_at,
+        reopened_at,
+        attempts=len(post_completed),
     ):
         return {
             "ok": False,
-            "reason": "post-boundary job was not observed queued during closed window",
+            "reason": "post-boundary job was not queued across closed window",
         }
     return {
         "ok": True,
