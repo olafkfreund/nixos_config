@@ -1,10 +1,8 @@
 import importlib.util
-import json
 import os
-from pathlib import Path
 import tempfile
 import unittest
-
+from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 SPEC = importlib.util.spec_from_file_location("run_test", HERE / "run-test.py")
@@ -54,57 +52,18 @@ class RunnerDrainHarnessTests(unittest.TestCase):
             else:
                 os.environ["RUNNER_DRAIN_TEST_TOKEN"] = old
 
-    def test_discover_guarded_upgrade_env_adapts_to_custom_var_names_and_shapes(self):
-        sample_script = """
-import json
-import os
-
-REPO = os.environ.get("CUSTOM_FLAKE_REPO", "github:olafkfreund/nixos_config")
-GIT_REMOTE = os.environ.get("CUSTOM_GIT_URL", "https://github.com/olafkfreund/nixos_config.git")
-ISSUES_REPO = os.environ.get("CUSTOM_ISSUES_SHORT", "nixos_config")
-ACTIONS_REPO = os.environ.get("CUSTOM_ACTIONS_FULL", "olafkfreund/nixarchy")
-UNIT_PREFIX = os.environ.get("CUSTOM_UNIT_SHORT", "nixarchy")
-FULL_UNIT_PREFIX = os.environ.get("CUSTOM_UNIT_FULL", "github-runner-nixarchy")
-NAME_PREFIX = os.environ.get("CUSTOM_RUNNER_PREFIX", "p620-nixarchy")
-WORKFLOWS_COLON = os.environ.get(
-    "CUSTOM_WORKFLOWS_STR", "install-check.yml:install,omarchy-edge.yml:verify"
-)
-WORKFLOWS_JSON = json.loads(
-    os.environ.get("CUSTOM_WORKFLOWS_JSON", '[["install-check.yml", "install"]]')
-)
-WINDOW_HOUR = int(os.environ.get("CUSTOM_WINDOW_HOUR", "4"))
-BUS_ROOM = os.environ.get("CUSTOM_BUS_ROOM", "#agents:freundcloud.org.uk")
-"""
+    def test_guarded_upgrade_env_names_exist_in_the_script(self):
         env = run_test.discover_guarded_upgrade_env(
-            source_text=sample_script,
-            repo="olafkfreund/disp-drain-repo",
-            runner_unit_prefix="github-runner-nixarchy",
-            runner_name_prefix="p620-nixarchy",
-            workflow_file="drain-test.yml",
-            job_name="drain-test",
-            window_hour=14,
-            bus_room="#runner-drain-test:localhost",
-            token_file="/run/runner-drain-test/github-token",
-            drain_timeout=25,
-            drain_poll=2,
+            repo="example/drain-test", drain_timeout=25, drain_poll=2
         )
-        self.assertEqual(env["CUSTOM_FLAKE_REPO"], "github:olafkfreund/disp-drain-repo")
-        self.assertEqual(
-            env["CUSTOM_GIT_URL"],
-            "https://github.com/olafkfreund/disp-drain-repo.git",
-        )
-        self.assertEqual(env["CUSTOM_ISSUES_SHORT"], "disp-drain-repo")
-        self.assertEqual(env["CUSTOM_ACTIONS_FULL"], "olafkfreund/disp-drain-repo")
-        self.assertEqual(env["CUSTOM_UNIT_SHORT"], "nixarchy")
-        self.assertEqual(env["CUSTOM_UNIT_FULL"], "github-runner-nixarchy")
-        self.assertEqual(env["CUSTOM_RUNNER_PREFIX"], "p620-nixarchy")
-        self.assertEqual(env["CUSTOM_WORKFLOWS_STR"], "drain-test.yml:drain-test")
-        self.assertEqual(
-            json.loads(env["CUSTOM_WORKFLOWS_JSON"]),
-            [["drain-test.yml", "drain-test"]],
-        )
-        self.assertEqual(env["CUSTOM_WINDOW_HOUR"], "14")
-        self.assertEqual(env["CUSTOM_BUS_ROOM"], "#runner-drain-test:localhost")
+        script = run_test.GUARDED_UPGRADE_SCRIPT.read_text()
+        for key in env:
+            if key.startswith("GUARDED_"):
+                self.assertIn(
+                    f'"{key}"', script, f"{key} is not read by guarded_upgrade.py"
+                )
+        self.assertEqual(env["GUARDED_WINDOW"], "0-24")
+        self.assertEqual(env["GUARDED_DRAIN_TIMEOUT"], "25")
 
     def test_collect_condition_skips(self):
         harness = run_test.VMHarness(

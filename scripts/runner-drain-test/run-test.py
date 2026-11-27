@@ -10,13 +10,10 @@ running and boot generations, and canary contents.
 """
 
 import argparse
-import ast
 import base64
 import contextlib
-from datetime import datetime
 import json
 import os
-from pathlib import Path
 import shutil
 import socket
 import subprocess
@@ -26,7 +23,8 @@ import time
 import urllib.error
 import urllib.request
 import uuid
-
+from datetime import datetime
+from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 REPO_ROOT = HERE.parent.parent
@@ -64,10 +62,8 @@ def normalize_repo(raw):
     """Normalize a repository reference into 'owner/name'."""
     value = raw.strip()
     for prefix in ("https://github.com/", "http://github.com/", "github:"):
-        if value.startswith(prefix):
-            value = value[len(prefix) :]
-    if value.endswith(".git"):
-        value = value[:-4]
+        value = value.removeprefix(prefix)
+    value = value.removesuffix(".git")
     value = value.strip("/")
     parts = value.split("/")
     if len(parts) != 2 or not parts[0] or not parts[1]:
@@ -153,178 +149,34 @@ def resolve_token_from_env(token_file=None, allow_agenix=False):
     )
 
 
-def _literal_value(node):
-    if node is None:
-        return None
-    try:
-        return ast.literal_eval(node)
-    except Exception:
-        return None
-
-
-def _extract_env_lookups(source_text):
-    """Return list of (env_key, default_value, uses_json) discovered in a Python script."""
-    tree = ast.parse(source_text)
-    parent_map = {}
-    for parent in ast.walk(tree):
-        for child in ast.iter_child_nodes(parent):
-            parent_map[child] = parent
-
-    def parent_uses_json(node):
-        cur = node
-        for _ in range(4):
-            cur = parent_map.get(cur)
-            if cur is None:
-                break
-            if isinstance(cur, ast.Call):
-                func_src = ast.unparse(cur.func) if hasattr(ast, "unparse") else ""
-                if "json.loads" in func_src:
-                    return True
-        return False
-
-    discovered = []
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Call) and node.args:
-            func_str = ast.unparse(node.func) if hasattr(ast, "unparse") else ""
-            if func_str in ("os.environ.get", "os.getenv", "environ.get", "getenv"):
-                key = _literal_value(node.args[0])
-                default = _literal_value(node.args[1]) if len(node.args) > 1 else None
-                if isinstance(key, str):
-                    discovered.append((key, default, parent_uses_json(node)))
-        elif isinstance(node, ast.Subscript):
-            val_str = ast.unparse(node.value) if hasattr(ast, "unparse") else ""
-            if val_str in ("os.environ", "environ"):
-                key = _literal_value(node.slice)
-                if isinstance(key, str):
-                    discovered.append((key, None, parent_uses_json(node)))
-    return discovered
-
-
-def _format_repo_for_default(repo, default_val, key_upper):
-    _, name = repo.split("/", 1)
-    if isinstance(default_val, str) and default_val:
-        if default_val.startswith("github:"):
-            return f"github:{repo}"
-        if default_val.startswith("https://") or default_val.startswith("http://"):
-            suffix = ".git" if default_val.endswith(".git") else ""
-            return f"https://github.com/{repo}{suffix}"
-        if "/" in default_val:
-            return repo
-        return name
-    if "FLAK" in key_upper or key_upper.endswith("_REF"):
-        return f"github:{repo}"
-    if "URL" in key_upper or "GIT" in key_upper:
-        return f"https://github.com/{repo}.git"
-    return repo
-
-
-def _format_workflows_for_default(workflow_file, job_name, default_val, uses_json):
-    if uses_json:
-        return json.dumps([[workflow_file, job_name]])
-    if isinstance(default_val, str):
-        if not default_val.strip():
-            return f"{workflow_file}:{job_name}"
-        if default_val.strip().startswith("["):
-            return json.dumps([[workflow_file, job_name]])
-        first_item = default_val.split(",")[0].strip()
-        for sep in (":", "/", "="):
-            if sep in first_item:
-                return f"{workflow_file}{sep}{job_name}"
-    return f"{workflow_file}:{job_name}"
-
-
 def discover_guarded_upgrade_env(
-    source_text,
     repo,
-    runner_unit_prefix="github-runner-nixarchy",
     runner_name_prefix="p620-nixarchy",
-    workflow_file="drain-test.yml",
-    job_name="drain-test",
-    window_hour=4,
     bus_room="#runner-drain-test:localhost",
     token_file="/run/runner-drain-test/github-token",
     drain_timeout=None,
     drain_poll=None,
 ):
-    """Build the environment dictionary for guarded_upgrade.py from both standard
-    variable names and AST analysis of scripts/guarded_upgrade.py."""
-    _, repo_short = repo.split("/", 1)
+    """The environment for guarded_upgrade.py: the GUARDED_* overrides it reads
+    (scripts/guarded_upgrade.py, top of file), set for the disposable repository."""
     env = {
         "GITHUB_TOKEN_FILE": token_file,
-        "GUARDED_UPGRADE_REPO": f"github:{repo}",
-        "GUARDED_UPGRADE_CONFIG_REPO": repo,
-        "GUARDED_UPGRADE_NIXOS_REPO": repo,
-        "GUARDED_UPGRADE_RUNNER_REPO": repo,
-        "GUARDED_UPGRADE_CI_REPO": repo,
-        "GUARDED_UPGRADE_NIXARCHY_REPO": repo,
-        "GUARDED_UPGRADE_GIT_REPO": f"https://github.com/{repo}.git",
-        "GUARDED_UPGRADE_RUNNER_UNIT_PREFIX": runner_unit_prefix,
-        "GUARDED_UPGRADE_RUNNER_NAME_PREFIX": runner_name_prefix,
-        "GUARDED_UPGRADE_RUNNER_PREFIX": runner_name_prefix,
-        "GUARDED_UPGRADE_UNIT_PREFIX": runner_unit_prefix,
-        "GUARDED_UPGRADE_WORKFLOWS": f"{workflow_file}:{job_name}",
-        "GUARDED_UPGRADE_CI_WORKFLOWS": f"{workflow_file}:{job_name}",
-        "GUARDED_UPGRADE_WINDOW": str(window_hour),
-        "GUARDED_UPGRADE_WINDOW_HOUR": str(window_hour),
-        "GUARDED_UPGRADE_BUS_ROOM": bus_room,
-        "AGENT_BUS_ROOM": bus_room,
+        "GUARDED_REPO": f"github:{repo}",
+        "GUARDED_GIT_URL": f"https://github.com/{repo}.git",
+        "GUARDED_RUNNER_REPO": repo,
+        "GUARDED_ISSUE_REPO": repo,
+        # The module's unit attribute, so units are github-runner-nixarchy{,-2,...}.
+        "GUARDED_RUNNER_UNIT": "nixarchy",
+        "GUARDED_RUNNER_NAME": runner_name_prefix,
+        # The scenarios run jobs on purpose; no CI workflow may block the gate.
+        "GUARDED_CI_WORKFLOWS": "",
+        "GUARDED_WINDOW": "0-24",
+        "GUARDED_BUS_ROOM": bus_room,
     }
     if drain_timeout is not None:
-        env["GUARDED_UPGRADE_DRAIN_TIMEOUT"] = str(drain_timeout)
-        env["GUARDED_UPGRADE_DRAIN_SECONDS"] = str(drain_timeout)
+        env["GUARDED_DRAIN_TIMEOUT"] = str(drain_timeout)
     if drain_poll is not None:
-        env["GUARDED_UPGRADE_DRAIN_POLL"] = str(drain_poll)
-        env["GUARDED_UPGRADE_POLL_SECONDS"] = str(drain_poll)
-
-    for key, default_val, uses_json in _extract_env_lookups(source_text):
-        ku = key.upper()
-        default_str = str(default_val) if default_val is not None else ""
-        if key == "GITHUB_TOKEN_FILE":
-            env[key] = token_file
-        elif key == "STAGE_KEY_FILE":
-            continue
-        elif "WINDOW" in ku or "HOUR" in ku or default_val in (4, "4", "04"):
-            env[key] = str(window_hour)
-        elif "BUS" in ku or "ROOM" in ku or "#agents:" in default_str:
-            env[key] = bus_room
-        elif (
-            "WORKFLOW" in ku
-            or "install-check.yml" in default_str
-            or "omarchy-edge.yml" in default_str
-        ):
-            env[key] = _format_workflows_for_default(
-                workflow_file, job_name, default_val, uses_json
-            )
-        elif "UNIT" in ku or "SERVICE" in ku or default_val == "github-runner-nixarchy":
-            if (
-                isinstance(default_val, str)
-                and default_val
-                and not default_val.startswith("github-runner-")
-            ):
-                env[key] = runner_unit_prefix.removeprefix("github-runner-")
-            else:
-                env[key] = runner_unit_prefix
-        elif (
-            "RUNNER" in ku and ("NAME" in ku or "PREFIX" in ku)
-        ) or default_val == "p620-nixarchy":
-            env[key] = runner_name_prefix
-        elif (
-            "REPO" in ku
-            or "nixos_config" in default_str
-            or default_val in ("nixarchy", "olafkfreund/nixarchy")
-        ):
-            env[key] = _format_repo_for_default(repo, default_val, ku)
-        elif drain_timeout is not None and (
-            "TIMEOUT" in ku or "DEADLINE" in ku or default_val in (1800, "1800")
-        ):
-            env[key] = str(drain_timeout)
-        elif drain_poll is not None and (
-            "POLL" in ku or "INTERVAL" in ku or default_val in (15, "15")
-        ):
-            env[key] = str(drain_poll)
-        elif default_val == "nixarchy":
-            env[key] = repo_short
-
+        env["GUARDED_POLL"] = str(drain_poll)
     return env
 
 
@@ -618,7 +470,9 @@ class VMHarness:
             "-o",
             str(out_link),
         ]
-        res = subprocess.run(cmd, cwd=str(REPO_ROOT), text=True, capture_output=True)
+        res = subprocess.run(
+            cmd, cwd=str(REPO_ROOT), text=True, capture_output=True, check=False
+        )
         if res.returncode != 0:
             raise RuntimeError(f"nix-build vm.nix failed:\n{res.stderr[-1000:]}")
         launcher = out_link / "bin" / "run-p620-vm"
@@ -718,7 +572,9 @@ class VMHarness:
             "root@127.0.0.1",
             command,
         ]
-        res = subprocess.run(cmd, text=True, capture_output=True, timeout=timeout)
+        res = subprocess.run(
+            cmd, text=True, capture_output=True, timeout=timeout, check=False
+        )
         if check and res.returncode != 0:
             raise RuntimeError(
                 f"guest command failed (rc={res.returncode}): {command}\n"
@@ -1003,17 +859,9 @@ PY
         return json.loads(res.stdout)
 
     def build_guest_env_exports(self, drain_timeout=None, drain_poll=2):
-        hour_res = self.ssh("date +%-H", timeout=10)
-        guest_hour = int(hour_res.stdout.strip())
-        source_text = GUARDED_UPGRADE_SCRIPT.read_text()
         env_map = discover_guarded_upgrade_env(
-            source_text=source_text,
             repo=self.repo,
-            runner_unit_prefix="github-runner-nixarchy",
             runner_name_prefix="p620-nixarchy",
-            workflow_file="drain-test.yml",
-            job_name="drain-test",
-            window_hour=guest_hour,
             bus_room="#runner-drain-test:localhost",
             token_file="/run/runner-drain-test/github-token",
             drain_timeout=drain_timeout,

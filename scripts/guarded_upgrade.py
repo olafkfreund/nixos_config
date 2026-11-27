@@ -47,11 +47,12 @@ BUS_ROOM = env("GUARDED_BUS_ROOM", "#agents:freundcloud.org.uk")
 
 RUNNER_STATE = Path("/var/lib/github-runner")
 CGROUP_ROOT = Path("/sys/fs/cgroup")
-DRAIN_TIMEOUT = 30 * 60
+# Overridable only so the disposable drain test (scripts/runner-drain-test) need not wait 30 min.
+DRAIN_TIMEOUT = int(env("GUARDED_DRAIN_TIMEOUT", str(30 * 60)))
 READY_TIMEOUT = 10 * 60
 START_TIMEOUT = 5 * 60
 SETTLE_TIMEOUT = 60
-POLL = 15
+POLL = int(env("GUARDED_POLL", "15"))
 EXITED = ("exited-idle", "exited-after-job")
 
 
