@@ -55,6 +55,9 @@
   # Fan control and thermal management for Razer
   boot.extraModprobeConfig = ''
     options i915 enable_fbc=1 enable_guc=2
+    # Wi-Fi firmware errors and audio power-save faults (#3259)
+    options iwlmvm power_scheme=1
+    options snd_hda_intel power_save=0
   '';
 
   # Razer-specific utilities

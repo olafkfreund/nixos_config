@@ -348,8 +348,7 @@ in
     enable = true;
     users = hostUsers; # Use all users for this host
     rootless = false;
-    # The store lives on the Lexar build disk (#3208); the 81 volumes are
-    # bound in from NVMe at /mnt/build/docker/volumes.
+    # The store and its volumes live on the Lexar build disk (#3208, #3259).
     dataRoot = "/mnt/build/docker";
     gc = {
       enable = true;
@@ -550,12 +549,8 @@ in
       # Network wait services now handled by desktop profile
       fwupd.serviceConfig.LimitNOFILE = 524288;
 
-      # Refuse to start on a blank data-root on / when its disk is missing.
-      # ...and on the NVMe copy of its volumes (#3109).
-      docker.unitConfig.RequiresMountsFor = [
-        "/mnt/build"
-        "/mnt/build/docker/volumes"
-      ];
+      # No blank data-root on / when the build disk, which also holds the volumes, is missing (#3259).
+      docker.unitConfig.RequiresMountsFor = [ "/mnt/build" ];
       containerd.unitConfig.RequiresMountsFor = [ "/mnt/build" ];
 
       # Never prune the old copy under a missing /mnt/build bind (#3194).
