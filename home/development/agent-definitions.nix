@@ -21,18 +21,18 @@ in
     dir=$HOME/.gemini/agents
     $DRY_RUN_CMD mkdir -p "$dir"
     for f in ${rendered}/gemini/*.md; do
-      cmp -s "$f" "$dir/''${f##*/}" || $DRY_RUN_CMD install -m 0644 "$f" "$dir/''${f##*/}"
+      ${pkgs.diffutils}/bin/cmp -s "$f" "$dir/''${f##*/}" || $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -T -m 0644 "$f" "$dir/''${f##*/}"
     done
     for f in "$dir"/*; do
       name=''${f##*/}
-      [[ -f $f && $name != *sync-conflict* && ! -e ${rendered}/gemini/$name ]] || continue
-      if [[ $(sed -n 2p "$f") == "# managed by nixos_config agent-definitions (#3267)" ]]; then
+      [[ -f $f && ! -L $f && $name != *sync-conflict* && ! -e ${rendered}/gemini/$name ]] || continue
+      if [[ $(${pkgs.gnused}/bin/sed -n 2p "$f") == "# managed by nixos_config agent-definitions (#3267)" ]]; then
         $DRY_RUN_CMD rm -f -- "$f"
       fi
     done
     # The one stray hand copy, matched by content.
     f=$dir/test-agent.md
-    if [[ -f $f && $(sha256sum < "$f") == "f2605ee60bb0af1645fe25ad5a4056032d5808ba337377bb2f4a1da02ea73179  -" ]]; then
+    if [[ -f $f && ! -L $f && $(${pkgs.coreutils}/bin/sha256sum < "$f") == "f2605ee60bb0af1645fe25ad5a4056032d5808ba337377bb2f4a1da02ea73179  -" ]]; then
       $DRY_RUN_CMD rm -f -- "$f"
     fi
   '';

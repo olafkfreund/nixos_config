@@ -128,3 +128,8 @@ in step 2, both host builds, and the post-switch checks in step 3.
 Revert the PR and switch again: the module and its activation disappear,
 the copied agy files stay (current text of the same agents), and
 `~/.codex/agents` goes with the home-files link.
+
+## Deviations
+
+- From the agy diff review: the cleanup skips symlinks (`! -L`), the
+  activation calls `cmp`, `install -T`, `sed` and `sha256sum` by store path.
