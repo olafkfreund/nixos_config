@@ -166,12 +166,42 @@ def discover_guarded_upgrade_env(
     return env
 
 
+class RateLimited(Exception):
+    def __init__(self, wait):
+        super().__init__(f"rate limited for {wait:.0f}s")
+        self.wait = wait
+
+
 class GitHubClient:
     def __init__(self, repo, token):
         self.repo = repo
         self._token = token
 
+    # The token shares the owner's 5000/hour REST budget with every other agent,
+    # so calls are spaced and a rate-limit refusal waits for the reset.
+    MIN_INTERVAL = 3.0
+    _last_call = 0.0
+
     def request(self, path, method="GET", body=None, expected=(200, 201, 204)):
+        for attempt in range(3):
+            wait = GitHubClient._last_call + self.MIN_INTERVAL - time.time()
+            if wait > 0:
+                time.sleep(wait)
+            GitHubClient._last_call = time.time()
+            try:
+                return self._request(path, method, body, expected)
+            except RateLimited as limited:
+                if attempt == 2:
+                    raise RuntimeError(
+                        f"GitHub {method} {path}: still rate limited"
+                    ) from limited
+                log(
+                    f"GitHub rate limit reached; waiting {limited.wait:.0f}s for the reset"
+                )
+                time.sleep(limited.wait)
+        raise AssertionError("unreachable")
+
+    def _request(self, path, method="GET", body=None, expected=(200, 201, 204)):
         url = f"https://api.github.com/repos/{self.repo}{path}"
         data = json.dumps(body).encode() if body is not None else None
         req = urllib.request.Request(
@@ -198,6 +228,12 @@ class GitHubClient:
                 raw = err.read().decode(errors="replace")
                 return err.code, (json.loads(raw) if raw.strip() else None)
             detail = err.read().decode(errors="replace")[:300]
+            if err.code in (403, 429) and (
+                err.headers.get("X-RateLimit-Remaining") == "0"
+                or "rate limit" in detail
+            ):
+                reset = int(err.headers.get("X-RateLimit-Reset") or 0)
+                raise RateLimited(max(30.0, reset - time.time() + 5)) from err
             raise RuntimeError(
                 f"GitHub {method} {path} failed with HTTP {err.code}: {detail}"
             ) from err

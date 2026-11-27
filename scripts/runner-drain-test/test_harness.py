@@ -88,6 +88,34 @@ class RunnerDrainHarnessTests(unittest.TestCase):
         vm_nix = run_test.VM_NIX_FILE.read_text()
         self.assertNotIn("github-runner-drain =", vm_nix)
 
+    def test_a_rate_limited_call_waits_for_the_reset_and_retries(self):
+        import io
+        import urllib.error
+        from email.message import Message
+
+        headers = Message()
+        headers["X-RateLimit-Remaining"] = "0"
+        headers["X-RateLimit-Reset"] = "0"
+        limited = urllib.error.HTTPError(
+            "https://api.github.com/x",
+            403,
+            "Forbidden",
+            headers,
+            io.BytesIO(b'{"message": "API rate limit exceeded"}'),
+        )
+        ok = mock.MagicMock()
+        ok.__enter__.return_value.status = 200
+        ok.__enter__.return_value.read.return_value = b'{"ok": true}'
+        client = run_test.GitHubClient.__new__(run_test.GitHubClient)
+        client.repo, client._token = "example/drain-test", "t"
+        with (
+            mock.patch("urllib.request.urlopen", side_effect=[limited, ok]),
+            mock.patch.object(run_test.time, "sleep") as slept,
+        ):
+            status, payload = client.request("/x")
+        self.assertEqual((status, payload), (200, {"ok": True}))
+        self.assertTrue(any(c.args[0] >= 30 for c in slept.call_args_list))
+
     def test_never_falls_back_to_the_owners_token(self):
         env = {
             "GH_TOKEN": "real",
