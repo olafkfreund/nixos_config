@@ -47,35 +47,39 @@ reviewers:
    `boot.extraModprobeConfig` string, after `options i915 …`, add the two
    `options` lines above, with one comment line naming #3259.
    → verify: `nix eval .#nixosConfigurations.razer.config.boot.extraModprobeConfig`
-   shows all four lines.
+   shows the i915 line plus the two new lines.
    Traps: do not add a second `boot.extraModprobeConfig` elsewhere (it is a
    lines option and would merge, but one place is the repo's pattern).
 
 2. `hosts/razer/nixos/hardware-configuration.nix:27`: `options = [ "fmask=0022" "dmask=0022" ];`
    → `[ "fmask=0077" "dmask=0077" ];`.
-   → verify: `nix eval .#nixosConfigurations.razer.config.fileSystems."/boot".options`.
+   → verify: `nix eval '.#nixosConfigurations.razer.config.fileSystems."/boot".options'`.
    Traps: none.
 
-3. `hosts/p620/nixos/schedule-watchdog.nix:8-13` and `:38`:
+3. `hosts/p620/nixos/schedule-watchdog.nix:8-13`, `:34` and `:38`:
    - In `run`, after `export GH_TOKEN` and before `exec`, add:
 
      ```bash
      # GitHub's rate_limit endpoint is free; a drained token skips this tick (#3259).
      left=$(gh api rate_limit --jq .resources.core.remaining 2>/dev/null) || left=
-     if [ -n "$left" ] && [ "$left" -lt 500 ]; then
+     if [[ $left =~ ^[0-9]+$ ]] && [ "$left" -lt 500 ]; then
        echo "skipping: $left GitHub API calls left"
        exit 0
      fi
      ```
 
-     If the check itself fails (network down, empty output), fall through to
-     the script as before.
-   - `OnCalendar = "*:0/5"` → `"*:0/15"`; the timer `description` says
-     "every 15 minutes".
-   → verify: `nix build .#nixosConfigurations.p620.config.systemd.units."nixarchy-schedule-watchdog.service".unit`
-   and `shellcheck` on the generated script (`ExecStart` path).
-   Traps: `gh` is already on the unit's `path`; nix `''` strings need `''$`
-   only for `${`, which this snippet does not use.
+     A failed check, or empty or non-numeric output (`null`), falls through
+     to the script as before.
+   - `:38` `OnCalendar = "*:0/5"` → `"*:0/15"`; `:34` the timer
+     `description` says "every 15 minutes".
+   → verify: `nix build '.#nixosConfigurations.p620.config.systemd.user.units."nixarchy-schedule-watchdog.service".unit'`;
+   `shellcheck` on the generated `ExecStart` script; run a copy of that
+   script with the token path and the `exec` target replaced by stubs and a
+   stub `gh` on `PATH` printing `499`, `500`, `null`, or exiting 1: 499
+   prints "skipping" and exits 0; the other three reach the `exec` line.
+   Traps: `gh` is already on the unit's `path`; `writeShellScript` runs
+   bash without `set -e`; nix `''` strings need escaping only for `${`, which
+   this snippet does not use.
 
 4. Docker volumes config, p620:
    - `hosts/p620/nixos/hardware-configuration.nix:108-121`: delete the
@@ -85,74 +89,116 @@ reviewers:
      disk (#3259).
    - `hosts/p620/configuration.nix:351-352`: comment: the store and its
      volumes live on the Lexar build disk (#3208, #3259).
+   No other file references the bind (checked with
+   `grep -rnE 'home/docker-volumes|mnt-build-docker-volumes|docker/volumes'`).
    → verify: `just test-host p620`; `nix eval` shows no
      `fileSystems."/mnt/build/docker/volumes"`.
-   Traps: Steps 4 and 6 must land together: deploying step 4 before the data
-   is copied starts Docker on an empty volumes directory (the cluster would
-   come up blank). The PR is not merged and p620 not deployed until step 6
-   runs.
+   Traps: the PR is merged only at step 6.6, inside the maintenance window,
+   after the copy is verified. Merged earlier, any deploy of `main` would
+   start Docker on the empty directory under the bind.
 
 5. `factory-gitops`, new branch `fix/observe-memory` from `origin/main`,
    `apps/observe/manifests/manifests.yaml:166-171`: `requests.memory: 1Gi`,
    `limits.memory: 4Gi`; extend the comment: 977Mi in use on 2026-11-27, 8
    OOM restarts at 2Gi (nixos_config#3259). Commit, push, PR.
-   → verify: `kubectl --context k3d-factory -n factory get deploy observe -o jsonpath='{.spec.template.spec.containers[0].resources}'`
-   after GitOps syncs.
+   → verify after GitOps syncs: the Deployment template and the running pod
+   (`kubectl --context k3d-factory -n factory get pod -l app=observe -o jsonpath='{.items[0].spec.containers[0].resources}'`)
+   both show 4Gi.
    Traps: the local checkout is 93 commits behind; branch from
    `origin/main`, in a worktree.
 
-6. Migrate the volumes and deploy p620 (Claude only, after the PR passes
-   review and is merged; adapted from #3208's tested runbook):
-   1. Announce on `#agents:freundcloud.org.uk` (k3d cluster down about 20
-      minutes); check no factory job is running
-      (`kubectl get jobs -A --field-selector status.successful=0`).
-   2. Record: `docker ps -a` (IDs, names), `docker volume ls`,
-      `kubectl get nodes,pods -A`, PVC list; write a sentinel ConfigMap.
-   3. Stop: `k3d-image-gc.timer`, `k3d-cluster-bootstrap.timer`,
-      `k3d-backup-freshness.timer`, `k3d-cluster-bootstrap`, every container
-      (`docker stop $(docker ps -q)`), then `docker.socket`, `docker`,
-      `containerd`. `pgrep -a containerd-shim` must be empty; stop if not.
-   4. `umount /mnt/build/docker/volumes`; `findmnt` must not show it, and
-      the directory underneath must be empty (it is 4 KB today).
-   5. `rsync -aHAX --numeric-ids /home/docker-volumes/ /mnt/build/docker/volumes/`;
-      compare `du -s --apparent-size` and file counts.
-   6. `nixos-rebuild switch` p620 from `main` with Docker held down (mask
-      `docker.socket` for the switch and unmask after), then start
-      `containerd`, `docker.socket`, `docker`, `k3d-cluster-bootstrap`, and
-      the three timers.
-   7. Check: same container IDs and volume names as recorded; nodes and pods
-      Ready; sentinel reads back; `docker inspect` mounts resolve under
-      `/mnt/build/docker/volumes` on nvme0n1 (`findmnt -T`);
-      `lsof +D /home/docker-volumes` empty.
-   8. Rollback if 7 fails: stop as in 3, switch back to the previous
-      generation, `mount /mnt/build/docker/volumes` (the bind returns over the
-      copy), start everything. `/home/docker-volumes` is untouched until the
-      owner OKs deleting it.
+6. Migrate the volumes and deploy p620 (Claude only; adapted from #3208's
+   tested runbook). All `kubectl` calls use `--context k3d-factory`.
+   0. **Before the window:** the PR has passed review but is not merged.
+      `nixos-rebuild build --flake .#p620` from the branch worktree
+      succeeds, so no build happens while the cluster is down.
+   1. **Announce** on `#agents:freundcloud.org.uk` (k3d cluster down about
+      20 minutes). No active Job:
+      `kubectl get jobs -A -o json | jq '[.items[] | select((.status.active // 0) > 0)] | length'`
+      is 0; otherwise wait.
+   2. **Record:** `docker ps -a` (IDs, names), `docker volume ls`, each
+      container's `docker inspect` mounts, `kubectl get nodes,pods -A`, the
+      PVC list; write a sentinel ConfigMap.
+   3. **Quiesce:** `k3d-image-gc.timer`, `k3d-cluster-bootstrap.timer`,
+      `k3d-backup-freshness.timer`, `docker-gc.timer`,
+      `k3d-cluster-bootstrap.service`; `docker ps -q | xargs -r docker stop`.
+      While containerd runs, `ctr -n moby tasks ls` must be empty. Then
+      `docker.socket`, `docker`, `containerd`; `pgrep -a containerd-shim`
+      must be empty. Abort if anything is left.
+   4. **Hold down and unbind:** `systemctl mask --runtime docker.socket
+      docker.service containerd.service k3d-cluster-bootstrap.service
+      mnt-build-docker-volumes.mount` (runtime masks vanish on reboot, so a
+      crash cannot leave Docker masked). Then `umount /mnt/build/docker/volumes`.
+      Hard checks: `findmnt --mountpoint /mnt/build/docker/volumes` prints
+      nothing; the directory is empty; `findmnt -T /mnt/build/docker/volumes -o SOURCE`
+      is `/dev/nvme0n1p1`.
+   5. **Copy:** `sudo rsync -aHAX --numeric-ids /home/docker-volumes/ /mnt/build/docker/volumes/`
+      must exit 0; `du -s --apparent-size` and `find | wc -l` of both trees
+      must match. Repeat the `findmnt -T` check.
+   6. **Merge and switch:** merge the PR, update `~/.config/nixos` to
+      `main` (check no `nhs` is running there first), and switch p620 from
+      it with the masks still in place. A switch that reports only the
+      masked units as failed is expected; any other failed unit means go to
+      9a.
+   7. **Release:** `systemctl unmask --runtime` the five units;
+      `systemctl cat mnt-build-docker-volumes.mount` must say not found and
+      `findmnt --mountpoint /mnt/build/docker/volumes` print nothing. Start
+      `containerd`, `docker.socket`, `docker`. Before any container starts:
+      `docker volume ls` and every recorded mount source match step 2 and
+      exist under `/mnt/build/docker/volumes`.
+   8. **Start and check:** start `k3d-cluster-bootstrap` and the four
+      timers. Same container IDs as recorded; nodes and pods Ready; sentinel
+      reads back; `lsof +D /home/docker-volumes` empty; `findmnt -T` of a
+      node's volume is nvme0n1p1.
+   9. **Rollback.** The boundary is whether k3d ran on the new copy.
+      Docker's store, containerd and the PVs (`/mnt/code/k3d/storage`) are
+      not moved, so they always match whichever volumes copy last ran.
+      - 9a. Failure before step 8 started a container: keep or reapply the
+        masks, switch back to the previous generation, unmask,
+        `systemctl start mnt-build-docker-volumes.mount`, check
+        `findmnt --mountpoint` shows `/home/docker-volumes` exactly once,
+        then start everything as in 7–8.
+      - 9b. Failure after the cluster ran on the copy: quiesce and mask as
+        in 3–4, `sudo rsync -aHAX --numeric-ids --delete /mnt/build/docker/volumes/ /home/docker-volumes/`
+        (exit 0, counts match), then 9a.
+      - After either, the 102 GB copy sits hidden under the bind on
+        `/mnt/build`; remove it only through a private bind of `/mnt/build`
+        (never through the mounted path), with the owner's OK.
+   10. **Later:** after a day of normal use, with the owner's OK, delete
+       `/home/docker-volumes`.
    Traps: never delete `/home/docker-volumes` in this task; bus
-   announcement before stopping anything (guard hook).
+   announcement before quiescing anything (guard hook).
 
-7. Deploy razer: `just deploy-via-p620 razer` (bus announcement first), then
-   `sudo mount -o remount /boot` on razer. Module options apply at the next
-   reboot or module reload; ask the owner when to reboot.
-   Traps: switch exit 4 on razer is cosmetic (memory `topic_razer`); merge
-   main first.
+7. Deploy razer: merge `main` first, announce on the bus, then
+   `just deploy-via-p620 razer`. vfat does not change `fmask`/`dmask` on
+   `remount`, and the module options need a reload that drops Wi-Fi, so
+   both take effect at a reboot of razer, at a time the owner picks.
+   Traps: switch exit 4 on razer is cosmetic (memory `topic_razer`).
+
+8. Follow-up on #3259: post the p510 long SMART result (due about 06:30 on
+   28 Nov); a day after the deploys, report the razer kernel-log counts,
+   the watchdog's failures, and whether `nixi-whatsapp`, `omarchy-voice` or
+   `morning-repo` failed again.
 
 ## Tests
 
 - `just check-syntax`; `just test-host razer`; `just test-host p620`.
+- Step 3's stub-`gh` run: 499 skips, 500 / `null` / failure fall through.
 - razer after deploy and reboot: `cat /sys/module/iwlmvm/parameters/power_scheme`
-  = 1,
-  `cat /sys/module/snd_hda_intel/parameters/power_save` = 0;
-  `findmnt /boot -o OPTIONS` has `fmask=0077`; `bootctl status 2>&1 | grep -c 'world accessible'` = 0.
+  = 1, `cat /sys/module/snd_hda_intel/parameters/power_save` = 0;
+  `findmnt /boot -o OPTIONS` has `fmask=0077` and `dmask=0077`;
+  `bootctl status 2>&1 | grep -c 'world accessible'` = 0.
   A day later `journalctl -k -g 'NMI_INTERRUPT|dma error' --since -1d` is
   empty or far below 2026-11-27's counts.
 - p620: `systemctl --user list-timers nixarchy-schedule-watchdog` shows a
   15-minute cadence; `systemctl --user is-failed nixarchy-schedule-watchdog`
   says `inactive` across ticks.
-- k3d: step 6.7 checks; `observe` limit 4Gi; restart count steady for a day.
+- k3d: step 6.7–6.8 checks; `observe` template and pod at 4Gi; restart
+  count steady for a day.
 
 ## Rollback
 
-- Steps 1–4: revert the commit and redeploy.
+- Steps 1–3: revert the commit and redeploy.
+- Step 4: never reverted on its own; reverting it restores the bind over
+  the live copy. Use step 6.9.
 - Step 5: revert the PR in `factory-gitops`.
-- Step 6: step 6.8.
