@@ -50,11 +50,11 @@ in
     ../../modules/programs/claude-swarm-reaper.nix
   ];
   host.class = "workstation";
-  # Stages and verifies razer's closure each night; never switches p620 itself
-  # until the runner drain test passes (nixarchy#1946).
+  # Stages razer's closure each night and switches p620 itself after draining
+  # its CI runners; the drain was tested live on 2026-11-27 (nixarchy#1967).
   features.guarded-upgrade = {
     enable = true;
-    autoActivate = false;
+    autoActivate = true;
   };
 
   # nixarchy's install and ISO checks need KVM, an hour, and 16 GB of build
